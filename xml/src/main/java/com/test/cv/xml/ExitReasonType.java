@@ -14,12 +14,12 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for PositionType complex type.
+ * <p>Java class for ExitReasonType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="PositionType">
+ * &lt;complexType name="ExitReasonType">
  *   &lt;complexContent>
  *     &lt;extension base="{http://www.example.org/cv}TextsType">
  *     &lt;/extension>
@@ -30,8 +30,8 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "PositionType")
-public class PositionType
+@XmlType(name = "ExitReasonType")
+public class ExitReasonType
     extends TextsType
 {
 

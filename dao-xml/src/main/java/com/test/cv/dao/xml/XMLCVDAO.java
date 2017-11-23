@@ -26,6 +26,7 @@ import com.test.cv.model.Work;
 import com.test.cv.xml.CVType;
 import com.test.cv.xml.CustomType;
 import com.test.cv.xml.DescriptionType;
+import com.test.cv.xml.ExitReasonType;
 import com.test.cv.xml.ItemType;
 import com.test.cv.xml.JobType;
 import com.test.cv.xml.NameType;
@@ -188,6 +189,10 @@ public class XMLCVDAO implements ICVDAO {
 		return convertTexts(xmlName, languages);
 	}
 
+	private static List<Text> convertExitReason(ExitReasonType xmlExitReason, Language [] languages) {
+		return convertTexts(xmlExitReason, languages);
+	}
+
 	private static List<Text> convertPosition(PositionType xmlPosition, Language [] languages) {
 		return convertTexts(xmlPosition, languages);
 	}
@@ -222,10 +227,13 @@ public class XMLCVDAO implements ICVDAO {
 		return ret;
 	}
 
-	private static void convertItem(ItemType xmlItem, Item ret) {
+	private static void convertItem(ItemType xmlItem, Item ret, Language [] languages) {
 		ret.setStartTime(convertCalendar(xmlItem.getStartTime()));
 		ret.setEndTime(convertCalendar(xmlItem.getEndTime()));
-		ret.setExitReason(xmlItem.getExitReason());
+		
+		if (xmlItem.getExitReason() != null) {
+			ret.setExitReason(convertExitReason(xmlItem.getExitReason(), languages));
+		}
 	}
 	
 	private static Date convertCalendar(XMLGregorianCalendar xmlCalendar) {
@@ -282,7 +290,7 @@ public class XMLCVDAO implements ICVDAO {
 	}
 	
 	private static void convertWork(WorkType xmlWork, Work ret, List<SkillType> xmlSkills, Language [] languages) {
-		convertItem(xmlWork, ret);
+		convertItem(xmlWork, ret, languages);
 
 		if (xmlWork.getSummary() != null) {
 			ret.setSummary(convertSummary(xmlWork.getSummary(), languages));
