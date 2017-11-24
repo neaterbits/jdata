@@ -6,7 +6,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>xml</artifactId>
-  <name>XML classesCommon</name>
+  <name>XML classes</name>
   <packaging>jar</packaging>
   <dependencies>
 

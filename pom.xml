@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.test.cv</groupId>
   <artifactId>root</artifactId>
@@ -25,8 +25,12 @@
 	    <module>dao-jpa</module>
 	    <module>dao-xml</module>
 	    <module>xml</module>
+	    <module>xmlstorage</module>
+	    <module>xmlstorage-local</module>
+	    <module>xmlstorage-s3</module>
 	    <module>word</module>
 	    <module>pdf</module>
+    <module>rest</module>
   </modules>
   <repositories>
 
@@ -75,6 +79,7 @@
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.1</version>
             <!-- best lock down version of the plugin too -->
             <configuration>
               <source>1.8</source>
@@ -95,5 +100,3 @@
   </build>
 
 </project>
-
-

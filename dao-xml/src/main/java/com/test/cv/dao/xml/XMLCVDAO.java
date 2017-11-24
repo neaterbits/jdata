@@ -12,6 +12,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import com.test.cv.dao.CVStorageException;
 import com.test.cv.dao.ICVDAO;
 import com.test.cv.model.CV;
 import com.test.cv.model.Custom;
@@ -20,7 +21,6 @@ import com.test.cv.model.Job;
 import com.test.cv.model.Language;
 import com.test.cv.model.Personalia;
 import com.test.cv.model.Skill;
-import com.test.cv.model.SkillCategory;
 import com.test.cv.model.Text;
 import com.test.cv.model.Work;
 import com.test.cv.xml.CVType;
@@ -32,7 +32,6 @@ import com.test.cv.xml.JobType;
 import com.test.cv.xml.NameType;
 import com.test.cv.xml.PersonaliaType;
 import com.test.cv.xml.PositionType;
-import com.test.cv.xml.SkillCategoryType;
 import com.test.cv.xml.SkillRefType;
 import com.test.cv.xml.SkillRefsType;
 import com.test.cv.xml.SkillType;
@@ -40,6 +39,8 @@ import com.test.cv.xml.SummaryType;
 import com.test.cv.xml.TextType;
 import com.test.cv.xml.TextsType;
 import com.test.cv.xml.WorkType;
+import com.test.cv.xmlstorage.api.IXMLStorage;
+import com.test.cv.xmlstorage.api.StorageException;
 
 public class XMLCVDAO implements ICVDAO {
 	
@@ -72,29 +73,35 @@ public class XMLCVDAO implements ICVDAO {
 	}
 
 	@Override
-	public CV findCV(String userId, Language... languages) {
-		
-		final InputStream inputStream = xmlStorage.getCVXMLForUser(userId);
-		
+	public CV findCV(String userId, Language... languages) throws CVStorageException {
+
 		final CV ret;
-		if (inputStream == null) {
-			ret = null;
-		}
-		else {
-			try {
-				final CVType xmlCV = (CVType)unmarshaller.unmarshal(inputStream);
-				
-				ret = convertToModel(xmlCV, languages);
-			} catch (JAXBException ex) {
-				throw new IllegalStateException("Failed to unmarshall", ex);
+		
+		try {
+			final InputStream inputStream = xmlStorage.getCVXMLForUser(userId);
+			
+			if (inputStream == null) {
+				ret = null;
 			}
-			finally {
+			else {
 				try {
-					inputStream.close();
-				} catch (IOException ex) {
-					throw new IllegalStateException("Failed to close input stream", ex);
+					final CVType xmlCV = (CVType)unmarshaller.unmarshal(inputStream);
+					
+					ret = convertToModel(xmlCV, languages);
+				} catch (JAXBException ex) {
+					throw new IllegalStateException("Failed to unmarshall", ex);
+				}
+				finally {
+					try {
+						inputStream.close();
+					} catch (IOException ex) {
+						throw new IllegalStateException("Failed to close input stream", ex);
+					}
 				}
 			}
+		}
+		catch (StorageException ex) {
+			throw new CVStorageException("Failed to retrieve CV", ex); 
 		}
 		
 		return ret;

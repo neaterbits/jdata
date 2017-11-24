@@ -12,5 +12,5 @@ public interface ICVDAO extends AutoCloseable {
 	 * 
 	 * @return the CV, or null if none was found
 	 */
-	CV findCV(String userId, Language ...languages);
+	CV findCV(String userId, Language ...languages) throws CVStorageException;
 }

@@ -5,27 +5,17 @@
     <artifactId>root</artifactId>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>dao-xml</artifactId>
-  <name>XML DAO</name>
+  <artifactId>xmlstorage-local</artifactId>
+  <name>Local XML storage</name>
   <packaging>jar</packaging>
   <dependencies>
-  	<dependency>
-	  	<groupId>${project.groupId}</groupId>
-	  	<artifactId>dao</artifactId>
-	  	<version>${project.version}</version>
-  	</dependency>
-
-  	<dependency>
-	  	<groupId>${project.groupId}</groupId>
-	  	<artifactId>xml</artifactId>
-	  	<version>${project.version}</version>
-  	</dependency>
 
   	<dependency>
 	  	<groupId>${project.groupId}</groupId>
 	  	<artifactId>xmlstorage</artifactId>
 	  	<version>${project.version}</version>
   	</dependency>
+
 
 	<!-- test dependencies --> 
 
