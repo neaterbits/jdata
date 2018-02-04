@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.persistence.OneToMany;
 
+import com.test.cv.model.text.Text;
+
 public abstract class DescribedItem extends Item {
 
 	@OneToMany

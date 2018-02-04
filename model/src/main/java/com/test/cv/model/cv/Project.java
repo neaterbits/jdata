@@ -6,6 +6,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
+import com.test.cv.model.text.Text;
+
 @Entity
 public class Project extends SkillsAquiringItem {
 

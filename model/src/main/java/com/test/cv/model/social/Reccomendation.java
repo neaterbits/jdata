@@ -8,7 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
-import com.test.cv.model.cv.Text;
+import com.test.cv.model.text.Text;
 
 public class Reccomendation {
 

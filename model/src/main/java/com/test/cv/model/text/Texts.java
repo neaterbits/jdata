@@ -1,4 +1,4 @@
-package com.test.cv.model.cv;
+package com.test.cv.model.text;
 
 import java.util.List;
 

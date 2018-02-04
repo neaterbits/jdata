@@ -9,6 +9,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import com.test.cv.model.text.Text;
+
 @Entity
 public abstract class Item {
 

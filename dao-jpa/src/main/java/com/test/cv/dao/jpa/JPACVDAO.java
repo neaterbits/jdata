@@ -21,8 +21,8 @@ import com.test.cv.model.cv.SelfEmployed;
 import com.test.cv.model.cv.Skill;
 import com.test.cv.model.cv.SkillCategory;
 import com.test.cv.model.cv.SkillsAquiringItem;
-import com.test.cv.model.cv.Text;
 import com.test.cv.model.cv.Work;
+import com.test.cv.model.text.Text;
 
 public class JPACVDAO implements ICVDAO {
 	
