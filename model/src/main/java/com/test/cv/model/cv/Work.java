@@ -4,16 +4,17 @@ import java.util.List;
 
 import javax.persistence.OneToMany;
 
-public abstract class Work extends DescribedItem {
+public abstract class Work extends SkillsAquiringItem {
+
+	// Sub-projects, in-house or external consultancy projets
+	private List<Project> projects;
 
 	@OneToMany
-	private List<Skill> skills;
-
-	public List<Skill> getSkills() {
-		return skills;
+	public List<Project> getProjects() {
+		return projects;
 	}
 
-	public void setSkills(List<Skill> skills) {
-		this.skills = skills;
+	public void setProjects(List<Project> projects) {
+		this.projects = projects;
 	}
 }

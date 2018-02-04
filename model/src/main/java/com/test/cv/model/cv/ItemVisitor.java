@@ -8,5 +8,7 @@ public interface ItemVisitor<T, R> {
 	
 	R onEducation(Education education, T param);
 	
+	R onProject(Project project, T param);
+	
 	R onCustom(Custom custom, T param);
 }

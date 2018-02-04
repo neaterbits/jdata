@@ -16,9 +16,11 @@ import com.test.cv.model.cv.Item;
 import com.test.cv.model.cv.ItemVisitor;
 import com.test.cv.model.cv.Job;
 import com.test.cv.model.cv.Language;
+import com.test.cv.model.cv.Project;
 import com.test.cv.model.cv.SelfEmployed;
 import com.test.cv.model.cv.Skill;
 import com.test.cv.model.cv.SkillCategory;
+import com.test.cv.model.cv.SkillsAquiringItem;
 import com.test.cv.model.cv.Text;
 import com.test.cv.model.cv.Work;
 
@@ -86,17 +88,25 @@ public class JPACVDAO implements ICVDAO {
 		}
 	}
 
-	private static void filterWork(Work work, Language [] languages) {
+	private static void filterSkillAquirngItem(SkillsAquiringItem skillAquiringItem, Language [] languages) {
 		
-		filterDescribedItem(work, languages);
+		filterDescribedItem(skillAquiringItem, languages);
 		
-		if (work.getSkills() != null) {
-			for (Skill skill : work.getSkills()) {
+		if (skillAquiringItem.getSkills() != null) {
+			for (Skill skill : skillAquiringItem.getSkills()) {
 				filterSkill(skill, languages);
 			}
 		}
 	}
-	
+
+	private static void filterWork(Work work, Language [] languages) {
+		filterSkillAquirngItem(work, languages);
+	}
+
+	private static void filterProject(Project project, Language [] languages) {
+		filterSkillAquirngItem(project, languages);
+	}
+
 	private static void filterSkill(Skill skill, Language [] languages) {
 		if (skill.getName() != null) {
 			filterTexts(skill.getName(), languages);
@@ -132,6 +142,14 @@ public class JPACVDAO implements ICVDAO {
 			if (job.getPosition() != null) {
 				filterTexts(job.getPosition(), param);
 			}
+			
+			return null;
+		}
+
+		@Override
+		public Void onProject(Project project, Language[] param) {
+
+			filterProject(project, param);
 			
 			return null;
 		}
