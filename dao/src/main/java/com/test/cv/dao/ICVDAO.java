@@ -1,7 +1,7 @@
 package com.test.cv.dao;
 
-import com.test.cv.model.CV;
-import com.test.cv.model.Language;
+import com.test.cv.model.cv.CV;
+import com.test.cv.model.cv.Language;
 
 public interface ICVDAO extends AutoCloseable {
 

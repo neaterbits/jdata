@@ -1,20 +1,20 @@
-package com.test.cv.model;
+package com.test.cv.model.cv;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import java.util.List;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
-@Entity
-public class User {
+public abstract class Texts {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
 	
-	@Column
-	private String userId;
+	@OneToMany
+	private List<Text> texts;
 
 	public long getId() {
 		return id;
@@ -24,11 +24,11 @@ public class User {
 		this.id = id;
 	}
 
-	public String getUserId() {
-		return userId;
+	public List<Text> getTexts() {
+		return texts;
 	}
 
-	public void setUserId(String userId) {
-		this.userId = userId;
+	public void setTexts(List<Text> texts) {
+		this.texts = texts;
 	}
 }

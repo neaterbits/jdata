@@ -13,10 +13,10 @@ import javax.ws.rs.core.Context;
 import com.test.cv.dao.CVStorageException;
 import com.test.cv.dao.ICVDAO;
 import com.test.cv.dao.xml.XMLCVDAO;
-import com.test.cv.model.CV;
-import com.test.cv.model.Item;
-import com.test.cv.model.Language;
-import com.test.cv.model.Personalia;
+import com.test.cv.model.cv.CV;
+import com.test.cv.model.cv.Item;
+import com.test.cv.model.cv.Language;
+import com.test.cv.model.cv.Personalia;
 import com.test.cv.xmlstorage.local.LocalXmlStorage;
 
 @Path("/cv")

@@ -1,4 +1,4 @@
-package com.test.cv.model;
+package com.test.cv.model.cv;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -7,17 +7,17 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class Text {
+public class Location {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
 	
 	@Column
-	private Language language;
+	private String city;
 	
 	@Column
-	private String text;
+	private Country country;
 
 	public long getId() {
 		return id;
@@ -27,19 +27,19 @@ public class Text {
 		this.id = id;
 	}
 
-	public Language getLanguage() {
-		return language;
+	public String getCity() {
+		return city;
 	}
 
-	public void setLanguage(Language language) {
-		this.language = language;
+	public void setCity(String city) {
+		this.city = city;
 	}
 
-	public String getText() {
-		return text;
+	public Country getCountry() {
+		return country;
 	}
 
-	public void setText(String text) {
-		this.text = text;
+	public void setCountry(Country country) {
+		this.country = country;
 	}
 }

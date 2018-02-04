@@ -8,19 +8,19 @@ import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 import com.test.cv.dao.ICVDAO;
-import com.test.cv.model.CV;
-import com.test.cv.model.Custom;
-import com.test.cv.model.DescribedItem;
-import com.test.cv.model.Education;
-import com.test.cv.model.Item;
-import com.test.cv.model.ItemVisitor;
-import com.test.cv.model.Job;
-import com.test.cv.model.Language;
-import com.test.cv.model.SelfEmployed;
-import com.test.cv.model.Skill;
-import com.test.cv.model.SkillCategory;
-import com.test.cv.model.Text;
-import com.test.cv.model.Work;
+import com.test.cv.model.cv.CV;
+import com.test.cv.model.cv.Custom;
+import com.test.cv.model.cv.DescribedItem;
+import com.test.cv.model.cv.Education;
+import com.test.cv.model.cv.Item;
+import com.test.cv.model.cv.ItemVisitor;
+import com.test.cv.model.cv.Job;
+import com.test.cv.model.cv.Language;
+import com.test.cv.model.cv.SelfEmployed;
+import com.test.cv.model.cv.Skill;
+import com.test.cv.model.cv.SkillCategory;
+import com.test.cv.model.cv.Text;
+import com.test.cv.model.cv.Work;
 
 public class JPACVDAO implements ICVDAO {
 	

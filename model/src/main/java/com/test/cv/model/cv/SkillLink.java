@@ -1,4 +1,4 @@
-package com.test.cv.model;
+package com.test.cv.model.cv;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;

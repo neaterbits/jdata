@@ -1,4 +1,4 @@
-package com.test.cv.model;
+package com.test.cv.model.cv;
 
 public enum Country {
 	NO,

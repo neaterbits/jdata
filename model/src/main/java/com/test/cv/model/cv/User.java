@@ -1,21 +1,20 @@
-package com.test.cv.model;
+package com.test.cv.model.cv;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-public abstract class Link {
+@Entity
+public class User {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
-
-	@Column
-	private LinkType type;
 	
 	@Column
-	private String url;
+	private String userId;
 
 	public long getId() {
 		return id;
@@ -25,19 +24,11 @@ public abstract class Link {
 		this.id = id;
 	}
 
-	public LinkType getType() {
-		return type;
+	public String getUserId() {
+		return userId;
 	}
 
-	public void setType(LinkType type) {
-		this.type = type;
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 }
