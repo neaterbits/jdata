@@ -1,4 +1,4 @@
-package com.test.cv.model.cv;
+package com.test.cv.model.user;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

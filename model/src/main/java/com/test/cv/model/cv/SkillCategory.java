@@ -12,6 +12,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.test.cv.model.user.User;
+
 @Entity
 @Table(uniqueConstraints={@UniqueConstraint(columnNames={"skillId", "user"})})
 public class SkillCategory {
