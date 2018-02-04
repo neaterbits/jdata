@@ -19,5 +19,4 @@ public class ProfessionalRelationFacet extends RelationFacet {
 	public void setItem(SkillsAquiringItem item) {
 		this.item = item;
 	}
-	
 }

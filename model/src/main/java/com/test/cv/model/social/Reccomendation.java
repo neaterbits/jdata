@@ -1,23 +1,24 @@
 package com.test.cv.model.social;
 
-import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
-import com.test.cv.model.text.Text;
+import com.test.cv.model.text.Texts;
 
+@Entity
 public class Reccomendation {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
-	
-	@OneToMany(cascade={ CascadeType.ALL })
-	private List<Text> text;
+
+	@OneToOne(optional=false, cascade={CascadeType.ALL})
+	private Texts text;
 
 	public long getId() {
 		return id;
@@ -25,5 +26,13 @@ public class Reccomendation {
 
 	public void setId(long id) {
 		this.id = id;
+	}
+
+	public Texts getText() {
+		return text;
+	}
+
+	public void setText(Texts text) {
+		this.text = text;
 	}
 }

@@ -2,6 +2,7 @@ package com.test.cv.model.text;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,7 +14,7 @@ public abstract class Texts {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
 	
-	@OneToMany
+	@OneToMany(cascade = { CascadeType.ALL })
 	private List<Text> texts;
 
 	public long getId() {
