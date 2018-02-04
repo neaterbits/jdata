@@ -6,7 +6,7 @@ import com.test.cv.model.Language;
 public interface ICVDAO extends AutoCloseable {
 
 	/**
-	 * Locate a CV for a particular user
+	 * Locate a CV for a particular user, returning it with texts in the languages specified
 	 * 
 	 * @param userId ID of user
 	 * 
