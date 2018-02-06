@@ -7,13 +7,13 @@ import javax.persistence.Entity;
 public class AcquaintanceRelationFacet extends RelationFacet {
 
 	@Column(nullable=false)
-	private AquintanceType type;
+	private AcquaintanceType type;
 
-	public AquintanceType getType() {
+	public AcquaintanceType getType() {
 		return type;
 	}
 
-	public void setType(AquintanceType type) {
+	public void setType(AcquaintanceType type) {
 		this.type = type;
 	}
 }

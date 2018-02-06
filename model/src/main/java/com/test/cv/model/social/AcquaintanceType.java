@@ -1,6 +1,6 @@
 package com.test.cv.model.social;
 
-public enum AquintanceType {
+public enum AcquaintanceType {
 
 	FAMILY,
 	FRIEND;
