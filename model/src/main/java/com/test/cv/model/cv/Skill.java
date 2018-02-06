@@ -2,12 +2,14 @@ package com.test.cv.model.cv;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
-import com.test.cv.model.text.Text;
+import com.test.cv.model.text.Texts;
 
 public class Skill {
 
@@ -15,13 +17,13 @@ public class Skill {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
 	
-	@OneToMany
-	private List<Text> name;
+	@OneToOne(cascade={CascadeType.ALL})
+	private Name name;
 
-	@OneToMany
-	private List<Text> description;
+	@OneToOne(cascade={CascadeType.ALL})
+	private Texts description;
 	
-	@OneToMany
+	@OneToMany(cascade={})
 	private List<SkillCategory> categories;
 
 	public long getId() {
@@ -32,19 +34,19 @@ public class Skill {
 		this.id = id;
 	}
 
-	public List<Text> getName() {
+	public Name getName() {
 		return name;
 	}
 
-	public void setName(List<Text> name) {
+	public void setName(Name name) {
 		this.name = name;
 	}
 	
-	public List<Text> getDescription() {
+	public Texts getDescription() {
 		return description;
 	}
 
-	public void setDescription(List<Text> description) {
+	public void setDescription(Texts description) {
 		this.description = description;
 	}
 

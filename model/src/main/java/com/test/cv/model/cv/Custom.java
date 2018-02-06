@@ -1,28 +1,24 @@
 package com.test.cv.model.cv;
 
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
-
-import com.test.cv.model.text.Text;
 
 @Entity
 public class Custom extends DescribedItem {
 
 	@Column
-	private List<Text> name;
+	private Name name;
 	
 	@Override
 	public <T, R> R visit(ItemVisitor<T, R> visitor, T param) {
 		return visitor.onCustom(this, param);
 	}
 
-	public List<Text> getName() {
+	public Name getName() {
 		return name;
 	}
 
-	public void setName(List<Text> name) {
+	public void setName(Name name) {
 		this.name = name;
 	}
 }

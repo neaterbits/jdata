@@ -10,23 +10,23 @@ package com.test.cv.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for KeySkillsType complex type.
+ * <p>Java class for SkillsAquiringItemType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="KeySkillsType">
+ * &lt;complexType name="SkillsAquiringItemType">
  *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *     &lt;extension base="{http://www.example.org/cv}DescribedItemType">
  *       &lt;sequence>
- *         &lt;element name="skill" type="{http://www.example.org/cv}KeySkillType"/>
+ *         &lt;element name="skills" type="{http://www.example.org/cv}SkillRefsType" minOccurs="0"/>
  *       &lt;/sequence>
- *     &lt;/restriction>
+ *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
@@ -34,36 +34,41 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "KeySkillsType", propOrder = {
-    "skill"
+@XmlType(name = "SkillsAquiringItemType", propOrder = {
+    "skills"
 })
-public class KeySkillsType {
+@XmlSeeAlso({
+    WorkType.class,
+    ProjectType.class
+})
+public class SkillsAquiringItemType
+    extends DescribedItemType
+{
 
-    @XmlElement(required = true)
-    protected KeySkillType skill;
+    protected SkillRefsType skills;
 
     /**
-     * Gets the value of the skill property.
+     * Gets the value of the skills property.
      * 
      * @return
      *     possible object is
-     *     {@link KeySkillType }
+     *     {@link SkillRefsType }
      *     
      */
-    public KeySkillType getSkill() {
-        return skill;
+    public SkillRefsType getSkills() {
+        return skills;
     }
 
     /**
-     * Sets the value of the skill property.
+     * Sets the value of the skills property.
      * 
      * @param value
      *     allowed object is
-     *     {@link KeySkillType }
+     *     {@link SkillRefsType }
      *     
      */
-    public void setSkill(KeySkillType value) {
-        this.skill = value;
+    public void setSkills(SkillRefsType value) {
+        this.skills = value;
     }
 
 }

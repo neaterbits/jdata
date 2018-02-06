@@ -10,22 +10,22 @@ package com.test.cv.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for EducationType complex type.
+ * <p>Java class for DescribedItemType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="EducationType">
+ * &lt;complexType name="DescribedItemType">
  *   &lt;complexContent>
  *     &lt;extension base="{http://www.example.org/cv}ItemType">
  *       &lt;sequence>
- *         &lt;element name="location" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="level" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="summary" type="{http://www.example.org/cv}SummaryType" minOccurs="0"/>
+ *         &lt;element name="description" type="{http://www.example.org/cv}DescriptionType" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -35,65 +35,67 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "EducationType", propOrder = {
-    "location",
-    "level"
+@XmlType(name = "DescribedItemType", propOrder = {
+    "summary",
+    "description"
 })
-public class EducationType
+@XmlSeeAlso({
+    CustomType.class,
+    SkillsAquiringItemType.class
+})
+public class DescribedItemType
     extends ItemType
 {
 
-    @XmlElement(required = true)
-    protected String location;
-    @XmlElement(required = true)
-    protected String level;
+    protected SummaryType summary;
+    protected DescriptionType description;
 
     /**
-     * Gets the value of the location property.
+     * Gets the value of the summary property.
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link SummaryType }
      *     
      */
-    public String getLocation() {
-        return location;
+    public SummaryType getSummary() {
+        return summary;
     }
 
     /**
-     * Sets the value of the location property.
+     * Sets the value of the summary property.
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link SummaryType }
      *     
      */
-    public void setLocation(String value) {
-        this.location = value;
+    public void setSummary(SummaryType value) {
+        this.summary = value;
     }
 
     /**
-     * Gets the value of the level property.
+     * Gets the value of the description property.
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link DescriptionType }
      *     
      */
-    public String getLevel() {
-        return level;
+    public DescriptionType getDescription() {
+        return description;
     }
 
     /**
-     * Sets the value of the level property.
+     * Sets the value of the description property.
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link DescriptionType }
      *     
      */
-    public void setLevel(String value) {
-        this.level = value;
+    public void setDescription(DescriptionType value) {
+        this.description = value;
     }
 
 }

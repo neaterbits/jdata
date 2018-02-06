@@ -14,4 +14,14 @@ public enum Language {
 	public String getCode() {
 		return code;
 	}
+	
+	public static Language fromCode(String code) {
+		for (Language language : values()) {
+			if (language.code.equals(code)) {
+				return language;
+			}
+		}
+		
+		return null;
+	}
 }

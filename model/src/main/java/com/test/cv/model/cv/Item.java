@@ -1,7 +1,6 @@
 package com.test.cv.model.cv;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,7 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import com.test.cv.model.text.Text;
+import com.test.cv.model.text.Texts;
 
 @Entity
 public abstract class Item {
@@ -25,7 +24,7 @@ public abstract class Item {
 	private Date endTime;
 	
 	@Column
-	private List<Text> exitReason;
+	private Texts exitReason;
 
 	public abstract <T, R> R visit(ItemVisitor<T, R> visitor, T param); 
 	
@@ -53,11 +52,11 @@ public abstract class Item {
 		this.endTime = endTime;
 	}
 
-	public List<Text> getExitReason() {
+	public Texts getExitReason() {
 		return exitReason;
 	}
 
-	public void setExitReason(List<Text> exitReason) {
+	public void setExitReason(Texts exitReason) {
 		this.exitReason = exitReason;
 	}
 }

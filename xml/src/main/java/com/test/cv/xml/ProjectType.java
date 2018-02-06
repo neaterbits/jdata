@@ -15,17 +15,17 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for JobType complex type.
+ * <p>Java class for ProjectType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="JobType">
+ * &lt;complexType name="ProjectType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://www.example.org/cv}WorkType">
+ *     &lt;extension base="{http://www.example.org/cv}SkillsAquiringItemType">
  *       &lt;sequence>
- *         &lt;element name="employerName" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="position" type="{http://www.example.org/cv}PositionType" minOccurs="0"/>
+ *         &lt;element name="client" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="position" type="{http://www.example.org/cv}TextsType" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -35,40 +35,40 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "JobType", propOrder = {
-    "employerName",
+@XmlType(name = "ProjectType", propOrder = {
+    "client",
     "position"
 })
-public class JobType
-    extends WorkType
+public class ProjectType
+    extends SkillsAquiringItemType
 {
 
     @XmlElement(required = true)
-    protected String employerName;
-    protected PositionType position;
+    protected String client;
+    protected TextsType position;
 
     /**
-     * Gets the value of the employerName property.
+     * Gets the value of the client property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getEmployerName() {
-        return employerName;
+    public String getClient() {
+        return client;
     }
 
     /**
-     * Sets the value of the employerName property.
+     * Sets the value of the client property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setEmployerName(String value) {
-        this.employerName = value;
+    public void setClient(String value) {
+        this.client = value;
     }
 
     /**
@@ -76,10 +76,10 @@ public class JobType
      * 
      * @return
      *     possible object is
-     *     {@link PositionType }
+     *     {@link TextsType }
      *     
      */
-    public PositionType getPosition() {
+    public TextsType getPosition() {
         return position;
     }
 
@@ -88,10 +88,10 @@ public class JobType
      * 
      * @param value
      *     allowed object is
-     *     {@link PositionType }
+     *     {@link TextsType }
      *     
      */
-    public void setPosition(PositionType value) {
+    public void setPosition(TextsType value) {
         this.position = value;
     }
 

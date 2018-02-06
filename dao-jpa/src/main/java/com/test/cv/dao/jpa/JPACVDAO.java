@@ -7,6 +7,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
+import com.test.cv.dao.CVStorageException;
 import com.test.cv.dao.ICVDAO;
 import com.test.cv.model.cv.CV;
 import com.test.cv.model.cv.Custom;
@@ -23,6 +24,7 @@ import com.test.cv.model.cv.SkillCategory;
 import com.test.cv.model.cv.SkillsAquiringItem;
 import com.test.cv.model.cv.Work;
 import com.test.cv.model.text.Text;
+import com.test.cv.model.text.Texts;
 
 public class JPACVDAO implements ICVDAO {
 	
@@ -40,14 +42,20 @@ public class JPACVDAO implements ICVDAO {
 		entityManagerFactory.close();
 	}
 
-	@Override
-	public CV findCV(String userId, Language... languages) {
-
+	private CV queryCV(String userId) {
 		final Query query = entityManager.createQuery("from CV cv where cv.user.userId = :userId");
 		
 		query.setParameter("userId", userId);
 		
 		final CV cv = (CV)query.getSingleResult();
+
+		return cv;
+	}
+	
+	@Override
+	public CV findCV(String userId, Language... languages) {
+
+		final CV cv = queryCV(userId);
 		
 		if (cv != null) {
 			// Filter languages for all fields that have multiple so that we only get at most one text
@@ -57,6 +65,35 @@ public class JPACVDAO implements ICVDAO {
 		return cv;
 	}
 	
+	
+	@Override
+	public CV findCVForEdit(String userId) throws CVStorageException {
+		return queryCV(userId);
+	}
+
+	@Override
+	public void createCV(String userId, CV cv) {
+		entityManager.persist(cv); // cascades
+	}
+
+	@Override
+	public void updateCV(String userId, CV cv) {
+		entityManager.persist(cv); // cascades
+	}
+
+	@Override
+	public void deleteCV(String userId) {
+		final CV cv = queryCV(userId);
+		
+		if (cv != null) {
+			entityManager.remove(cv); // cascades
+		}
+	}
+
+	private static void filterTexts(Texts texts, Language [] languages) {
+		filterTexts(texts.getTexts(), languages);
+	}
+
 	private static void filterTexts(List<Text> texts, Language [] languages) {
 		// Loop over languages and find first one that match
 		Text found = null;

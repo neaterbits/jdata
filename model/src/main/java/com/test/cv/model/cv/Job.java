@@ -1,21 +1,20 @@
 package com.test.cv.model.cv;
 
-import java.util.List;
-
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
-import com.test.cv.model.text.Text;
+import com.test.cv.model.text.Texts;
 
 @Entity
 public class Job extends Work {
 
-	@Column
+	@Column(nullable=false)
 	private String employerName;
 
-	@OneToMany
-	private List<Text> position;
+	@OneToOne(cascade={CascadeType.ALL})
+	private Texts position;
 	
 	@Override
 	public <T, R> R visit(ItemVisitor<T, R> visitor, T param) {
@@ -30,11 +29,11 @@ public class Job extends Work {
 		this.employerName = employerName;
 	}
 
-	public List<Text> getPosition() {
+	public Texts getPosition() {
 		return position;
 	}
 
-	public void setPosition(List<Text> position) {
+	public void setPosition(Texts position) {
 		this.position = position;
 	}
 }

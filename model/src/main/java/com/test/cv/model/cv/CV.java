@@ -3,6 +3,7 @@ package com.test.cv.model.cv;
 import java.util.List;
 
 import javax.annotation.Generated;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -26,7 +27,7 @@ public class CV {
 	@OneToOne(optional=false)
 	private Personalia personalia;
 	
-	@OneToMany
+	@OneToMany(cascade={CascadeType.ALL})
 	private List<Item> items;
 
 	public long getId() {

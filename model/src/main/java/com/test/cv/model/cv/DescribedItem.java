@@ -1,32 +1,31 @@
 package com.test.cv.model.cv;
 
-import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.OneToOne;
 
-import javax.persistence.OneToMany;
-
-import com.test.cv.model.text.Text;
+import com.test.cv.model.text.Texts;
 
 public abstract class DescribedItem extends Item {
 
-	@OneToMany
-	private List<Text> summary;
+	@OneToOne(cascade={CascadeType.ALL})
+	private Texts summary;
 
-	@OneToMany
-	private List<Text> description;
+	@OneToOne(cascade={CascadeType.ALL})
+	private Texts description;
 
-	public List<Text> getSummary() {
+	public Texts getSummary() {
 		return summary;
 	}
 
-	public void setSummary(List<Text> summary) {
+	public void setSummary(Texts summary) {
 		this.summary = summary;
 	}
 
-	public List<Text> getDescription() {
+	public Texts getDescription() {
 		return description;
 	}
 
-	public void setDescription(List<Text> description) {
+	public void setDescription(Texts description) {
 		this.description = description;
 	}
 }
