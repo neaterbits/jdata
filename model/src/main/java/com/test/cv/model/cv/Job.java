@@ -5,7 +5,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 
-import com.test.cv.model.text.Texts;
+import com.test.cv.model.text.Text;
 
 @Entity
 public class Job extends Work {
@@ -14,7 +14,7 @@ public class Job extends Work {
 	private String employerName;
 
 	@OneToOne(cascade={CascadeType.ALL})
-	private Texts position;
+	private Text position;
 	
 	@Override
 	public <T, R> R visit(ItemVisitor<T, R> visitor, T param) {
@@ -29,11 +29,11 @@ public class Job extends Work {
 		this.employerName = employerName;
 	}
 
-	public Texts getPosition() {
+	public Text getPosition() {
 		return position;
 	}
 
-	public void setPosition(Texts position) {
+	public void setPosition(Text position) {
 		this.position = position;
 	}
 }

@@ -8,7 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
-import com.test.cv.model.text.Texts;
+import com.test.cv.model.text.Text;
 
 @Entity
 public class Reccomendation {
@@ -18,7 +18,7 @@ public class Reccomendation {
 	private long id;
 
 	@OneToOne(optional=false, cascade={CascadeType.ALL})
-	private Texts text;
+	private Text text;
 
 	public long getId() {
 		return id;
@@ -28,11 +28,11 @@ public class Reccomendation {
 		this.id = id;
 	}
 
-	public Texts getText() {
+	public Text getText() {
 		return text;
 	}
 
-	public void setText(Texts text) {
+	public void setText(Text text) {
 		this.text = text;
 	}
 }

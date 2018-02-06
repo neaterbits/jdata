@@ -12,7 +12,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.test.cv.model.text.Texts;
+import com.test.cv.model.text.Text;
 import com.test.cv.model.user.User;
 
 @Entity
@@ -35,7 +35,7 @@ public class SkillCategory {
 	private Name name;
 
 	@OneToOne(cascade={CascadeType.ALL})
-	private Texts description;
+	private Text description;
 
 	public long getId() {
 		return id;
@@ -69,11 +69,11 @@ public class SkillCategory {
 		this.name = name;
 	}
 
-	public Texts getDescription() {
+	public Text getDescription() {
 		return description;
 	}
 
-	public void setDescription(Texts description) {
+	public void setDescription(Text description) {
 		this.description = description;
 	}
 }

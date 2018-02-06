@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
-import com.test.cv.model.text.Texts;
+import com.test.cv.model.text.Text;
 
 public class Skill {
 
@@ -21,7 +21,7 @@ public class Skill {
 	private Name name;
 
 	@OneToOne(cascade={CascadeType.ALL})
-	private Texts description;
+	private Text description;
 	
 	@OneToMany(cascade={})
 	private List<SkillCategory> categories;
@@ -42,11 +42,11 @@ public class Skill {
 		this.name = name;
 	}
 	
-	public Texts getDescription() {
+	public Text getDescription() {
 		return description;
 	}
 
-	public void setDescription(Texts description) {
+	public void setDescription(Text description) {
 		this.description = description;
 	}
 

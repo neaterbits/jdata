@@ -1,25 +1,29 @@
 package com.test.cv.model.text;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
-import com.test.cv.model.cv.Language;
-
-@Entity
 public class Text {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
 	
-	@Column
-	private Language language;
+	@OneToMany(cascade = { CascadeType.ALL })
+	private List<Translation> texts;
 	
-	@Column
-	private String text;
+	public Text() {
+		
+	}
+	
+	public Text(List<Translation> texts) {
+		this.texts = texts;
+	}
 
 	public long getId() {
 		return id;
@@ -29,19 +33,11 @@ public class Text {
 		this.id = id;
 	}
 
-	public Language getLanguage() {
-		return language;
+	public List<Translation> getTexts() {
+		return texts;
 	}
 
-	public void setLanguage(Language language) {
-		this.language = language;
-	}
-
-	public String getText() {
-		return text;
-	}
-
-	public void setText(String text) {
-		this.text = text;
+	public void setTexts(List<Translation> texts) {
+		this.texts = texts;
 	}
 }

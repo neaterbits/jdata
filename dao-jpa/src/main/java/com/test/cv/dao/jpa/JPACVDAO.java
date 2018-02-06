@@ -23,8 +23,8 @@ import com.test.cv.model.cv.Skill;
 import com.test.cv.model.cv.SkillCategory;
 import com.test.cv.model.cv.SkillsAquiringItem;
 import com.test.cv.model.cv.Work;
+import com.test.cv.model.text.Translation;
 import com.test.cv.model.text.Text;
-import com.test.cv.model.text.Texts;
 
 public class JPACVDAO implements ICVDAO {
 	
@@ -90,16 +90,16 @@ public class JPACVDAO implements ICVDAO {
 		}
 	}
 
-	private static void filterTexts(Texts texts, Language [] languages) {
+	private static void filterTexts(Text texts, Language [] languages) {
 		filterTexts(texts.getTexts(), languages);
 	}
 
-	private static void filterTexts(List<Text> texts, Language [] languages) {
+	private static void filterTexts(List<Translation> texts, Language [] languages) {
 		// Loop over languages and find first one that match
-		Text found = null;
+		Translation found = null;
 		
 		for (Language language : languages) {
-			for (Text text : texts) {
+			for (Translation text : texts) {
 				if (language.equals(text.getLanguage())) {
 					found = text;
 					break;
@@ -107,7 +107,7 @@ public class JPACVDAO implements ICVDAO {
 			}
 			
 			if (found != null) {
-				final Text f = found;
+				final Translation f = found;
 				// found matching text, remove all other items from list
 				texts.removeIf(t -> t != f);
 				break;

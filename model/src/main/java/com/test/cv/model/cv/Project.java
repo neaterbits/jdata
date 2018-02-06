@@ -6,7 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
-import com.test.cv.model.text.Text;
+import com.test.cv.model.text.Translation;
 
 @Entity
 public class Project extends SkillsAquiringItem {
@@ -15,7 +15,7 @@ public class Project extends SkillsAquiringItem {
 	private String client;
 
 	@OneToMany
-	private List<Text> position;
+	private List<Translation> position;
 	
 	public String getClient() {
 		return client;
@@ -25,11 +25,11 @@ public class Project extends SkillsAquiringItem {
 		this.client = client;
 	}
 
-	public List<Text> getPosition() {
+	public List<Translation> getPosition() {
 		return position;
 	}
 
-	public void setPosition(List<Text> position) {
+	public void setPosition(List<Translation> position) {
 		this.position = position;
 	}
 	

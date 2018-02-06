@@ -16,8 +16,8 @@ import com.test.cv.model.cv.Name;
 import com.test.cv.model.cv.Personalia;
 import com.test.cv.model.cv.Skill;
 import com.test.cv.model.cv.Work;
+import com.test.cv.model.text.Translation;
 import com.test.cv.model.text.Text;
-import com.test.cv.model.text.Texts;
 import com.test.cv.xml.CVType;
 import com.test.cv.xml.CustomType;
 import com.test.cv.xml.DescriptionType;
@@ -75,9 +75,9 @@ final class ConvertXMLToModel {
 		return ret;
 	}
 
-	private static List<Text> convertTexts(TextsType xmlTexts, Language [] languages) {
+	private static List<Translation> convertTexts(TextsType xmlTexts, Language [] languages) {
 		
-		final List<Text> ret;
+		final List<Translation> ret;
 		
 		if (xmlTexts.getText() != null && !xmlTexts.getText().isEmpty()) {
 			ret = new ArrayList<>(xmlTexts.getText().size());
@@ -95,7 +95,7 @@ final class ConvertXMLToModel {
 					for (TextType xmlText : xmlTexts.getText()) {
 						if (language.getCode().equals(xmlText.getLanguage())) {
 							
-							final Text text = convertText(xmlText, language);
+							final Translation text = convertText(xmlText, language);
 							
 							ret.add(text);
 							found = true;
@@ -116,7 +116,7 @@ final class ConvertXMLToModel {
 							? Language.fromCode(xmlText.getLanguage())
 							: null;
 					
-					final Text text = convertText(xmlText, language);
+					final Translation text = convertText(xmlText, language);
 					
 					ret.add(text);
 				}
@@ -129,8 +129,8 @@ final class ConvertXMLToModel {
 		return ret;
 	}
 	
-	private static Text convertText(TextType xmlText, Language language) {
-		final Text text = new Text();
+	private static Translation convertText(TextType xmlText, Language language) {
+		final Translation text = new Translation();
 		
 		text.setLanguage(language);
 		text.setText(xmlText.getText());
@@ -142,20 +142,20 @@ final class ConvertXMLToModel {
 		return new Name(convertTexts(xmlName, languages));
 	}
 
-	private static List<Text> convertExitReason(ExitReasonType xmlExitReason, Language [] languages) {
+	private static List<Translation> convertExitReason(ExitReasonType xmlExitReason, Language [] languages) {
 		return convertTexts(xmlExitReason, languages);
 	}
 
-	private static List<Text> convertPosition(PositionType xmlPosition, Language [] languages) {
+	private static List<Translation> convertPosition(PositionType xmlPosition, Language [] languages) {
 		return convertTexts(xmlPosition, languages);
 	}
 
-	private static Texts convertSummary(SummaryType xmlSummary, Language [] languages) {
-		return new Texts(convertTexts(xmlSummary, languages));
+	private static Text convertSummary(SummaryType xmlSummary, Language [] languages) {
+		return new Text(convertTexts(xmlSummary, languages));
 	}
 
-	private static Texts convertDescription(DescriptionType xmlDescription, Language [] languages) {
-		return new Texts(convertTexts(xmlDescription, languages));
+	private static Text convertDescription(DescriptionType xmlDescription, Language [] languages) {
+		return new Text(convertTexts(xmlDescription, languages));
 	}
 	
 	private static Custom convertCustom(CustomType xmlCustom, Language [] languages) {
@@ -185,7 +185,7 @@ final class ConvertXMLToModel {
 		ret.setEndTime(convertCalendar(xmlItem.getEndTime()));
 		
 		if (xmlItem.getExitReason() != null) {
-			ret.setExitReason(new Texts(convertExitReason(xmlItem.getExitReason(), languages)));
+			ret.setExitReason(new Text(convertExitReason(xmlItem.getExitReason(), languages)));
 		}
 	}
 	
@@ -268,7 +268,7 @@ final class ConvertXMLToModel {
 		}
 		
 		if (xmlJob.getPosition() != null) {
-			ret.setPosition(new Texts(convertPosition(xmlJob.getPosition(), languages)));
+			ret.setPosition(new Text(convertPosition(xmlJob.getPosition(), languages)));
 		}
 		
 		return ret;

@@ -8,7 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import com.test.cv.model.text.Texts;
+import com.test.cv.model.text.Text;
 
 @Entity
 public abstract class Item {
@@ -24,7 +24,7 @@ public abstract class Item {
 	private Date endTime;
 	
 	@Column
-	private Texts exitReason;
+	private Text exitReason;
 
 	public abstract <T, R> R visit(ItemVisitor<T, R> visitor, T param); 
 	
@@ -52,11 +52,11 @@ public abstract class Item {
 		this.endTime = endTime;
 	}
 
-	public Texts getExitReason() {
+	public Text getExitReason() {
 		return exitReason;
 	}
 
-	public void setExitReason(Texts exitReason) {
+	public void setExitReason(Text exitReason) {
 		this.exitReason = exitReason;
 	}
 }

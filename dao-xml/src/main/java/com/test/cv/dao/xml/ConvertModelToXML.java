@@ -25,8 +25,8 @@ import com.test.cv.model.cv.Skill;
 import com.test.cv.model.cv.SkillCategory;
 import com.test.cv.model.cv.SkillsAquiringItem;
 import com.test.cv.model.cv.Work;
+import com.test.cv.model.text.Translation;
 import com.test.cv.model.text.Text;
-import com.test.cv.model.text.Texts;
 import com.test.cv.xml.CVType;
 import com.test.cv.xml.CustomType;
 import com.test.cv.xml.DescribedItemType;
@@ -251,7 +251,7 @@ public class ConvertModelToXML {
 	}
 	
 
-	private static List<TextType> convertTexts(Texts modelTexts) {
+	private static List<TextType> convertTexts(Text modelTexts) {
 		
 		final List<TextType> ret;
 		
@@ -259,7 +259,7 @@ public class ConvertModelToXML {
 			ret = new ArrayList<>(modelTexts.getTexts().size());
 
 			// No languages, just return all texts
-			for (Text modelText : modelTexts.getTexts()) {
+			for (Translation modelText : modelTexts.getTexts()) {
 				final TextType text = convertText(modelText);
 				
 				ret.add(text);
@@ -272,7 +272,7 @@ public class ConvertModelToXML {
 		return ret;
 	}
 	
-	private static TextType convertText(Text modelText) {
+	private static TextType convertText(Translation modelText) {
 		final TextType text = new TextType();
 		
 		if (modelText.getLanguage() != null) {
@@ -293,7 +293,7 @@ public class ConvertModelToXML {
 		return name;
 	}
 
-	private static ExitReasonType convertExitReason(Texts modelExitReason) {
+	private static ExitReasonType convertExitReason(Text modelExitReason) {
 
 		final ExitReasonType ret = new ExitReasonType();
 
@@ -302,7 +302,7 @@ public class ConvertModelToXML {
 		return ret;
 	}
 
-	private static PositionType convertPosition(Texts modelPosition) {
+	private static PositionType convertPosition(Text modelPosition) {
 
 		final PositionType ret = new PositionType();
 
@@ -311,7 +311,7 @@ public class ConvertModelToXML {
 		return ret;
 	}
 
-	private static SummaryType convertSummary(Texts modelSummary) {
+	private static SummaryType convertSummary(Text modelSummary) {
 		
 		final SummaryType summary = new SummaryType();
 		
@@ -320,7 +320,7 @@ public class ConvertModelToXML {
 		return summary;
 	}
 
-	private static DescriptionType convertDescription(Texts modelDescription) {
+	private static DescriptionType convertDescription(Text modelDescription) {
 		
 		final DescriptionType description = new DescriptionType();
 		
