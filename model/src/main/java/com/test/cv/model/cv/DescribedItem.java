@@ -5,7 +5,7 @@ import javax.persistence.OneToOne;
 
 import com.test.cv.model.text.Text;
 
-public abstract class DescribedItem extends Item {
+public abstract class DescribedItem extends CVItem {
 
 	@OneToOne(cascade={CascadeType.ALL})
 	private Text summary;

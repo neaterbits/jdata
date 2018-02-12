@@ -11,7 +11,7 @@ import javax.persistence.Id;
 import com.test.cv.model.text.Text;
 
 @Entity
-public abstract class Item {
+public abstract class CVItem {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)

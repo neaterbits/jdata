@@ -28,7 +28,7 @@ public class CV {
 	private Personalia personalia;
 	
 	@OneToMany(cascade={CascadeType.ALL})
-	private List<Item> items;
+	private List<CVItem> items;
 
 	public long getId() {
 		return id;
@@ -54,11 +54,11 @@ public class CV {
 		this.personalia = personalia;
 	}
 
-	public List<Item> getItems() {
+	public List<CVItem> getItems() {
 		return items;
 	}
 
-	public void setItems(List<Item> items) {
+	public void setItems(List<CVItem> items) {
 		this.items = items;
 	}
 }	

@@ -13,7 +13,7 @@ import com.test.cv.model.cv.CV;
 import com.test.cv.model.cv.Custom;
 import com.test.cv.model.cv.DescribedItem;
 import com.test.cv.model.cv.Education;
-import com.test.cv.model.cv.Item;
+import com.test.cv.model.cv.CVItem;
 import com.test.cv.model.cv.ItemVisitor;
 import com.test.cv.model.cv.Job;
 import com.test.cv.model.cv.Language;
@@ -219,7 +219,7 @@ public class JPACVDAO implements ICVDAO {
 	
 	private static void filterLanguages(CV cv, Language [] languages) {
 		if (cv.getItems() != null) {
-			for (Item item : cv.getItems()) {
+			for (CVItem item : cv.getItems()) {
 				filterTexts(item.getExitReason(), languages);
 				
 				item.visit(filterLanguagesVisitor, languages);

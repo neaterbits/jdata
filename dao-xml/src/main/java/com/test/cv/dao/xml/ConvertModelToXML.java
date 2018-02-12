@@ -14,7 +14,7 @@ import com.test.cv.model.cv.CV;
 import com.test.cv.model.cv.Custom;
 import com.test.cv.model.cv.DescribedItem;
 import com.test.cv.model.cv.Education;
-import com.test.cv.model.cv.Item;
+import com.test.cv.model.cv.CVItem;
 import com.test.cv.model.cv.ItemVisitor;
 import com.test.cv.model.cv.Job;
 import com.test.cv.model.cv.Name;
@@ -144,7 +144,7 @@ public class ConvertModelToXML {
 			final Map<Long, Skill> distinctSkills = new HashMap<>();
 			final Map<String, SkillCategory> distinctSkillCategories = new HashMap<>();
 
-			for (Item item : modelCV.getItems()) {
+			for (CVItem item : modelCV.getItems()) {
 				
 				if (item instanceof SkillsAquiringItem) {
 					// Can aquire skills
@@ -212,7 +212,7 @@ public class ConvertModelToXML {
 
 			ret.setItems(xmlItems);
 
-			for (Item item : modelCV.getItems()) {
+			for (CVItem item : modelCV.getItems()) {
 				item.visit(modelToXmlItemVisitor, xmlItems);
 			}
 		}
@@ -378,7 +378,7 @@ public class ConvertModelToXML {
 		return ret;
 	}
 
-	private static void convertItem(Item modelItem, ItemType ret) {
+	private static void convertItem(CVItem modelItem, ItemType ret) {
 		ret.setStartTime(convertCalendar(modelItem.getStartTime()));
 		ret.setEndTime(convertCalendar(modelItem.getEndTime()));
 		

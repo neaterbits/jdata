@@ -9,7 +9,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.test.cv.model.cv.CV;
 import com.test.cv.model.cv.Custom;
-import com.test.cv.model.cv.Item;
+import com.test.cv.model.cv.CVItem;
 import com.test.cv.model.cv.Job;
 import com.test.cv.model.cv.Language;
 import com.test.cv.model.cv.Name;
@@ -55,7 +55,7 @@ final class ConvertXMLToModel {
 		}
 		
 		if (xmlCV.getItems() != null) {
-			final List<Item> items = new ArrayList<>();
+			final List<CVItem> items = new ArrayList<>();
 	
 			if (xmlCV.getItems().getJob() != null) {
 				for (JobType xmlJob : xmlCV.getItems().getJob()) {
@@ -180,7 +180,7 @@ final class ConvertXMLToModel {
 		return ret;
 	}
 
-	private static void convertItem(ItemType xmlItem, Item ret, Language [] languages) {
+	private static void convertItem(ItemType xmlItem, CVItem ret, Language [] languages) {
 		ret.setStartTime(convertCalendar(xmlItem.getStartTime()));
 		ret.setEndTime(convertCalendar(xmlItem.getEndTime()));
 		

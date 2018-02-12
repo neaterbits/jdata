@@ -14,7 +14,7 @@ import com.test.cv.dao.CVStorageException;
 import com.test.cv.dao.ICVDAO;
 import com.test.cv.dao.xml.XMLCVDAO;
 import com.test.cv.model.cv.CV;
-import com.test.cv.model.cv.Item;
+import com.test.cv.model.cv.CVItem;
 import com.test.cv.model.cv.Language;
 import com.test.cv.model.cv.Personalia;
 import com.test.cv.xmlstorage.local.LocalXmlStorage;
@@ -87,19 +87,19 @@ public class CVService {
 	@GET
 	@Path("/{userId}/items")
 	@Produces("text/plain")
-	public Item [] getItems(@PathParam("userId") String userId, @Context HttpServletRequest request) {
+	public CVItem [] getItems(@PathParam("userId") String userId, @Context HttpServletRequest request) {
 		final CV cv = getCV(userId, request);
 		
 		return cv.getItems() == null
-				? new Item[0]
-				: cv.getItems().toArray(new Item[cv.getItems().size()]);
+				? new CVItem[0]
+				: cv.getItems().toArray(new CVItem[cv.getItems().size()]);
 	}
 	
 	// get details for one particular item
 	@GET
 	@Path("/{userId}/items/{itemNo}")
 	@Produces("text/plain")
-	public Item getItem(@PathParam("userId") String userId, @PathParam("itemNo") int itemNo, @Context HttpServletRequest request) {
+	public CVItem getItem(@PathParam("userId") String userId, @PathParam("itemNo") int itemNo, @Context HttpServletRequest request) {
 		final CV cv = getCV(userId, request);
 		
 		return cv.getItems().get(itemNo);
