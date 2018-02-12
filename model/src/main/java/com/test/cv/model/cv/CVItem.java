@@ -8,15 +8,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import com.test.cv.model.Item;
 import com.test.cv.model.text.Text;
 
 @Entity
-public abstract class CVItem {
+public abstract class CVItem extends Item {
 
-	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	private long id;
-	
 	@Column
 	private Date startTime;
 	
@@ -28,14 +25,6 @@ public abstract class CVItem {
 
 	public abstract <T, R> R visit(ItemVisitor<T, R> visitor, T param); 
 	
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
-	}
-
 	public Date getStartTime() {
 		return startTime;
 	}
