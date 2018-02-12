@@ -18,14 +18,14 @@ public abstract class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	}
 
 	@Override
-	public IFoundItem getItem(String id) {
-		final Item item = entityManager.find(Item.class, Long.parseLong(id));
+	public IFoundItem getItem(String userId, String itemId) {
+		final Item item = entityManager.find(Item.class, Long.parseLong(itemId));
 		
 		return item == null ? null : new JPAFoundItem(item);
 	}
 
 	@Override
-	public List<IFoundItemPhotoThumbnail> getPhotoThumbnails(String itemId) {
+	public List<IFoundItemPhotoThumbnail> getPhotoThumbnails(String userId, String itemId) {
 
 		final String query = "select ipt.id, ipt.mimeType, ipt.photo.categories, ipt.data from ItemPhotoThumbnail ipt where ipt.item = :itemId";
 		
@@ -51,7 +51,7 @@ public abstract class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	}
 
 	@Override
-	public ItemPhoto getItemPhoto(IFoundItemPhotoThumbnail thumbnail) {
+	public ItemPhoto getItemPhoto(String userId, IFoundItemPhotoThumbnail thumbnail) {
 		
 		final long thumbnailId = Long.parseLong(thumbnail.getId());
 		
@@ -63,12 +63,12 @@ public abstract class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	}
 
 	@Override
-	public void addItem(Item item) {
+	public void addItem(String userId, Item item) {
 		entityManager.persist(item);
 	}
 
 	@Override
-	public void updateItem(Item item) {
+	public void updateItem(String userId, Item item) {
 		entityManager.persist(item);
 	}
 }

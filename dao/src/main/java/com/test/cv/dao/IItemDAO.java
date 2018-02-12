@@ -13,7 +13,7 @@ public interface IItemDAO {
 	/**
 	 * Find detailed information about an item
 	 */
-	IFoundItem getItem(String id);
+	IFoundItem getItem(String userId, String itemId) throws ItemStorageException;
 	
 
 	/**
@@ -22,26 +22,26 @@ public interface IItemDAO {
 	 * 
 	 * @return thumbnails
 	 */
-	List<IFoundItemPhotoThumbnail> getPhotoThumbnails(String itemId);
+	List<IFoundItemPhotoThumbnail> getPhotoThumbnails(String userId, String itemId) throws ItemStorageException;
 	
 	/**
 	 * Get complete photo, given thumbnail
 	 * @param thumbnail
 	 * @return photo
 	 */
-	ItemPhoto getItemPhoto(IFoundItemPhotoThumbnail thumbnail);
+	ItemPhoto getItemPhoto(String userId, IFoundItemPhotoThumbnail thumbnail) throws ItemStorageException;
 	
 	/**
 	 * Add an item to the database, does not cascade to photos
 	 * 
 	 * @param item the item to add
 	 */
-	void addItem(Item item);
+	void addItem(String userId, Item item) throws ItemStorageException;
 	
 	/**
 	 * Update an item in the database, does not cascade to photos
 	 * 
 	 * @param item the item to update
 	 */
-	void updateItem(Item item);
+	void updateItem(String userId, Item item) throws ItemStorageException;
 }

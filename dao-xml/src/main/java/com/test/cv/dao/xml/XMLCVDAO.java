@@ -9,21 +9,19 @@ import java.util.function.Function;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 
 import com.test.cv.dao.CVStorageException;
 import com.test.cv.dao.ICVDAO;
 import com.test.cv.model.cv.CV;
 import com.test.cv.model.cv.Language;
 import com.test.cv.xml.CVType;
-import com.test.cv.xmlstorage.api.IXMLStorage;
+import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.api.StorageException;
 
-public class XMLCVDAO implements ICVDAO {
-	
+public class XMLCVDAO extends XMLBaseDAO implements ICVDAO {
+
 	private static final JAXBContext jaxbContext;
-	
+
 	static {
 		try {
 			jaxbContext = JAXBContext.newInstance(CVType.class);
@@ -32,32 +30,18 @@ public class XMLCVDAO implements ICVDAO {
 		}
 	}
 
-	private final IXMLStorage xmlStorage;
-	private final Marshaller marshaller;
-	private final Unmarshaller unmarshaller;
-
-	public XMLCVDAO(IXMLStorage xmlStorage) {
-
-		if (xmlStorage == null) {
-			throw new IllegalArgumentException("xmlStorage == null");
-		}
-		
-		this.xmlStorage = xmlStorage;
-
-		try {
-			this.marshaller = jaxbContext.createMarshaller();
-			this.unmarshaller = jaxbContext.createUnmarshaller();
-		} catch (JAXBException ex) {
-			throw new IllegalStateException("Failed to create JAXB context", ex);
-		}
+	public XMLCVDAO(IItemStorage xmlStorage) {
+		super(jaxbContext, xmlStorage);
 	}
+	
+	private static final String CV_ID = "cv";
 	
 	private <T> CV queryCV(String userId, T param, BiFunction<CVType, T, CV> convert) throws CVStorageException {
 		final CV ret;
-		
+
 		try {
-			final InputStream inputStream = xmlStorage.getCVXMLForUser(userId);
-			
+			final InputStream inputStream = xmlStorage.getXMLForItem(userId, CV_ID);
+
 			if (inputStream == null) {
 				ret = null;
 			}
@@ -112,7 +96,7 @@ public class XMLCVDAO implements ICVDAO {
 		}
 		
 		try {
-			xmlStorage.storeCVXMLForUser(userId, new ByteArrayInputStream(baos.toByteArray()));
+			xmlStorage.storeXMLForItem(userId, CV_ID, new ByteArrayInputStream(baos.toByteArray()));
 		} catch (StorageException ex) {
 			throw new CVStorageException("Failed to store to XML storage", ex);
 		}
@@ -136,7 +120,7 @@ public class XMLCVDAO implements ICVDAO {
 	public void deleteCV(String userId) throws CVStorageException {
 
 		try {
-			xmlStorage.deleteCVXMLForUser(userId);
+			xmlStorage.deleteAllItemFiles(userId, CV_ID);
 		} catch (StorageException ex) {
 			throw new CVStorageException("Caught exception while deleting XML", ex);
 		}
