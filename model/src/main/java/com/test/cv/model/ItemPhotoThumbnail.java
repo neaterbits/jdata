@@ -1,28 +1,27 @@
 package com.test.cv.model;
 
-import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
-/**
- * Photo of an item, with item photo category
- */
-public class ItemPhoto {
+public class ItemPhotoThumbnail {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
 	
+	@ManyToOne(optional=false)
+	private Item item;
+	
 	@Column(nullable=false)
 	private String mimeType;
-	
-	@OneToMany(cascade={CascadeType.REMOVE, CascadeType.REFRESH})
-	private List<ItemPhotoCategory> categories;
+
+	@OneToOne(optional=false)
+	private ItemPhoto photo;
 	
 	@Column(nullable=false)
 	private byte [] data;
@@ -41,14 +40,6 @@ public class ItemPhoto {
 
 	public void setMimeType(String mimeType) {
 		this.mimeType = mimeType;
-	}
-
-	public List<ItemPhotoCategory> getCategories() {
-		return categories;
-	}
-
-	public void setCategories(List<ItemPhotoCategory> categories) {
-		this.categories = categories;
 	}
 
 	public byte[] getData() {

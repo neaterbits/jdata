@@ -2,9 +2,6 @@ package com.test.cv.dao.jpa;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 import com.test.cv.dao.CVStorageException;
@@ -26,20 +23,10 @@ import com.test.cv.model.cv.Work;
 import com.test.cv.model.text.Translation;
 import com.test.cv.model.text.Text;
 
-public class JPACVDAO implements ICVDAO {
-	
-	private final EntityManagerFactory entityManagerFactory;
-	private final EntityManager entityManager;
+public class JPACVDAO extends JPABaseDAO implements ICVDAO {
 	
 	public JPACVDAO(String persistenceUnitName) {
-		this.entityManagerFactory = Persistence.createEntityManagerFactory(persistenceUnitName);
-		this.entityManager = entityManagerFactory.createEntityManager();
-	}
-
-	@Override
-	public void close() throws Exception {
-		entityManager.close();
-		entityManagerFactory.close();
+		super(persistenceUnitName);
 	}
 
 	private CV queryCV(String userId) {

@@ -6,7 +6,9 @@ import com.test.cv.model.ItemPhotoCategory;
 
 public interface IFoundItemPhotoThumbnail {
 
-	long getId();
+	String getId();
+	
+	String getMimeType();
 	
 	List<ItemPhotoCategory> getCategories();
 	

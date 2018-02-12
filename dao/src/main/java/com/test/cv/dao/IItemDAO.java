@@ -2,6 +2,7 @@ package com.test.cv.dao;
 
 import java.util.List;
 
+import com.test.cv.model.Item;
 import com.test.cv.model.ItemPhoto;
 
 /**
@@ -30,4 +31,17 @@ public interface IItemDAO {
 	 */
 	ItemPhoto getItemPhoto(IFoundItemPhotoThumbnail thumbnail);
 	
+	/**
+	 * Add an item to the database, does not cascade to photos
+	 * 
+	 * @param item the item to add
+	 */
+	void addItem(Item item);
+	
+	/**
+	 * Update an item in the database, does not cascade to photos
+	 * 
+	 * @param item the item to update
+	 */
+	void updateItem(Item item);
 }
