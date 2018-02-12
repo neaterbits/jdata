@@ -12,7 +12,10 @@ public class UserToUserRelation extends Relation {
 
 	// user we have a relation to
 	@OneToOne(optional=false)
-	private User user;
+	private User firstUser;
+
+	@OneToOne(optional=false)
+	private User secondUser;
 
 	@OneToMany(cascade={CascadeType.ALL})
 	private List<RelationFacet> facets;
@@ -20,12 +23,20 @@ public class UserToUserRelation extends Relation {
 	@OneToOne(cascade={CascadeType.ALL})
 	private Reccomendation reccomendation;
 
-	public User getUser() {
-		return user;
+	public User getFirstUser() {
+		return firstUser;
 	}
 
-	public void setUser(User user) {
-		this.user = user;
+	public void setFirstUser(User user) {
+		this.firstUser = user;
+	}
+
+	public User getSecondUser() {
+		return secondUser;
+	}
+
+	public void setSecondUser(User user) {
+		this.secondUser = user;
 	}
 
 	public List<RelationFacet> getFacets() {
