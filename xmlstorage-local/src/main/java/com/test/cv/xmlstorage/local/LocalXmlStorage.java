@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 
+import com.test.cv.common.IOUtil;
 import com.test.cv.xmlstorage.api.BaseXMLStorage;
 import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.api.ItemFileType;
@@ -101,6 +102,14 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 
 		final File xmlFile = getXMLFile(userId, itemId);
 
+		final File dir = xmlFile.getParentFile();
+		if (!dir.exists()) {
+			if (!dir.mkdirs()) {
+				throw new StorageException("Failed to create item directory");
+			}
+		}
+		
+		
 		try {
 			writeAndCloseOutput(inputStream, new FileOutputStream(xmlFile));
 		} catch (FileNotFoundException ex) {
@@ -125,32 +134,11 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 		
 		return new ImageResult(mimeType, inputStream);
 	}
-
 	
-	private static void deleteDirectoryRecursively(File dir) {
-		
-		if (!dir.isDirectory()) {
-			throw new IllegalArgumentException("file is not a directory: " + dir);
-		}
-		
-		final File [] subs = dir.listFiles();
-		
-		for (File sub : subs) {
-			
-			if (sub.isDirectory()) {
-				deleteDirectoryRecursively(sub);
-			}
-			else {
-				sub.delete();
-			}
-		}
-		
-		dir.delete();
-	}
 
 	@Override
 	public void deleteAllItemFiles(String userId, String itemId) throws StorageException {
-		deleteDirectoryRecursively(itemDir(userId, itemId));
+		IOUtil.deleteDirectoryRecursively(itemDir(userId, itemId));
 	}
 
 

@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 
 import com.test.cv.dao.IFoundItem;
 import com.test.cv.dao.IItemDAO;
-import com.test.cv.model.Item;
 import com.test.cv.model.items.Snowboard;
 import com.test.cv.model.items.SnowboardProfile;
 
@@ -12,12 +11,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import junit.framework.TestCase;
 
-// Inheited by implementation specific test
+// Inherited by implementation specific test
 public abstract class ItemDAOTest extends TestCase {
 
 	protected abstract IItemDAO getItemDAO();
 	
-	public void testStoreItem() throws Exception {
+	public void testStoreAndRetrieveItem() throws Exception {
 		final Snowboard snowboard = new Snowboard();
 		
 		snowboard.setMake("Burton");

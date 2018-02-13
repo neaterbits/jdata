@@ -86,22 +86,14 @@ public class XMLCVDAO extends XMLBaseDAO implements ICVDAO {
 	
 	private void storeCV(String userId, CV cv, Function<CV, CVType> convertCV) throws CVStorageException {
 		final CVType converted = convertCV.apply(cv);
-		
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		
+
 		try {
-			marshaller.marshal(converted, baos);
-		} catch (JAXBException ex) {
-			throw new CVStorageException("Failed to marshal XML", ex);
-		}
-		
-		try {
-			xmlStorage.storeXMLForItem(userId, CV_ID, new ByteArrayInputStream(baos.toByteArray()));
-		} catch (StorageException ex) {
-			throw new CVStorageException("Failed to store to XML storage", ex);
+			store(userId, CV_ID, converted);
+		} catch (XMLStorageException ex) {
+			throw new CVStorageException("Failed to store CV", ex);
 		}
 	}
-
+		
 	@Override
 	public void createCV(String userId, CV cv) throws CVStorageException {
 		

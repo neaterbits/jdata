@@ -4,9 +4,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity(name="snowboard")
-//@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@XmlRootElement
 public class Snowboard extends SportsItem {
 
 	@Column

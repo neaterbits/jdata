@@ -3,6 +3,7 @@ package com.test.cv.dao.xml;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -13,6 +14,7 @@ import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemPhoto;
+import com.test.cv.model.items.Snowboard;
 import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.api.StorageException;
 
@@ -22,7 +24,7 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 
 	static {
 		try {
-			jaxbContext = JAXBContext.newInstance(Item.class);
+			jaxbContext = JAXBContext.newInstance(Item.class, Snowboard.class);
 		} catch (JAXBException ex) {
 			throw new IllegalStateException("Failed to initialize JAXB context", ex);
 		}
@@ -71,19 +73,32 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	}
 
 	@Override
-	public String addItem(String userId, Item item) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO");
+	public String addItem(String userId, Item item) throws ItemStorageException {
+		// Add to storage, must make an ID for item
+		// Just generate an uuid
+		
+		final String itemId = genItemId();
+		
+		try {
+			store(userId, itemId, item);
+		} catch (XMLStorageException ex) {
+			throw new ItemStorageException("Failed to store item", ex);
+		}
+		
+		return itemId;
 	}
 
 	@Override
 	public void updateItem(String userId, Item item) {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException("TODO");
 	}
 
 	@Override
 	public void close() throws Exception {
 		
+	}
+	
+	private String genItemId() {
+		return UUID.randomUUID().toString();
 	}
 }
