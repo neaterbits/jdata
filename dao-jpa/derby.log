@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Mon Feb 12 22:23:16 CLST 2018:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.12.1.1 - (1704137): instance a816c00e-0161-8cc2-409a-000007e0d9c8 
+on database directory memory:/Users/nils.lorentzen/projects/cv/dao-jpa/query-jpa-test-derby with class loader sun.misc.Launcher$AppClassLoader@4554617c 
+Loaded from file:/Users/nils.lorentzen/.m2/repository/org/apache/derby/derby/10.12.1.1/derby-10.12.1.1.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_144-b01
+user.dir=/Users/nils.lorentzen/projects/cv/dao-jpa
+os.name=Mac OS X
+os.arch=x86_64
+os.version=10.12.6
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

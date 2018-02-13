@@ -13,7 +13,6 @@ import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemPhoto;
-import com.test.cv.xml.CVType;
 import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.api.StorageException;
 
@@ -72,14 +71,19 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	}
 
 	@Override
-	public void addItem(String userId, Item item) {
+	public String addItem(String userId, Item item) {
 		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException("TODO");
 	}
 
 	@Override
 	public void updateItem(String userId, Item item) {
 		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void close() throws Exception {
 		
 	}
 }

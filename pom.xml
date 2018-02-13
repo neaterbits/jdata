@@ -24,6 +24,7 @@
 	    <module>dao</module>
 	    <module>dao-jpa</module>
 	    <module>dao-xml</module>
+	    <module>dao-test</module>
 	    <module>xml</module>
 	    <module>xmlstorage</module>
 	    <module>xmlstorage-local</module>

@@ -3,18 +3,25 @@ package com.test.cv.dao.jpa;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+
+
 import com.test.cv.dao.IFoundItem;
 import com.test.cv.dao.IFoundItemPhotoThumbnail;
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemPhoto;
 import com.test.cv.model.ItemPhotoCategory;
-import com.test.cv.model.ItemPhotoThumbnail;
 
-public abstract class JPAItemDAO extends JPABaseDAO implements IItemDAO {
+public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 
 	public JPAItemDAO(String persistenceUnitName) {
 		super(persistenceUnitName);
+	}
+	
+	public JPAItemDAO(EntityManagerFactory entityManagerFactory) {
+		super(entityManagerFactory);
 	}
 
 	@Override
@@ -63,8 +70,22 @@ public abstract class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	}
 
 	@Override
-	public void addItem(String userId, Item item) {
-		entityManager.persist(item);
+	public String addItem(String userId, Item item) {
+
+		final EntityTransaction tx = entityManager.getTransaction();
+		
+		tx.begin();
+
+		try {
+			entityManager.persist(item);
+			
+			tx.commit();
+		}
+		finally {
+			
+		}
+		
+		return String.valueOf(item.getId());
 	}
 
 	@Override

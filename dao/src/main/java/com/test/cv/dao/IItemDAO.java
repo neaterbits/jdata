@@ -8,7 +8,7 @@ import com.test.cv.model.ItemPhoto;
 /**
  * DAO for retrieving items and all their subinformation
  */
-public interface IItemDAO {
+public interface IItemDAO extends AutoCloseable {
 	
 	/**
 	 * Find detailed information about an item
@@ -35,8 +35,10 @@ public interface IItemDAO {
 	 * Add an item to the database, does not cascade to photos
 	 * 
 	 * @param item the item to add
+	 * 
+	 * @return ID of newly added item
 	 */
-	void addItem(String userId, Item item) throws ItemStorageException;
+	String addItem(String userId, Item item) throws ItemStorageException;
 	
 	/**
 	 * Update an item in the database, does not cascade to photos

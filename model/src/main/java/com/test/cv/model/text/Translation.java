@@ -5,10 +5,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import com.test.cv.model.cv.Language;
 
 @Entity
+@Table(name="XLATION") // "TRANSLATION" seems like a reserved word
 public class Translation {
 
 	@Id
