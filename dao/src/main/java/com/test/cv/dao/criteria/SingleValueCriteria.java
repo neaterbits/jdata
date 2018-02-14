@@ -2,7 +2,7 @@ package com.test.cv.dao.criteria;
 
 import com.test.cv.model.ItemAttribute;
 
-public abstract class SingleValueCriteria<T> extends SearchCriteria {
+public abstract class SingleValueCriteria<T> extends Criterium {
 
 	private final T value;
 	private final ComparisonOperator comparisonOperator;

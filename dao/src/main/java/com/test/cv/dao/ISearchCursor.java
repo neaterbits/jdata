@@ -21,4 +21,12 @@ public interface ISearchCursor {
 	 */
 	List<IFoundItem> getItems(int initialIdx, int count);
 	
+	/**
+	 * Total number of items that matched the search.
+	 * Useful when displaying scrollbar.
+	 * 
+	 * @return total number of matches
+	 */
+	int getTotalMatchCount();
+	
 }

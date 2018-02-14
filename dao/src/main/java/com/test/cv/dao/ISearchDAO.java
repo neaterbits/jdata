@@ -1,6 +1,6 @@
 package com.test.cv.dao;
 
-import com.test.cv.dao.criteria.SearchCriteria;
+import com.test.cv.dao.criteria.Criterium;
 import com.test.cv.model.Item;
 
 /**
@@ -15,11 +15,11 @@ public interface ISearchDAO {
 	 * @param type item type
 	 * @param freeText freetext to search for
 	 * @param criteria list of criteria
-	 * @return a cursor for sshowing results, may be a long list of items
+	 * @return a cursor for showing results, may be a long list of items
 	 * 
 	 * @todo add freetext
 	 */
-	ISearchCursor search(Class<? extends Item> type /*, String freeText */, SearchCriteria ... criteria);
+	ISearchCursor search(Class<? extends Item> type /*, String freeText */, Criterium ... criteria);
 
 }
 

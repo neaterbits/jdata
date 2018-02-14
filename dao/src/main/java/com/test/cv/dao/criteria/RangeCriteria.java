@@ -2,7 +2,7 @@ package com.test.cv.dao.criteria;
 
 import com.test.cv.model.ItemAttribute;
 
-public class RangeCriteria<T> extends SearchCriteria {
+public class RangeCriteria<T> extends Criterium {
 
 	private final T lowerValue;
 	private final boolean includeLower;
