@@ -15,33 +15,20 @@ import com.test.cv.dao.ICVDAO;
 import com.test.cv.dao.xml.XMLCVDAO;
 import com.test.cv.model.cv.CV;
 import com.test.cv.model.cv.CVItem;
-import com.test.cv.model.cv.Language;
 import com.test.cv.model.cv.Personalia;
-import com.test.cv.xmlstorage.local.LocalXmlStorage;
 
 @Path("/cv")
-public class CVService {
+public class CVService extends BaseService {
 
-	enum Storage {
-		AMAZON_RDS,
-		AMAZON_S3,
-		LOCAL_FILE
-	};
-	
 	private static ICVDAO getDAO(HttpServletRequest request) {
-		
-		// just store current storage as an attribute
-		Storage storage = (Storage)request.getSession().getAttribute("storage");
-		
-		if (storage == null) {
-			storage = Storage.LOCAL_FILE;
-		}
 		
 		final ICVDAO ret;
 		
+		final Storage storage = getStorageType(request);
+		
 		switch (storage) {
-		case LOCAL_FILE:
-			ret = new XMLCVDAO(new LocalXmlStorage(new File("/Users/nils.lorentexn/cvs")));
+		case LOCAL_FILE_LUCENE:
+			ret = new XMLCVDAO(getLocalXMLStorage());
 			break;
 			
 		default:
@@ -50,18 +37,7 @@ public class CVService {
 		
 		return ret;
 	}
-	
-	private static Language [] getLanguages(HttpServletRequest request) {
-		
-		Language language = (Language)request.getSession().getAttribute("language");
-		
-		if (language == null) {
-			language = Language.NB_NO;
-		}
 
-		return new Language [] { language };
-	}
-	
 	// return the complete CV
 	@GET
 	@Path("/{userId}")
