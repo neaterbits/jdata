@@ -20,4 +20,18 @@ public interface IFoundItem {
 	 * @return item POJO
 	 */
 	Item getItem();
+	
+	/**
+	 * String ID to pass along to REST service
+	 * 
+	 * @return item ID
+	 */
+	String getItemId();
+	
+	/**
+	 * Title to be displayed in listings
+	 * 
+	 * @return title
+	 */
+	String getTitle();
 }

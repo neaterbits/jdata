@@ -2,12 +2,15 @@ package com.test.cv.dao.xml;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import com.test.cv.common.ItemId;
 import com.test.cv.dao.CVStorageException;
 import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.api.StorageException;
@@ -46,6 +49,15 @@ abstract class XMLBaseDAO {
 		} catch (StorageException ex) {
 			throw new XMLStorageException("Failed to store to XML storage", ex);
 		}
+	}
+	
+	protected static Map<String, Integer> makeItemIdToIndexMap(ItemId [] itemIds) {
+		final Map<String, Integer> map = new HashMap<>(itemIds.length);
+		for (int i = 0; i < itemIds.length; ++ i) {
+			map.put(itemIds[i].getItemId(), i);
+		}
+
+		return map;
 	}
 	
 	protected static class XMLStorageException extends Exception {

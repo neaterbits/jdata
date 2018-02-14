@@ -2,14 +2,18 @@ package com.test.cv.xmlstorage.api;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.function.BiConsumer;
+
+import com.test.cv.common.ItemId;
 
 public interface IItemStorage {
 	
 	public static class ImageResult {
 		public final String mimeType;
+		public final int imageSize;
 		public final InputStream inputStream;
 		
-		public ImageResult(String mimeType, InputStream inputStream) {
+		public ImageResult(String mimeType, int imageSize, InputStream inputStream) {
 			
 			if (mimeType == null) {
 				throw new IllegalArgumentException("mimeType == null");
@@ -20,6 +24,7 @@ public interface IItemStorage {
 			}
 			
 			this.mimeType = mimeType;
+			this.imageSize = imageSize;
 			this.inputStream = inputStream;
 		}
 	}
@@ -45,4 +50,6 @@ public interface IItemStorage {
 			InputStream photoInputStream, String photoMimeType) throws StorageException;
 	
 	void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException;
+
+	void retrieveThumbnails(ItemId [] itemIds, BiConsumer<ImageResult, ItemId> consumer) throws StorageException;
 }

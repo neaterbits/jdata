@@ -1,6 +1,7 @@
 package com.test.cv.xmlstorage;
 
 import java.io.InputStream;
+import java.util.function.BiConsumer;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
@@ -11,6 +12,7 @@ import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import com.test.cv.common.ItemId;
 import com.test.cv.xmlstorage.api.BaseXMLStorage;
 import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.api.ItemFileType;
@@ -41,7 +43,13 @@ public class S3XMLStorage extends BaseXMLStorage implements IItemStorage {
 	private String xmlFilePath(String userId, String itemId) {
 		return getKey(userId, itemId, ItemFileType.XML, xmlFileName(itemId));
 	}
+
+	private S3Object getS3Object(String path) {
+		final S3Object object = client.getObject(new GetObjectRequest(bucketName, path));
 	
+		return object;
+	}
+
 	private InputStream getInputStream(String path) {
 		final S3Object object = client.getObject(new GetObjectRequest(bucketName, path));
 		
@@ -167,8 +175,21 @@ public class S3XMLStorage extends BaseXMLStorage implements IItemStorage {
 
 		final String path = getKey(userId, itemId, itemFileType, fileName);
 		
-		final InputStream inputStream = getInputStream(path);
+		final S3Object s3Object = getS3Object(path);
+		
+		final InputStream inputStream = s3Object.getObjectContent();
 
-		return new ImageResult(getMimeTypeFromFileName(fileName), inputStream);
+		return new ImageResult(
+				getMimeTypeFromFileName(fileName),
+				Long.valueOf(s3Object.getObjectMetadata().getContentLength()).intValue(),
+				inputStream);
+	}
+
+	@Override
+	public void retrieveThumbnails(ItemId[] itemIds, BiConsumer<ImageResult, ItemId> consumer) throws StorageException {
+
+		// TODO possible to get multiple objects asynchronously?
+		
+		super.retrieveThumbnails(itemIds, consumer);
 	}
 }

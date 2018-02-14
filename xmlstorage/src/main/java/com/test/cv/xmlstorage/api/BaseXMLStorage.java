@@ -6,8 +6,10 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import com.test.cv.common.IOUtil;
+import com.test.cv.common.ItemId;
 import com.test.cv.xmlstorage.api.IItemStorage.ImageResult;
 
 public abstract class BaseXMLStorage implements IItemStorage {
@@ -56,7 +58,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	protected final String allocateFileName(String userId, String itemId, ItemFileType itemFileType, String mimeType) {
 		final int [] indices = listFileIndicesSorted(userId, itemId, itemFileType);
 		
-		final int allocatedId = indices.length == 0 ? 1 : indices[indices.length + 1];
+		final int allocatedId = indices.length == 0 ? 1 : indices[indices.length - 1] + 1;
 		
 		return String.valueOf(allocatedId) + '#' + mimeType.replace('/', '_') + '#' + itemId;
 	}
@@ -93,7 +95,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		
 		return entries;
 	}
-		
+
 	protected final String getImageFileName(String userId, String itemId, ItemFileType itemFileType, int fileNo) {
 		return getImageFilesSorted(userId, itemId, itemFileType)[fileNo].fileName;
 	}
@@ -221,6 +223,21 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		}
 		finally {
 			releaseLock(userId, itemId, lock);
+		}
+	}
+
+	@Override
+	public void retrieveThumbnails(ItemId[] itemIds, BiConsumer<ImageResult, ItemId> consumer) throws StorageException {
+		// Retrieve thumbnails for all that have such
+		for (ItemId itemId : itemIds) {
+			if (getNumThumbnailsAndPhotosForItem(itemId.getUserId(), itemId.getItemId()) > 0) {
+				
+				final String fileName = getImageFileName(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, 0);
+
+				final ImageResult image = getImageFileForItem(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, fileName);
+				
+				consumer.accept(image, itemId);
+			}
 		}
 	}
 }

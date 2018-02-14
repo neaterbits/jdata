@@ -10,10 +10,12 @@ import com.test.cv.dao.ISearchCursor;
 import com.test.cv.model.Item;
 
 final class JPASearchCursor implements ISearchCursor {
+	private final TypedQuery<Long> countQuery;
 	private final TypedQuery<Long> idQuery;
 	private final TypedQuery<Item> itemQuery;
 
-	public JPASearchCursor(TypedQuery<Long> idQuery, TypedQuery<Item> itemQuery) {
+	public JPASearchCursor(TypedQuery<Long> countQuery, TypedQuery<Long> idQuery, TypedQuery<Item> itemQuery) {
+		this.countQuery = countQuery;
 		this.idQuery = idQuery;
 		this.itemQuery = itemQuery;
 	}
@@ -40,4 +42,11 @@ final class JPASearchCursor implements ISearchCursor {
 				.map(i -> new JPAFoundItem(i))
 				.collect(Collectors.toList());
 	}
+
+	@Override
+	public int getTotalMatchCount() {
+		return countQuery.getSingleResult().intValue();
+	}
+	
+	
 }

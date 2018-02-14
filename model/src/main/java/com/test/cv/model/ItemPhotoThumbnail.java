@@ -16,6 +16,9 @@ public class ItemPhotoThumbnail {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
 	
+	@Column(nullable=false) // thumbnails and photos are ordered when presented, index 0 is the default appearing in listings
+	private int index;
+	
 	@ManyToOne(optional=false)
 	private Item item;
 	
@@ -36,6 +39,14 @@ public class ItemPhotoThumbnail {
 		this.id = id;
 	}
 	
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
 	public Item getItem() {
 		return item;
 	}

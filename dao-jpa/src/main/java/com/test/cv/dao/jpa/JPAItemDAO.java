@@ -1,18 +1,29 @@
 package com.test.cv.dao.jpa;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;import javax.imageio.stream.ImageOutputStreamImpl;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 
 import com.test.cv.common.IOUtil;
+import com.test.cv.common.ItemId;
 import com.test.cv.dao.IFoundItem;
 import com.test.cv.dao.IFoundItemPhotoThumbnail;
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.ItemStorageException;
+import com.test.cv.dao.RetrieveThumbnailsInputStream;
+import com.test.cv.dao.RetrieveThumbnailsInputStream.Thumbnail;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemPhoto;
 import com.test.cv.model.ItemPhotoCategory;
@@ -31,10 +42,17 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	@Override
 	public IFoundItem getItem(String userId, String itemId) {
 		final Item item = entityManager.find(Item.class, Long.parseLong(itemId));
-		
 		return item == null ? null : new JPAFoundItem(item);
 	}
 
+	private int getNumberOfPhotoThumbnails(String userId, String itemId) {
+		
+		return entityManager.createQuery("select count(ipt) from ItemPhotoThumbnail ipt where ipt.item.id = :itemId", Long.class)
+				.setParameter("itemId", Long.parseLong(itemId))
+				.getSingleResult()
+				.intValue();
+	}
+	
 	@Override
 	public List<IFoundItemPhotoThumbnail> getPhotoThumbnails(String userId, String itemId) {
 
@@ -120,6 +138,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 		boolean ok = false;
 		
 		tx.begin();
+
 		
 		try {
 			final IFoundItem foundItem = getItem(userId, itemId);
@@ -130,10 +149,29 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 			
 			final Item item = foundItem.getItem();
 
+			// TODO is this thread-safe? Some other thread might add so max is changed?
+			// lock item crashes, use other type of locking for max-index?
+			// entityManager.lock(item, LockModeType.PESSIMISTIC_WRITE);
+			
+			final int iptCount = getNumberOfPhotoThumbnails(userId, itemId);
+			
+			final int thumbnailIndex;
+			if (iptCount == 0) {
+				thumbnailIndex = 0;
+			}
+			else {
+				final int maxIndex = entityManager.createQuery("select max(ipt.index) from ItemPhotoThumbnail ipt where ipt.item.id = :itemId", Integer.class)
+						.setParameter("itemId", item.getId())
+						.getSingleResult();
+			
+				thumbnailIndex = maxIndex + 1;
+			}
+			
 			final ItemPhotoThumbnail thumbnail = new ItemPhotoThumbnail();
 
 			thumbnail.setMimeType(thumbnailMimeType);
 			thumbnail.setItem(item);
+			thumbnail.setIndex(thumbnailIndex);
 			
 			try {
 				thumbnail.setData(IOUtil.readAll(thumbnailInputStream));
@@ -184,5 +222,77 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	@Override
 	public void updateItem(String userId, Item item) {
 		entityManager.persist(item);
+	}
+
+	private static class JPAThumbnail extends Thumbnail {
+		private final String itemId;
+
+		public JPAThumbnail(String mimeType, int thumbnailSize, InputStream thumbnail, String itemId) {
+			super(mimeType, thumbnailSize, thumbnail);
+
+			this.itemId = itemId;
+		}
+	}
+	@Override
+	public InputStream retrieveAndConcatenateThumbnails(ItemId[] itemIds) {
+		
+		// Query the first thumbnail of every item, using left outer join
+		/*
+		final String query = "select item.id, ipt.mimeType, ipt.data "
+				+ " from Item item, ItemPhotoThumbnail ipt "
+				+ " where ipt. = ( select min(ipts.index) from ItemPhotoThumbnail ipts"
+				+ "  					where ipts.id = item.id  )"
+				+ " and item.id in :itemIds";
+		*/
+		final String query = "select ipt.item.id, ipt.mimeType, ipt.data "
+				+ " from ItemPhotoThumbnail ipt "
+				+ " where ipt.item.id in :itemIds"
+				+ "  and ipt.index = 0";
+		
+		final List<Long> ids = Arrays.stream(itemIds)
+				.map(itemId -> Long.parseLong(itemId.getItemId()))
+				.collect(Collectors.toList());
+		
+		@SuppressWarnings("unchecked")
+		final List<Object[]> rows = (List<Object[]>)entityManager.createQuery(query)
+				.setParameter("itemIds", ids)
+				.getResultList();
+
+		// We get a result back that is not sorted by item ID so we must sort that here
+		final Map<String, Integer> map = new HashMap<>(itemIds.length);
+
+		for (int i = 0; i < itemIds.length; ++ i) {
+			map.put(itemIds[i].getItemId(), i);
+		}
+		
+		final List<JPAThumbnail> thumbnails = rows.stream()
+			.map(row -> new JPAThumbnail((String)row[1], -1, new ByteArrayInputStream((byte[])row[2]), String.valueOf((Long)row[0])))
+			.collect(Collectors.toList());
+		
+		// Sort the thumbnails according to their place
+		final List<JPAThumbnail> sorted = new ArrayList<>(thumbnails.size());
+		
+		for (int i = 0; i < itemIds.length; ++ i) {
+			// Set to empty thumbnail by default
+			sorted.add(new JPAThumbnail("", 0, null, itemIds[i].getItemId()));
+		}
+		
+		for (JPAThumbnail thumbnail : thumbnails) {
+			final int index = map.get(thumbnail.itemId);
+			
+			sorted.set(index, thumbnail);
+		}
+		
+		final Iterator<JPAThumbnail> sortedIterator = sorted.iterator();
+
+		final InputStream stream = new RetrieveThumbnailsInputStream() {
+
+			@Override
+			protected Thumbnail getNext() {
+				return sortedIterator.hasNext() ? sortedIterator.next() : null;
+			}
+		};
+		
+		return stream;
 	}
 }

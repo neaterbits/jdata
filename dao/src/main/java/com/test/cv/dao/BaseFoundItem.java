@@ -5,7 +5,7 @@ import java.util.List;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttributeValue;
 
-public class BaseFoundItem implements IFoundItem {
+public abstract class BaseFoundItem implements IFoundItem {
 	private final Item item;
 	
 	protected BaseFoundItem(Item item) {
@@ -28,4 +28,8 @@ public class BaseFoundItem implements IFoundItem {
 		return item;
 	}
 
+	@Override
+	public final String getTitle() {
+		return item.getTitle();
+	}
 }

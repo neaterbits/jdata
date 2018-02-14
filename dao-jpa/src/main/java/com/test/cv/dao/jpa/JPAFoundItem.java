@@ -10,4 +10,9 @@ final class JPAFoundItem extends BaseFoundItem implements IFoundItem {
 	JPAFoundItem(Item item) {
 		super(item);
 	}
+
+	@Override
+	public String getItemId() {
+		return String.valueOf(getItem().getId());
+	}
 }

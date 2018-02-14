@@ -6,8 +6,17 @@ import com.test.cv.model.Item;
 
 final class XMLFoundItem extends BaseFoundItem implements IFoundItem {
 
-	XMLFoundItem(Item item) {
+	private final String itemId;
+	
+	XMLFoundItem(Item item, String itemId) {
 		super(item);
+		
+		this.itemId = itemId;
+	}
+
+	@Override
+	public String getItemId() {
+		return itemId;
 	}
 }
 

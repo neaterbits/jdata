@@ -10,7 +10,7 @@ import javax.persistence.metamodel.EntityType;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
 import com.test.cv.dao.criteria.RangeCriteria;
-import com.test.cv.dao.criteria.SearchCriteria;import com.test.cv.dao.criteria.SingleValueCriteria;
+import com.test.cv.dao.criteria.Criterium;import com.test.cv.dao.criteria.SingleValueCriteria;
 import com.test.cv.model.Item;
 
 public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
@@ -21,7 +21,7 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 
 	// Search for criteria on all attributes on a particular type
 	@Override
-	public ISearchCursor search(Class<? extends Item> type /*, String freeText */, SearchCriteria... criteria) {
+	public ISearchCursor search(Class<? extends Item> type /*, String freeText */, Criterium... criteria) {
 
 		// Must dynamically construct criteria from database by mapping to table
 		
@@ -37,13 +37,15 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 
 		final String whereClause = whereSb.toString();
 
+		final TypedQuery<Long> countQuery = entityManager.createQuery("select count(item.id) from item Item" + whereClause, Long.class);
 		final TypedQuery<Long> idQuery   = entityManager.createQuery("select item.id from item Item" + whereClause, Long.class);
 		final TypedQuery<Item> itemQuery = entityManager.createQuery("from Item " + whereClause, Item.class);
 
+		addParams(countQuery, params);
 		addParams(idQuery, params);
 		addParams(itemQuery, params);
 
-		return new JPASearchCursor(idQuery, itemQuery);
+		return new JPASearchCursor(countQuery, idQuery, itemQuery);
 	}
 
 	private static void addParams(TypedQuery<?> query, List<Object> params) {
@@ -52,7 +54,7 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 		}
 	}
 	
-	private static List<Object> constructWhereClause(SearchCriteria [] criteria, StringBuilder sb, EntityType<?> entity) {
+	private static List<Object> constructWhereClause(Criterium [] criteria, StringBuilder sb, EntityType<?> entity) {
 		
 		final String itemVar = "item";
 
@@ -62,7 +64,7 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 		
 		for (int i = 0; i < criteria.length; ++ i) {
 			
-			final SearchCriteria c = criteria[i];
+			final Criterium c = criteria[i];
 
 			final String attrName = c.getAttribute().getName();
 			final Attribute<?, ?> attr = entity.getAttribute(attrName);

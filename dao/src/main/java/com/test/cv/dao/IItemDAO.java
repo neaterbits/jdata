@@ -3,6 +3,7 @@ package com.test.cv.dao;
 import java.io.InputStream;
 import java.util.List;
 
+import com.test.cv.common.ItemId;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemPhoto;
 
@@ -55,4 +56,19 @@ public interface IItemDAO extends AutoCloseable {
 	void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws ItemStorageException;
 	
 	void deleteItem(String userId, String itemId) throws ItemStorageException;
+	
+	/**
+	 * Retrieve thumbnails and concatenate them into one stream for fast retrieval of
+	 * thumbnails to show in current display.
+	 * 
+	 * Each entry has 
+	 *  = size of thumbnail in bytes as integer, 0 means no thumbnail for this item
+	 *  = 0-terminated string for mimetype, empty string if no thumbnail
+	 *  = the 
+	 *  
+	 * @param itemIds Item IDs to retrieve thumbnails for
+	 * @return stream of concatenated thumbnails
+	 */
+	
+	InputStream retrieveAndConcatenateThumbnails(ItemId [] itemIds) throws ItemStorageException;
 }

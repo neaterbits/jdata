@@ -165,7 +165,7 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 			throw new StorageException("Could not open file " + file, ex);
 		}
 		
-		return new ImageResult(mimeType, inputStream);
+		return new ImageResult(mimeType, Long.valueOf(file.length()).intValue(), inputStream);
 	}
 	
 

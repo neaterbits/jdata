@@ -3,17 +3,22 @@ package com.test.cv.dao.xml;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
 import com.test.cv.common.IOUtil;
+import com.test.cv.common.ItemId;
 import com.test.cv.dao.IFoundItem;
 import com.test.cv.dao.IFoundItemPhotoThumbnail;
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.ItemStorageException;
+import com.test.cv.dao.RetrieveThumbnailsInputStream;
+import com.test.cv.dao.RetrieveThumbnailsInputStream.Thumbnail;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemPhoto;
 import com.test.cv.model.ItemPhotoCategory;
@@ -48,7 +53,7 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		
 			final Item item = (Item)unmarshaller.unmarshal(inputStream);
 
-			found = new XMLFoundItem(item);
+			found = new XMLFoundItem(item, itemId);
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException("Exception on close", ex);
@@ -195,6 +200,41 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		
 	}
 	
+	@Override
+	public InputStream retrieveAndConcatenateThumbnails(ItemId[] itemIds) throws ItemStorageException {
+		
+		// Retrieve thumbnails across user IDs from storage. Pass in all since might retreieve in parallell
+		final Map<String, Integer> map = makeItemIdToIndexMap(itemIds);
+		
+		final List<Thumbnail> sorted = new ArrayList<>(itemIds.length);
+		
+		// default to no thumbnail
+		for (int i = 0; i < itemIds.length; ++ i) {
+			sorted.add(new Thumbnail("", 0, null));
+		}
+		
+		try {
+			xmlStorage.retrieveThumbnails(itemIds, (imageResult, itemId) -> {
+				final int index = map.get(itemId.getItemId());
+				
+				sorted.set(index, new Thumbnail(imageResult.mimeType, imageResult.imageSize, imageResult.inputStream));
+			});
+		}
+		catch (StorageException ex) {
+			throw new ItemStorageException("Failed to retrieve thumbnails form storage", ex);
+		}
+
+		final Iterator<Thumbnail> sortedIterator = sorted.iterator();
+		
+		return new RetrieveThumbnailsInputStream() {
+			
+			@Override
+			protected Thumbnail getNext() {
+				return sortedIterator.hasNext() ? sortedIterator.next() : null;
+			}
+		};
+	}
+
 	private String genItemId() {
 		return UUID.randomUUID().toString();
 	}
