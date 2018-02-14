@@ -13,7 +13,6 @@ public class XMLItemDAOTest extends ItemDAOTest {
 
 	private final File baseDir;
 	
-	
 	public XMLItemDAOTest() {
 		try {
 			baseDir = Files.createTempDirectory("xmlitemtest").toFile();

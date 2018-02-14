@@ -1,5 +1,6 @@
 package com.test.cv.xmlstorage.local;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.nio.file.StandardOpenOption;
 
 import com.test.cv.common.IOUtil;
 import com.test.cv.xmlstorage.api.BaseXMLStorage;
@@ -17,7 +19,6 @@ import com.test.cv.xmlstorage.api.StorageException;
 
 public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 
-	
 	private final File baseDir;
 
 	public LocalXmlStorage(File baseDir) {
@@ -51,7 +52,14 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 
 	@Override
 	protected String[] listFiles(String userId, String itemId, ItemFileType itemFileType) {
-		return new File(itemDir(userId, itemId), itemFileType.getDirectoryName()).list();
+		
+		final File dir = new File(itemDir(userId, itemId), itemFileType.getDirectoryName());
+		
+		if (!dir.exists() || !dir.isDirectory()) {
+			throw new IllegalStateException("No such directory : " + dir);
+		}
+		
+		return dir.list();
 	}
 	
 	private static class LocalFileLock implements ILock {
@@ -69,7 +77,7 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 		final FileLock fileLock;
 		
 		try {
-			final FileChannel fileChannel = FileChannel.open(file.toPath());
+			final FileChannel fileChannel = FileChannel.open(file.toPath(), StandardOpenOption.WRITE);
 			fileLock = fileChannel.lock();
 		}
 		catch (IOException ex) {
@@ -108,19 +116,44 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 				throw new StorageException("Failed to create item directory");
 			}
 		}
+
+		// Create thumb and photo subdirectories
+		for (ItemFileType itemFileType : ItemFileType.values()) {
+			final File itemFileDir = new File(itemDir(userId, itemId), itemFileType.getDirectoryName());
+			
+			if (!itemFileDir.mkdirs()) {
+				throw new StorageException("Could not create storage directory " + itemFileDir);
+			}
+		}
 		
+		// Write a lockfile for later use
+		final File lockFile = getLockFile(userId, itemId);
+		try {
+			writeAndCloseOutput(new ByteArrayInputStream(new byte [0]), new FileOutputStream(lockFile));
+		} catch (FileNotFoundException ex) {
+			throw new StorageException("Failed to write lock file to " + lockFile, ex);
+		}
+
+		boolean ok = false;
 		
 		try {
 			writeAndCloseOutput(inputStream, new FileOutputStream(xmlFile));
+			
+			ok = true;
 		} catch (FileNotFoundException ex) {
 			throw new StorageException("Failed to open output stream " + xmlFile, ex);
+		}
+		finally {
+			if (!ok) {
+				lockFile.delete();
+			}
 		}
 	}
 
 	@Override
-	protected ImageResult getImageFileForItem(String userId, String itemId, int photoNo, ItemFileType itemFileType, String fileName) throws StorageException {
+	protected ImageResult getImageFileForItem(String userId, String itemId, ItemFileType itemFileType, String fileName) throws StorageException {
 		
-		final File file = new File(itemDir(userId, itemId), fileName);
+		final File file = itemFile(userId, itemId, itemFileType, fileName);
 		
 		final String mimeType = getMimeTypeFromFileName(fileName);
 		
@@ -138,7 +171,15 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 
 	@Override
 	public void deleteAllItemFiles(String userId, String itemId) throws StorageException {
-		IOUtil.deleteDirectoryRecursively(itemDir(userId, itemId));
+		
+		final ILock lock = obtainLock(userId, itemId);
+		
+		try {
+			IOUtil.deleteDirectoryRecursively(itemDir(userId, itemId));
+		}
+		finally {
+			releaseLock(userId, itemId, lock);
+		}
 	}
 
 
@@ -160,7 +201,7 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 			try {
 				final String photoFileName = allocateFileName(userId, itemId, ItemFileType.PHOTO, photoMimeType);
 
-				writeAndCloseOutput(thumbnailInputStream, new FileOutputStream(itemFile(userId, itemId, ItemFileType.PHOTO, photoFileName)));
+				writeAndCloseOutput(photoInputStream, new FileOutputStream(itemFile(userId, itemId, ItemFileType.PHOTO, photoFileName)));
 				
 				ok = true;
 			}

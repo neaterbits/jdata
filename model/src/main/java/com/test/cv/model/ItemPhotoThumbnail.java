@@ -35,6 +35,14 @@ public class ItemPhotoThumbnail {
 	public void setId(long id) {
 		this.id = id;
 	}
+	
+	public Item getItem() {
+		return item;
+	}
+
+	public void setItem(Item item) {
+		this.item = item;
+	}
 
 	public String getMimeType() {
 		return mimeType;
@@ -42,6 +50,14 @@ public class ItemPhotoThumbnail {
 
 	public void setMimeType(String mimeType) {
 		this.mimeType = mimeType;
+	}
+	
+	public ItemPhoto getPhoto() {
+		return photo;
+	}
+
+	public void setPhoto(ItemPhoto photo) {
+		this.photo = photo;
 	}
 
 	public byte[] getData() {

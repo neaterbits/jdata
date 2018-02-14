@@ -1,5 +1,6 @@
 package com.test.cv.dao;
 
+import java.io.InputStream;
 import java.util.List;
 
 import com.test.cv.model.Item;
@@ -46,4 +47,12 @@ public interface IItemDAO extends AutoCloseable {
 	 * @param item the item to update
 	 */
 	void updateItem(String userId, Item item) throws ItemStorageException;
+	
+	void addPhotoAndThumbnailForItem(String userId, String itemId,
+			InputStream thumbnailInputStream, String thumbnailMimeType,
+			InputStream photoInputStream, String photoMimeType) throws ItemStorageException;
+	
+	void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws ItemStorageException;
+	
+	void deleteItem(String userId, String itemId) throws ItemStorageException;
 }

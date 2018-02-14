@@ -3,7 +3,12 @@ package com.test.cv.xmlstorage.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import com.test.cv.common.IOUtil;
+import com.test.cv.xmlstorage.api.IItemStorage.ImageResult;
 
 public abstract class BaseXMLStorage implements IItemStorage {
 
@@ -19,7 +24,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	 * @param itemFileType
 	 * @return
 	 */
-	protected final int [] listFileIndicesSorted(String userId, String itemId, ItemFileType itemFileType) {
+	private int [] listFileIndicesSorted(String userId, String itemId, ItemFileType itemFileType) {
 		final String [] files = listFiles(userId, itemId, itemFileType);
 		
 		// file names are number#mime_type#itemId
@@ -71,7 +76,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		}
 	}
 
-	protected final String getImageFileName(String userId, String itemId, ItemFileType itemFileType, int fileNo) {
+	protected final Entry [] getImageFilesSorted(String userId, String itemId, ItemFileType itemFileType) {
 
 		final String [] files = listFiles(userId, itemId, itemFileType);
 		
@@ -86,7 +91,11 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		
 		Arrays.sort(entries);
 		
-		return entries[fileNo].fileName;
+		return entries;
+	}
+		
+	protected final String getImageFileName(String userId, String itemId, ItemFileType itemFileType, int fileNo) {
+		return getImageFilesSorted(userId, itemId, itemFileType)[fileNo].fileName;
 	}
 	
 	protected final String getMimeTypeFromFileName(String fileName) {
@@ -97,20 +106,9 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	}
 	
 	protected final void writeAndCloseOutput(InputStream inputStream, OutputStream outputStream) throws StorageException {
-		final byte [] buffer = new byte[10000];
-		
 		
 		try {
-
-			for (;;) {
-				final int bytesRead = inputStream.read(buffer);
-				
-				if (bytesRead < 0) {
-					break;
-				}
-				
-				outputStream.write(buffer, 0, bytesRead);
-			}
+			IOUtil.copyStreams(inputStream, outputStream);
 		}
 		catch (IOException ex) {
 			throw new StorageException("Failed to copy data", ex);
@@ -122,7 +120,6 @@ public abstract class BaseXMLStorage implements IItemStorage {
 				throw new StorageException("Failed to close output stream", ex);
 			}
 		}
-
 	}
 
 	
@@ -168,26 +165,62 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	}
 
 
-	protected abstract ImageResult getImageFileForItem(String userId, String itemId, int photoNo, ItemFileType itemFileType, String fileName) throws StorageException;
+	protected abstract ImageResult getImageFileForItem(String userId, String itemId, ItemFileType itemFileType, String fileName) throws StorageException;
 		
+	@Override
+	public final List<ImageResult> getThumbnailsForItem(String userId, String itemId) throws StorageException {
 
+		final ILock lock = obtainLock(userId, itemId);
+		
+		final List<ImageResult> result;
+		
+		try {
+			final Entry [] entries = getImageFilesSorted(userId, itemId, ItemFileType.THUMBNAIL);
+	
+			result = new ArrayList<>(entries.length);
+			
+			for (Entry entry : entries) {
+				final ImageResult image = getImageFileForItem(userId, itemId, ItemFileType.THUMBNAIL, entry.fileName);
+				
+				result.add(image);
+			}
+		}
+		finally {
+			releaseLock(userId, itemId, lock);
+		}
+		
+		return result;
+	}
 	
 	private ImageResult getImageFileForItem(String userId, String itemId, int photoNo, ItemFileType itemFileType) throws StorageException {
 
-		final String [] thumbs = listFiles(userId, itemId, itemFileType);
+		final String fileName = getImageFileName(userId, itemId, itemFileType, photoNo);
 		
-		final String fileName = thumbs[photoNo];
-		
-		return getImageFileForItem(userId, itemId, photoNo, itemFileType, fileName);
+		return getImageFileForItem(userId, itemId, itemFileType, fileName);
 	}
+
 
 	@Override
 	public final ImageResult getThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException {
-		return getImageFileForItem(userId, itemId, photoNo, ItemFileType.THUMBNAIL);
+		final ILock lock = obtainLock(userId, itemId);
+
+		try {
+			return getImageFileForItem(userId, itemId, photoNo, ItemFileType.THUMBNAIL);
+		}
+		finally {
+			releaseLock(userId, itemId, lock);
+		}
 	}
 
 	@Override
 	public final ImageResult getPhotoForItem(String userId, String itemId, int photoNo) throws StorageException {
-		return getImageFileForItem(userId, itemId, photoNo, ItemFileType.PHOTO);
+		final ILock lock = obtainLock(userId, itemId);
+
+		try {
+			return getImageFileForItem(userId, itemId, photoNo, ItemFileType.PHOTO);
+		}
+		finally {
+			releaseLock(userId, itemId, lock);
+		}
 	}
 }

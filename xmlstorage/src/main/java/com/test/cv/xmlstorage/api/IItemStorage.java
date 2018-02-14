@@ -1,6 +1,7 @@
 package com.test.cv.xmlstorage.api;
 
 import java.io.InputStream;
+import java.util.List;
 
 public interface IItemStorage {
 	
@@ -31,6 +32,9 @@ public interface IItemStorage {
 	void deleteAllItemFiles(String userId, String itemId) throws StorageException;
 
 	int getNumThumbnailsAndPhotosForItem(String userId, String itemId) throws StorageException;
+
+	// Sorted in order
+	List<ImageResult> getThumbnailsForItem(String userId, String itemId) throws StorageException;
 	
 	ImageResult getThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException;
 

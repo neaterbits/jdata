@@ -71,9 +71,18 @@ public class S3XMLStorage extends BaseXMLStorage implements IItemStorage {
 	@Override
 	public void deleteAllItemFiles(String userId, String itemId) throws StorageException {
 
-		deleteDirecoryFiles(userId, itemId, ItemFileType.XML);
-		deleteDirecoryFiles(userId, itemId, ItemFileType.THUMBNAIL);
-		deleteDirecoryFiles(userId, itemId, ItemFileType.PHOTO);
+		final ILock lock = obtainLock(userId, itemId);
+		
+		try {
+			deleteDirecoryFiles(userId, itemId, ItemFileType.XML);
+			deleteDirecoryFiles(userId, itemId, ItemFileType.THUMBNAIL);
+			deleteDirecoryFiles(userId, itemId, ItemFileType.PHOTO);
+		}
+		finally {
+			releaseLock(userId, itemId, lock);
+			
+			deleteLock(userId, itemId);
+		}
 		
 	}
 
@@ -103,8 +112,15 @@ public class S3XMLStorage extends BaseXMLStorage implements IItemStorage {
 
 	@Override
 	public void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException {
-		deleteImageFile(userId, itemId, ItemFileType.THUMBNAIL, photoNo);
-		deleteImageFile(userId, itemId, ItemFileType.PHOTO, photoNo);
+		final ILock lock = obtainLock(userId, itemId);
+		
+		try {
+			deleteImageFile(userId, itemId, ItemFileType.THUMBNAIL, photoNo);
+			deleteImageFile(userId, itemId, ItemFileType.PHOTO, photoNo);
+		}
+		finally {
+			releaseLock(userId, itemId, lock);
+		}
 	}
 
 	@Override
@@ -141,8 +157,12 @@ public class S3XMLStorage extends BaseXMLStorage implements IItemStorage {
 		throw new UnsupportedOperationException("TODO");
 	}
 
+	protected void deleteLock(String userId, String itemId) {
+		throw new UnsupportedOperationException("TODO");
+	}
+
 	@Override
-	protected ImageResult getImageFileForItem(String userId, String itemId, int photoNo, ItemFileType itemFileType,
+	protected ImageResult getImageFileForItem(String userId, String itemId, ItemFileType itemFileType,
 			String fileName) throws StorageException {
 
 		final String path = getKey(userId, itemId, itemFileType, fileName);
