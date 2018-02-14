@@ -8,6 +8,8 @@ public interface IFoundItemPhotoThumbnail {
 
 	String getId();
 	
+	int getIndex();
+	
 	String getMimeType();
 	
 	List<ItemPhotoCategory> getCategories();

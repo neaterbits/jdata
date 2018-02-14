@@ -196,4 +196,59 @@ public abstract class ItemDAOTest extends TestCase {
 
 		 itemDAO.addPhotoAndThumbnailForItem(userId, itemId, thumbnailInputStream, "image/png", photoInputStream, "image/jpeg");
 	}
+
+	public void testDeleteThumbnailAndPhoto() throws Exception {
+		final Snowboard snowboard = makeSnowboard();
+			
+		final String userId = "user1";
+		final String itemId;
+		try (IItemDAO itemDAO = getItemDAO()) {
+			 itemId = itemDAO.addItem(userId, snowboard);
+			 addPhotoAndThumbnail(itemDAO, userId, itemId, "thumbnail1".getBytes(), "photo1".getBytes());
+			 addPhotoAndThumbnail(itemDAO, userId, itemId, "thumbnail2".getBytes(), "photo2".getBytes());
+			 addPhotoAndThumbnail(itemDAO, userId, itemId, "thumbnail3".getBytes(), "photo3".getBytes());
+			 addPhotoAndThumbnail(itemDAO, userId, itemId, "thumbnail4".getBytes(), "photo4".getBytes());
+			 
+			 itemDAO.deletePhotoAndThumbnailForItem(userId, itemId, 1);
+			 
+			 List<IFoundItemPhotoThumbnail> thumbnails = itemDAO.getPhotoThumbnails(userId, itemId);
+			 
+			 assertThat(thumbnails.size()).isEqualTo(3);
+			 
+			 assertThat(thumbnails.get(0).getIndex()).isEqualTo(0);
+			 assertThat(thumbnails.get(0).getData()).isEqualTo("thumbnail1".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(0)).getData()).isEqualTo("photo1".getBytes());		 
+	
+			 assertThat(thumbnails.get(1).getIndex()).isEqualTo(1);
+			 assertThat(thumbnails.get(1).getData()).isEqualTo("thumbnail3".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(1)).getData()).isEqualTo("photo3".getBytes());		 
+
+			 assertThat(thumbnails.get(2).getIndex()).isEqualTo(2);
+			 assertThat(thumbnails.get(2).getData()).isEqualTo("thumbnail4".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(2)).getData()).isEqualTo("photo4".getBytes());		 
+			 
+			 assertThat(itemDAO.getNumThumbnails(userId, itemId)).isEqualTo(3);
+			 assertThat(itemDAO.getNumPhotos(userId, itemId)).isEqualTo(3);
+			 
+			 // Try delete last enry as well
+			 itemDAO.deletePhotoAndThumbnailForItem(userId, itemId, 2);
+
+			 	
+			 thumbnails = itemDAO.getPhotoThumbnails(userId, itemId);
+			 
+			 assertThat(thumbnails.size()).isEqualTo(2);
+			 
+			 assertThat(thumbnails.get(0).getIndex()).isEqualTo(0);
+			 assertThat(thumbnails.get(0).getData()).isEqualTo("thumbnail1".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(0)).getData()).isEqualTo("photo1".getBytes());		 
+	
+			 assertThat(thumbnails.get(1).getIndex()).isEqualTo(1);
+			 assertThat(thumbnails.get(1).getData()).isEqualTo("thumbnail3".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(1)).getData()).isEqualTo("photo3".getBytes());		 
+
+			 assertThat(itemDAO.getNumThumbnails(userId, itemId)).isEqualTo(2);
+			 assertThat(itemDAO.getNumPhotos(userId, itemId)).isEqualTo(2);
+
+		}
+	}
 }

@@ -24,6 +24,7 @@ import com.test.cv.model.ItemPhoto;
 import com.test.cv.model.ItemPhotoCategory;
 import com.test.cv.model.items.Snowboard;
 import com.test.cv.xmlstorage.api.IItemStorage;
+import com.test.cv.xmlstorage.api.ItemFileType;
 import com.test.cv.xmlstorage.api.IItemStorage.ImageResult;
 import com.test.cv.xmlstorage.api.StorageException;
 
@@ -92,7 +93,7 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 				// TODO categories
 				final List<ItemPhotoCategory> categories = new ArrayList<>();
 
-				result.add(new XMLFoundItemPhotoThumbnail(id, itemId, image.mimeType, categories, data));
+				result.add(new XMLFoundItemPhotoThumbnail(id, itemId, i, image.mimeType, categories, data));
 			}
 		}
 		catch (IOException ex) {
@@ -237,5 +238,23 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 
 	private String genItemId() {
 		return UUID.randomUUID().toString();
+	}
+
+	@Override
+	public int getNumThumbnails(String userId, String itemId) throws ItemStorageException {
+		try {
+			return xmlStorage.getNumFiles(userId, itemId, ItemFileType.THUMBNAIL);
+		} catch (StorageException ex) {
+			throw new ItemStorageException("Failed to get number of files", ex);
+		}
+	}
+
+	@Override
+	public int getNumPhotos(String userId, String itemId) throws ItemStorageException {
+		try {
+			return xmlStorage.getNumFiles(userId, itemId, ItemFileType.PHOTO);
+		} catch (StorageException ex) {
+			throw new ItemStorageException("Failed to get number of files", ex);
+		}
 	}
 }

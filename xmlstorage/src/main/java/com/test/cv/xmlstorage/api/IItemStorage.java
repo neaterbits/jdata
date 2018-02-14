@@ -52,4 +52,6 @@ public interface IItemStorage {
 	void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException;
 
 	void retrieveThumbnails(ItemId [] itemIds, BiConsumer<ImageResult, ItemId> consumer) throws StorageException;
+
+	int getNumFiles(String userId, String itemId, ItemFileType itemFileType) throws StorageException;
 }

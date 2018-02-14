@@ -1,6 +1,7 @@
 package com.test.cv.model;
 
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -25,7 +26,7 @@ public class ItemPhotoThumbnail {
 	@Column(nullable=false)
 	private String mimeType;
 
-	@OneToOne(optional=false)
+	@OneToOne(optional=false, cascade={CascadeType.REMOVE})
 	private ItemPhoto photo;
 	
 	@Column(nullable=false)

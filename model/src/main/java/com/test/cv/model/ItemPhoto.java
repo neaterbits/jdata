@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 /**
  * Photo of an item, with item photo category
@@ -19,6 +20,9 @@ public class ItemPhoto {
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
+
+	@OneToOne(optional=false)
+	private Item item;
 	
 	@Column(nullable=false)
 	private String mimeType;
@@ -35,6 +39,14 @@ public class ItemPhoto {
 
 	public void setId(long id) {
 		this.id = id;
+	}
+	
+	public Item getItem() {
+		return item;
+	}
+
+	public void setItem(Item item) {
+		this.item = item;
 	}
 
 	public String getMimeType() {

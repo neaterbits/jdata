@@ -240,4 +240,9 @@ public abstract class BaseXMLStorage implements IItemStorage {
 			}
 		}
 	}
+
+	@Override
+	public int getNumFiles(String userId, String itemId, ItemFileType itemFileType) throws StorageException {
+		return listFiles(userId, itemId, itemFileType).length;
+	}
 }

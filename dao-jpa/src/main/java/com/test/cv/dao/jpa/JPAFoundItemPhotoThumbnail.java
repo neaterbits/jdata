@@ -8,7 +8,7 @@ import com.test.cv.model.ItemPhotoCategory;
 
 final class JPAFoundItemPhotoThumbnail extends BaseFoundItemPhotoThumbnail implements IFoundItemPhotoThumbnail {
 
-	JPAFoundItemPhotoThumbnail(long id, String itemId, String mimeType, List<ItemPhotoCategory> categories, byte[] data) {
-		super(String.valueOf(id), itemId, mimeType, categories, data);
+	JPAFoundItemPhotoThumbnail(long id, String itemId, int index, String mimeType, List<ItemPhotoCategory> categories, byte[] data) {
+		super(String.valueOf(id), itemId, index, mimeType, categories, data);
 	}
 }

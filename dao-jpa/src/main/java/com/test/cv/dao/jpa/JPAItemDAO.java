@@ -44,19 +44,11 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 		final Item item = entityManager.find(Item.class, Long.parseLong(itemId));
 		return item == null ? null : new JPAFoundItem(item);
 	}
-
-	private int getNumberOfPhotoThumbnails(String userId, String itemId) {
-		
-		return entityManager.createQuery("select count(ipt) from ItemPhotoThumbnail ipt where ipt.item.id = :itemId", Long.class)
-				.setParameter("itemId", Long.parseLong(itemId))
-				.getSingleResult()
-				.intValue();
-	}
 	
 	@Override
 	public List<IFoundItemPhotoThumbnail> getPhotoThumbnails(String userId, String itemId) {
 
-		final String query = "select ipt.id, ipt.mimeType, ipc, ipt.data "
+		final String query = "select ipt.id, ipt.index, ipt.mimeType, ipc, ipt.data "
 					+ " from ItemPhotoThumbnail ipt "
 				    + " left outer join ipt.photo ip "
 				    + " left outer join ip.categories ipc "
@@ -71,13 +63,14 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 		
 		for (Object [] columns : found) {
 			final long id = (Long)columns[0];
-			final String mimeType = (String)columns[1];
+			final int index = (Integer)columns[1];
+			final String mimeType = (String)columns[2];
 			@SuppressWarnings({ "unchecked", "rawtypes" })
-			final List<ItemPhotoCategory> categories = (List)columns[2];
+			final List<ItemPhotoCategory> categories = (List)columns[3];
 			
-			final byte []data = (byte[])columns[3];
+			final byte []data = (byte[])columns[4];
 			
-			result.add(new JPAFoundItemPhotoThumbnail(id, itemId, mimeType, categories, data));
+			result.add(new JPAFoundItemPhotoThumbnail(id, itemId, index, mimeType, categories, data));
 		}
 		
 		return result;
@@ -129,6 +122,13 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 		return String.valueOf(item.getId());
 	}
 
+	private void lockItem(Item item) {
+		// TODO is this thread-safe? Some other thread might add so max is changed?
+		// lock item crashes, use other type of locking for max-index?
+		// entityManager.lock(item, LockModeType.PESSIMISTIC_WRITE);
+		
+	}
+	
 	@Override
 	public void addPhotoAndThumbnailForItem(String userId, String itemId, InputStream thumbnailInputStream,
 			String thumbnailMimeType, InputStream photoInputStream, String photoMimeType) throws ItemStorageException {
@@ -149,11 +149,9 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 			
 			final Item item = foundItem.getItem();
 
-			// TODO is this thread-safe? Some other thread might add so max is changed?
-			// lock item crashes, use other type of locking for max-index?
-			// entityManager.lock(item, LockModeType.PESSIMISTIC_WRITE);
+			lockItem(item);
 			
-			final int iptCount = getNumberOfPhotoThumbnails(userId, itemId);
+			final int iptCount = getNumThumbnails(userId, itemId);
 			
 			final int thumbnailIndex;
 			if (iptCount == 0) {
@@ -181,6 +179,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 
 			final ItemPhoto photo = new ItemPhoto();
 
+			photo.setItem(item);
 			photo.setMimeType(photoMimeType);
 			try {
 				photo.setData(IOUtil.readAll(photoInputStream));
@@ -209,7 +208,70 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 
 	@Override
 	public void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws ItemStorageException {
-		// TODO Auto-generated method stub
+
+		// Must move all indices if this is not the last one
+		
+		final Item item = getItem(userId, itemId).getItem();
+		
+		final EntityTransaction tx = entityManager.getTransaction();
+		
+		boolean ok = false;
+		
+		tx.begin();
+		
+		try {
+			lockItem(item);
+		
+			final int num = getNumThumbnails(userId, itemId);
+
+			/* Does not work because of foreign key constraint
+			 * and cascade delete does not work on delete from query
+			entityManager.createQuery("delete from ItemPhoto ip "
+					+ " where ip.id = (select ipt.photo.id from ItemPhotoThumbnail ipt "
+							+ " where ipt.item.id = :itemId "
+							+ "   and ipt.index = :photoNo )")
+						.setParameter("itemId", Long.parseLong(itemId))
+						.setParameter("photoNo", photoNo)
+						.executeUpdate();
+
+			entityManager.createQuery("delete from ItemPhotoThumbnail ipt "
+									+ " where ipt.item.id = :itemId "
+									+ "   and ipt.index = :photoNo")
+				.setParameter("itemId", Long.parseLong(itemId))
+				.setParameter("photoNo", photoNo)
+				.executeUpdate();
+			*/
+			
+			final ItemPhotoThumbnail ipt = entityManager.createQuery("from ItemPhotoThumbnail ipt "
+									+ " where ipt.item.id = :itemId "
+									+ "   and ipt.index = :photoNo", ItemPhotoThumbnail.class)
+				.setParameter("itemId", Long.parseLong(itemId))
+				.setParameter("photoNo", photoNo)
+				.getSingleResult();
+			
+			entityManager.remove(ipt);
+
+			if (photoNo < num - 1) {
+				// Was not the last index so must decrement by one all with higher index
+				entityManager.createQuery("update ItemPhotoThumbnail ipt "
+							+ " set ipt.index = ipt.index - 1 "
+							+ " where ipt.item.id = :itemId "
+							+ " and ipt.index > :photoNo")
+				.setParameter("itemId", Long.parseLong(itemId))
+				.setParameter("photoNo", photoNo)
+				.executeUpdate();
+			}
+			
+			
+			tx.commit();
+			
+			ok = true;
+		}
+		finally {
+			if (!ok) {
+				tx.rollback();
+			}
+		}
 		
 	}
 
@@ -294,5 +356,21 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 		};
 		
 		return stream;
+	}
+
+	@Override
+	public int getNumThumbnails(String userId, String itemId) {
+		return entityManager.createQuery("select count(ipt) from ItemPhotoThumbnail ipt where ipt.item.id = :itemId", Long.class)
+				.setParameter("itemId", Long.parseLong(itemId))
+				.getSingleResult()
+				.intValue();
+	}
+
+	@Override
+	public int getNumPhotos(String userId, String itemId) {
+		return entityManager.createQuery("select count(ip) from ItemPhoto ip where ip.item.id = :itemId", Long.class)
+				.setParameter("itemId", Long.parseLong(itemId))
+				.getSingleResult()
+				.intValue();
 	}
 }
