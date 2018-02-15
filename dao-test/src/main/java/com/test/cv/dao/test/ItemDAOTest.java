@@ -102,6 +102,141 @@ public abstract class ItemDAOTest extends TestCase {
 			 assertThat(photo.getData()).containsExactly("photo".getBytes());
 		}
 	}
+	
+	public void testMoveThumbnailAndPhoto() throws Exception {
+		final Snowboard snowboard = makeSnowboard();
+			
+		final String userId = "user1";
+		final String itemId;
+		try (IItemDAO itemDAO = getItemDAO()) {
+			 itemId = itemDAO.addItem(userId, snowboard);
+			 addPhotoAndThumbnail(itemDAO, userId, itemId, "thumbnail1".getBytes(), "photo1".getBytes());
+			 addPhotoAndThumbnail(itemDAO, userId, itemId, "thumbnail2".getBytes(), "photo2".getBytes());
+			 addPhotoAndThumbnail(itemDAO, userId, itemId, "thumbnail3".getBytes(), "photo3".getBytes());
+			 addPhotoAndThumbnail(itemDAO, userId, itemId, "thumbnail4".getBytes(), "photo4".getBytes());
+			 
+			 List<IFoundItemPhotoThumbnail> thumbnails = itemDAO.getPhotoThumbnails(userId, itemId);
+			 
+			 assertThat(thumbnails.size()).isEqualTo(4);
+			 
+			 assertThat(thumbnails.get(0).getIndex()).isEqualTo(0);
+			 assertThat(thumbnails.get(0).getData()).isEqualTo("thumbnail1".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(0)).getData()).isEqualTo("photo1".getBytes());		 
+
+			 assertThat(thumbnails.get(1).getIndex()).isEqualTo(1);
+			 assertThat(thumbnails.get(1).getData()).isEqualTo("thumbnail2".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(1)).getData()).isEqualTo("photo2".getBytes());		 
+
+			 assertThat(thumbnails.get(2).getIndex()).isEqualTo(2);
+			 assertThat(thumbnails.get(2).getData()).isEqualTo("thumbnail3".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(2)).getData()).isEqualTo("photo3".getBytes());		 
+
+			 assertThat(thumbnails.get(3).getIndex()).isEqualTo(3);
+			 assertThat(thumbnails.get(3).getData()).isEqualTo("thumbnail4".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(3)).getData()).isEqualTo("photo4".getBytes());		 
+			 
+			 assertThat(itemDAO.getNumThumbnails(userId, itemId)).isEqualTo(4);
+			 assertThat(itemDAO.getNumPhotos(userId, itemId)).isEqualTo(4);
+			 
+			 // Move first to last
+			 itemDAO.movePhotoAndThumbnailForItem(userId, itemId, 0, 3);
+			 
+			 thumbnails = itemDAO.getPhotoThumbnails(userId, itemId);
+			 
+			 assertThat(thumbnails.get(0).getIndex()).isEqualTo(0);
+			 assertThat(thumbnails.get(0).getData()).isEqualTo("thumbnail2".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(0)).getData()).isEqualTo("photo2".getBytes());		 
+
+			 assertThat(thumbnails.get(1).getIndex()).isEqualTo(1);
+			 assertThat(thumbnails.get(1).getData()).isEqualTo("thumbnail3".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(1)).getData()).isEqualTo("photo3".getBytes());		 
+
+			 assertThat(thumbnails.get(2).getIndex()).isEqualTo(2);
+			 assertThat(thumbnails.get(2).getData()).isEqualTo("thumbnail4".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(2)).getData()).isEqualTo("photo4".getBytes());		 
+
+			 assertThat(thumbnails.get(3).getIndex()).isEqualTo(3);
+			 assertThat(thumbnails.get(3).getData()).isEqualTo("thumbnail1".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(3)).getData()).isEqualTo("photo1".getBytes());		 
+			 
+			 assertThat(itemDAO.getNumThumbnails(userId, itemId)).isEqualTo(4);
+			 assertThat(itemDAO.getNumPhotos(userId, itemId)).isEqualTo(4);
+			 
+			 // Move position 1 to 2
+			 itemDAO.movePhotoAndThumbnailForItem(userId, itemId, 1, 2);
+
+			 thumbnails = itemDAO.getPhotoThumbnails(userId, itemId);
+			 
+			 assertThat(thumbnails.get(0).getIndex()).isEqualTo(0);
+			 assertThat(thumbnails.get(0).getData()).isEqualTo("thumbnail2".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(0)).getData()).isEqualTo("photo2".getBytes());		 
+
+			 assertThat(thumbnails.get(1).getIndex()).isEqualTo(1);
+			 assertThat(thumbnails.get(1).getData()).isEqualTo("thumbnail4".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(1)).getData()).isEqualTo("photo4".getBytes());		 
+
+			 assertThat(thumbnails.get(2).getIndex()).isEqualTo(2);
+			 assertThat(thumbnails.get(2).getData()).isEqualTo("thumbnail3".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(2)).getData()).isEqualTo("photo3".getBytes());
+
+			 assertThat(thumbnails.get(3).getIndex()).isEqualTo(3);
+			 assertThat(thumbnails.get(3).getData()).isEqualTo("thumbnail1".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(3)).getData()).isEqualTo("photo1".getBytes());		 
+			 
+			 assertThat(itemDAO.getNumThumbnails(userId, itemId)).isEqualTo(4);
+			 assertThat(itemDAO.getNumPhotos(userId, itemId)).isEqualTo(4);
+
+			 // Move position 2 to 1
+			 itemDAO.movePhotoAndThumbnailForItem(userId, itemId, 2, 1);
+
+			 thumbnails = itemDAO.getPhotoThumbnails(userId, itemId);
+			 
+			 assertThat(thumbnails.get(0).getIndex()).isEqualTo(0);
+			 assertThat(thumbnails.get(0).getData()).isEqualTo("thumbnail2".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(0)).getData()).isEqualTo("photo2".getBytes());		 
+
+			 assertThat(thumbnails.get(1).getIndex()).isEqualTo(1);
+			 assertThat(thumbnails.get(1).getData()).isEqualTo("thumbnail3".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(1)).getData()).isEqualTo("photo3".getBytes());		 
+
+			 assertThat(thumbnails.get(2).getIndex()).isEqualTo(2);
+			 assertThat(thumbnails.get(2).getData()).isEqualTo("thumbnail4".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(2)).getData()).isEqualTo("photo4".getBytes());
+
+			 assertThat(thumbnails.get(3).getIndex()).isEqualTo(3);
+			 assertThat(thumbnails.get(3).getData()).isEqualTo("thumbnail1".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(3)).getData()).isEqualTo("photo1".getBytes());		 
+			 
+			 assertThat(itemDAO.getNumThumbnails(userId, itemId)).isEqualTo(4);
+			 assertThat(itemDAO.getNumPhotos(userId, itemId)).isEqualTo(4);
+
+			 // Move position 3 to 0
+			 itemDAO.movePhotoAndThumbnailForItem(userId, itemId, 3, 0);
+
+			 thumbnails = itemDAO.getPhotoThumbnails(userId, itemId);
+			 
+			 assertThat(thumbnails.get(0).getIndex()).isEqualTo(0);
+			 assertThat(thumbnails.get(0).getData()).isEqualTo("thumbnail1".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(0)).getData()).isEqualTo("photo1".getBytes());		 
+			 
+			 assertThat(thumbnails.get(1).getIndex()).isEqualTo(1);
+			 assertThat(thumbnails.get(1).getData()).isEqualTo("thumbnail2".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(1)).getData()).isEqualTo("photo2".getBytes());		 
+
+			 assertThat(thumbnails.get(2).getIndex()).isEqualTo(2);
+			 assertThat(thumbnails.get(2).getData()).isEqualTo("thumbnail3".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(2)).getData()).isEqualTo("photo3".getBytes());		 
+
+			 assertThat(thumbnails.get(3).getIndex()).isEqualTo(3);
+			 assertThat(thumbnails.get(3).getData()).isEqualTo("thumbnail4".getBytes());
+			 assertThat(itemDAO.getItemPhoto(userId, thumbnails.get(3)).getData()).isEqualTo("photo4".getBytes());
+
+
+			 assertThat(itemDAO.getNumThumbnails(userId, itemId)).isEqualTo(4);
+			 assertThat(itemDAO.getNumPhotos(userId, itemId)).isEqualTo(4);
+}
+	}
+	
 
 	public void testRetrieveMultipleThumbnails() throws Exception {
 		final Snowboard snowboard1 = makeSnowboard();

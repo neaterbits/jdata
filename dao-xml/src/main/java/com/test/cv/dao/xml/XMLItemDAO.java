@@ -177,6 +177,12 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 			throw new ItemStorageException("Failed to store thumbnail", ex);
 		}
 	}
+	
+	@Override
+	public void movePhotoAndThumbnailForItem(String userId, String itemId, int photoNo, int toIndex)
+			throws ItemStorageException {
+		throw new UnsupportedOperationException("TODO");
+	}
 
 	@Override
 	public void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws ItemStorageException {

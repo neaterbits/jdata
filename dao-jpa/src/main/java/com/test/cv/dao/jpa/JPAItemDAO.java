@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 
 import com.test.cv.common.IOUtil;
@@ -52,7 +51,8 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 					+ " from ItemPhotoThumbnail ipt "
 				    + " left outer join ipt.photo ip "
 				    + " left outer join ip.categories ipc "
-					+ " where ipt.item.id = :itemId";
+					+ " where ipt.item.id = :itemId"
+					+ " order by ipt.index asc";
 		
 		@SuppressWarnings("unchecked")
 		final List<Object[]> found = entityManager.createQuery(query)
@@ -138,7 +138,6 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 		boolean ok = false;
 		
 		tx.begin();
-
 		
 		try {
 			final IFoundItem foundItem = getItem(userId, itemId);
@@ -194,6 +193,111 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 			entityManager.persist(thumbnail);
 
 			entityManager.persist(item);
+			
+			tx.commit();
+			
+			ok = true;
+		}
+		finally {
+			if (!ok) {
+				tx.rollback();
+			}
+		}
+	}
+	
+
+	@Override
+	public void movePhotoAndThumbnailForItem(String userId, String itemId, int photoNo, int toIndex)
+			throws ItemStorageException {
+		final EntityTransaction tx = entityManager.getTransaction();
+
+		if (photoNo == toIndex) {
+			throw new IllegalArgumentException("Moving to same pos");
+		}
+		
+		boolean ok = false;
+		
+		tx.begin();
+		
+		try {
+			final IFoundItem foundItem = getItem(userId, itemId);
+
+			if (foundItem == null) {
+				throw new ItemStorageException("No such item");
+			}
+			
+			final Item item = foundItem.getItem();
+
+			lockItem(item);
+			
+			final int iptCount = getNumThumbnails(userId, itemId);
+			
+			if (toIndex < 0 || toIndex >= iptCount) {
+				throw new IllegalArgumentException("toIndex out of range");
+			}
+			
+			final ItemPhotoThumbnail ipt = entityManager.createQuery(
+					"from ItemPhotoThumbnail ipt " 
+					+ " where ipt.item.id = :itemId "
+					+ "   and ipt.index = :photoNo", ItemPhotoThumbnail.class)
+					.setParameter("itemId", Long.parseLong(itemId))
+					.setParameter("photoNo", photoNo)
+					.getSingleResult();
+
+			// Avoid unique constraint error on item_id/index
+			// by temporarily setting to Integer.MAX_VALUE
+			entityManager.createQuery("update ItemPhotoThumbnail ipt "
+					+ " set ipt.index = :toIndex "
+					+ " where ipt.id = :id")
+			.setParameter("toIndex", Integer.MAX_VALUE)
+			.setParameter("id", ipt.getId())
+			.executeUpdate();
+		
+
+			
+			if (toIndex < photoNo) {
+				// Moving up in list, move all from toIndex down
+				entityManager.createQuery("update ItemPhotoThumbnail ipt "
+							+ " set ipt.index = ipt.index + 1 "
+							+ " where ipt.item.id = :itemId "
+							+ " and ipt.index >= :toIndex"
+							+ " and ipt.index < :photoNo"
+							)
+				.setParameter("itemId", Long.parseLong(itemId))
+				.setParameter("toIndex", toIndex)
+				.setParameter("photoNo", photoNo)
+				.executeUpdate();
+			}
+			else if (toIndex > photoNo) {
+				// Moving down in list, move all upto toIndex one step up
+				entityManager.createQuery("update ItemPhotoThumbnail ipt "
+						+ " set ipt.index = ipt.index - 1 "
+						+ " where ipt.item.id = :itemId "
+						+ " and ipt.index <= :toIndex"
+						+ " and ipt.index > :photoNo"
+						)
+			.setParameter("itemId", Long.parseLong(itemId))
+			.setParameter("toIndex", toIndex)
+			.setParameter("photoNo", photoNo)
+			.executeUpdate();
+			}
+			else {
+				throw new IllegalStateException();
+			}
+
+			// Update index of item in question via id since other entry now also has this index
+			
+			// does not always update for some reason
+			//ipt.setIndex(toIndex);
+			//entityManager.persist(ipt);
+			
+			// .. so just use update query
+			entityManager.createQuery("update ItemPhotoThumbnail ipt "
+						+ " set ipt.index = :toIndex "
+						+ " where ipt.id = :id")
+				.setParameter("toIndex", toIndex)
+				.setParameter("id", ipt.getId())
+				.executeUpdate();
 			
 			tx.commit();
 			
