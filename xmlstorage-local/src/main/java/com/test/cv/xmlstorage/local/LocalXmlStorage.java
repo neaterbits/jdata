@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.StandardOpenOption;
@@ -16,6 +17,7 @@ import com.test.cv.xmlstorage.api.BaseXMLStorage;
 import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.api.ItemFileType;
 import com.test.cv.xmlstorage.api.StorageException;
+import com.test.cv.xmlstorage.model.images.Images;
 
 public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 
@@ -149,6 +151,36 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 			}
 		}
 	}
+	
+	
+
+	@Override
+	protected InputStream getImageListInputForItem(String userId, String itemId, String fileName) throws StorageException {
+	
+		InputStream result;
+		try {
+			result = new FileInputStream(new File(itemDir(userId, itemId), fileName));
+		} catch (FileNotFoundException ex) {
+			result = null;
+		}
+		
+		return result;
+	}
+	
+	@Override
+	protected void storeImageListForItem(String userId, String itemId, String fileName, InputStream inputStream)
+			throws StorageException {
+		
+		final File file = new File(itemDir(userId, itemId), fileName);
+
+		try (OutputStream outputStream = new FileOutputStream(file)) {
+			writeAndCloseOutput(inputStream, outputStream);
+		} catch (FileNotFoundException ex) {
+			throw new StorageException("Failed to create imagelist output file", ex);
+		} catch (IOException ex) {
+			throw new StorageException("Exception when writing to output", ex);
+		}
+	}
 
 	@Override
 	protected ImageResult getImageFileForItem(String userId, String itemId, ItemFileType itemFileType, String fileName) throws StorageException {
@@ -202,6 +234,8 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 				final String photoFileName = allocateFileName(userId, itemId, ItemFileType.PHOTO, photoMimeType);
 
 				writeAndCloseOutput(photoInputStream, new FileOutputStream(itemFile(userId, itemId, ItemFileType.PHOTO, photoFileName)));
+
+				addToImageList(userId, itemId, thumbFileName, thumbnailMimeType, photoFileName, photoMimeType);
 				
 				ok = true;
 			}
@@ -232,6 +266,9 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 			
 			itemFile(userId, itemId, ItemFileType.THUMBNAIL, thumbFileName).delete();
 			itemFile(userId, itemId, ItemFileType.PHOTO, photoFileName).delete();
+			
+			// Remove from image as well
+			removeFromImageList(userId, itemId, thumbFileName, photoFileName);
 		}
 		finally {
 			releaseLock(userId, itemId, lock);

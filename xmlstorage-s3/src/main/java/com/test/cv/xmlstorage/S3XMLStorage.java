@@ -1,6 +1,7 @@
 package com.test.cv.xmlstorage;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.function.BiConsumer;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -30,6 +31,10 @@ public class S3XMLStorage extends BaseXMLStorage implements IItemStorage {
 	
 	private String getKey(String userId, String itemId, ItemFileType itemFileType, String fileName) {
 		return filesDir(userId, itemId, itemFileType) + "/" + fileName;
+	}
+
+	private String itemDir(String userId, String itemId) {
+		return userId + "/" + itemId;
 	}
 
 	private String filesDir(String userId, String itemId, ItemFileType itemFileType) {
@@ -111,20 +116,27 @@ public class S3XMLStorage extends BaseXMLStorage implements IItemStorage {
 	}
 
 	
-	private void deleteImageFile(String userId, String itemId, ItemFileType itemFileType, int fileNo) throws StorageException {
+	private String deleteImageFile(String userId, String itemId, ItemFileType itemFileType, int fileNo) throws StorageException {
 
 		final String fileName = getImageFileName(userId, itemId, itemFileType, fileNo);
 
 		deleteItemFile(userId, itemId, itemFileType, fileName);
+		
+		return fileName;
 	}
 
 	@Override
 	public void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException {
 		final ILock lock = obtainLock(userId, itemId);
-		
+
+		final String thumbFileName;
+		final String photoFileName;
+
 		try {
-			deleteImageFile(userId, itemId, ItemFileType.THUMBNAIL, photoNo);
-			deleteImageFile(userId, itemId, ItemFileType.PHOTO, photoNo);
+			thumbFileName = deleteImageFile(userId, itemId, ItemFileType.THUMBNAIL, photoNo);
+			photoFileName = deleteImageFile(userId, itemId, ItemFileType.PHOTO, photoNo);
+
+			removeFromImageList(userId, itemId, thumbFileName, photoFileName);
 		}
 		finally {
 			releaseLock(userId, itemId, lock);
@@ -167,6 +179,26 @@ public class S3XMLStorage extends BaseXMLStorage implements IItemStorage {
 
 	protected void deleteLock(String userId, String itemId) {
 		throw new UnsupportedOperationException("TODO");
+	}
+
+	
+	@Override
+	protected InputStream getImageListInputForItem(String userId, String itemId, String fileName) throws StorageException {
+		
+		final String path = itemDir(userId, itemId) + '/' + fileName;
+		
+		final S3Object s3Object = getS3Object(path);
+		
+		return s3Object.getObjectContent();
+	}
+	
+
+	@Override
+	protected void storeImageListForItem(String userId, String itemId, String fileName, InputStream inputStream)
+			throws StorageException {
+		final String path = itemDir(userId, itemId) + '/' + fileName;
+	
+		client.putObject(new PutObjectRequest(bucketName, xmlFilePath(userId, itemId), inputStream, null));
 	}
 
 	@Override

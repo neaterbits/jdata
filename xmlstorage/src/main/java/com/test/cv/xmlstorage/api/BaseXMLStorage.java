@@ -1,5 +1,7 @@
 package com.test.cv.xmlstorage.api;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -8,12 +10,33 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+
 import com.test.cv.common.IOUtil;
 import com.test.cv.common.ItemId;
-import com.test.cv.xmlstorage.api.IItemStorage.ImageResult;
+import com.test.cv.xmlstorage.model.images.Image;
+import com.test.cv.xmlstorage.model.images.ImageData;
+import com.test.cv.xmlstorage.model.images.Images;
 
 public abstract class BaseXMLStorage implements IItemStorage {
 
+	// TODO we cannot really store this as a file in S3 since does no read-after=write consistency on update
+	// would have to pass in former order on move operation
+	private static final String IMAGE_LIST_FILENAME = "images.xml";
+
+	private static final JAXBContext imagesContext;
+	
+	static {
+		try {
+			imagesContext = JAXBContext.newInstance(Images.class);
+		} catch (JAXBException ex) {
+			throw new IllegalStateException("Failed to init imagelist JAXB context", ex);
+		}
+	}
+	
 	protected interface ILock {
 		
 	}
@@ -63,43 +86,36 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		return String.valueOf(allocatedId) + '#' + mimeType.replace('/', '_') + '#' + itemId;
 	}
 
-	private static final class Entry implements Comparable<Entry> {
-		private final int index;
-		private final String fileName;
-
-		Entry(int index, String fileName) {
-			this.index = index;
-			this.fileName = fileName;
-		}
-
-		@Override
-		public int compareTo(Entry o) {
-			return Integer.compare(this.index, o.index);
-		}
-	}
-
-	protected final Entry [] getImageFilesSorted(String userId, String itemId, ItemFileType itemFileType) {
-
-		final String [] files = listFiles(userId, itemId, itemFileType);
+	protected final ImageData getImageData(Images images, int fileNo, ItemFileType itemFileType) {
+		final Image image = images.getImages().get(fileNo);
 		
-		final int [] indices = getIndicesUnsorted(files);
+		final ImageData imageData;
 		
-		// Must sort files according to indices, eg swap files both files and indices
-		final Entry [] entries = new Entry[files.length];
-		
-		for (int i = 0; i < files.length; ++ i) {
-			entries[i] = new Entry(indices[i], files[i]);
+		switch (itemFileType) {
+		case THUMBNAIL:
+			imageData = image.getThumb();
+			break;
+			
+		case PHOTO:
+			imageData = image.getPhoto();
+			break;
+			
+		default:
+			throw new IllegalArgumentException("Unknown item file type " + itemFileType);
 		}
 		
-		Arrays.sort(entries);
-		
-		return entries;
-	}
-
-	protected final String getImageFileName(String userId, String itemId, ItemFileType itemFileType, int fileNo) {
-		return getImageFilesSorted(userId, itemId, itemFileType)[fileNo].fileName;
+		return imageData;
 	}
 	
+	private final String getImageFileName(String userId, String itemId, ItemFileType itemFileType, Images images, int fileNo) {
+		
+		return getImageData(images, fileNo, itemFileType).getFileName();
+	}
+
+	protected final String getImageFileName(String userId, String itemId, ItemFileType itemFileType, int fileNo) throws StorageException {
+		return getImageData(getImageList(userId, itemId), fileNo, itemFileType).getFileName();
+	}
+
 	protected final String getMimeTypeFromFileName(String fileName) {
 		// Get mime-type by splitting on '#'
 		final String mimeType = getFileNameParts(fileName)[1].replace("_", "/");
@@ -166,9 +182,132 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		return thumbs.length;
 	}
 
+	private Images getOrCreateImageList(String userId, String itemId) throws StorageException {
+		Images images = getImageList(userId, itemId);
+		
+		if (images == null) {
+			images = new Images();
+			
+			images.setImages(new ArrayList<>());
+			
+			writeImageList(userId, itemId, images);
+		}
+		
+		return images;
+	}
+	
+	private void writeImageList(String userId, String itemId, Images images) throws StorageException{
+		final Marshaller mashaller;
+		try {
+			mashaller = imagesContext.createMarshaller();
+		} catch (JAXBException ex) {
+			throw new StorageException("Failed to create image list marshaller", ex);
+		}
+		
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+				mashaller.marshal(images, baos);
+	
+				final ByteArrayInputStream inputStream = new ByteArrayInputStream(baos.toByteArray());
+	
+				storeImageListForItem(userId, itemId, IMAGE_LIST_FILENAME, inputStream);
+			} catch (JAXBException ex) {
+			throw new StorageException("Failed to marshal image list file", ex);
+		} catch (IOException ex) {
+			throw new StorageException("Exception while outputing to image list file", ex);
+		}
+
+	}
+	
+	
+	protected final void addToImageList(String userId, String itemId,
+			String thumbnailFileName, String thumbnailMimeType,
+			String photoFileName, String photoMimeType) throws StorageException {
+		final Images imageList = getOrCreateImageList(userId, itemId);
+		
+		final Image image = new Image();
+		
+		image.setId(itemId);
+		image.setThumb(makeImageData(thumbnailFileName, thumbnailMimeType));
+		image.setPhoto(makeImageData(photoFileName, photoMimeType));
+		
+		imageList.getImages().add(image);
+
+		writeImageList(userId, itemId, imageList);
+	}
+
+	protected final void removeFromImageList(String userId, String itemId,
+				String thumbnailFileName, String photoFileName) throws StorageException {
+
+		final Images imageList = getImageList(userId, itemId);
+		
+		imageList.getImages().removeIf(image -> image.getId().equals(itemId)
+				&& image.getThumb().getFileName().equals(thumbnailFileName)
+				&& image.getPhoto().getFileName().equals(photoFileName));
+
+		writeImageList(userId, itemId, imageList);
+	}
+
+	private Images getImageList(String userId, String itemId) throws StorageException {
+		final Unmarshaller unmarshaller;
+		try {
+			unmarshaller = imagesContext.createUnmarshaller();
+		} catch (JAXBException ex) {
+			throw new StorageException("Failed to create image list unmarshaller", ex);
+		}
+
+		final Images images;
+
+		InputStream inputStream = getImageListInputForItem(userId, itemId, IMAGE_LIST_FILENAME);
+		
+		if (inputStream == null) {
+			images = null;
+		}
+		else {
+			try {
+				images = (Images)unmarshaller.unmarshal(inputStream);
+			} catch (JAXBException ex) {
+				throw new StorageException("Failed to parse image list", ex);
+			}
+			finally {
+				try {
+					inputStream.close();
+				} catch (IOException ex) {
+					throw new StorageException("Failed to close input stream", ex);
+				}
+			}
+		}
+
+		return images;
+	}
+	
+	
+
+	@Override
+	public final void movePhotoAndThumbnailForItem(String userId, String itemId, int photoNo, int toIndex) throws StorageException {
+
+		final Images imageList = getImageList(userId, itemId);
+		
+		if (photoNo == toIndex) {
+			throw new IllegalArgumentException("Moving to same pos");
+		}
+
+		final Image toMove = imageList.getImages().get(photoNo);
+
+		imageList.getImages().remove(photoNo);
+
+		// Add at to-index
+		imageList.getImages().add(toIndex, toMove);
+		
+		
+		writeImageList(userId, itemId, imageList);
+	}
+
+	protected abstract InputStream getImageListInputForItem(String userId, String itemId, String fileName) throws StorageException;
+
+	protected abstract void storeImageListForItem(String userId, String itemId, String fileName, InputStream inputStream) throws StorageException;
 
 	protected abstract ImageResult getImageFileForItem(String userId, String itemId, ItemFileType itemFileType, String fileName) throws StorageException;
-		
+	
 	@Override
 	public final List<ImageResult> getThumbnailsForItem(String userId, String itemId) throws StorageException {
 
@@ -177,12 +316,17 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		final List<ImageResult> result;
 		
 		try {
-			final Entry [] entries = getImageFilesSorted(userId, itemId, ItemFileType.THUMBNAIL);
-	
-			result = new ArrayList<>(entries.length);
+			final Images images = getOrCreateImageList(userId, itemId);
 			
-			for (Entry entry : entries) {
-				final ImageResult image = getImageFileForItem(userId, itemId, ItemFileType.THUMBNAIL, entry.fileName);
+			int fileNo = 0;
+			
+			result = new ArrayList<>(images.getImages().size());
+			
+			for (fileNo = 0; fileNo < images.getImages().size(); ++ fileNo) {
+
+				final String fileName = getImageFileName(userId, itemId, ItemFileType.THUMBNAIL, images, fileNo);
+			
+				final ImageResult image = getImageFileForItem(userId, itemId, ItemFileType.THUMBNAIL, fileName);
 				
 				result.add(image);
 			}
@@ -196,7 +340,9 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	
 	private ImageResult getImageFileForItem(String userId, String itemId, int photoNo, ItemFileType itemFileType) throws StorageException {
 
-		final String fileName = getImageFileName(userId, itemId, itemFileType, photoNo);
+		final Images images = getImageList(userId, itemId);
+
+		final String fileName = getImageFileName(userId, itemId, itemFileType, images, photoNo);
 		
 		return getImageFileForItem(userId, itemId, itemFileType, fileName);
 	}
@@ -232,7 +378,13 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		for (ItemId itemId : itemIds) {
 			if (getNumThumbnailsAndPhotosForItem(itemId.getUserId(), itemId.getItemId()) > 0) {
 				
-				final String fileName = getImageFileName(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, 0);
+				final Images imageList = getImageList(itemId.getUserId(), itemId.getItemId());
+				
+				if (imageList == null) {
+					throw new IllegalStateException("Should have had image list");
+				}
+				
+				final String fileName = getImageFileName(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, imageList, 0);
 
 				final ImageResult image = getImageFileForItem(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, fileName);
 				
@@ -244,5 +396,14 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	@Override
 	public int getNumFiles(String userId, String itemId, ItemFileType itemFileType) throws StorageException {
 		return listFiles(userId, itemId, itemFileType).length;
+	}
+	
+	protected final ImageData makeImageData(String fileName, String mimeType) {
+		final ImageData imageData = new ImageData();
+		
+		imageData.setFileName(fileName);
+		imageData.setMimeType(mimeType);
+		
+		return imageData;
 	}
 }
