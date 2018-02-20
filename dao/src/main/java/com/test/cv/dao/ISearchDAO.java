@@ -7,7 +7,7 @@ import com.test.cv.model.Item;
  * DAO for generic search over items in storage, returns paged results
  */
 
-public interface ISearchDAO {
+public interface ISearchDAO extends AutoCloseable {
 
 	/**
 	 * Search for items using a freetext and a number for criteria to match

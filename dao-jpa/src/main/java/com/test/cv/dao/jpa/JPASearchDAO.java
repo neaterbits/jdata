@@ -3,6 +3,7 @@ package com.test.cv.dao.jpa;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
@@ -18,6 +19,10 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 	public JPASearchDAO(String persistenceUnitName) {
 		super(persistenceUnitName);
 	}
+	
+	public JPASearchDAO(EntityManagerFactory entityManagerFactory) {
+		super(entityManagerFactory);
+	}
 
 	// Search for criteria on all attributes on a particular type
 	@Override
@@ -31,26 +36,37 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			throw new IllegalArgumentException("no entity for type " + type.getName());
 		}
 
-		final StringBuilder whereSb = new StringBuilder(" where ");
+		final String whereClause;
+		final List<Object> params;
+		
+		if (criteria.length != 0) {
+			final StringBuilder whereSb = new StringBuilder(" where ");
+	
+			params = constructWhereClause(criteria, whereSb, entity);
+	
+			whereClause = whereSb.toString();
+		}
+		else {
+			whereClause = "";
+			params = null;
+		}
 
-		final List<Object> params = constructWhereClause(criteria, whereSb, entity);
+		final TypedQuery<Long> countQuery = entityManager.createQuery("select count(item.id) from " + entity.getName() + " item" + whereClause, Long.class);
+		final TypedQuery<Long> idQuery   = entityManager.createQuery("select item.id from " + entity.getName() + " item" + whereClause, Long.class);
+		final TypedQuery<Item> itemQuery = entityManager.createQuery("from " + entity.getName() + " item" + whereClause, Item.class);
 
-		final String whereClause = whereSb.toString();
-
-		final TypedQuery<Long> countQuery = entityManager.createQuery("select count(item.id) from item Item" + whereClause, Long.class);
-		final TypedQuery<Long> idQuery   = entityManager.createQuery("select item.id from item Item" + whereClause, Long.class);
-		final TypedQuery<Item> itemQuery = entityManager.createQuery("from Item " + whereClause, Item.class);
-
-		addParams(countQuery, params);
-		addParams(idQuery, params);
-		addParams(itemQuery, params);
+		if (params != null) {
+			addParams(countQuery, params);
+			addParams(idQuery, params);
+			addParams(itemQuery, params);
+		}
 
 		return new JPASearchCursor(countQuery, idQuery, itemQuery);
 	}
 
 	private static void addParams(TypedQuery<?> query, List<Object> params) {
 		for (int i = 0; i < params.size(); ++ i) {
-			query.setParameter(i, params.get(i));
+			query.setParameter("param" + i, params.get(i));
 		}
 	}
 	
@@ -74,16 +90,16 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			}
 			
 			if (i > 0) {
-				sb.append(" and");
+				sb.append(" and ");
 			}
 			
-			sb.append(' ').append(itemVar).append(',').append(entity.getName());
+			sb.append(itemVar).append('.').append(attrName);
 
 			if (c instanceof SingleValueCriteria<?>) {
 				
 				final SingleValueCriteria<?> sc = (SingleValueCriteria<?>)c;
 				
-				sb.append(" = ").append(":param").append(paramNo ++);
+				sb.append(' ').append(sc.getComparisonOperator().getMathString()).append(":param").append(paramNo ++);
 				
 				params.add(sc.getValue());
 			}
