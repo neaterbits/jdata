@@ -3,6 +3,7 @@ package com.test.cv.dao.xml;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -50,19 +51,33 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		
 		final IFoundItem found;
 		
-		try (InputStream inputStream = xmlStorage.getXMLForItem(userId, itemId)) {
-		
-			final Item item = (Item)unmarshaller.unmarshal(inputStream);
-
-			found = new XMLFoundItem(item, itemId);
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException("Exception on close", ex);
-		}
-		catch (StorageException ex) {
+		InputStream inputStream;
+		try {
+			inputStream = xmlStorage.getXMLForItem(userId, itemId);
+		} catch (StorageException ex) {
 			throw new ItemStorageException("Failed to retrieve item", ex);
-		} catch (JAXBException ex) {
-			throw new IllegalStateException("Failed to unmarshall XML for ID " + itemId, ex);
+		}
+		
+		if (inputStream == null) {
+			found = null;
+		}
+		else {
+			try {
+			
+				final Item item = (Item)unmarshaller.unmarshal(inputStream);
+	
+				found = new XMLFoundItem(item, itemId);
+			} catch (JAXBException ex) {
+				throw new IllegalStateException("Failed to unmarshall XML for ID " + itemId, ex);
+			}
+			finally {
+				try {
+					inputStream.close();
+				}
+				catch (IOException ex) {
+					throw new IllegalStateException("Exception on close", ex);
+				}
+			}
 		}
 
 		return found;
@@ -72,38 +87,45 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	public List<IFoundItemPhotoThumbnail> getPhotoThumbnails(String userId, String itemId) throws ItemStorageException {
 
 		// Thumbnails are stored as separate files, list directory
-		List<ImageResult> images;
-		final List<IFoundItemPhotoThumbnail> result;
+		List<ImageResult> images = null;
+		List<IFoundItemPhotoThumbnail> result = null;
 		
 		try {
 			images = xmlStorage.getThumbnailsForItem(userId, itemId);
 		} catch (StorageException ex) {
-			throw new ItemStorageException("Failed to get thumbnails for " + itemId, ex);
-		}
-		
-		try {
-			result = new ArrayList<>(images.size());
-			
-			for (int i = 0; i < images.size(); ++ i) {
-				final ImageResult image = images.get(i);
-				
-				final byte [] data = IOUtil.readAll(image.inputStream);
-				final String id = String.valueOf(i);
-				
-				// TODO categories
-				final List<ItemPhotoCategory> categories = new ArrayList<>();
-
-				result.add(new XMLFoundItemPhotoThumbnail(id, itemId, i, image.mimeType, categories, data));
+			if (!xmlStorage.itemExists(userId, itemId)) {
+				result = Collections.emptyList();
+			}
+			else {
+				throw new ItemStorageException("Failed to get thumbnails for " + itemId, ex);
 			}
 		}
-		catch (IOException ex) {
-			throw new ItemStorageException("Failed to retrieve thumbnail image", ex);
-		}
-		finally {
-			for (ImageResult image : images) {
-				try {
-					image.inputStream.close();
-				} catch (IOException e) {
+		
+		if (result == null) {
+			try {
+				result = new ArrayList<>(images.size());
+				
+				for (int i = 0; i < images.size(); ++ i) {
+					final ImageResult image = images.get(i);
+					
+					final byte [] data = IOUtil.readAll(image.inputStream);
+					final String id = String.valueOf(i);
+					
+					// TODO categories
+					final List<ItemPhotoCategory> categories = new ArrayList<>();
+	
+					result.add(new XMLFoundItemPhotoThumbnail(id, itemId, i, image.mimeType, categories, data));
+				}
+			}
+			catch (IOException ex) {
+				throw new ItemStorageException("Failed to retrieve thumbnail image", ex);
+			}
+			finally {
+				for (ImageResult image : images) {
+					try {
+						image.inputStream.close();
+					} catch (IOException e) {
+					}
 				}
 			}
 		}

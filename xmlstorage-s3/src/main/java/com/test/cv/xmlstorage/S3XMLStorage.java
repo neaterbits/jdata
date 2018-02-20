@@ -224,4 +224,9 @@ public class S3XMLStorage extends BaseXMLStorage implements IItemStorage {
 		
 		super.retrieveThumbnails(itemIds, consumer);
 	}
+
+	@Override
+	public boolean itemExists(String userId, String itemId) {
+		throw new UnsupportedOperationException("TODO");
+	}
 }

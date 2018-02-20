@@ -28,7 +28,7 @@ public abstract class Item {
 	@OneToMany(cascade={CascadeType.REMOVE})
 	private List<ItemPhotoThumbnail> thumbnails;
 
-	@OneToMany(cascade={CascadeType.REMOVE})
+	@OneToMany // Cascade deleted through thumbnail (cascade={CascadeType.REMOVE})
 	private List<ItemPhoto> photos;
 
 	public long getId() {

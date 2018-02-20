@@ -56,4 +56,6 @@ public interface IItemStorage {
 	void movePhotoAndThumbnailForItem(String userId, String itemId, int photoNo, int toIndex) throws StorageException;
 	
 	int getNumFiles(String userId, String itemId, ItemFileType itemFileType) throws StorageException;
+
+	boolean itemExists(String userId, String itemId);
 }

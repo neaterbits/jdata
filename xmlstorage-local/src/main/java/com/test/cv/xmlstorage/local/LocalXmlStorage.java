@@ -56,12 +56,19 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 	protected String[] listFiles(String userId, String itemId, ItemFileType itemFileType) {
 		
 		final File dir = new File(itemDir(userId, itemId), itemFileType.getDirectoryName());
+
+		final String [] result;
 		
 		if (!dir.exists() || !dir.isDirectory()) {
-			throw new IllegalStateException("No such directory : " + dir);
+			// probably was deleted
+			result = new String[0];
+		}
+		else {
+			result = dir.list();
 		}
 		
-		return dir.list();
+		
+		return result;
 	}
 	
 	private static class LocalFileLock implements ILock {
@@ -100,11 +107,15 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 
 	@Override
 	public InputStream getXMLForItem(String userId, String itemId) throws StorageException {
+
+		InputStream inputStream = null;
 		try {
-			return new FileInputStream(getXMLFile(userId, itemId));
+			inputStream = new FileInputStream(getXMLFile(userId, itemId));
 		} catch (FileNotFoundException ex) {
-			throw new StorageException("No such file", ex);
+			inputStream = null;
 		}
+
+		return inputStream;
 	}
 
 	@Override
@@ -273,5 +284,10 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 		finally {
 			releaseLock(userId, itemId, lock);
 		}
+	}
+
+	@Override
+	public boolean itemExists(String userId, String itemId) {
+		return itemDir(userId, itemId).exists();
 	}
 }

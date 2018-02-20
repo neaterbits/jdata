@@ -15,6 +15,7 @@ import com.test.cv.dao.IFoundItemPhotoThumbnail;
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.model.ItemPhoto;
+import com.test.cv.model.ItemPhotoCategory;
 import com.test.cv.model.items.Snowboard;
 import com.test.cv.model.items.SnowboardProfile;
 
@@ -384,6 +385,27 @@ public abstract class ItemDAOTest extends TestCase {
 			 assertThat(itemDAO.getNumThumbnails(userId, itemId)).isEqualTo(2);
 			 assertThat(itemDAO.getNumPhotos(userId, itemId)).isEqualTo(2);
 
+		}
+	}
+	
+	public void testDeleteItem() throws Exception {
+		final Snowboard snowboard = makeSnowboard();
+		
+		final String userId = "user1";
+		final String itemId;
+		try (IItemDAO itemDAO = getItemDAO()) {
+			 itemId = itemDAO.addItem(userId, snowboard);
+			 addPhotoAndThumbnail(itemDAO, userId, itemId, "thumbnail1".getBytes(), "photo1".getBytes());
+			 addPhotoAndThumbnail(itemDAO, userId, itemId, "thumbnail2".getBytes(), "photo2".getBytes());
+			 addPhotoAndThumbnail(itemDAO, userId, itemId, "thumbnail3".getBytes(), "photo3".getBytes());
+			 addPhotoAndThumbnail(itemDAO, userId, itemId, "thumbnail4".getBytes(), "photo4".getBytes());
+
+			 itemDAO.deleteItem(userId, itemId);
+			 
+			 assertThat(itemDAO.getPhotoThumbnails(userId, itemId).isEmpty()).isTrue();
+			 assertThat(itemDAO.getNumThumbnails(userId, itemId)).isEqualTo(0);
+			 assertThat(itemDAO.getNumPhotos(userId, itemId)).isEqualTo(0);
+			 assertThat(itemDAO.getItem(userId, itemId)).isEqualTo(null);
 		}
 	}
 }

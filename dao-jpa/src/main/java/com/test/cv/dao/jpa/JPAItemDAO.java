@@ -199,7 +199,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 			ok = true;
 		}
 		finally {
-			if (!ok) {
+			if (!ok && tx.isActive()) {
 				tx.rollback();
 			}
 		}
@@ -304,7 +304,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 			ok = true;
 		}
 		finally {
-			if (!ok) {
+			if (!ok && tx.isActive()) {
 				tx.rollback();
 			}
 		}
@@ -372,7 +372,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 			ok = true;
 		}
 		finally {
-			if (!ok) {
+			if (!ok && tx.isActive()) {
 				tx.rollback();
 			}
 		}
@@ -381,8 +381,41 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 
 	@Override
 	public void deleteItem(String userId, String itemId) {
-		// TODO Auto-generated method stub
+		final Item item = getItem(userId, itemId).getItem();
 		
+		final EntityTransaction tx = entityManager.getTransaction();
+		
+		boolean ok = false;
+		
+		tx.begin();
+		
+		try {
+			lockItem(item);
+			
+			// Cascade should remove thumbnails and photos
+			// TODO causes constraint error, delete manually
+			// entityManager.remove(item);
+			
+			final List<ItemPhotoThumbnail> thumbnails = entityManager.createQuery("from ItemPhotoThumbnail ipt where ipt.item.id = :itemId", ItemPhotoThumbnail.class)
+				.setParameter("itemId", Long.parseLong(itemId))
+				.getResultList();
+			
+			for (ItemPhotoThumbnail thumbnail : thumbnails) {
+				// Cascades to photos
+				entityManager.remove(thumbnail);
+			}
+			
+			entityManager.remove(item);
+			
+			tx.commit();
+			
+			ok = true;
+		}
+		finally {
+			if (!ok && tx.isActive()) {
+				tx.rollback();
+			}
+		}
 	}
 
 	@Override
