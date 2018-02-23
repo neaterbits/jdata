@@ -1,6 +1,9 @@
 package com.test.cv.model;
 
 import java.beans.PropertyDescriptor;
+import java.math.BigDecimal;
+
+import com.test.cv.model.attributes.AttributeType;
 
 // A searchable attribute for an item and accessor methods
 public final class ItemAttribute {
@@ -28,5 +31,26 @@ public final class ItemAttribute {
 	
 	public String getName() {
 		return property.getName();
+	}
+	
+	public AttributeType getAttributeType() {
+		final Class<?> propertyType = property.getPropertyType();
+		
+		final AttributeType attributeType;
+		
+		if (propertyType.equals(String.class)) {
+			attributeType = AttributeType.STRING;
+		}
+		else if (propertyType.equals(Integer.class) || propertyType.equals(int.class)) {
+			attributeType = AttributeType.INTEGER;
+		}
+		else if (propertyType.equals(BigDecimal.class)) {
+			attributeType = AttributeType.DECIMAL;
+		}
+		else {
+			throw new IllegalStateException("Unknown property type " + propertyType + " of attribute " + getName() + " of " + itemType.getSimpleName());
+		}
+
+		return attributeType;
 	}
 }

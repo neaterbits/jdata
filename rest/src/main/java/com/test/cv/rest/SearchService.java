@@ -3,6 +3,7 @@ package com.test.cv.rest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,7 +15,16 @@ import com.test.cv.dao.IFoundItem;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
 import com.test.cv.dao.ItemStorageException;
+import com.test.cv.dao.criteria.ComparisonOperator;
 import com.test.cv.dao.criteria.Criterium;
+import com.test.cv.dao.criteria.DecimalCriteria;
+import com.test.cv.dao.criteria.DecimalRangeCriteria;
+import com.test.cv.dao.criteria.IntegerCriteria;
+import com.test.cv.dao.criteria.IntegerRangeCriteria;
+import com.test.cv.dao.criteria.StringCriteria;
+import com.test.cv.model.ItemAttribute;
+import com.test.cv.model.items.ItemTypes;
+import com.test.cv.model.items.TypeInfo;
 
 public class SearchService extends BaseService {
 	
@@ -42,12 +52,13 @@ public class SearchService extends BaseService {
 		
 		final Criterium [] daoCriteria; 
 		if (criteria != null) {
-			daoCriteria = new Criterium[criteria.length];
+			daoCriteria = convertCriteria(criteria);
 		}
 		else {
 			daoCriteria = null;
 		}
 		
+		// TODO support types
 		final ISearchCursor cursor = getSearchDAO(request).search(null, daoCriteria);
 		
 		final int totalMatchCount = cursor.getTotalMatchCount();
@@ -89,6 +100,85 @@ public class SearchService extends BaseService {
 		result.setItems(items);
 
 		return result;
+	}
+	
+	private static Criterium [] convertCriteria(SearchCriterium [] searchCriteria) {
+		final Criterium [] criteria = new Criterium[searchCriteria.length];
+		
+		for (int i = 0; i < searchCriteria.length; ++ i) {
+			criteria[i] = convertCriterium(searchCriteria[i]);
+		}
+
+		return criteria;
+	}
+	
+	private static Criterium convertCriterium(SearchCriterium searchCriterium) {
+		
+		// Figure out the type first
+		final String typeName = searchCriterium.getType();
+		
+		// This is a Java type, look it up from the types list
+		final TypeInfo type = ItemTypes.getTypeByName(typeName);
+		
+		if (type == null) {
+			throw new IllegalArgumentException("Unknown type " + typeName);
+		}
+		
+		// Find the attribute
+		final ItemAttribute attribute = type.getAttributes().getByName(searchCriterium.getAttribute());
+		
+		if (attribute == null) {
+			throw new IllegalArgumentException("Unknown attribute " + searchCriterium.getAttribute() + " from type " + typeName);
+		}
+
+		final Criterium criterium;
+		
+		final SearchRange range = searchCriterium.getRange();
+		if (range != null) {
+			
+			switch (attribute.getAttributeType()) {
+			case STRING:
+				throw new UnsupportedOperationException("Range query for strings");
+				
+			case INTEGER:
+				criterium = new IntegerRangeCriteria(
+						attribute,
+						(Integer)range.getLower(), range.includeLower(),
+						(Integer)range.getUpper(), range.includeUpper());
+				break;
+				
+			case DECIMAL:
+				criterium = new DecimalRangeCriteria(
+						attribute,
+						(BigDecimal)range.getLower(), range.includeLower(),
+						(BigDecimal)range.getUpper(), range.includeUpper());
+				break;
+				
+			default:
+				throw new UnsupportedOperationException("Unknown attribute type " + attribute.getAttributeType());
+			}
+		}
+		else {
+			switch (attribute.getAttributeType()) {
+			case STRING:
+				criterium = new StringCriteria(attribute, (String)searchCriterium.getValue(), ComparisonOperator.EQUALS);
+				break;
+
+			case INTEGER:
+				criterium = new IntegerCriteria(attribute, (Integer)searchCriterium.getValue(), ComparisonOperator.EQUALS);
+				break;
+
+			case DECIMAL:
+				criterium = new DecimalCriteria(attribute, (BigDecimal)searchCriterium.getValue(), ComparisonOperator.EQUALS);
+				break;
+
+			default:
+				throw new UnsupportedOperationException("Unknown attribute type " + attribute.getAttributeType());
+			}
+			
+		}
+
+		return criterium;
 	}
 	
 	// Get item thumbnails as one big compressed JPEG? Or as a stream of JPEGs?
