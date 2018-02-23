@@ -1,5 +1,7 @@
 package com.test.cv.dao.test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -15,11 +17,8 @@ import com.test.cv.dao.IFoundItemPhotoThumbnail;
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.model.ItemPhoto;
-import com.test.cv.model.ItemPhotoCategory;
 import com.test.cv.model.items.Snowboard;
 import com.test.cv.model.items.SnowboardProfile;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 import junit.framework.TestCase;
 

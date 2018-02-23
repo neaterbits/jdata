@@ -10,8 +10,9 @@ import javax.persistence.metamodel.EntityType;
 
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
+import com.test.cv.dao.criteria.Criterium;
 import com.test.cv.dao.criteria.RangeCriteria;
-import com.test.cv.dao.criteria.Criterium;import com.test.cv.dao.criteria.SingleValueCriteria;
+import com.test.cv.dao.criteria.SingleValueCriteria;
 import com.test.cv.model.Item;
 
 public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {

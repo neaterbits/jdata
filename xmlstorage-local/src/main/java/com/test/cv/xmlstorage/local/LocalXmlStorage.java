@@ -17,7 +17,6 @@ import com.test.cv.xmlstorage.api.BaseXMLStorage;
 import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.api.ItemFileType;
 import com.test.cv.xmlstorage.api.StorageException;
-import com.test.cv.xmlstorage.model.images.Images;
 
 public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 

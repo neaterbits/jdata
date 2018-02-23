@@ -1,5 +1,7 @@
 package com.test.cv.dao.test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -14,8 +16,6 @@ import com.test.cv.model.items.Snowboard;
 import com.test.cv.model.items.SnowboardProfile;
 
 import junit.framework.TestCase;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class SearchDAOTest extends TestCase {
 

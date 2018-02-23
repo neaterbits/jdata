@@ -8,16 +8,16 @@ import java.util.List;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.test.cv.model.cv.CV;
-import com.test.cv.model.cv.Custom;
 import com.test.cv.model.cv.CVItem;
+import com.test.cv.model.cv.Custom;
 import com.test.cv.model.cv.Job;
 import com.test.cv.model.cv.Language;
 import com.test.cv.model.cv.Name;
 import com.test.cv.model.cv.Personalia;
 import com.test.cv.model.cv.Skill;
 import com.test.cv.model.cv.Work;
-import com.test.cv.model.text.Translation;
 import com.test.cv.model.text.Text;
+import com.test.cv.model.text.Translation;
 import com.test.cv.xml.CVType;
 import com.test.cv.xml.CustomType;
 import com.test.cv.xml.DescriptionType;

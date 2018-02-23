@@ -1,7 +1,5 @@
 package com.test.cv.rest;
 
-import java.io.File;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

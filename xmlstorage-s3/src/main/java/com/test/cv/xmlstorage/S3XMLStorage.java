@@ -1,7 +1,6 @@
 package com.test.cv.xmlstorage;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.function.BiConsumer;
 
 import com.amazonaws.auth.AWSCredentialsProvider;

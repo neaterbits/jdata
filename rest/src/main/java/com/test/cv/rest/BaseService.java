@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.xml.XMLItemDAO;
 import com.test.cv.model.cv.Language;
-import com.test.cv.rest.BaseService.Storage;
 import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.local.LocalXmlStorage;
 

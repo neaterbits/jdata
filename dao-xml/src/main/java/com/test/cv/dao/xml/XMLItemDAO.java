@@ -25,8 +25,8 @@ import com.test.cv.model.ItemPhoto;
 import com.test.cv.model.ItemPhotoCategory;
 import com.test.cv.model.items.Snowboard;
 import com.test.cv.xmlstorage.api.IItemStorage;
-import com.test.cv.xmlstorage.api.ItemFileType;
 import com.test.cv.xmlstorage.api.IItemStorage.ImageResult;
+import com.test.cv.xmlstorage.api.ItemFileType;
 import com.test.cv.xmlstorage.api.StorageException;
 
 public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {

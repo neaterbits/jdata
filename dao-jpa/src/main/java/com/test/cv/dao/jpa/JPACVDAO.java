@@ -7,10 +7,10 @@ import javax.persistence.Query;
 import com.test.cv.dao.CVStorageException;
 import com.test.cv.dao.ICVDAO;
 import com.test.cv.model.cv.CV;
+import com.test.cv.model.cv.CVItem;
 import com.test.cv.model.cv.Custom;
 import com.test.cv.model.cv.DescribedItem;
 import com.test.cv.model.cv.Education;
-import com.test.cv.model.cv.CVItem;
 import com.test.cv.model.cv.ItemVisitor;
 import com.test.cv.model.cv.Job;
 import com.test.cv.model.cv.Language;
@@ -20,8 +20,8 @@ import com.test.cv.model.cv.Skill;
 import com.test.cv.model.cv.SkillCategory;
 import com.test.cv.model.cv.SkillsAquiringItem;
 import com.test.cv.model.cv.Work;
-import com.test.cv.model.text.Translation;
 import com.test.cv.model.text.Text;
+import com.test.cv.model.text.Translation;
 
 public class JPACVDAO extends JPABaseDAO implements ICVDAO {
 	

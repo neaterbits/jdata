@@ -2,8 +2,6 @@ package com.test.cv.model.items;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity(name="snowboard")
