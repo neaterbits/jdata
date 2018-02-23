@@ -9,7 +9,7 @@ import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
 import com.test.cv.dao.criteria.ComparisonOperator;
-import com.test.cv.dao.criteria.DecimalCriteria;
+import com.test.cv.dao.criteria.DecimalCriterium;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.items.Snowboard;
@@ -73,7 +73,7 @@ public abstract class SearchDAOTest extends TestCase {
 			 
 			assertThat(widthAttribute).isNotNull();
 			 
-			final DecimalCriteria widthCriteria = new DecimalCriteria(widthAttribute, new BigDecimal("30.4"), ComparisonOperator.GREATER_THAN);
+			final DecimalCriterium widthCriteria = new DecimalCriterium(widthAttribute, new BigDecimal("30.4"), ComparisonOperator.GREATER_THAN);
 			
 			final ISearchCursor search = searchDAO.search(Snowboard.class, widthCriteria);
 			final List<String> itemIds = search.getItemIDs(0, Integer.MAX_VALUE);
@@ -91,7 +91,7 @@ public abstract class SearchDAOTest extends TestCase {
 			 
 			assertThat(widthAttribute).isNotNull();
 			 
-			final DecimalCriteria widthCriteria = new DecimalCriteria(widthAttribute, new BigDecimal("32.8"), ComparisonOperator.NOT_EQUALS);
+			final DecimalCriterium widthCriteria = new DecimalCriterium(widthAttribute, new BigDecimal("32.8"), ComparisonOperator.NOT_EQUALS);
 			
 			final ISearchCursor search = searchDAO.search(Snowboard.class, widthCriteria);
 			final List<String> itemIds = search.getItemIDs(0, Integer.MAX_VALUE);

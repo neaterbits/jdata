@@ -17,11 +17,11 @@ import com.test.cv.dao.ISearchDAO;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.dao.criteria.ComparisonOperator;
 import com.test.cv.dao.criteria.Criterium;
-import com.test.cv.dao.criteria.DecimalCriteria;
-import com.test.cv.dao.criteria.DecimalRangeCriteria;
-import com.test.cv.dao.criteria.IntegerCriteria;
-import com.test.cv.dao.criteria.IntegerRangeCriteria;
-import com.test.cv.dao.criteria.StringCriteria;
+import com.test.cv.dao.criteria.DecimalCriterium;
+import com.test.cv.dao.criteria.DecimalRangeCriterium;
+import com.test.cv.dao.criteria.IntegerCriterium;
+import com.test.cv.dao.criteria.IntegerRangeCriterium;
+import com.test.cv.dao.criteria.StringCriterium;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.TypeInfo;
@@ -141,14 +141,14 @@ public class SearchService extends BaseService {
 				throw new UnsupportedOperationException("Range query for strings");
 				
 			case INTEGER:
-				criterium = new IntegerRangeCriteria(
+				criterium = new IntegerRangeCriterium(
 						attribute,
 						(Integer)range.getLower(), range.includeLower(),
 						(Integer)range.getUpper(), range.includeUpper());
 				break;
 				
 			case DECIMAL:
-				criterium = new DecimalRangeCriteria(
+				criterium = new DecimalRangeCriterium(
 						attribute,
 						(BigDecimal)range.getLower(), range.includeLower(),
 						(BigDecimal)range.getUpper(), range.includeUpper());
@@ -161,15 +161,15 @@ public class SearchService extends BaseService {
 		else {
 			switch (attribute.getAttributeType()) {
 			case STRING:
-				criterium = new StringCriteria(attribute, (String)searchCriterium.getValue(), ComparisonOperator.EQUALS);
+				criterium = new StringCriterium(attribute, (String)searchCriterium.getValue(), ComparisonOperator.EQUALS);
 				break;
 
 			case INTEGER:
-				criterium = new IntegerCriteria(attribute, (Integer)searchCriterium.getValue(), ComparisonOperator.EQUALS);
+				criterium = new IntegerCriterium(attribute, (Integer)searchCriterium.getValue(), ComparisonOperator.EQUALS);
 				break;
 
 			case DECIMAL:
-				criterium = new DecimalCriteria(attribute, (BigDecimal)searchCriterium.getValue(), ComparisonOperator.EQUALS);
+				criterium = new DecimalCriterium(attribute, (BigDecimal)searchCriterium.getValue(), ComparisonOperator.EQUALS);
 				break;
 
 			default:
