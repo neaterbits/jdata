@@ -308,6 +308,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 
 	protected abstract ImageResult getImageFileForItem(String userId, String itemId, ItemFileType itemFileType, String fileName) throws StorageException;
 	
+	
 	@Override
 	public final List<ImageResult> getThumbnailsForItem(String userId, String itemId) throws StorageException {
 
@@ -347,6 +348,31 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		return getImageFileForItem(userId, itemId, itemFileType, fileName);
 	}
 
+
+	@Override
+	public final ImageMetaData getThumbnailMetaDataForItem(String userId, String itemId, int photoNo) throws StorageException {
+		final ILock lock = obtainLock(userId, itemId);
+
+		final ImageMetaData metaData;
+		
+		try {
+			final Images imageList = getImageList(userId, itemId);
+			
+			if (imageList == null || imageList.getImages().size() <= photoNo) {
+				metaData = null;
+			}
+			else {
+				final ImageData imageData = imageList.getImages().get(photoNo).getThumb();
+				
+				metaData = new ImageMetaData(imageData.getMimeType(), imageData.getSize(), imageData.getWidth(), imageData.getHeight());
+			}
+		}
+		finally {
+			releaseLock(userId, itemId, lock);
+		}
+
+		return metaData;
+	}
 
 	@Override
 	public final ImageResult getThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException {

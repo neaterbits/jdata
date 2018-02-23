@@ -5,7 +5,7 @@ import java.util.List;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttributeValue;
 
-public interface IFoundItem {
+public interface IFoundItem extends SearchItem {
 
 	/**
 	 * Retrieve all attributes as generic list
@@ -21,17 +21,4 @@ public interface IFoundItem {
 	 */
 	Item getItem();
 	
-	/**
-	 * String ID to pass along to REST service
-	 * 
-	 * @return item ID
-	 */
-	String getItemId();
-	
-	/**
-	 * Title to be displayed in listings
-	 * 
-	 * @return title
-	 */
-	String getTitle();
 }

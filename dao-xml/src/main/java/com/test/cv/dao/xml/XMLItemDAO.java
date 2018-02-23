@@ -25,6 +25,7 @@ import com.test.cv.model.ItemPhoto;
 import com.test.cv.model.ItemPhotoCategory;
 import com.test.cv.model.items.Snowboard;
 import com.test.cv.xmlstorage.api.IItemStorage;
+import com.test.cv.xmlstorage.api.IItemStorage.ImageMetaData;
 import com.test.cv.xmlstorage.api.IItemStorage.ImageResult;
 import com.test.cv.xmlstorage.api.ItemFileType;
 import com.test.cv.xmlstorage.api.StorageException;
@@ -65,10 +66,20 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 			try {
 			
 				final Item item = (Item)unmarshaller.unmarshal(inputStream);
+				
+				final ImageMetaData thumb = xmlStorage.getThumbnailMetaDataForItem(userId, itemId, 0);
 	
-				found = new XMLFoundItem(item, itemId);
+				found = new XMLFoundItem(
+						item,
+						itemId,
+						thumb != null ? thumb.width : null,
+						thumb != null ? thumb.height : null);
+
 			} catch (JAXBException ex) {
 				throw new IllegalStateException("Failed to unmarshall XML for ID " + itemId, ex);
+			}
+			catch (StorageException ex) {
+				throw new ItemStorageException("Failed to get thumb metadata", ex);
 			}
 			finally {
 				try {

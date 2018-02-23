@@ -31,6 +31,13 @@ public abstract class Item {
 	@OneToMany // Cascade deleted through thumbnail (cascade={CascadeType.REMOVE})
 	private List<ItemPhoto> photos;
 
+	// Cached values for thumb width and height, only applicble for JPA
+	@Column
+	private Integer thumbWidth;
+	
+	@Column
+	private Integer thumbHeight;
+	
 	public long getId() {
 		return id;
 	}
@@ -45,5 +52,21 @@ public abstract class Item {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	public Integer getThumbWidth() {
+		return thumbWidth;
+	}
+
+	public void setThumbWidth(Integer thumbWidth) {
+		this.thumbWidth = thumbWidth;
+	}
+
+	public Integer getThumbHeight() {
+		return thumbHeight;
+	}
+
+	public void setThumbHeight(Integer thumbHeight) {
+		this.thumbHeight = thumbHeight;
 	}
 }

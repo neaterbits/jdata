@@ -1,8 +1,10 @@
 package com.test.cv.rest;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -94,7 +96,7 @@ public class SearchService extends BaseService {
 		for (int i = 0; i < numFound; ++ i) {
 			final IFoundItem foundItem = found.get(i);
 
-			items[i] = new SearchItemResult(foundItem.getItemId(), foundItem.getTitle());
+			items[i] = new SearchItemResult(foundItem.getItemId(), foundItem.getTitle(), foundItem.getThumbWidth(), foundItem.getThumbHeight());
 		}
 		
 		result.setItems(items);
@@ -180,6 +182,45 @@ public class SearchService extends BaseService {
 
 		return criterium;
 	}
+	
+	public byte[] searchReturnCompressed(String freeText, String [] types, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, HttpServletRequest request) {
+		// Return result as a compressed array (non JSON) of
+		// - IDs, in order
+		// titles, in order
+		// thumbnail sizes (byte width, byte height), in order
+		
+		final SearchResult searchResult = this.search(freeText, types, criteria, pageNo, itemsPerPage, request);
+
+		// Add information to compression stream
+		
+		// TODO compress
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		
+		final OutputStream outputStream = baos; // TODO compression
+		
+		final DataOutputStream dataOut = new DataOutputStream(outputStream);
+		
+		try {
+			for (SearchItemResult item : searchResult.getItems()) {
+				dataOut.writeUTF(item.getId());
+			}
+			
+			for (SearchItemResult item : searchResult.getItems()) {
+				dataOut.writeUTF(item.getTitle());
+			}
+			
+			for (SearchItemResult item : searchResult.getItems()) {
+				dataOut.writeByte(item.getThumbWidth());
+				dataOut.writeByte(item.getThumbHeight());
+			}
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Failed to write to output stream");
+		}
+		
+		return baos.toByteArray();
+	}
+		
 	
 	// Get item thumbnails as one big compressed JPEG? Or as a stream of JPEGs?
 	public byte [] getThumbnails(String userId, String [] itemIds, HttpServletRequest request) {

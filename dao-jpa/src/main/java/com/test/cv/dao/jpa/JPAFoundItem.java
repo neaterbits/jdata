@@ -15,4 +15,14 @@ final class JPAFoundItem extends BaseFoundItem implements IFoundItem {
 	public String getItemId() {
 		return String.valueOf(getItem().getId());
 	}
+
+	@Override
+	public Integer getThumbWidth() {
+		return getItem().getThumbWidth();
+	}
+
+	@Override
+	public Integer getThumbHeight() {
+		return getItem().getThumbHeight();
+	}
 }

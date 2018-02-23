@@ -7,24 +7,36 @@ import java.util.function.BiConsumer;
 import com.test.cv.common.ItemId;
 
 public interface IItemStorage {
-	
-	public static class ImageResult {
+
+	public static class ImageMetaData {
 		public final String mimeType;
 		public final int imageSize;
-		public final InputStream inputStream;
+		public final int width;
+		public final int height;
 		
-		public ImageResult(String mimeType, int imageSize, InputStream inputStream) {
+		public ImageMetaData(String mimeType, int imageSize, int width, int height) {
 			
 			if (mimeType == null) {
 				throw new IllegalArgumentException("mimeType == null");
 			}
 			
+			this.mimeType = mimeType;
+			this.imageSize = imageSize;
+			this.width = width;
+			this.height = height;
+		}
+	}
+
+	public static class ImageResult extends ImageMetaData {
+		public final InputStream inputStream;
+		
+		public ImageResult(String mimeType, int imageSize, InputStream inputStream) {
+			super(mimeType, imageSize, -1, -1);
+			
 			if (inputStream == null) {
 				throw new IllegalArgumentException("inputStream == null");
 			}
 			
-			this.mimeType = mimeType;
-			this.imageSize = imageSize;
 			this.inputStream = inputStream;
 		}
 	}
@@ -40,7 +52,9 @@ public interface IItemStorage {
 
 	// Sorted in order
 	List<ImageResult> getThumbnailsForItem(String userId, String itemId) throws StorageException;
-	
+
+	ImageMetaData getThumbnailMetaDataForItem(String userId, String itemId, int photoNo) throws StorageException;
+
 	ImageResult getThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException;
 
 	ImageResult getPhotoForItem(String userId, String itemId, int photoNo) throws StorageException;

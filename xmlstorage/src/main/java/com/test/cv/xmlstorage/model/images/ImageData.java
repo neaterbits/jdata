@@ -6,6 +6,7 @@ public class ImageData {
 
 	private String fileName;
 	private String mimeType;
+	private int size; // in bytes
 	private int width;
 	private int height;
 
@@ -25,6 +26,15 @@ public class ImageData {
 
 	public void setMimeType(String mimeType) {
 		this.mimeType = mimeType;
+	}
+
+	@XmlElement
+	public int getSize() {
+		return size;
+	}
+
+	public void setSize(int size) {
+		this.size = size;
 	}
 
 	@XmlElement
