@@ -1,18 +1,20 @@
 package com.test.cv.rest;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
 
+import com.test.cv.common.IOUtil;
+import com.test.cv.common.ItemId;
 import com.test.cv.dao.IFoundItem;
-import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
+import com.test.cv.dao.ItemStorageException;
 import com.test.cv.dao.criteria.Criterium;
-import com.test.cv.dao.xml.XMLItemDAO;
-import com.test.cv.model.ItemPhotoThumbnail;
-import com.test.cv.rest.BaseService.Storage;
 
 public class SearchService extends BaseService {
 	
@@ -90,11 +92,36 @@ public class SearchService extends BaseService {
 	}
 	
 	// Get item thumbnails as one big compressed JPEG? Or as a stream of JPEGs?
-	public byte [] getThumbnails(String [] itemIds, HttpServletRequest request) {
-		
-		final List<ItemPhotoThumbnail> thumbnails = getItemDAO(request).getThumbnails(itemIds);
+	public byte [] getThumbnails(String userId, String [] itemIds, HttpServletRequest request) {
+
+		final ItemId [] array = new ItemId[itemIds.length];
+
+		for (int i = 0; i < itemIds.length; ++i) {
+			array[i] = new ItemId(userId, itemIds[i]);
+		}
 
 		// Return thumbnails as concatenated JPEGs
-		return getItemDAO(request).retrieveAndConcatenateThumbnails(itemIds);
+		InputStream inputStream = null;
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream(50000);
+
+		try {
+			inputStream = getItemDAO(request).retrieveAndConcatenateThumbnails(array);
+
+			IOUtil.copyStreams(inputStream, baos);
+		} catch (ItemStorageException ex) {
+			throw new IllegalStateException("Could not get thumbnails");
+		} catch (IOException ex) {
+			throw new IllegalStateException("Could not read thumbnails");
+		}
+		finally {
+			if (inputStream != null) {
+				try {
+					inputStream.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+
+		return baos.toByteArray();
 	}
 }
