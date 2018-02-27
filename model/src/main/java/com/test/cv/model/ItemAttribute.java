@@ -32,6 +32,11 @@ public final class ItemAttribute {
 	public String getName() {
 		return property.getName();
 	}
+
+	// TODO use annotations
+	public String getDisplayName() {
+		return property.getName();
+	}
 	
 	public AttributeType getAttributeType() {
 		final Class<?> propertyType = property.getPropertyType();

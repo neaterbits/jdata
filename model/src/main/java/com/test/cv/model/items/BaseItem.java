@@ -19,6 +19,8 @@ public abstract class BaseItem extends Item {
 	private String make;
 	@Column
 	private String model;
+	@Column
+	Integer productionYear;
 
 	// Non-searchable sub items, eg items that are part of the same package and
 	// not sold separately, eg ski poles that belong to skies or snowboard bindings not sold separately
@@ -39,5 +41,13 @@ public abstract class BaseItem extends Item {
 
 	public void setModel(String model) {
 		this.model = model;
+	}
+
+	public Integer getProductionYear() {
+		return productionYear;
+	}
+
+	public void setProductionYear(Integer productionYear) {
+		this.productionYear = productionYear;
 	}
 }

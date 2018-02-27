@@ -9,7 +9,12 @@ public class SearchResult {
 	private int pageFirstItem; // index of item into total
 	private int pageItemCount; // number of items returned, same as item array length
 	
+	private FacetsResult facets;
+	
 	private SearchItemResult [] items;
+	
+	// Facet results, eg all attributes and the count for each
+	// Some attributes are common for multiple datatypes, other are specific
 
 	public int getTotalItemMatchCount() {
 		return totalItemMatchCount;
@@ -33,6 +38,14 @@ public class SearchResult {
 
 	public void setPageItemCount(int pageItemCount) {
 		this.pageItemCount = pageItemCount;
+	}
+	
+	public FacetsResult getFacets() {
+		return facets;
+	}
+
+	public void setFacets(FacetsResult facets) {
+		this.facets = facets;
 	}
 
 	public SearchItemResult [] getItems() {

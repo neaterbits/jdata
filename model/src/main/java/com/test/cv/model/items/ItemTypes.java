@@ -18,12 +18,20 @@ public class ItemTypes {
 	
 	private static final Map<String, TypeInfo> typesByName;
 	
+	public static String getTypeName(Class<? extends Item> type) {
+		return type.getSimpleName();
+	}
+
+	// TODO get from annotation
+	public static String getTypeDisplayName(Class<? extends Item> type) {
+		return getTypeName(type);
+	}
 	
 	static {
 		typesByName = new HashMap<>();
 		
 		for (Class<? extends Item> type : types) {
-			final String typeName = type.getSimpleName();
+			final String typeName = getTypeName(type);
 			
 			if (typesByName.containsKey(typeName)) {
 				throw new IllegalStateException("Already contains type with name " + typeName);

@@ -6,7 +6,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.xml.XMLItemDAO;
+import com.test.cv.model.Item;
 import com.test.cv.model.cv.Language;
+import com.test.cv.model.items.ItemTypes;
 import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.local.LocalXmlStorage;
 
@@ -59,5 +61,13 @@ public abstract class BaseService {
 		}
 		
 		return ret;
+	}
+	
+	static String getTypeId(Class<? extends Item> type) {
+		return ItemTypes.getTypeName(type);
+	}
+	
+	static String getTypeDisplayName(Class<? extends Item> type) {
+		return ItemTypes.getTypeDisplayName(type);
 	}
 }

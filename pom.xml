@@ -26,11 +26,17 @@
 	    <module>dao-xml</module>
 	    <module>dao-test</module>
 	    <module>xml</module>
+	    <module>search-common</module>
+	    <module>index</module>
+	    <module>index-lucene</module>
+	    <module>index-elasticsearch</module>
+	    <module>index-elasticsearch-aws</module>
 	    <module>xmlstorage</module>
 	    <module>xmlstorage-local</module>
 	    <module>xmlstorage-s3</module>
 	    <module>word</module>
 	    <module>pdf</module>
+	    <module>jetty-test</module>
     <module>rest</module>
   </modules>
   <repositories>

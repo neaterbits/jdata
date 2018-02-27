@@ -5,27 +5,16 @@
     <artifactId>root</artifactId>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>dao</artifactId>
-  <name>DAO</name>
+  <artifactId>index-elasticsearch</artifactId>
+  <name>Elasticsearch implementation of index</name>
   <packaging>jar</packaging>
   <dependencies>
-  	<dependency>
-	  	<groupId>${project.groupId}</groupId>
-	  	<artifactId>model</artifactId>
-	  	<version>${project.version}</version>
-  	</dependency>
 
-  	<dependency>
-	  	<groupId>${project.groupId}</groupId>
-	  	<artifactId>common</artifactId>
-	  	<version>${project.version}</version>
-  	</dependency>
-
-  	<dependency>
-	  	<groupId>${project.groupId}</groupId>
-	  	<artifactId>search-common</artifactId>
-	  	<version>${project.version}</version>
-  	</dependency>
+	<dependency>
+		<groupId>org.elasticsearch</groupId>
+		<artifactId>elasticsearch</artifactId>
+		<version>6.2.2</version>
+	</dependency>
 
 	<!-- test dependencies --> 
 

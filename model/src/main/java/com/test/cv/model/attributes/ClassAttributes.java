@@ -14,7 +14,7 @@ public class ClassAttributes {
 
 	private final Class<? extends Item> type;
 	private final List<ItemAttribute> attributes;
-	
+
 	private ClassAttributes(Class<? extends Item> type, List<ItemAttribute> attributes) {
 		this.type = type;
 		this.attributes = attributes;

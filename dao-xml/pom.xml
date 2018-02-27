@@ -17,6 +17,12 @@
 
   	<dependency>
 	  	<groupId>${project.groupId}</groupId>
+	  	<artifactId>index</artifactId>
+	  	<version>${project.version}</version>
+  	</dependency>
+
+  	<dependency>
+	  	<groupId>${project.groupId}</groupId>
 	  	<artifactId>xml</artifactId>
 	  	<version>${project.version}</version>
   	</dependency>

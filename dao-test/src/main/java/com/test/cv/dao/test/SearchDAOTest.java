@@ -8,12 +8,13 @@ import java.util.List;
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
-import com.test.cv.dao.criteria.ComparisonOperator;
-import com.test.cv.dao.criteria.DecimalCriterium;
+import com.test.cv.dao.SearchException;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.items.Snowboard;
 import com.test.cv.model.items.SnowboardProfile;
+import com.test.cv.search.criteria.ComparisonOperator;
+import com.test.cv.search.criteria.DecimalCriterium;
 
 import junit.framework.TestCase;
 
@@ -103,7 +104,7 @@ public abstract class SearchDAOTest extends TestCase {
 	
 	@FunctionalInterface
 	public interface CheckSnowboard {
-		void check(ISearchDAO searchDAO, String itemId1, String itemId2);
+		void check(ISearchDAO searchDAO, String itemId1, String itemId2) throws SearchException;
 	}
 	
 	private void checkSnowboard(CheckSnowboard check) throws Exception {

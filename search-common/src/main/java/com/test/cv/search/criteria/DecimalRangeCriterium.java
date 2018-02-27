@@ -1,4 +1,4 @@
-package com.test.cv.dao.criteria;
+package com.test.cv.search.criteria;
 
 import java.math.BigDecimal;
 

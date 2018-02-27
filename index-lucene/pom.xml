@@ -5,27 +5,22 @@
     <artifactId>root</artifactId>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>dao</artifactId>
-  <name>DAO</name>
+  <artifactId>index-lucene</artifactId>
+  <name>Lucene index implementation</name>
   <packaging>jar</packaging>
   <dependencies>
+  
   	<dependency>
-	  	<groupId>${project.groupId}</groupId>
-	  	<artifactId>model</artifactId>
-	  	<version>${project.version}</version>
+  		<groupId>${project.groupId}</groupId>
+  		<artifactId>index</artifactId>
+  		<version>${project.version}</version>
   	</dependency>
 
-  	<dependency>
-	  	<groupId>${project.groupId}</groupId>
-	  	<artifactId>common</artifactId>
-	  	<version>${project.version}</version>
-  	</dependency>
-
-  	<dependency>
-	  	<groupId>${project.groupId}</groupId>
-	  	<artifactId>search-common</artifactId>
-	  	<version>${project.version}</version>
-  	</dependency>
+	<dependency>
+		<groupId>org.apache.lucene</groupId>
+		<artifactId>lucene-core</artifactId>
+		<version>7.2.1</version>
+	</dependency>
 
 	<!-- test dependencies --> 
 

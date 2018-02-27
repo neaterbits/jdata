@@ -8,6 +8,7 @@ import javax.persistence.TypedQuery;
 import com.test.cv.dao.IFoundItem;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.model.Item;
+import com.test.cv.search.facets.ItemsFacets;
 
 final class JPASearchCursor implements ISearchCursor {
 	private final TypedQuery<Long> countQuery;
@@ -47,6 +48,9 @@ final class JPASearchCursor implements ISearchCursor {
 	public int getTotalMatchCount() {
 		return countQuery.getSingleResult().intValue();
 	}
-	
-	
+
+	@Override
+	public ItemsFacets getFacets() {
+		throw new UnsupportedOperationException("TODO");
+	}
 }

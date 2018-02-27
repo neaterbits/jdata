@@ -5,8 +5,8 @@
     <artifactId>root</artifactId>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>dao</artifactId>
-  <name>DAO</name>
+  <artifactId>search-common</artifactId>
+  <name>Search related classes shared between dao and index modules</name>
   <packaging>jar</packaging>
   <dependencies>
   	<dependency>
@@ -21,11 +21,6 @@
 	  	<version>${project.version}</version>
   	</dependency>
 
-  	<dependency>
-	  	<groupId>${project.groupId}</groupId>
-	  	<artifactId>search-common</artifactId>
-	  	<version>${project.version}</version>
-  	</dependency>
 
 	<!-- test dependencies --> 
 

@@ -1,7 +1,7 @@
 package com.test.cv.dao;
 
-import com.test.cv.dao.criteria.Criterium;
 import com.test.cv.model.Item;
+import com.test.cv.search.criteria.Criterium;
 
 /**
  * DAO for generic search over items in storage, returns paged results
@@ -19,8 +19,8 @@ public interface ISearchDAO extends AutoCloseable {
 	 * 
 	 * @todo add freetext
 	 */
-	ISearchCursor search(Class<? extends Item> type /*, String freeText */, Criterium ... criteria);
-
+	ISearchCursor search(Class<? extends Item> type /*, String freeText */, Criterium ... criteria) throws SearchException;
+	
 }
 
 

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,16 +18,20 @@ import com.test.cv.dao.IFoundItem;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
 import com.test.cv.dao.ItemStorageException;
-import com.test.cv.dao.criteria.ComparisonOperator;
-import com.test.cv.dao.criteria.Criterium;
-import com.test.cv.dao.criteria.DecimalCriterium;
-import com.test.cv.dao.criteria.DecimalRangeCriterium;
-import com.test.cv.dao.criteria.IntegerCriterium;
-import com.test.cv.dao.criteria.IntegerRangeCriterium;
-import com.test.cv.dao.criteria.StringCriterium;
+import com.test.cv.dao.SearchException;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.TypeInfo;
+import com.test.cv.search.criteria.ComparisonOperator;
+import com.test.cv.search.criteria.Criterium;
+import com.test.cv.search.criteria.DecimalCriterium;
+import com.test.cv.search.criteria.DecimalRangeCriterium;
+import com.test.cv.search.criteria.IntegerCriterium;
+import com.test.cv.search.criteria.IntegerRangeCriterium;
+import com.test.cv.search.criteria.StringCriterium;
+import com.test.cv.search.facets.AttributeFacet;
+import com.test.cv.search.facets.ItemsFacets;
+import com.test.cv.search.facets.TypeFacets;
 
 public class SearchService extends BaseService {
 	
@@ -61,8 +66,13 @@ public class SearchService extends BaseService {
 		}
 		
 		// TODO support types
-		final ISearchCursor cursor = getSearchDAO(request).search(null, daoCriteria);
-		
+		final ISearchCursor cursor;
+		try {
+			cursor = getSearchDAO(request).search(null, daoCriteria);
+		} catch (SearchException ex) {
+			throw new IllegalStateException("Failed to search", ex);
+		}
+
 		final int totalMatchCount = cursor.getTotalMatchCount();
 		
 		final int initialIdx;
@@ -92,6 +102,10 @@ public class SearchService extends BaseService {
 		result.setTotalItemMatchCount(totalMatchCount);
 		
 		final SearchItemResult [] items = new SearchItemResult[numFound];
+		
+		if (cursor.getFacets() != null) {
+			result.setFacets(convertFacets(cursor.getFacets()));
+		}
 		
 		for (int i = 0; i < numFound; ++ i) {
 			final IFoundItem foundItem = found.get(i);
@@ -181,6 +195,44 @@ public class SearchService extends BaseService {
 		}
 
 		return criterium;
+	}
+	
+	private static FacetsResult convertFacets(ItemsFacets facets) {
+		final FacetsResult result = new FacetsResult();
+		
+		final List<FacetResult> typeFacetsResult = new ArrayList<>(facets.getTypes().size());
+		
+		for (TypeFacets typeFacet : facets.getTypes()) {
+			final FacetResult typeResult = new FacetResult();
+
+			final List<FacetAttribute> facetAttributesResult = convertAttributeList(typeFacet.getAttributes());
+			
+			typeResult.setType(getTypeId(typeFacet.getType()));
+			typeResult.setAttributes(facetAttributesResult);
+			
+			typeFacetsResult.add(typeResult);
+		}
+
+		return result;
+	}
+	
+	private static List<FacetAttribute> convertAttributeList(List<AttributeFacet> attributes) {
+
+		final List<FacetAttribute> facetAttributesResult = new ArrayList<>(attributes.size());
+
+		for (AttributeFacet attributeFacet : attributes) {
+			final FacetAttribute facetAttribute = new FacetAttribute();
+
+			facetAttribute.setId(attributeFacet.getAttribute().getName());
+			facetAttribute.setName(attributeFacet.getAttribute().getDisplayName());
+			facetAttribute.setMatchCount(attributeFacet.getMatchCount());
+
+			if (attributeFacet.getSubFacets() != null) {
+				facetAttribute.setSubAttributes(convertAttributeList(attributeFacet.getSubFacets()));
+			}
+		}
+
+		return facetAttributesResult;
 	}
 	
 	public byte[] searchReturnCompressed(String freeText, String [] types, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, HttpServletRequest request) {
