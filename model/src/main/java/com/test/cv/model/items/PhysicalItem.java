@@ -14,8 +14,10 @@ public abstract class PhysicalItem extends BaseItem {
 	// measurements in centimeters
 	@Column(precision=15, scale=3)
 	private BigDecimal width;
+	
 	@Column(precision=15, scale=3)
 	private BigDecimal height;
+	
 	@Column(precision=15, scale=3)
 	private BigDecimal length;
 	

@@ -8,19 +8,24 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 
 import com.test.cv.model.Item;
+import com.test.cv.model.annotations.Facet;
 
 
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public abstract class BaseItem extends Item {
 
-	
+	@Facet
 	@Column
 	private String make;
+
+	@Facet
 	@Column
 	private String model;
+	
+	@Facet
 	@Column
-	Integer productionYear;
+	private Integer productionYear;
 
 	// Non-searchable sub items, eg items that are part of the same package and
 	// not sold separately, eg ski poles that belong to skies or snowboard bindings not sold separately
