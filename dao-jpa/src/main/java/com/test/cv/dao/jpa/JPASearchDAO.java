@@ -1,7 +1,11 @@
 package com.test.cv.dao.jpa;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
@@ -11,6 +15,7 @@ import javax.persistence.metamodel.EntityType;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
 import com.test.cv.model.Item;
+import com.test.cv.model.ItemAttribute;
 import com.test.cv.search.criteria.Criterium;
 import com.test.cv.search.criteria.RangeCriteria;
 import com.test.cv.search.criteria.SingleValueCriteria;
@@ -27,39 +32,99 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 
 	// Search for criteria on all attributes on a particular type
 	@Override
-	public ISearchCursor search(Class<? extends Item> type /*, String freeText */, Criterium... criteria) {
+	public ISearchCursor search(List<Class<? extends Item>> types /*, String freeText */, List<Criterium> criteria, List<ItemAttribute> facetAttributes) {
 
 		// Must dynamically construct criteria from database by mapping to table
+		final LinkedHashMap<EntityType<?>, String> typeToVarName = new LinkedHashMap<>(types.size());
 		
-		final EntityType<?> entity = entityManager.getMetamodel().entity(type);
-		
-		if (entity == null) {
-			throw new IllegalArgumentException("no entity for type " + type.getName());
+		for (Class<? extends Item> type : types) {
+			final EntityType<?> entity = entityManager.getMetamodel().entity(type);
+
+			if (entity == null) {
+				throw new IllegalArgumentException("no entity for type " + type.getName());
+			}
+			
+			if (typeToVarName.containsKey(entity)) {
+				throw new IllegalArgumentException("Duplicate entity " + entity.getName());
+			}
+
+			typeToVarName.put(entity, "item" + entity.getName());
 		}
 
-		final String whereClause;
-		final List<Object> params;
+		final StringBuilder fromListBuilder = new StringBuilder();
+		final StringBuilder countBilder = new StringBuilder();
+		final StringBuilder itemIdBuilder = new StringBuilder();
 		
-		if (criteria.length != 0) {
-			final StringBuilder whereSb = new StringBuilder(" where ");
+		final Set<Map.Entry<EntityType<?>, String>> entrySet = typeToVarName.entrySet();
+
 	
-			params = constructWhereClause(criteria, whereSb, entity);
+		boolean first = true;
+		for (Map.Entry<EntityType<?>, String> entry : entrySet) {
+			final EntityType<?> entity = entry.getKey();
+			final String entityName = entity.getName();
+			final String itemVarName = entry.getValue();
+
+			if (first) {
+				first = false;
+			}
+			else {
+				fromListBuilder.append(", ");
+				countBilder.append(" + ");
+				itemIdBuilder.append(", ");
+			}
+
+			fromListBuilder.append(entityName).append(' ').append(itemVarName);
+			countBilder.append("count(").append(itemVarName).append(")");
+			itemIdBuilder.append(itemVarName).append(".id");
+		}
+
+		final String fromList = fromListBuilder.toString();
+
+		final String whereClause;
+		final List<Object> allParams;
+		
+		if (criteria != null && !criteria.isEmpty()) {
+			
+			// Must order criteria by type so that we search on the right item
+			// However some criteria may be for base types as well, but we can just apply those to all types
+			final StringBuilder whereSb = new StringBuilder(" where ");
+			
+			allParams = new ArrayList<>();
+			
+			for (Map.Entry<EntityType<?>, String> entry : typeToVarName.entrySet()) {
+
+				final EntityType<?> entity = entry.getKey();
+				final String itemJPQLVarName = entry.getValue();
+
+				// Find all criteria that applies to this type
+				final List<Criterium> criteriaForThisType = criteria.stream()
+					.filter(c -> {
+						final Class<? extends Item> itemType = c.getAttribute().getItemType();
+						
+						return itemType.equals(entity.getJavaType());
+					})
+					.collect(Collectors.toList());
+				
+				final List<Object> thisTypeParams = constructWhereClause(criteriaForThisType, whereSb, entity, itemJPQLVarName, allParams.size());
+				
+				allParams.addAll(thisTypeParams);
+			}
 	
 			whereClause = whereSb.toString();
 		}
 		else {
 			whereClause = "";
-			params = null;
+			allParams = null;
 		}
 
-		final TypedQuery<Long> countQuery = entityManager.createQuery("select count(item.id) from " + entity.getName() + " item" + whereClause, Long.class);
-		final TypedQuery<Long> idQuery   = entityManager.createQuery("select item.id from " + entity.getName() + " item" + whereClause, Long.class);
-		final TypedQuery<Item> itemQuery = entityManager.createQuery("from " + entity.getName() + " item" + whereClause, Item.class);
+		final TypedQuery<Long> countQuery = entityManager.createQuery("select " + countBilder.toString() + " from " + fromList + " " + whereClause, Long.class);
+		final TypedQuery<Long> idQuery   = entityManager.createQuery("select " + itemIdBuilder.toString() + " from " + fromList + " " + whereClause, Long.class);
+		final TypedQuery<Item> itemQuery = entityManager.createQuery("from " + fromList + " " + whereClause, Item.class);
 
-		if (params != null) {
-			addParams(countQuery, params);
-			addParams(idQuery, params);
-			addParams(itemQuery, params);
+		if (allParams != null) {
+			addParams(countQuery, allParams);
+			addParams(idQuery, allParams);
+			addParams(itemQuery, allParams);
 		}
 
 		return new JPASearchCursor(countQuery, idQuery, itemQuery);
@@ -71,17 +136,14 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 		}
 	}
 	
-	private static List<Object> constructWhereClause(Criterium [] criteria, StringBuilder sb, EntityType<?> entity) {
-		
-		final String itemVar = "item";
+	private static List<Object> constructWhereClause(List<Criterium> criteria, StringBuilder sb, EntityType<?> entity, String itemJPQLVarName, int paramNo) {
 
-		final List<Object> params = new ArrayList<>(criteria.length * 2); // * 2 because of possible range params
 
-		int paramNo = 0;
+		final List<Object> params = new ArrayList<>(criteria.size() * 2); // * 2 because of possible range params
 		
-		for (int i = 0; i < criteria.length; ++ i) {
+		for (int i = 0; i < criteria.size(); ++ i) {
 			
-			final Criterium c = criteria[i];
+			final Criterium c = criteria.get(i);
 
 			final String attrName = c.getAttribute().getName();
 			final Attribute<?, ?> attr = entity.getAttribute(attrName);
@@ -94,7 +156,7 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 				sb.append(" and ");
 			}
 			
-			sb.append(itemVar).append('.').append(attrName);
+			sb.append(itemJPQLVarName).append('.').append(attrName);
 
 			if (c instanceof SingleValueCriteria<?>) {
 				

@@ -5,11 +5,11 @@ import java.util.List;
 /**
  * Search facet results for all facets for all types available
  */
-public class FacetResult {
+public class SearchFacetedTypeResult {
 
 	private String type;
 	private String typeDisplayName;
-	private List<FacetAttribute> attributes;
+	private List<SearchFacetedAttributeResult> attributes;
 
 	public String getType() {
 		return type;
@@ -27,11 +27,11 @@ public class FacetResult {
 		this.typeDisplayName = typeDisplayName;
 	}
 
-	public List<FacetAttribute> getAttributes() {
+	public List<SearchFacetedAttributeResult> getAttributes() {
 		return attributes;
 	}
 
-	public void setAttributes(List<FacetAttribute> attributes) {
+	public void setAttributes(List<SearchFacetedAttributeResult> attributes) {
 		this.attributes = attributes;
 	}
 }

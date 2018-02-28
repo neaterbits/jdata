@@ -20,6 +20,7 @@ import com.test.cv.dao.ISearchDAO;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.dao.SearchException;
 import com.test.cv.model.ItemAttribute;
+import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.TypeInfo;
 import com.test.cv.search.criteria.ComparisonOperator;
@@ -29,7 +30,9 @@ import com.test.cv.search.criteria.DecimalRangeCriterium;
 import com.test.cv.search.criteria.IntegerCriterium;
 import com.test.cv.search.criteria.IntegerRangeCriterium;
 import com.test.cv.search.criteria.StringCriterium;
-import com.test.cv.search.facets.AttributeFacet;
+import com.test.cv.search.facets.IndexFacetedAttributeResult;
+import com.test.cv.search.facets.IndexRangeFacetedAttributeResult;
+import com.test.cv.search.facets.IndexSimpleFacetedAttributeResult;
 import com.test.cv.search.facets.ItemsFacets;
 import com.test.cv.search.facets.TypeFacets;
 
@@ -57,18 +60,18 @@ public class SearchService extends BaseService {
 	// TODO check that we adhere to best practices for pageNo and itemsPerPage
 	public SearchResult search(String freeText, String [] types, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, HttpServletRequest request) {
 		
-		final Criterium [] daoCriteria; 
+		final List<Criterium> daoCriteria; 
 		if (criteria != null) {
 			daoCriteria = convertCriteria(criteria);
 		}
 		else {
 			daoCriteria = null;
 		}
-		
+
 		// TODO support types
 		final ISearchCursor cursor;
 		try {
-			cursor = getSearchDAO(request).search(null, daoCriteria);
+			cursor = getSearchDAO(request).search(null, daoCriteria, null);
 		} catch (SearchException ex) {
 			throw new IllegalStateException("Failed to search", ex);
 		}
@@ -118,11 +121,11 @@ public class SearchService extends BaseService {
 		return result;
 	}
 	
-	private static Criterium [] convertCriteria(SearchCriterium [] searchCriteria) {
-		final Criterium [] criteria = new Criterium[searchCriteria.length];
+	private static List<Criterium> convertCriteria(SearchCriterium [] searchCriteria) {
+		final List<Criterium> criteria = new ArrayList<>(searchCriteria.length);
 		
 		for (int i = 0; i < searchCriteria.length; ++ i) {
-			criteria[i] = convertCriterium(searchCriteria[i]);
+			criteria.add(convertCriterium(searchCriteria[i]));
 		}
 
 		return criteria;
@@ -197,15 +200,15 @@ public class SearchService extends BaseService {
 		return criterium;
 	}
 	
-	private static FacetsResult convertFacets(ItemsFacets facets) {
-		final FacetsResult result = new FacetsResult();
+	private static SearchFacetsResult convertFacets(ItemsFacets facets) {
+		final SearchFacetsResult result = new SearchFacetsResult();
 		
-		final List<FacetResult> typeFacetsResult = new ArrayList<>(facets.getTypes().size());
+		final List<SearchFacetedTypeResult> typeFacetsResult = new ArrayList<>(facets.getTypes().size());
 		
 		for (TypeFacets typeFacet : facets.getTypes()) {
-			final FacetResult typeResult = new FacetResult();
+			final SearchFacetedTypeResult typeResult = new SearchFacetedTypeResult();
 
-			final List<FacetAttribute> facetAttributesResult = convertAttributeList(typeFacet.getAttributes());
+			final List<SearchFacetedAttributeResult> facetAttributesResult = convertAttributeList(typeFacet.getAttributes());
 			
 			typeResult.setType(getTypeId(typeFacet.getType()));
 			typeResult.setAttributes(facetAttributesResult);
@@ -216,20 +219,85 @@ public class SearchService extends BaseService {
 		return result;
 	}
 	
-	private static List<FacetAttribute> convertAttributeList(List<AttributeFacet> attributes) {
+	private static List<SearchFacetedAttributeResult> convertAttributeList(List<IndexFacetedAttributeResult> attributes) {
 
-		final List<FacetAttribute> facetAttributesResult = new ArrayList<>(attributes.size());
+		final List<SearchFacetedAttributeResult> facetAttributesResult = new ArrayList<>(attributes.size());
 
-		for (AttributeFacet attributeFacet : attributes) {
-			final FacetAttribute facetAttribute = new FacetAttribute();
+		for (IndexFacetedAttributeResult indexFacetedAttribute : attributes) {
+			final SearchFacetedAttributeResult searchFacetedAttribute;
 
-			facetAttribute.setId(attributeFacet.getAttribute().getName());
-			facetAttribute.setName(attributeFacet.getAttribute().getDisplayName());
-			facetAttribute.setMatchCount(attributeFacet.getMatchCount());
-
-			if (attributeFacet.getSubFacets() != null) {
-				facetAttribute.setSubAttributes(convertAttributeList(attributeFacet.getSubFacets()));
+			if (indexFacetedAttribute instanceof IndexSimpleFacetedAttributeResult) {
+				final IndexSimpleFacetedAttributeResult indexSimpleFacetedAttributeResult
+						= (IndexSimpleFacetedAttributeResult)indexFacetedAttribute;
+				
+				final SearchSimpleFacetedAttributeResult searchSimpleFacetedAttribute = new SearchSimpleFacetedAttributeResult();
+				
+				if (indexSimpleFacetedAttributeResult.getSubFacets() != null) {
+					searchSimpleFacetedAttribute.setSubAttributes(convertAttributeList(indexSimpleFacetedAttributeResult.getSubFacets()));
+				}
+				
+				searchSimpleFacetedAttribute.setMatchCount(indexSimpleFacetedAttributeResult.getMatchCount());
+				
+				searchFacetedAttribute = searchSimpleFacetedAttribute;
 			}
+			else if (indexFacetedAttribute instanceof IndexRangeFacetedAttributeResult) {
+				final IndexRangeFacetedAttributeResult indexRangeFacetedAttributeResult
+						= (IndexRangeFacetedAttributeResult)indexFacetedAttribute;
+
+				final ItemAttribute attribute = indexFacetedAttribute.getAttribute();
+				final AttributeType attributeType = attribute.getAttributeType();
+				
+				final int [] matchCounts = indexRangeFacetedAttributeResult.getMatchCounts();
+				
+				final List<SearchFacetedAttributeRangeResult<?>> ranges = new ArrayList<>(matchCounts.length);
+				
+				// Convert match count for each range to REST response format
+				// Response contains the ranges as well for ease of use from UI code
+				switch (attributeType) {
+				case INTEGER: {
+					for (int i = 0; i < matchCounts.length; ++ i) {
+						final SearchFacetedAttributeIntegerRangeResult searchRange = new SearchFacetedAttributeIntegerRangeResult();
+						
+						// Set range lower and upper
+						searchRange.setLower(attribute.getIntegerRanges()[i].getLower());
+						searchRange.setUpper(attribute.getIntegerRanges()[i].getUpper());
+						searchRange.setMatchCount(matchCounts[i]);
+						
+						ranges.add(searchRange);
+					}
+					break;
+				}
+					
+				case DECIMAL: {
+					for (int i = 0; i < matchCounts.length; ++ i) {
+						final SearchFacetedAttributeDecimalRangeResult searchRange = new SearchFacetedAttributeDecimalRangeResult();
+						
+						// Set range lower and upper
+						searchRange.setLower(attribute.getDecimalRanges()[i].getLower());
+						searchRange.setUpper(attribute.getDecimalRanges()[i].getUpper());
+						searchRange.setMatchCount(matchCounts[i]);
+
+						ranges.add(searchRange);
+					}
+					break;
+				}
+					
+				default:
+					throw new UnsupportedOperationException("Unknown attribute range type " + attributeType);
+				}
+				
+				final SearchRangeFacetedAttributeResult rangeResult = new SearchRangeFacetedAttributeResult();
+				
+				rangeResult.setRanges(ranges);
+				
+				searchFacetedAttribute = rangeResult;
+			}
+			else {
+				throw new UnsupportedOperationException("Unknown index faceted attribute result type " + indexFacetedAttribute.getClass());
+			}
+
+			searchFacetedAttribute.setId(indexFacetedAttribute.getAttribute().getName());
+			searchFacetedAttribute.setName(indexFacetedAttribute.getAttribute().getDisplayName());
 		}
 
 		return facetAttributesResult;
@@ -250,26 +318,29 @@ public class SearchService extends BaseService {
 		
 		final OutputStream outputStream = baos; // TODO compression
 		
-		final DataOutputStream dataOut = new DataOutputStream(outputStream);
+		try (DataOutputStream dataOut = new DataOutputStream(outputStream)) {
 		
-		try {
-			for (SearchItemResult item : searchResult.getItems()) {
-				dataOut.writeUTF(item.getId());
+			try {
+				for (SearchItemResult item : searchResult.getItems()) {
+					dataOut.writeUTF(item.getId());
+				}
+				
+				for (SearchItemResult item : searchResult.getItems()) {
+					dataOut.writeUTF(item.getTitle());
+				}
+				
+				for (SearchItemResult item : searchResult.getItems()) {
+					dataOut.writeByte(item.getThumbWidth());
+					dataOut.writeByte(item.getThumbHeight());
+				}
 			}
-			
-			for (SearchItemResult item : searchResult.getItems()) {
-				dataOut.writeUTF(item.getTitle());
+			catch (IOException ex) {
+				throw new IllegalStateException("Failed to write to output stream");
 			}
-			
-			for (SearchItemResult item : searchResult.getItems()) {
-				dataOut.writeByte(item.getThumbWidth());
-				dataOut.writeByte(item.getThumbHeight());
-			}
+		} catch (IOException ex) {
+			throw new IllegalStateException("Exception while closing output stream", ex);
 		}
-		catch (IOException ex) {
-			throw new IllegalStateException("Failed to write to output stream");
-		}
-		
+
 		return baos.toByteArray();
 	}
 		

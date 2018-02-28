@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AttributeFacetsTest extends TestCase {
+public class FacetedAttributesTest extends TestCase {
 	
 	// @FacetAttribute annotation
 	public void testSubclassFacet() {

@@ -3,6 +3,7 @@ package com.test.cv.dao.test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 
 import com.test.cv.dao.IItemDAO;
@@ -54,7 +55,10 @@ public abstract class SearchDAOTest extends TestCase {
 	public void testSearchNoCriteria() throws Exception {
 
 		checkSnowboard((searchDAO, itemId1, itemId2) -> {
-			final ISearchCursor search = searchDAO.search(Snowboard.class);
+			final ISearchCursor search = searchDAO.search(
+					Arrays.asList(Snowboard.class),
+					null,
+					null);
 
 			 assertThat(search.getTotalMatchCount()).isEqualTo(2);
 			 
@@ -76,7 +80,10 @@ public abstract class SearchDAOTest extends TestCase {
 			 
 			final DecimalCriterium widthCriteria = new DecimalCriterium(widthAttribute, new BigDecimal("30.4"), ComparisonOperator.GREATER_THAN);
 			
-			final ISearchCursor search = searchDAO.search(Snowboard.class, widthCriteria);
+			final ISearchCursor search = searchDAO.search(
+					Arrays.asList(Snowboard.class),
+					Arrays.asList(widthCriteria),
+					null);
 			final List<String> itemIds = search.getItemIDs(0, Integer.MAX_VALUE);
 			
 			assertThat(itemIds.size()).isEqualTo(1);
@@ -94,7 +101,10 @@ public abstract class SearchDAOTest extends TestCase {
 			 
 			final DecimalCriterium widthCriteria = new DecimalCriterium(widthAttribute, new BigDecimal("32.8"), ComparisonOperator.NOT_EQUALS);
 			
-			final ISearchCursor search = searchDAO.search(Snowboard.class, widthCriteria);
+			final ISearchCursor search = searchDAO.search(
+					Arrays.asList(Snowboard.class),
+					Arrays.asList(widthCriteria),
+					null);
 			final List<String> itemIds = search.getItemIDs(0, Integer.MAX_VALUE);
 			
 			assertThat(itemIds.size()).isEqualTo(1);

@@ -7,9 +7,9 @@ import com.test.cv.model.Item;
 public class TypeFacets {
 
 	private final Class<? extends Item> type;
-	private final List<AttributeFacet> attributes;
+	private final List<IndexFacetedAttributeResult> attributes;
 
-	public TypeFacets(Class<? extends Item> type, List<AttributeFacet> attributes) {
+	public TypeFacets(Class<? extends Item> type, List<IndexFacetedAttributeResult> attributes) {
 		
 		if (type == null) {
 			throw new IllegalArgumentException("type == null");
@@ -27,7 +27,7 @@ public class TypeFacets {
 		return type;
 	}
 
-	public List<AttributeFacet> getAttributes() {
+	public List<IndexFacetedAttributeResult> getAttributes() {
 		return attributes;
 	}
 }

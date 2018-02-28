@@ -9,7 +9,7 @@ public class SearchResult {
 	private int pageFirstItem; // index of item into total
 	private int pageItemCount; // number of items returned, same as item array length
 	
-	private FacetsResult facets;
+	private SearchFacetsResult facets;
 	
 	private SearchItemResult [] items;
 	
@@ -40,11 +40,11 @@ public class SearchResult {
 		this.pageItemCount = pageItemCount;
 	}
 	
-	public FacetsResult getFacets() {
+	public SearchFacetsResult getFacets() {
 		return facets;
 	}
 
-	public void setFacets(FacetsResult facets) {
+	public void setFacets(SearchFacetsResult facets) {
 		this.facets = facets;
 	}
 

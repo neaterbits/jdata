@@ -3,6 +3,7 @@ package com.test.cv.index;
 import java.util.List;
 
 import com.test.cv.model.Item;
+import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.ItemAttributeValue;
 import com.test.cv.search.criteria.Criterium;
 
@@ -23,7 +24,7 @@ public interface ItemIndex extends AutoCloseable {
 	/**
 	 * Search for values in an index based on types
 	 */
-	IndexSearchCursor search(String freeText, Criterium ... criteria) throws ItemIndexException;
+	IndexSearchCursor search(String freeText, List<Criterium> criteria, List<ItemAttribute> facetAttributes) throws ItemIndexException;
 	
 	
 }

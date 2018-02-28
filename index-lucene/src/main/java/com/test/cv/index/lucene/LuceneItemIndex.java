@@ -123,7 +123,7 @@ public class LuceneItemIndex implements ItemIndex {
 	}
 
 	@Override
-	public IndexSearchCursor search(String freeText, Criterium... criteria) throws ItemIndexException {
+	public IndexSearchCursor search(String freeText, List<Criterium> criteria, List<ItemAttribute> facetAttributes) throws ItemIndexException {
 
 		try {
 			final DirectoryReader newReader = DirectoryReader.openIfChanged(this.reader);

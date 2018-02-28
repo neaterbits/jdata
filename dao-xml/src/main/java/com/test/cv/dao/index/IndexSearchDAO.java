@@ -10,6 +10,7 @@ import com.test.cv.index.IndexSearchCursor;
 import com.test.cv.index.ItemIndex;
 import com.test.cv.index.ItemIndexException;
 import com.test.cv.model.Item;
+import com.test.cv.model.ItemAttribute;
 import com.test.cv.search.criteria.Criterium;
 import com.test.cv.search.facets.ItemsFacets;
 
@@ -27,11 +28,11 @@ public class IndexSearchDAO implements ISearchDAO {
 	}
 
 	@Override
-	public ISearchCursor search(Class<? extends Item> type, Criterium... criteria) throws SearchException {
+	public ISearchCursor search(List<Class<? extends Item>> types, List<Criterium> criteria, List<ItemAttribute> facetAttributes) throws SearchException {
 
 		IndexSearchCursor cursor;
 		try {
-			cursor = index.search(null, criteria);
+			cursor = index.search(null, criteria, null);
 		} catch (ItemIndexException ex) {
 			throw new SearchException("Failed to search", ex);
 		}
