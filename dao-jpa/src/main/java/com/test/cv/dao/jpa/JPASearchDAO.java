@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
@@ -54,6 +55,7 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 		final StringBuilder fromListBuilder = new StringBuilder();
 		final StringBuilder countBilder = new StringBuilder();
 		final StringBuilder itemIdBuilder = new StringBuilder();
+		final StringBuilder itemBuilder = new StringBuilder();
 		
 		final Set<Map.Entry<EntityType<?>, String>> entrySet = typeToVarName.entrySet();
 
@@ -71,11 +73,18 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 				fromListBuilder.append(", ");
 				countBilder.append(" + ");
 				itemIdBuilder.append(", ");
+				itemBuilder.append(", ");
 			}
 
 			fromListBuilder.append(entityName).append(' ').append(itemVarName);
 			countBilder.append("count(").append(itemVarName).append(")");
 			itemIdBuilder.append(itemVarName).append(".id");
+			
+			itemBuilder
+				.append(itemVarName).append(".id, ")
+				.append(itemVarName).append(".title, ")
+				.append(itemVarName).append(".thumbWidth, ")
+				.append(itemVarName).append(".thumbHeight ");
 		}
 
 		final String fromList = fromListBuilder.toString();
@@ -119,7 +128,7 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 
 		final TypedQuery<Long> countQuery = entityManager.createQuery("select " + countBilder.toString() + " from " + fromList + " " + whereClause, Long.class);
 		final TypedQuery<Long> idQuery   = entityManager.createQuery("select " + itemIdBuilder.toString() + " from " + fromList + " " + whereClause, Long.class);
-		final TypedQuery<Item> itemQuery = entityManager.createQuery("from " + fromList + " " + whereClause, Item.class);
+		final Query itemQuery = entityManager.createQuery("select " + itemBuilder.toString() +" from " + fromList + " " + whereClause);
 
 		if (allParams != null) {
 			addParams(countQuery, allParams);
@@ -130,7 +139,7 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 		return new JPASearchCursor(countQuery, idQuery, itemQuery);
 	}
 
-	private static void addParams(TypedQuery<?> query, List<Object> params) {
+	private static void addParams(Query query, List<Object> params) {
 		for (int i = 0; i < params.size(); ++ i) {
 			query.setParameter("param" + i, params.get(i));
 		}

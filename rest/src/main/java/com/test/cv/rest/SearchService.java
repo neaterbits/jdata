@@ -14,11 +14,11 @@ import javax.ws.rs.POST;
 
 import com.test.cv.common.IOUtil;
 import com.test.cv.common.ItemId;
-import com.test.cv.dao.IFoundItem;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.dao.SearchException;
+import com.test.cv.dao.SearchItem;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.items.ItemTypes;
@@ -94,7 +94,7 @@ public class SearchService extends BaseService {
 			count = totalMatchCount;
 		}
 		
-		final List<IFoundItem> found = cursor.getItems(initialIdx, count);
+		final List<SearchItem> found = cursor.getItemIDsAndTitles(initialIdx, count);
 		
 		final SearchResult result = new SearchResult();
 		
@@ -111,7 +111,7 @@ public class SearchService extends BaseService {
 		}
 		
 		for (int i = 0; i < numFound; ++ i) {
-			final IFoundItem foundItem = found.get(i);
+			final SearchItem foundItem = found.get(i);
 
 			items[i] = new SearchItemResult(foundItem.getItemId(), foundItem.getTitle(), foundItem.getThumbWidth(), foundItem.getThumbHeight());
 		}

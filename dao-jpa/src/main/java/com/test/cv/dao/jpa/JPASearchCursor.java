@@ -1,24 +1,25 @@
 package com.test.cv.dao.jpa;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
-import com.test.cv.dao.IFoundItem;
 import com.test.cv.dao.ISearchCursor;
-import com.test.cv.model.Item;
+import com.test.cv.dao.SearchItem;
 import com.test.cv.search.facets.ItemsFacets;
 
 final class JPASearchCursor implements ISearchCursor {
 	private final TypedQuery<Long> countQuery;
 	private final TypedQuery<Long> idQuery;
-	private final TypedQuery<Item> itemQuery;
+	private final Query idAndTitleQuery;
 
-	public JPASearchCursor(TypedQuery<Long> countQuery, TypedQuery<Long> idQuery, TypedQuery<Item> itemQuery) {
+	public JPASearchCursor(TypedQuery<Long> countQuery, TypedQuery<Long> idQuery, Query itemQuery) {
 		this.countQuery = countQuery;
 		this.idQuery = idQuery;
-		this.itemQuery = itemQuery;
+		this.idAndTitleQuery = itemQuery;
 	}
 
 	@Override
@@ -33,15 +34,26 @@ final class JPASearchCursor implements ISearchCursor {
 	}
 
 	@Override
-	public List<IFoundItem> getItems(int initialIdx, int count) {
-		itemQuery.setFirstResult(initialIdx);
-		itemQuery.setMaxResults(count);
+	public List<SearchItem> getItemIDsAndTitles(int initialIdx, int count) {
+		idAndTitleQuery.setFirstResult(initialIdx);
+		idAndTitleQuery.setMaxResults(count);
 		
-		final List<Item> items = itemQuery.getResultList();
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final List<Object[]> items = (List)idAndTitleQuery.getResultList();
+		
+		final List<SearchItem> result = new ArrayList<>(items.size());
+		
+		for (Object [] row : items) {
+			final SearchItem searchItem = new JPASearchItem(
+					String.valueOf((Long)row[0]),
+					(String)row[1],
+					(Integer)row[2],
+					(Integer)row[3]);
+			
+			result.add(searchItem);
+		}
 
-		return items.stream()
-				.map(i -> new JPAFoundItem(i))
-				.collect(Collectors.toList());
+		return result;
 	}
 
 	@Override
@@ -51,6 +63,6 @@ final class JPASearchCursor implements ISearchCursor {
 
 	@Override
 	public ItemsFacets getFacets() {
-		throw new UnsupportedOperationException("TODO");
+		throw new UnsupportedOperationException("No facet attributes specified in search query so none in result");
 	}
 }

@@ -2,10 +2,10 @@ package com.test.cv.dao.index;
 
 import java.util.List;
 
-import com.test.cv.dao.IFoundItem;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
 import com.test.cv.dao.SearchException;
+import com.test.cv.dao.SearchItem;
 import com.test.cv.index.IndexSearchCursor;
 import com.test.cv.index.ItemIndex;
 import com.test.cv.index.ItemIndexException;
@@ -45,7 +45,7 @@ public class IndexSearchDAO implements ISearchDAO {
 			}
 			
 			@Override
-			public List<IFoundItem> getItems(int initialIdx, int count) {
+			public List<SearchItem> getItemIDsAndTitles(int initialIdx, int count) {
 				throw new UnsupportedOperationException("TODO - should not return complete item here");
 			}
 			

@@ -4,11 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
+import com.test.cv.dao.SearchItem;
 import com.test.cv.dao.SearchException;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.attributes.ClassAttributes;
@@ -27,7 +30,7 @@ public abstract class SearchDAOTest extends TestCase {
 	static Snowboard makeSnowboard1() {
 		final Snowboard snowboard = new Snowboard();
 		
-		snowboard.setTitle("Snowboard for sale");
+		snowboard.setTitle("First snowboard for sale");
 		snowboard.setMake("Burton");
 		snowboard.setModel("1234");
 		snowboard.setProfile(SnowboardProfile.CAMBER);
@@ -41,7 +44,7 @@ public abstract class SearchDAOTest extends TestCase {
 	static Snowboard makeSnowboard2() {
 		final Snowboard snowboard = new Snowboard();
 		
-		snowboard.setTitle("Snowboard for sale");
+		snowboard.setTitle("Second snowboard for sale");
 		snowboard.setMake("Jones");
 		snowboard.setModel("Abcd");
 		snowboard.setProfile(SnowboardProfile.FLAT);
@@ -69,7 +72,40 @@ public abstract class SearchDAOTest extends TestCase {
 			 assertThat(itemIds.contains(itemId2)).isTrue();
 		});
 	}
+
+	public void testSearchItemsNoCriteria() throws Exception {
+
+		checkSnowboard((searchDAO, itemId1, itemId2) -> {
+			final ISearchCursor search = searchDAO.search(
+					Arrays.asList(Snowboard.class),
+					null,
+					null);
+
+			 assertThat(search.getTotalMatchCount()).isEqualTo(2);
+			 
+			 List<SearchItem> items = search.getItemIDsAndTitles(0, Integer.MAX_VALUE);
+
+			 assertThat(items.size()).isEqualTo(2);
+			 
+			 final SearchItem item1 = find(items, item -> item.getItemId().equals(itemId1));
+			 final SearchItem item2 = find(items, item -> item.getItemId().equals(itemId2));
+
+			 assertThat(item1).isNotNull();
+			 assertThat(item2).isNotNull();
+			 
+			 assertThat(item1.getTitle()).isEqualTo("First snowboard for sale");
+			 assertThat(item2.getTitle()).isEqualTo("Second snowboard for sale");
+		});
+	}
+
+	private static <T> boolean contains(Collection<T> collection, Predicate<T> predicate) {
+		return collection.stream().anyMatch(predicate);
+	}
 	
+	private static <T> T find(Collection<T> collection, Predicate<T> predicate) {
+		return collection.stream().filter(predicate).findFirst().get();
+	}
+
 	public void testSnowboardCriteriaGreaterThan() throws Exception {
 		checkSnowboard((searchDAO, itemId1, itemId2) -> {
 			final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);

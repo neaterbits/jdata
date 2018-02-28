@@ -21,7 +21,7 @@ public interface ISearchCursor {
 	 * @param count
 	 * @return items, if no more items to be found, returns < count
 	 */
-	List<IFoundItem> getItems(int initialIdx, int count);
+	List<SearchItem> getItemIDsAndTitles(int initialIdx, int count);
 	
 	/**
 	 * Total number of items that matched the search.
