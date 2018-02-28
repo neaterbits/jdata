@@ -8,21 +8,18 @@
 
         <persistence-unit name="jpa-derby">
         
-        	<shared-cache-mode>NONE</shared-cache-mode>
-        
-
-			<class>com.test.cv.model.Item</class>
-			<class>com.test.cv.model.ItemPhotoThumbnail</class>
-			<class>com.test.cv.model.ItemPhoto</class>
-			<class>com.test.cv.model.ItemPhotoCategory</class>
-			<class>com.test.cv.model.text.Text</class>
-			<class>com.test.cv.model.text.Translation</class>
-			<class>com.test.cv.model.items.BaseItem</class>
-			<class>com.test.cv.model.items.PhysicalItem</class>
-			<class>com.test.cv.model.items.SportsItem</class>
-			<class>com.test.cv.model.items.Snowboard</class>
-
                 <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+
+				<class>com.test.cv.model.Item</class>
+				<class>com.test.cv.model.ItemPhotoThumbnail</class>
+				<class>com.test.cv.model.ItemPhoto</class>
+				<class>com.test.cv.model.ItemPhotoCategory</class>
+				<class>com.test.cv.model.text.Text</class>
+				<class>com.test.cv.model.text.Translation</class>
+				<class>com.test.cv.model.items.BaseItem</class>
+				<class>com.test.cv.model.items.PhysicalItem</class>
+				<class>com.test.cv.model.items.SportsItem</class>
+				<class>com.test.cv.model.items.Snowboard</class>
 
                 <exclude-unlisted-classes>false</exclude-unlisted-classes>
                 
