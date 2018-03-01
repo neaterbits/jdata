@@ -1,6 +1,7 @@
 package com.test.cv.model;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 
 import com.test.cv.model.annotations.DecimalRange;
@@ -15,7 +16,11 @@ public final class ItemAttribute {
 	private final Class<? extends Item> itemType;
 	private final PropertyDescriptor property;
 	
-	// Does this attrbute gas facets?
+	private final String fieldNameOverride;
+
+	private final boolean storeValueInSearchIndex;
+	
+	// Does this attribute have facets?
 	private final boolean isFaceted;
 	
 	// Ay integer ranges if this is an integer attribute
@@ -23,6 +28,8 @@ public final class ItemAttribute {
 	private final FacetedAttributeDecimalRange [] decimalRanges;
 
 	public ItemAttribute(Class<? extends Item> itemType, PropertyDescriptor property,
+				String fieldNameOverride,
+				boolean storeValueInSearchIndex,
 				boolean isFaceted,
 				IntegerRange [] integerRanges, DecimalRange [] decimalRanges) {
 	
@@ -36,6 +43,15 @@ public final class ItemAttribute {
 
 		this.itemType = itemType;
 		this.property = property;
+		
+		this.fieldNameOverride = fieldNameOverride;
+		
+		if (isFaceted && !storeValueInSearchIndex) {
+			// TODO is this the case for elasticsearch?
+			throw new IllegalArgumentException("Ought always store faceted attribute values in index");
+		}
+		
+		this.storeValueInSearchIndex = storeValueInSearchIndex;
 		
 		if (integerRanges != null && integerRanges.length > 0 && decimalRanges != null && decimalRanges.length > 0) {
 			throw new IllegalArgumentException("Cannot have both integer and decimal ranges for property " + property.getName());
@@ -75,7 +91,50 @@ public final class ItemAttribute {
 	}
 	
 	public String getName() {
-		return property.getName();
+		return fieldNameOverride != null ? fieldNameOverride : property.getName();
+	}
+	
+	public ItemAttributeValue<?> getValue(Item item) {
+		final Object value;
+		try {
+			value = property.getReadMethod().invoke(item);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+			throw new IllegalStateException("Failed to invoke getter for " + getName() + " of " + item.getClass().getName(), ex);
+		}
+
+		final ItemAttributeValue<?> itemAttributeValue;
+
+		if (value != null) {
+			switch (getAttributeType()) {
+			case STRING:
+				itemAttributeValue = new StringAttributeValue(this, (String)value);
+				break;
+				
+			case INTEGER:
+				itemAttributeValue = new IntegerAttributeValue(this, (Integer)value);
+				break;
+
+			case LONG:
+				itemAttributeValue = new LongAttributeValue(this, (Long)value);
+				break;
+
+			case DECIMAL:
+				itemAttributeValue = new DecimalAttributeValue(this, (BigDecimal)value);
+				break;
+				
+			case ENUM:
+				itemAttributeValue = new EnumAttributeValue(this, (Enum<?>)value);
+				break;
+
+			default:
+				throw new UnsupportedOperationException("Unknown attribute type " + getAttributeType());
+			}
+ 		}
+		else {
+			itemAttributeValue = null;
+		}
+
+		return itemAttributeValue;
 	}
 
 	// TODO use annotations
@@ -85,23 +144,19 @@ public final class ItemAttribute {
 	
 	public AttributeType getAttributeType() {
 		final Class<?> propertyType = property.getPropertyType();
-		
-		final AttributeType attributeType;
-		
-		if (propertyType.equals(String.class)) {
-			attributeType = AttributeType.STRING;
-		}
-		else if (propertyType.equals(Integer.class) || propertyType.equals(int.class)) {
-			attributeType = AttributeType.INTEGER;
-		}
-		else if (propertyType.equals(BigDecimal.class)) {
-			attributeType = AttributeType.DECIMAL;
-		}
-		else {
+
+		final AttributeType attributeType = AttributeType.fromClass(propertyType);
+
+		if (attributeType == null) {
 			throw new IllegalStateException("Unknown property type " + propertyType + " of attribute " + getName() + " of " + itemType.getSimpleName());
 		}
 
 		return attributeType;
+	}
+
+	
+	public boolean shouldStoreValueInSearchIndex() {
+		return storeValueInSearchIndex;
 	}
 
 	public boolean isFaceted() {

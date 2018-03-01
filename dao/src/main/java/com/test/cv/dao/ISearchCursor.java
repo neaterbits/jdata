@@ -2,6 +2,7 @@ package com.test.cv.dao;
 
 import java.util.List;
 
+import com.test.cv.search.SearchItem;
 import com.test.cv.search.facets.ItemsFacets;
 
 public interface ISearchCursor {

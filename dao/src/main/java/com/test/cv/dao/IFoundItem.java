@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttributeValue;
+import com.test.cv.search.SearchItem;
 
 public interface IFoundItem extends SearchItem {
 

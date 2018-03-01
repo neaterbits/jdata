@@ -1,7 +1,7 @@
 package com.test.cv.dao.jpa;
 
-import com.test.cv.dao.BaseSearchItem;
-import com.test.cv.dao.SearchItem;
+import com.test.cv.search.BaseSearchItem;
+import com.test.cv.search.SearchItem;
 
 public class JPASearchItem extends BaseSearchItem implements SearchItem {
 

@@ -20,9 +20,12 @@ import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.dao.RetrieveThumbnailsInputStream;
 import com.test.cv.dao.RetrieveThumbnailsInputStream.Thumbnail;
+import com.test.cv.index.ItemIndex;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemPhoto;
 import com.test.cv.model.ItemPhotoCategory;
+import com.test.cv.model.attributes.ClassAttributes;
+import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.Snowboard;
 import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.api.IItemStorage.ImageMetaData;
@@ -42,8 +45,8 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		}
 	}
 
-	public XMLItemDAO(IItemStorage xmlStorage) {
-		super(jaxbContext, xmlStorage);
+	public XMLItemDAO(IItemStorage xmlStorage, ItemIndex index) {
+		super(jaxbContext, xmlStorage, index);
 	}
 
 	@Override
@@ -181,13 +184,16 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 
 	@Override
 	public String addItem(String userId, Item item) throws ItemStorageException {
+
 		// Add to storage, must make an ID for item
 		// Just generate an uuid
 		
 		final String itemId = genItemId();
 		
+		item.setIdString(itemId);
+		
 		try {
-			store(userId, itemId, item);
+			store(userId, itemId, item, ItemTypes.getType(item), ClassAttributes.getValues(item));
 		} catch (XMLStorageException ex) {
 			throw new ItemStorageException("Failed to store item", ex);
 		}

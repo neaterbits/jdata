@@ -1,4 +1,4 @@
-package com.test.cv.dao;
+package com.test.cv.search;
 
 /**
  * Information for one item returned from search result

@@ -13,11 +13,16 @@ import java.util.Map;
 
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
+import com.test.cv.model.ItemAttributeValue;
 import com.test.cv.model.annotations.DecimalRange;
 import com.test.cv.model.annotations.Facet;
 import com.test.cv.model.annotations.FacetAttribute;
 import com.test.cv.model.annotations.FacetAttributes;
+import com.test.cv.model.annotations.IndexItemAttribute;
+import com.test.cv.model.annotations.IndexItemAttributeTransient;
 import com.test.cv.model.annotations.IntegerRange;
+import com.test.cv.model.items.ItemTypes;
+import com.test.cv.model.items.TypeInfo;
 
 public class ClassAttributes {
 
@@ -27,6 +32,24 @@ public class ClassAttributes {
 	private ClassAttributes(Class<? extends Item> type, List<ItemAttribute> attributes) {
 		this.type = type;
 		this.attributes = attributes;
+	}
+	
+	public static List<ItemAttributeValue<?>> getValues(Item item) {
+		final TypeInfo typeInfo = ItemTypes.getTypeInfo(item);
+		
+		final ClassAttributes classAttributes = typeInfo.getAttributes();
+		
+		final List<ItemAttributeValue<?>> result = new ArrayList<>();
+		
+		for (ItemAttribute attribute : classAttributes.attributes) {
+			final ItemAttributeValue<?> value = attribute.getValue(item);
+			
+			if (value != null) {
+				result.add(value);
+			}
+		}
+		
+		return result;
 	}
 	
 	public static ClassAttributes getFromClass(Class<? extends Item> type) {
@@ -62,41 +85,24 @@ public class ClassAttributes {
 				}
 			}
 		}
-		
+
 		for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
-			
-			Facet fieldFacet = null;
-			
-			fieldFacet = propertyDescriptor.getReadMethod().getAnnotation(Facet.class);
-			
-			if (fieldFacet == null) {
-				// Try get from field
-				final String fieldName = propertyDescriptor.getName();
 
-				Field found = null;
-				
-				for (Class<?> t = type; t != null; t = t.getSuperclass()) {
-					for (Field field : t.getDeclaredFields()) {
-						if (field.getName().equals(fieldName)) {
-							
-							// Verify that not multiple fields of the same name
-							if (found != null) {
-								throw new IllegalStateException("Multiple fields named " + fieldName + " for " + type);
-							}
-							
-							found = field;
-						}
-					}
-				}
-
-				if (found != null) {
-					fieldFacet = found.getAnnotation(Facet.class);
-				}
+			if (propertyDescriptor.getReadMethod() == null || propertyDescriptor.getWriteMethod() == null) {
+				continue;
 			}
+
+			if (findAnnotation(IndexItemAttributeTransient.class, type, propertyDescriptor) != null) {
+				// Not for indexing
+				continue;
+			}
+
 
 			final boolean isFacet;
 			final IntegerRange [] integerRanges;
 			final DecimalRange [] decimalRanges;
+
+			final Facet fieldFacet = findAnnotation(Facet.class, type, propertyDescriptor);
 
 			if (fieldFacet != null) {
 				isFacet = true;
@@ -118,13 +124,74 @@ public class ClassAttributes {
 					decimalRanges = null;
 				}
 			}
+			
+			final boolean storeFieldInIndex;
+			
+			// Depends on attribute annotation
+			final IndexItemAttribute indexItemAttribute = findAnnotation(IndexItemAttribute.class, type, propertyDescriptor);
+	
+			if (isFacet) {
+				// Faceting requires store
+				// TODO perhaps not for elasticsearh
+				storeFieldInIndex = true;
+			}
+			else {
+				if (indexItemAttribute != null) {
+					storeFieldInIndex = indexItemAttribute.storeValue();
+				}
+				else {
+					storeFieldInIndex = false; // Default to not store
+				}
+			}
+			
+			final String fieldNameOverride = indexItemAttribute != null && ! indexItemAttribute.name().isEmpty()
+					? indexItemAttribute.name()
+					: null;
 
-			final ItemAttribute attribute = new ItemAttribute(type, propertyDescriptor, isFacet, integerRanges, decimalRanges);
+			final ItemAttribute attribute = new ItemAttribute(
+					type,
+					propertyDescriptor,
+					fieldNameOverride,
+					storeFieldInIndex,
+					isFacet,
+					integerRanges,
+					decimalRanges);
 
 			attributes.add(attribute);
 		}
 
 		return new ClassAttributes(type, attributes);
+	}
+	
+	private static <T extends Annotation> T findAnnotation(Class<T> annotationType, Class<?> cl, PropertyDescriptor propertyDescriptor) {
+		T annotation = propertyDescriptor.getReadMethod().getAnnotation(annotationType);
+		
+		if (annotation == null) {
+			// Try get from field
+			final String fieldName = propertyDescriptor.getName();
+
+			Field found = null;
+			
+			for (Class<?> t = cl; t != null; t = t.getSuperclass()) {
+				for (Field field : t.getDeclaredFields()) {
+					if (field.getName().equals(fieldName)) {
+						
+						// Verify that not multiple fields of the same name
+						if (found != null) {
+							throw new IllegalStateException("Multiple fields named " + fieldName + " for " + cl);
+						}
+						
+						found = field;
+					}
+				}
+			}
+
+			if (found != null) {
+				annotation = found.getAnnotation(annotationType);
+			}
+		}
+		
+		return annotation;
 	}
 
 	private static void addFacetAttribute(

@@ -26,7 +26,7 @@ public class CVService extends BaseService {
 		
 		switch (storage) {
 		case LOCAL_FILE_LUCENE:
-			ret = new XMLCVDAO(getLocalXMLStorage());
+			ret = new XMLCVDAO(getLocalXMLStorage(), null);
 			break;
 			
 		default:

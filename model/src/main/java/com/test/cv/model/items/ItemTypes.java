@@ -27,6 +27,13 @@ public class ItemTypes {
 		return getTypeName(type);
 	}
 	
+	public static Class<? extends Item> getType(Item item) {
+		return item.getClass();
+	}
+	
+	public static TypeInfo getTypeInfo(Item item) {
+		return getTypeByName(getTypeName(getType(item)));
+	}
 	static {
 		typesByName = new HashMap<>();
 		

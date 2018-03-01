@@ -10,8 +10,11 @@ import javax.xml.bind.JAXBException;
 
 import com.test.cv.dao.CVStorageException;
 import com.test.cv.dao.ICVDAO;
+import com.test.cv.index.ItemIndex;
+import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.cv.CV;
 import com.test.cv.model.cv.Language;
+import com.test.cv.model.items.ItemTypes;
 import com.test.cv.xml.CVType;
 import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.api.StorageException;
@@ -28,8 +31,8 @@ public class XMLCVDAO extends XMLBaseDAO implements ICVDAO {
 		}
 	}
 
-	public XMLCVDAO(IItemStorage xmlStorage) {
-		super(jaxbContext, xmlStorage);
+	public XMLCVDAO(IItemStorage xmlStorage, ItemIndex index) {
+		super(jaxbContext, xmlStorage, index);
 	}
 	
 	private static final String CV_ID = "cv";
@@ -86,7 +89,7 @@ public class XMLCVDAO extends XMLBaseDAO implements ICVDAO {
 		final CVType converted = convertCV.apply(cv);
 
 		try {
-			store(userId, CV_ID, converted);
+			store(userId, CV_ID, converted, ItemTypes.getType(cv), ClassAttributes.getValues(cv));
 		} catch (XMLStorageException ex) {
 			throw new CVStorageException("Failed to store CV", ex);
 		}

@@ -10,10 +10,11 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import com.test.cv.model.Item;
 import com.test.cv.model.user.User;
 
 @Entity
-public class CV {
+public class CV extends Item {
 
 	@Id 
 	@GeneratedValue(strategy=GenerationType.AUTO)

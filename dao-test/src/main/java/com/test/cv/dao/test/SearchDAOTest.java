@@ -11,12 +11,12 @@ import java.util.function.Predicate;
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
-import com.test.cv.dao.SearchItem;
 import com.test.cv.dao.SearchException;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.items.Snowboard;
 import com.test.cv.model.items.SnowboardProfile;
+import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.DecimalCriterium;
 
@@ -83,7 +83,7 @@ public abstract class SearchDAOTest extends TestCase {
 
 			 assertThat(search.getTotalMatchCount()).isEqualTo(2);
 			 
-			 List<SearchItem> items = search.getItemIDsAndTitles(0, Integer.MAX_VALUE);
+			 final List<SearchItem> items = search.getItemIDsAndTitles(0, Integer.MAX_VALUE);
 
 			 assertThat(items.size()).isEqualTo(2);
 			 

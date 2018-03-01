@@ -12,15 +12,25 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 
+import com.test.cv.model.annotations.IndexItemAttribute;
+import com.test.cv.model.annotations.IndexItemAttributeTransient;
+
 // Base class for all storable structured items
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public abstract class Item {
 
+	
+	@IndexItemAttributeTransient
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
 
+	// Only there to support indexing ID as string in Lucene so can retrieve based on ID
+	@IndexItemAttribute(name="id", storeValue=true)
+	private String idString;
+	
+	@IndexItemAttribute(storeValue=true) // must store for quick-lookup in search results
 	@Column(nullable=false)
 	private String title;
 	
@@ -32,9 +42,11 @@ public abstract class Item {
 	private List<ItemPhoto> photos;
 
 	// Cached values for thumb width and height, only applicble for JPA
+	@IndexItemAttribute(storeValue=true)
 	@Column
 	private Integer thumbWidth;
 	
+	@IndexItemAttribute(storeValue=true)
 	@Column
 	private Integer thumbHeight;
 	
@@ -44,6 +56,14 @@ public abstract class Item {
 
 	public void setId(long id) {
 		this.id = id;
+	}
+
+	public String getIdString() {
+		return idString;
+	}
+
+	public void setIdString(String idString) {
+		this.idString = idString;
 	}
 
 	public String getTitle() {

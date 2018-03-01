@@ -1,4 +1,4 @@
-package com.test.cv.dao;
+package com.test.cv.search;
 
 public abstract class BaseSearchItem implements SearchItem {
 

@@ -5,12 +5,12 @@ import java.util.List;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
 import com.test.cv.dao.SearchException;
-import com.test.cv.dao.SearchItem;
 import com.test.cv.index.IndexSearchCursor;
 import com.test.cv.index.ItemIndex;
 import com.test.cv.index.ItemIndexException;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
+import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.Criterium;
 import com.test.cv.search.facets.ItemsFacets;
 
@@ -46,13 +46,12 @@ public class IndexSearchDAO implements ISearchDAO {
 			
 			@Override
 			public List<SearchItem> getItemIDsAndTitles(int initialIdx, int count) {
-				throw new UnsupportedOperationException("TODO - should not return complete item here");
+				return cursor.getItemIDsAndTitles(initialIdx, count);
 			}
 			
 			@Override
 			public List<String> getItemIDs(int initialIdx, int count) {
-				// TODO Auto-generated method stub
-				return null;
+				return cursor.getItemIDs(initialIdx, count);
 			}
 			
 			@Override

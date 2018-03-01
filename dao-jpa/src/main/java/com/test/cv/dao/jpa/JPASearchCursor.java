@@ -8,7 +8,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import com.test.cv.dao.ISearchCursor;
-import com.test.cv.dao.SearchItem;
+import com.test.cv.search.SearchItem;
 import com.test.cv.search.facets.ItemsFacets;
 
 final class JPASearchCursor implements ISearchCursor {

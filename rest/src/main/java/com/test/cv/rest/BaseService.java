@@ -53,7 +53,7 @@ public abstract class BaseService {
 		
 		switch (storage) {
 		case LOCAL_FILE_LUCENE:
-			ret = new XMLItemDAO(getLocalXMLStorage());
+			ret = new XMLItemDAO(getLocalXMLStorage(), null);
 			break;
 			
 		default:

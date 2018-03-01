@@ -2,6 +2,7 @@ package com.test.cv.index;
 
 import java.util.List;
 
+import com.test.cv.search.SearchItem;
 import com.test.cv.search.facets.ItemsFacets;
 
 
@@ -15,6 +16,9 @@ public interface IndexSearchCursor {
 	 */
 	List<String> getItemIDs(int initialIdx, int count);
 	
+	
+	List<SearchItem> getItemIDsAndTitles(int initialIdx, int count);
+
 	/**
 	 * Total number of items that matched the search.
 	 * Useful when displaying scrollbar.
