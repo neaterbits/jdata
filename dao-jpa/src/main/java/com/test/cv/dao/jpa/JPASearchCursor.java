@@ -44,11 +44,7 @@ final class JPASearchCursor implements ISearchCursor {
 		final List<SearchItem> result = new ArrayList<>(items.size());
 		
 		for (Object [] row : items) {
-			final SearchItem searchItem = new JPASearchItem(
-					String.valueOf((Long)row[0]),
-					(String)row[1],
-					(Integer)row[2],
-					(Integer)row[3]);
+			final SearchItem searchItem = JPASearchItem.mapFromRow(row);
 			
 			result.add(searchItem);
 		}

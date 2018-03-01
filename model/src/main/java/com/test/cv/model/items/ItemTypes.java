@@ -22,6 +22,10 @@ public class ItemTypes {
 		return type.getSimpleName();
 	}
 
+	public static String getTypeName(Item item) {
+		return getTypeName(getType(item));
+	}
+
 	// TODO get from annotation
 	public static String getTypeDisplayName(Class<? extends Item> type) {
 		return getTypeName(type);

@@ -4,10 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,8 +48,6 @@ import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.ItemAttributeValue;
 import com.test.cv.model.LongAttributeValue;
 import com.test.cv.model.StringAttributeValue;
-import com.test.cv.model.attributes.facets.FacetedAttributeComparableRange;
-import com.test.cv.model.items.ItemTypes;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.Criterium;
@@ -62,11 +58,8 @@ import com.test.cv.search.criteria.IntegerRangeCriterium;
 import com.test.cv.search.criteria.RangeCriteria;
 import com.test.cv.search.criteria.SingleValueCriteria;
 import com.test.cv.search.criteria.StringCriterium;
-import com.test.cv.search.facets.IndexFacetedAttributeResult;
-import com.test.cv.search.facets.IndexRangeFacetedAttributeResult;
-import com.test.cv.search.facets.IndexSimpleFacetedAttributeResult;
+import com.test.cv.search.facets.FacetUtils;
 import com.test.cv.search.facets.ItemsFacets;
-import com.test.cv.search.facets.TypeFacets;
 
 public class LuceneItemIndex implements ItemIndex {
 
@@ -517,143 +510,29 @@ public class LuceneItemIndex implements ItemIndex {
 	}
 	
 	private static ItemsFacets computeFacets(List<Document> documents, Set<ItemAttribute> facetedAttributes) {
-		
-		// Sort by type of item
-		final Set<Class<? extends Item>> distinctTypes =
-				facetedAttributes.stream()
-					.map(attribute -> attribute.getItemType())
-					.collect(Collectors.toSet());
-		
-		final List<TypeFacets> typeFacets = new ArrayList<>(distinctTypes.size());
-		
-		for (Class<? extends Item> itemType : distinctTypes) {
-		
-			final List<ItemAttribute> typeAttributes = facetedAttributes.stream()
-				.filter(attribute -> attribute.getItemType().equals(itemType))
-				.collect(Collectors.toList());
-			
-			final String typeName = ItemTypes.getTypeName(itemType);
-			
-			final List<Document> typeDocuments = documents.stream()
-					.filter(d -> d.getField("type").stringValue().equals(typeName))
-					.collect(Collectors.toList());
-			
-			final TypeFacets tf = computeFacetsForType(itemType, typeDocuments, typeAttributes);
-			
-			typeFacets.add(tf);
-		}
-		
-		final ItemsFacets itemsFacets = new ItemsFacets(typeFacets);
-		
-		return itemsFacets;
+		return FacetUtils.computeFacets(documents, facetedAttributes, new FacetUtils.FacetFunctions<Document, IndexableField>() {
+			@Override
+			public boolean isType(Document d, String typeName) {
+				return d.getField("type").stringValue().equals(typeName);
+			}
+
+			@Override
+			public IndexableField getField(Document item, String fieldName) {
+				return item.getField(fieldName);
+			}
+
+			@Override
+			public Integer getIntegerValue(IndexableField field) {
+				return field.numericValue().intValue();
+			}
+
+			@Override
+			public BigDecimal getDecimalValue(IndexableField field) {
+				return BigDecimal.valueOf(field.numericValue().doubleValue());
+			}
+		});
 	}
 	
-	private static TypeFacets computeFacetsForType(Class<? extends Item> itemType, List<Document> documents, List<ItemAttribute> typeAttributes) {
-		
-		final Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults = new HashMap<>(typeAttributes.size());
-		//final List<IndexFacetedAttributeResult> attributeResults = new ArrayList<>(typeAttributes.size());
-		
-		for (Document d : documents) {
-			for (ItemAttribute attribute : typeAttributes) {
-				final IndexableField field = d.getField(attribute.getName());
-				
-				if (field == null) {
-					continue;
-				}
-				
-				// Get the field value from document
-				if (attribute.isFaceted()) {
-					if (attribute.getIntegerRanges() != null) {
-						
-						// Find which range we are in
-						final int value = field.numericValue().intValue();
-
-						computeFacetsForRange(attribute, attribute.getIntegerRanges(), value, attributeResults);
-					}
-					else if (attribute.getDecimalRanges() != null) {
-						
-						// Find which range we are in
-						final BigDecimal value = BigDecimal.valueOf(field.numericValue().doubleValue());
-						
-						computeFacetsForRange(attribute, attribute.getDecimalRanges(), value, attributeResults);
-					}
-					else {
-						// Simple value
-						IndexSimpleFacetedAttributeResult singleValueResult = (IndexSimpleFacetedAttributeResult)attributeResults.get(attribute);
-						
-						// TODO avoid instantiation?
-						// TODO subfacets
-						if (singleValueResult == null) {
-							attributeResults.put(attribute, new IndexSimpleFacetedAttributeResult(attribute, 1, null));
-						}
-						else {
-							attributeResults.put(attribute, new IndexSimpleFacetedAttributeResult(attribute, singleValueResult.getMatchCount() + 1, null));
-						}
-					}
-				}
-			}
-		}
-
-		final TypeFacets typeFacets = new TypeFacets(itemType, new ArrayList<>(attributeResults.values()));
-		
-		return typeFacets;
-	}
-	
-
-	private static <T extends Comparable<T>, R extends FacetedAttributeComparableRange<T>> void computeFacetsForRange(
-			ItemAttribute attribute,
-			R [] ranges,
-			T value,
-			Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults) {
-		
-		final IndexRangeFacetedAttributeResult rangeResult
-				= getOrAddRange(attributeResults, attribute, ranges.length);
-
-		boolean found = false;
-		for (int i = 0; i < ranges.length; ++ i) {
-			final R range = ranges[i];
-
-			if (range.getLower() == null && range.getUpper() == null) {
-				found = true;
-			}
-			else if (range.getLower() == null) {
-				if (value.compareTo(range.getUpper()) <= 0) {
-					found = true;
-				}
-			}
-			else if (range.getUpper() == null) {
-				if (range.getLower().compareTo(value) <= 0 ) {
-					found = true;
-				}
-			}
-			else if (range.getLower().compareTo(value) <= 0 && value.compareTo(range.getUpper()) <= 0) {
-				found = true;
-			}
-			
-			if (found) {
-				++ rangeResult.getMatchCounts()[i];
-				break;
-			}
-		}
-		
-		if (!found) {
-			throw new IllegalStateException("Unable to find range for value for decimal attribute " + attribute.getName());
-		}
-		
-	}
-	
-	private static IndexRangeFacetedAttributeResult getOrAddRange(Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults, ItemAttribute attribute, int count) {
-		IndexRangeFacetedAttributeResult rangeResult = (IndexRangeFacetedAttributeResult)attributeResults.get(attribute);
-		
-		if (rangeResult == null) {
-			rangeResult = new IndexRangeFacetedAttributeResult(attribute, new int[count]);
-			
-			attributeResults.put(attribute, rangeResult);
-		}
-		
-		return rangeResult;
-	}
- 	
 	
 	private static class ResultsCollector implements Collector {
 		private final Set<Integer> documents;

@@ -94,13 +94,19 @@ public final class ItemAttribute {
 		return fieldNameOverride != null ? fieldNameOverride : property.getName();
 	}
 	
-	public ItemAttributeValue<?> getValue(Item item) {
+	public Object getObjectValue(Item item) {
 		final Object value;
 		try {
 			value = property.getReadMethod().invoke(item);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 			throw new IllegalStateException("Failed to invoke getter for " + getName() + " of " + item.getClass().getName(), ex);
 		}
+
+		return value;
+	}
+	
+	public ItemAttributeValue<?> getValue(Item item) {
+		final Object value = getObjectValue(item);
 
 		final ItemAttributeValue<?> itemAttributeValue;
 

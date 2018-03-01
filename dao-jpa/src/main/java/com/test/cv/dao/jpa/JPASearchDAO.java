@@ -1,5 +1,6 @@
 package com.test.cv.dao.jpa;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,9 +18,13 @@ import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
+import com.test.cv.model.items.ItemTypes;
+import com.test.cv.model.items.TypeInfo;
 import com.test.cv.search.criteria.Criterium;
 import com.test.cv.search.criteria.RangeCriteria;
 import com.test.cv.search.criteria.SingleValueCriteria;
+import com.test.cv.search.facets.FacetUtils;
+import com.test.cv.search.facets.ItemsFacets;
 
 public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 
@@ -53,15 +58,9 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 		}
 
 		final StringBuilder fromListBuilder = new StringBuilder();
-		final StringBuilder countBilder = new StringBuilder();
-		final StringBuilder itemIdBuilder = new StringBuilder();
-		final StringBuilder itemBuilder = new StringBuilder();
 		
-		final Set<Map.Entry<EntityType<?>, String>> entrySet = typeToVarName.entrySet();
-
-	
 		boolean first = true;
-		for (Map.Entry<EntityType<?>, String> entry : entrySet) {
+		for (Map.Entry<EntityType<?>, String> entry : typeToVarName.entrySet()) {
 			final EntityType<?> entity = entry.getKey();
 			final String entityName = entity.getName();
 			final String itemVarName = entry.getValue();
@@ -71,20 +70,9 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			}
 			else {
 				fromListBuilder.append(", ");
-				countBilder.append(" + ");
-				itemIdBuilder.append(", ");
-				itemBuilder.append(", ");
 			}
 
 			fromListBuilder.append(entityName).append(' ').append(itemVarName);
-			countBilder.append("count(").append(itemVarName).append(")");
-			itemIdBuilder.append(itemVarName).append(".id");
-			
-			itemBuilder
-				.append(itemVarName).append(".id, ")
-				.append(itemVarName).append(".title, ")
-				.append(itemVarName).append(".thumbWidth, ")
-				.append(itemVarName).append(".thumbHeight ");
 		}
 
 		final String fromList = fromListBuilder.toString();
@@ -98,32 +86,50 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			// However some criteria may be for base types as well, but we can just apply those to all types
 			final StringBuilder whereSb = new StringBuilder(" where ");
 			
-			allParams = new ArrayList<>();
-			
-			for (Map.Entry<EntityType<?>, String> entry : typeToVarName.entrySet()) {
-
-				final EntityType<?> entity = entry.getKey();
-				final String itemJPQLVarName = entry.getValue();
-
-				// Find all criteria that applies to this type
-				final List<Criterium> criteriaForThisType = criteria.stream()
-					.filter(c -> {
-						final Class<? extends Item> itemType = c.getAttribute().getItemType();
-						
-						return itemType.equals(entity.getJavaType());
-					})
-					.collect(Collectors.toList());
-				
-				final List<Object> thisTypeParams = constructWhereClause(criteriaForThisType, whereSb, entity, itemJPQLVarName, allParams.size());
-				
-				allParams.addAll(thisTypeParams);
-			}
+			allParams = constructWhereClause(typeToVarName, criteria, whereSb);
 	
 			whereClause = whereSb.toString();
 		}
 		else {
 			whereClause = "";
 			allParams = null;
+		}
+		
+		final ISearchCursor searchCursor;
+		
+		if (facetAttributes == null || facetAttributes.isEmpty()) {
+			searchCursor = makeSearchCursorForNonFacetedQuery(typeToVarName, fromListBuilder.toString(), whereClause, allParams);
+		}
+		else {
+			searchCursor = makeSearchCursorForFacetedQuery(typeToVarName, facetAttributes, fromList, whereClause, allParams);
+		}
+
+		return searchCursor;
+	}
+
+	private ISearchCursor makeSearchCursorForNonFacetedQuery(LinkedHashMap<EntityType<?>, String> typeToVarName, String fromList, String whereClause, List<Object> allParams) {
+
+		final StringBuilder countBilder = new StringBuilder();
+		final StringBuilder itemIdBuilder = new StringBuilder();
+		final StringBuilder itemBuilder = new StringBuilder();
+		
+		boolean first = true;
+		for (Map.Entry<EntityType<?>, String> entry : typeToVarName.entrySet()) {
+			final String itemVarName = entry.getValue();
+
+			if (first) {
+				first = false;
+			}
+			else {
+				countBilder.append(" + ");
+				itemIdBuilder.append(", ");
+				itemBuilder.append(", ");
+			}
+
+			countBilder.append("count(").append(itemVarName).append(")");
+			itemIdBuilder.append(itemVarName).append(".id");
+			
+			appendItemColumns(itemBuilder, itemVarName).append(" ");
 		}
 
 		final TypedQuery<Long> countQuery = entityManager.createQuery("select " + countBilder.toString() + " from " + fromList + " " + whereClause, Long.class);
@@ -135,8 +141,177 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			addParams(idQuery, allParams);
 			addParams(itemQuery, allParams);
 		}
-
+		
 		return new JPASearchCursor(countQuery, idQuery, itemQuery);
+	}
+
+	private ISearchCursor makeSearchCursorForFacetedQuery(
+			LinkedHashMap<EntityType<?>, String> typeToVarName,
+			Set<ItemAttribute> facetedAttributes,
+			String fromList,
+			String whereClause,
+			List<Object> allParams) {
+		
+		final Query itemQuery = buildItemQuery(typeToVarName, facetedAttributes, fromList, whereClause);
+
+		if (allParams != null) {
+			addParams(itemQuery, allParams);
+		}
+		
+		// Now we have queries for all matching items, also returning faceted attributes so we can count them
+		@SuppressWarnings("unchecked")
+		final List<Item> results = (List<Item>)itemQuery.getResultList();
+
+		final List<JPASearchItem> items = new ArrayList<>(results.size());
+
+		for (Item item : results) {
+			final JPASearchItem searchItem = new JPASearchItem(item);
+			
+			items.add(searchItem);
+		}
+		
+		// We can share code with Lucene mapping for building facets
+		final ItemsFacets facets = FacetUtils.computeFacets(results, facetedAttributes, new FacetUtils.FacetFunctions<Item, Object>() {
+			
+			@Override
+			public boolean isType(Item item, String typeName) {
+				return typeName.equals(ItemTypes.getTypeName(item));
+			}
+
+			@Override
+			public Object getField(Item item, String fieldName) {
+				final TypeInfo typeInfo = ItemTypes.getTypeInfo(item);
+				
+				return typeInfo.getAttributes().getByName(fieldName).getObjectValue(item);
+			}
+
+			@Override
+			public Integer getIntegerValue(Object field) {
+				return (Integer)field;
+			}
+
+			@Override
+			public BigDecimal getDecimalValue(Object field) {
+				return (BigDecimal)field;
+			}
+		});
+
+		return new JPASearchCursorWithFacets(items, facets);
+	}
+	
+	private Query buildItemQuery(LinkedHashMap<EntityType<?>, String> typeToVarName,
+			Set<ItemAttribute> facetedAttributes,
+			String fromList,
+			String whereClause) {
+		
+		final StringBuilder fromBuilder = new StringBuilder();
+
+		boolean first = true;
+		for (Map.Entry<EntityType<?>, String> entry : typeToVarName.entrySet()) {
+			final EntityType<?> entity = entry.getKey();
+			final String itemVarName = entry.getValue();
+
+			if (first) {
+				first = false;
+			}
+			else {
+				fromBuilder.append(", ");
+			}
+			
+			fromBuilder.append(entity.getName()).append(' ').append(itemVarName);
+		}
+
+		final Query fromQuery = entityManager.createQuery("from " + fromBuilder.toString() + " " + whereClause);
+
+		return fromQuery;
+	}
+
+	// Not in use, favoring just to get all items
+	private Query buildItemAndFacetAttributesQuery(
+			LinkedHashMap<EntityType<?>, String> typeToVarName,
+			Set<ItemAttribute> facetedAttributes,
+			String fromList,
+			String whereClause) {
+
+		// Must retrieve all entries in order to compute facets
+		// Just iterate over all types and append all attributes for all kinds of results
+		final StringBuilder itemBuilder = new StringBuilder();
+
+		boolean first = true;
+		for (Map.Entry<EntityType<?>, String> entry : typeToVarName.entrySet()) {
+			final String itemVarName = entry.getValue();
+
+			if (first) {
+				first = false;
+			}
+			else {
+				itemBuilder.append(", ");
+			}
+
+			appendItemColumns(itemBuilder, itemVarName).append(", ");
+
+			// Append for facets?
+			if (facetedAttributes == null || facetedAttributes.isEmpty()) {
+				throw new IllegalStateException("Only for queries with faceted attributes");
+			}
+
+			boolean firstFaceted = true;
+			for (ItemAttribute attribute : facetedAttributes) {
+				if (firstFaceted) {
+					firstFaceted = false;
+				}
+				else {
+					itemBuilder.append(", ");
+				}
+				
+				itemBuilder.append(itemVarName).append('.').append(attribute.getName());
+			}
+		}
+
+		final Query itemQuery = entityManager.createQuery("select " + itemBuilder.toString() +" from " + fromList + " " + whereClause);
+
+		return itemQuery;
+	}
+	
+	private static StringBuilder appendItemColumns(StringBuilder itemBuilder, String itemVarName) {
+		itemBuilder
+			.append(itemVarName).append(".id, ")
+			.append(itemVarName).append(".title, ")
+			.append(itemVarName).append(".thumbWidth, ")
+			.append(itemVarName).append(".thumbHeight");
+		
+		return itemBuilder;
+	}
+
+	private static List<Object> constructWhereClause(LinkedHashMap<EntityType<?>, String> typeToVarName, List<Criterium> criteria, StringBuilder whereSb) {
+		final List<Object> allParams = new ArrayList<>();
+		
+		for (Map.Entry<EntityType<?>, String> entry : typeToVarName.entrySet()) {
+
+			final EntityType<?> entity = entry.getKey();
+			final String itemJPQLVarName = entry.getValue();
+
+			final List<Object> thisTypeParams = addWhereClausesForCriteriaForOneType(entity, itemJPQLVarName, criteria, whereSb, allParams.size());
+			
+			allParams.addAll(thisTypeParams);
+		}
+
+		return allParams;
+	}
+	
+	private static List<Object> addWhereClausesForCriteriaForOneType(EntityType<?> entity, String itemJPQLVarName, List<Criterium> criteria, StringBuilder whereSb, int paramNo) {
+		// Find all criteria that applies to this type
+		final List<Criterium> criteriaForThisType = criteria.stream()
+			.filter(c -> {
+				final Class<? extends Item> itemType = c.getAttribute().getItemType();
+				
+				return itemType.equals(entity.getJavaType());
+			})
+			.collect(Collectors.toList());
+		
+		final List<Object> thisTypeParams = constructWhereClause(criteriaForThisType, whereSb, entity, itemJPQLVarName, paramNo);
+
+		return thisTypeParams;
 	}
 
 	private static void addParams(Query query, List<Object> params) {
