@@ -2,6 +2,7 @@ package com.test.cv.dao.xml;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import com.test.cv.index.ItemIndex;
 import com.test.cv.index.ItemIndexException;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttributeValue;
+import com.test.cv.model.items.ItemTypes;
 import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.api.StorageException;
 
@@ -62,7 +64,7 @@ abstract class XMLBaseDAO {
 		
 		// TODO index on an async-queue with retries
 		try {
-			index.indexItemAttributes(itemType, attributeValues);
+			index.indexItemAttributes(itemType, ItemTypes.getTypeName(itemType), attributeValues);
 		} catch (ItemIndexException ex) {
 			try {
 				xmlStorage.deleteAllItemFiles(userId, itemId);

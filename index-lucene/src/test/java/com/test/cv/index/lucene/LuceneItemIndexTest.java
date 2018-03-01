@@ -13,6 +13,7 @@ import com.test.cv.model.IntegerAttributeValue;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.StringAttributeValue;
 import com.test.cv.model.attributes.ClassAttributes;
+import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.Snowboard;
 import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.Criterium;
@@ -42,7 +43,7 @@ public class LuceneItemIndexTest extends TestCase {
 			final IntegerAttributeValue yearAttrbuteValue = new IntegerAttributeValue(yearAttribute, 2015);
 			final DecimalAttributeValue widthAttributeValue = new DecimalAttributeValue(widthAttribute, new BigDecimal("32.5"));
 	
-			index.indexItemAttributes(Snowboard.class, Arrays.asList(makeAttributeValue, yearAttrbuteValue, widthAttributeValue));
+			index.indexItemAttributes(Snowboard.class, ItemTypes.getTypeName(Snowboard.class), Arrays.asList(makeAttributeValue, yearAttrbuteValue, widthAttributeValue));
 
 			IndexSearchCursor cursor = search(index, new StringCriterium(makeAttribute, "Burton", ComparisonOperator.EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);

@@ -5,7 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import com.test.cv.dao.IItemDAO;
@@ -19,6 +21,10 @@ import com.test.cv.model.items.SnowboardProfile;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.DecimalCriterium;
+import com.test.cv.search.facets.IndexRangeFacetedAttributeResult;
+import com.test.cv.search.facets.IndexSimpleFacetedAttributeResult;
+import com.test.cv.search.facets.ItemsFacets;
+import com.test.cv.search.facets.TypeFacets;
 
 import junit.framework.TestCase;
 
@@ -145,6 +151,61 @@ public abstract class SearchDAOTest extends TestCase {
 			
 			assertThat(itemIds.size()).isEqualTo(1);
 			assertThat(itemIds.contains(itemId1)).isTrue();
+		});
+	}
+	
+	public void testFacetsNoCriteria() throws Exception {
+		
+		final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
+
+		final ItemAttribute widthAttribute = snowboardAttributes.getByName("width");
+		final ItemAttribute makeAttribute = snowboardAttributes.getByName("make");
+
+		final Set<ItemAttribute> facetedAttributes = new HashSet<>(Arrays.asList(widthAttribute, makeAttribute));
+		
+		checkSnowboard((searchDAO, itemId1, itemId2) -> {
+
+			final ISearchCursor search = searchDAO.search(
+					Arrays.asList(Snowboard.class),
+					null,
+					facetedAttributes);
+			
+			final ItemsFacets facets = search.getFacets();
+			
+			assertThat(facets).isNotNull();
+			assertThat(facets.getTypes().size()).isEqualTo(1);
+
+			final TypeFacets typeFacets = facets.getTypes().get(0);
+			
+			assertThat(typeFacets.getType()).isEqualTo(Snowboard.class);
+
+			// System.out.println("Attributes: " + typeFacets.getAttributes());
+			assertThat(typeFacets.getAttributes().size()).isEqualTo(2);
+
+			final IndexSimpleFacetedAttributeResult makeFacet =
+					(IndexSimpleFacetedAttributeResult) find(
+							typeFacets.getAttributes(),
+							attribute -> attribute.getAttribute().getName().equals("make"));
+			
+			assertThat(makeFacet).isNotNull();
+			assertThat(makeFacet.getAttribute()).isEqualTo(makeAttribute);
+			assertThat(makeFacet.getMatchCount()).isEqualTo(2);
+
+			final IndexRangeFacetedAttributeResult widthFacet =
+					(IndexRangeFacetedAttributeResult) find(
+							typeFacets.getAttributes(),
+							attribute -> attribute.getAttribute().getName().equals("width"));
+
+			assertThat(widthFacet).isNotNull();
+			assertThat(widthFacet.getAttribute()).isEqualTo(widthAttribute);
+			assertThat(widthFacet.getMatchCounts()).isNotNull();
+			assertThat(widthFacet.getMatchCounts().length).isEqualTo(widthAttribute.getDecimalRanges().length);
+			assertThat(widthFacet.getMatchCounts()[0]).isEqualTo(0);
+			assertThat(widthFacet.getMatchCounts()[1]).isEqualTo(0);
+			assertThat(widthFacet.getMatchCounts()[2]).isEqualTo(1);
+			assertThat(widthFacet.getMatchCounts()[3]).isEqualTo(1);
+			assertThat(widthFacet.getMatchCounts()[4]).isEqualTo(0);
+			
 		});
 	}
 	

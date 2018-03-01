@@ -18,4 +18,9 @@ public abstract class IndexFacetedAttributeResult {
 	public ItemAttribute getAttribute() {
 		return attribute;
 	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + " [attribute=" + attribute.getName() + "]";
+	}
 }

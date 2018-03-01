@@ -1,6 +1,7 @@
 package com.test.cv.dao;
 
 import java.util.List;
+import java.util.Set;
 
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
@@ -28,7 +29,7 @@ public interface ISearchDAO extends AutoCloseable {
 			List<Class<? extends Item>> types
 			/*, String freeText */,
 			List<Criterium> criteria,
-			List<ItemAttribute> facetAttributes) throws SearchException;
+			Set<ItemAttribute> facetAttributes) throws SearchException;
 	
 }
 

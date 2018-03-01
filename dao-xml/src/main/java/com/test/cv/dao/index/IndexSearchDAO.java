@@ -1,6 +1,7 @@
 package com.test.cv.dao.index;
 
 import java.util.List;
+import java.util.Set;
 
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
@@ -28,11 +29,11 @@ public class IndexSearchDAO implements ISearchDAO {
 	}
 
 	@Override
-	public ISearchCursor search(List<Class<? extends Item>> types, List<Criterium> criteria, List<ItemAttribute> facetAttributes) throws SearchException {
+	public ISearchCursor search(List<Class<? extends Item>> types, List<Criterium> criteria, Set<ItemAttribute> facetAttributes) throws SearchException {
 
 		IndexSearchCursor cursor;
 		try {
-			cursor = index.search(null, criteria, null);
+			cursor = index.search(null, criteria, facetAttributes);
 		} catch (ItemIndexException ex) {
 			throw new SearchException("Failed to search", ex);
 		}
@@ -56,8 +57,7 @@ public class IndexSearchDAO implements ISearchDAO {
 			
 			@Override
 			public ItemsFacets getFacets() {
-				// TODO Auto-generated method stub
-				return null;
+				return cursor.getFacets();
 			}
 		};
 	}

@@ -1,6 +1,7 @@
 package com.test.cv.index;
 
 import java.util.List;
+import java.util.Set;
 
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
@@ -18,13 +19,13 @@ public interface ItemIndex extends AutoCloseable {
 	 * @param attributeValues values to index
 	 */
 	
-	void indexItemAttributes(Class<? extends Item> itemType, List<ItemAttributeValue<?>> attributeValues) throws ItemIndexException;
+	void indexItemAttributes(Class<? extends Item> itemType, String typeName, List<ItemAttributeValue<?>> attributeValues) throws ItemIndexException;
 	
 
 	/**
 	 * Search for values in an index based on types
 	 */
-	IndexSearchCursor search(String freeText, List<Criterium> criteria, List<ItemAttribute> facetAttributes) throws ItemIndexException;
+	IndexSearchCursor search(String freeText, List<Criterium> criteria, Set<ItemAttribute> facetAttributes) throws ItemIndexException;
 	
 	
 }
