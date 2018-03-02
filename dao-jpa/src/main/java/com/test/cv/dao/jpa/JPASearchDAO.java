@@ -194,6 +194,11 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			public BigDecimal getDecimalValue(Object field) {
 				return (BigDecimal)field;
 			}
+
+			@Override
+			public Object getObjectValue(ItemAttribute attribute, Object field) {
+				return field;
+			}
 		});
 
 		return new JPASearchCursorWithFacets(items, facets);

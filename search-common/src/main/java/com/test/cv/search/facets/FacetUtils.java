@@ -22,6 +22,8 @@ public class FacetUtils {
 		Integer getIntegerValue(F field);
 		
 		BigDecimal getDecimalValue(F field);
+		
+		Object getObjectValue(ItemAttribute attribute, F field);
 	}
 
 	public static <I, F> ItemsFacets computeFacets(List<I> documents, Set<ItemAttribute> facetedAttributes, FacetFunctions<I, F> functions) {
@@ -87,17 +89,33 @@ public class FacetUtils {
 						computeFacetsForRange(attribute, attribute.getDecimalRanges(), value, attributeResults);
 					}
 					else {
-						// Simple value
-						IndexSimpleFacetedAttributeResult singleValueResult = (IndexSimpleFacetedAttributeResult)attributeResults.get(attribute);
+						// Single-value
+						IndexSingleValueFacetedAttributeResult singleValueResult = (IndexSingleValueFacetedAttributeResult)attributeResults.get(attribute);
+						
+						// 
 						
 						// TODO avoid instantiation?
 						// TODO subfacets
 						if (singleValueResult == null) {
-							attributeResults.put(attribute, new IndexSimpleFacetedAttributeResult(attribute, 1, null));
+							singleValueResult = new IndexSingleValueFacetedAttributeResult(attribute, new HashMap<>());
+							attributeResults.put(attribute, singleValueResult);
 						}
-						else {
-							attributeResults.put(attribute, new IndexSimpleFacetedAttributeResult(attribute, singleValueResult.getMatchCount() + 1, null));
+						
+						final Object value = functions.getObjectValue(attribute, field);
+						
+						if (value != null) {
+							IndexSingleValueFacet valueFacet = singleValueResult.getForValue(value);
+							
+							if (valueFacet == null) {
+								valueFacet = new IndexSingleValueFacet(value, null);
+								
+								singleValueResult.putForValue(value, valueFacet);
+							}
+							
+							valueFacet.increaseMatchCount();
 						}
+						
+						// Find or add corresponding value
 					}
 				}
 			}

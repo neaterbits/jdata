@@ -32,7 +32,8 @@ import com.test.cv.search.criteria.IntegerRangeCriterium;
 import com.test.cv.search.criteria.StringCriterium;
 import com.test.cv.search.facets.IndexFacetedAttributeResult;
 import com.test.cv.search.facets.IndexRangeFacetedAttributeResult;
-import com.test.cv.search.facets.IndexSimpleFacetedAttributeResult;
+import com.test.cv.search.facets.IndexSingleValueFacet;
+import com.test.cv.search.facets.IndexSingleValueFacetedAttributeResult;
 import com.test.cv.search.facets.ItemsFacets;
 import com.test.cv.search.facets.TypeFacets;
 
@@ -226,19 +227,27 @@ public class SearchService extends BaseService {
 		for (IndexFacetedAttributeResult indexFacetedAttribute : attributes) {
 			final SearchFacetedAttributeResult searchFacetedAttribute;
 
-			if (indexFacetedAttribute instanceof IndexSimpleFacetedAttributeResult) {
-				final IndexSimpleFacetedAttributeResult indexSimpleFacetedAttributeResult
-						= (IndexSimpleFacetedAttributeResult)indexFacetedAttribute;
+			if (indexFacetedAttribute instanceof IndexSingleValueFacetedAttributeResult) {
+				final IndexSingleValueFacetedAttributeResult indexSingleValueFacetedAttributeResult
+						= (IndexSingleValueFacetedAttributeResult)indexFacetedAttribute;
 				
-				final SearchSimpleFacetedAttributeResult searchSimpleFacetedAttribute = new SearchSimpleFacetedAttributeResult();
+				final SearchSingleValueFacetedAttributeResult searchSingleValueFacetedAttribute = new SearchSingleValueFacetedAttributeResult();
 				
-				if (indexSimpleFacetedAttributeResult.getSubFacets() != null) {
-					searchSimpleFacetedAttribute.setSubAttributes(convertAttributeList(indexSimpleFacetedAttributeResult.getSubFacets()));
+				final List<SearchSingleValueFacet> searchValues = new ArrayList<>(indexSingleValueFacetedAttributeResult.getValues().size());
+				for (IndexSingleValueFacet indexValue : indexSingleValueFacetedAttributeResult.getValues()) {
+					
+					final SearchSingleValueFacet searchValue = new SearchSingleValueFacet();
+					
+					searchValue.setMatchCount(indexValue.getMatchCount());
+					
+					if (indexValue.getSubFacets() != null) {
+						searchValue.setSubAttributes(convertAttributeList(indexValue.getSubFacets()));
+					}
 				}
 				
-				searchSimpleFacetedAttribute.setMatchCount(indexSimpleFacetedAttributeResult.getMatchCount());
+				searchSingleValueFacetedAttribute.setValues(searchValues);
 				
-				searchFacetedAttribute = searchSimpleFacetedAttribute;
+				searchFacetedAttribute = searchSingleValueFacetedAttribute;
 			}
 			else if (indexFacetedAttribute instanceof IndexRangeFacetedAttributeResult) {
 				final IndexRangeFacetedAttributeResult indexRangeFacetedAttributeResult

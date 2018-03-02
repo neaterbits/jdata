@@ -22,7 +22,8 @@ import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.DecimalCriterium;
 import com.test.cv.search.facets.IndexRangeFacetedAttributeResult;
-import com.test.cv.search.facets.IndexSimpleFacetedAttributeResult;
+import com.test.cv.search.facets.IndexSingleValueFacet;
+import com.test.cv.search.facets.IndexSingleValueFacetedAttributeResult;
 import com.test.cv.search.facets.ItemsFacets;
 import com.test.cv.search.facets.TypeFacets;
 
@@ -182,14 +183,23 @@ public abstract class SearchDAOTest extends TestCase {
 			// System.out.println("Attributes: " + typeFacets.getAttributes());
 			assertThat(typeFacets.getAttributes().size()).isEqualTo(2);
 
-			final IndexSimpleFacetedAttributeResult makeFacet =
-					(IndexSimpleFacetedAttributeResult) find(
+			final IndexSingleValueFacetedAttributeResult makeFacet =
+					(IndexSingleValueFacetedAttributeResult) find(
 							typeFacets.getAttributes(),
 							attribute -> attribute.getAttribute().getName().equals("make"));
 			
 			assertThat(makeFacet).isNotNull();
 			assertThat(makeFacet.getAttribute()).isEqualTo(makeAttribute);
-			assertThat(makeFacet.getMatchCount()).isEqualTo(2);
+			assertThat(makeFacet.getValues().size()).isEqualTo(2);
+			
+			assertThat(makeFacet.getValues().get(0).getMatchCount()).isEqualTo(1);
+			assertThat(makeFacet.getValues().get(0).getMatchCount()).isEqualTo(1);
+
+			final IndexSingleValueFacet burton = find(makeFacet.getValues(), f -> f.getValue().equals("Burton"));
+			assertThat(burton).isNotNull();
+
+			final IndexSingleValueFacet jones = find(makeFacet.getValues(), f -> f.getValue().equals("Jones"));
+			assertThat(jones).isNotNull();
 
 			final IndexRangeFacetedAttributeResult widthFacet =
 					(IndexRangeFacetedAttributeResult) find(

@@ -48,6 +48,7 @@ import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.ItemAttributeValue;
 import com.test.cv.model.LongAttributeValue;
 import com.test.cv.model.StringAttributeValue;
+import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.Criterium;
@@ -529,6 +530,33 @@ public class LuceneItemIndex implements ItemIndex {
 			@Override
 			public BigDecimal getDecimalValue(IndexableField field) {
 				return BigDecimal.valueOf(field.numericValue().doubleValue());
+			}
+
+			@Override
+			public Object getObjectValue(ItemAttribute attribute, IndexableField field) {
+				
+				final AttributeType attributeType = attribute.getAttributeType();
+				
+				final Object result;
+				
+				switch (attributeType) {
+				case STRING:
+					result = field.stringValue();
+					break;
+					
+				case INTEGER:
+					result = getIntegerValue(field);
+					break;
+					
+				case DECIMAL:
+					result = getDecimalValue(field);
+					break;
+					
+				default:
+					throw new UnsupportedOperationException("Unknown attribute type " + attributeType);
+				}
+				
+				return result;
 			}
 		});
 	}

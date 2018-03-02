@@ -2,8 +2,7 @@ package com.test.cv.rest;
 
 import java.util.List;
 
-public class SearchSimpleFacetedAttributeResult extends SearchFacetedAttributeResult {
-
+public class SearchSingleValueFacet {
 	// Number matching this attribute
 	private int matchCount;
 
