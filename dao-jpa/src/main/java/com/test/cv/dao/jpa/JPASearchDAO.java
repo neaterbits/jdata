@@ -2,6 +2,7 @@ package com.test.cv.dao.jpa;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +21,11 @@ import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.TypeInfo;
+import com.test.cv.search.criteria.ComparisonCriterium;
 import com.test.cv.search.criteria.Criterium;
-import com.test.cv.search.criteria.RangeCriteria;
-import com.test.cv.search.criteria.SingleValueCriteria;
+import com.test.cv.search.criteria.InCriterium;
+import com.test.cv.search.criteria.Range;
+import com.test.cv.search.criteria.RangesCriterium;
 import com.test.cv.search.facets.FacetUtils;
 import com.test.cv.search.facets.ItemsFacets;
 
@@ -327,9 +330,8 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 	
 	private static List<Object> constructWhereClause(List<Criterium> criteria, StringBuilder sb, EntityType<?> entity, String itemJPQLVarName, int paramNo) {
 
-
 		final List<Object> params = new ArrayList<>(criteria.size() * 2); // * 2 because of possible range params
-		
+
 		for (int i = 0; i < criteria.size(); ++ i) {
 			
 			final Criterium c = criteria.get(i);
@@ -345,33 +347,55 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 				sb.append(" and ");
 			}
 			
-			sb.append(itemJPQLVarName).append('.').append(attrName);
 
-			if (c instanceof SingleValueCriteria<?>) {
+			if (c instanceof ComparisonCriterium<?>) {
 				
-				final SingleValueCriteria<?> sc = (SingleValueCriteria<?>)c;
+				final ComparisonCriterium<?> sc = (ComparisonCriterium<?>)c;
 				
+				sb.append(itemJPQLVarName).append('.').append(attrName);
 				sb.append(' ').append(sc.getComparisonOperator().getMathString()).append(":param").append(paramNo ++);
 				
 				params.add(sc.getValue());
 			}
-			else if (c instanceof RangeCriteria<?>) {
-				final RangeCriteria<?> rc = (RangeCriteria<?>)c;
+			else if (c instanceof InCriterium<?>) {
+				final InCriterium<?> ic = (InCriterium<?>)c;
+				
+				sb.append(itemJPQLVarName).append('.').append(attrName);
+				
+				sb.append(" in :param").append(paramNo ++);
 
+				params.add(Arrays.asList(ic.getValues()));
+			}
+			else if (c instanceof RangesCriterium<?, ?>) {
+				final RangesCriterium<?, ?> rc = (RangesCriterium<?, ?>)c;
+				
 				sb.append(" ( ");
+				
+				for (int rangeIdx = 0; rangeIdx < rc.getRanges().length; ++ rangeIdx) {
 
-				sb.append(' ').append(attrName);
-				sb.append(' ').append(rc.includeLower() ? ">=" : ">").append(' ').append(":param").append(paramNo ++);
+					final Range<?> range = rc.getRanges()[rangeIdx];
 
-				sb.append(" and ");
+					if (rangeIdx > 0) {
+						sb.append(" or");
+					}
 
-				sb.append(' ').append(attrName);
-				sb.append(' ').append(rc.includeUpper() ? "<=" : "<").append(' ').append(":param").append(paramNo ++);
+					sb.append(" ( ");
 
+					sb.append(' ').append(itemJPQLVarName).append('.').append(attrName);
+					sb.append(' ').append(range.includeLower() ? ">=" : ">").append(' ').append(":param").append(paramNo ++);
+	
+					sb.append(" and ");
+	
+					sb.append(' ').append(attrName);
+					sb.append(' ').append(range.includeUpper() ? "<=" : "<").append(' ').append(":param").append(paramNo ++);
+	
+					sb.append(" ) ");
+	
+					params.add(range.getLowerValue());
+					params.add(range.getUpperValue());
+				}
+				
 				sb.append(" ) ");
-
-				params.add(rc.getLowerValue());
-				params.add(rc.getUpperValue());
 			}
 			else {
 				throw new UnsupportedOperationException("Unknown criteria type " + c.getClass());

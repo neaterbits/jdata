@@ -9,7 +9,12 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>rest</artifactId>
+
+<!--   
   <packaging>war</packaging>
+-->
+   <packaging>jar</packaging>
+   
   <name>rest Maven Webapp</name>
   <url>http://maven.apache.org</url>
   <dependencies>
@@ -38,6 +43,11 @@
 	  	<artifactId>xmlstorage-s3</artifactId>
 	  	<version>${project.version}</version>
   	</dependency>
+  	<dependency>
+	  	<groupId>${project.groupId}</groupId>
+	  	<artifactId>integrationtest</artifactId>
+	  	<version>${project.version}</version>
+  	</dependency>
    	<dependency>
 	  	<groupId>com.sun.jersey</groupId>
 	  	<artifactId>jersey-server</artifactId>
@@ -54,6 +64,8 @@
   		<version>3.0.1</version>
   		<scope>provided</scope>
   	</dependency>
+  	
+  	<!-- test -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

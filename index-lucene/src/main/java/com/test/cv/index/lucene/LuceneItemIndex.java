@@ -51,13 +51,16 @@ import com.test.cv.model.StringAttributeValue;
 import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonOperator;
+import com.test.cv.search.criteria.ComparisonCriterium;
 import com.test.cv.search.criteria.Criterium;
 import com.test.cv.search.criteria.DecimalCriterium;
-import com.test.cv.search.criteria.DecimalRangeCriterium;
+import com.test.cv.search.criteria.DecimalRange;
+import com.test.cv.search.criteria.DecimalRangesCriterium;
+import com.test.cv.search.criteria.InCriterium;
 import com.test.cv.search.criteria.IntegerCriterium;
-import com.test.cv.search.criteria.IntegerRangeCriterium;
-import com.test.cv.search.criteria.RangeCriteria;
-import com.test.cv.search.criteria.SingleValueCriteria;
+import com.test.cv.search.criteria.IntegerRange;
+import com.test.cv.search.criteria.IntegerRangesCriterium;
+import com.test.cv.search.criteria.RangesCriterium;
 import com.test.cv.search.criteria.StringCriterium;
 import com.test.cv.search.facets.FacetUtils;
 import com.test.cv.search.facets.ItemsFacets;
@@ -296,10 +299,13 @@ public class LuceneItemIndex implements ItemIndex {
 
 			final QueryAndOccur queryAndOccur;
 			
-			if (criterium instanceof SingleValueCriteria<?>) {
-				queryAndOccur = createSingleValueQuery(criterium, fieldName);
+			if (criterium instanceof ComparisonCriterium<?>) {
+				queryAndOccur = createComparisonQuery(criterium, fieldName);
 			}
-			else if (criterium instanceof RangeCriteria<?>) {
+			else if (criterium instanceof InCriterium<?>) {
+				queryAndOccur = createInQuery(criterium, fieldName);
+			}
+			else if (criterium instanceof RangesCriterium<?, ?>) {
 				queryAndOccur = createRangeQuery(criterium, fieldName);
 			}
 			else {
@@ -312,11 +318,11 @@ public class LuceneItemIndex implements ItemIndex {
 		return queryBuilder.build();
 	}
 	
-	private static QueryAndOccur createSingleValueQuery(Criterium criterium, String fieldName) {
+	private static QueryAndOccur createComparisonQuery(Criterium criterium, String fieldName) {
 		final Query query;
 		final Occur occur;
 
-		final ComparisonOperator comparisonOperator = ((SingleValueCriteria<?>) criterium).getComparisonOperator();
+		final ComparisonOperator comparisonOperator = ((ComparisonCriterium<?>) criterium).getComparisonOperator();
 		
 		if (criterium instanceof StringCriterium) {
 			final String value = ((StringCriterium)criterium).getValue();
@@ -430,75 +436,101 @@ public class LuceneItemIndex implements ItemIndex {
 
 		return new QueryAndOccur(query, occur);
 	}
+
+	private static QueryAndOccur createInQuery(Criterium criterium, String fieldName) {
+		final Query query;
+		final Occur occur;
+		
+		final InCriterium<?> inCriterium = (InCriterium<?>)criterium;
+		
+		final Object [] values = inCriterium.getValues();
+		
+		final AttributeType attributeType = criterium.getAttribute().getAttributeType();
+
+		if (values.length == 1) {
+			query = createExactQuery(fieldName, attributeType, values[0]);
+		}
+		else {
+
+			final BooleanQuery.Builder booleanQuery = new BooleanQuery.Builder();
+
+			for (Object value : values) {
+				booleanQuery.add(createExactQuery(fieldName, attributeType, value), Occur.SHOULD);
+			}
+
+			query = booleanQuery.build();
+		}
+		
+		occur = Occur.MUST;
+		
+		return new QueryAndOccur(query, occur);
+	}
 	
+	private static Query createExactQuery(String fieldName, AttributeType attributeType, Object value) {
+		final Query query;
+		
+		switch (attributeType) {
+		case STRING:
+			query = new TermQuery(new Term(fieldName, (String)value));
+			break;
+			
+		case INTEGER:
+			query = IntPoint.newExactQuery(fieldName, (Integer)value);
+			break;
+			
+		case DECIMAL:
+			query = DoublePoint.newExactQuery(fieldName, ((BigDecimal)value).doubleValue());
+			break;
+			
+		default:
+			throw new UnsupportedOperationException("Unknown attribute type: " + attributeType);
+		}
+
+		return query;
+	}
+
 	private static QueryAndOccur createRangeQuery(Criterium criterium, String fieldName) {
 		final Query query;
 		final Occur occur;
 		
-		if (criterium instanceof IntegerRangeCriterium) {
-			final IntegerRangeCriterium integerRangeCriterium = (IntegerRangeCriterium)criterium;
+		if (criterium instanceof IntegerRangesCriterium) {
+			final IntegerRangesCriterium integerRangeCriterium = (IntegerRangesCriterium)criterium;
+
+			final IntegerRange [] ranges = integerRangeCriterium.getRanges();
 			
-			if (integerRangeCriterium.includeLower() && integerRangeCriterium.includeUpper()) {
-
-				query = IntPoint.newRangeQuery(fieldName, integerRangeCriterium.getLowerValue(), integerRangeCriterium.getUpperValue());
-				
-			}
-			else if (integerRangeCriterium.includeLower()) {
-				
-				query = IntPoint.newRangeQuery(fieldName, integerRangeCriterium.getLowerValue(), integerRangeCriterium.getUpperValue() - 1);
-
-			}
-			else if (integerRangeCriterium.includeUpper()) {
-
-				query = IntPoint.newRangeQuery(fieldName, integerRangeCriterium.getLowerValue() + 1, integerRangeCriterium.getUpperValue());
-
+			if (ranges.length == 1) {
+				query = createIntegerRangeQuery(fieldName, ranges[0]);
 			}
 			else {
+				// Nest in should-query
+				final BooleanQuery.Builder rangeBooleanQuery = new BooleanQuery.Builder();
+				
+				for (IntegerRange range : ranges) {
+					rangeBooleanQuery.add(createIntegerRangeQuery(fieldName, range), Occur.SHOULD);
+				}
 
-				query = IntPoint.newRangeQuery(fieldName, integerRangeCriterium.getLowerValue() + 1, integerRangeCriterium.getUpperValue() - 1);
-			
+				query = rangeBooleanQuery.build();
 			}
 			
 			occur = Occur.MUST;
 		}
-		else if (criterium instanceof DecimalRangeCriterium) {
-			final DecimalRangeCriterium decimalRangeCriterium = (DecimalRangeCriterium)criterium;
+		else if (criterium instanceof DecimalRangesCriterium) {
+			final DecimalRangesCriterium decimalRangeCriterium = (DecimalRangesCriterium)criterium;
+			
+			final DecimalRange [] ranges = decimalRangeCriterium.getRanges();
 
-			if (decimalRangeCriterium.includeLower() && decimalRangeCriterium.includeUpper()) {
-				query = DoublePoint.newRangeQuery(
-						fieldName,
-						decimalRangeCriterium.getLowerValue().doubleValue(),
-						decimalRangeCriterium.getUpperValue().doubleValue());
-			}
-			else if (decimalRangeCriterium.includeLower()) {
-				query = new BooleanQuery.Builder()
-						.add(DoublePoint.newRangeQuery(
-							fieldName,
-							decimalRangeCriterium.getLowerValue().doubleValue(),
-							decimalRangeCriterium.getUpperValue().doubleValue()), Occur.MUST)
-						.add(DoublePoint.newExactQuery(fieldName, decimalRangeCriterium.getUpperValue().doubleValue()), Occur.MUST_NOT)
-						.build();
-			}
-			else if (decimalRangeCriterium.includeUpper()) {
-				query = new BooleanQuery.Builder()
-						.add(DoublePoint.newRangeQuery(
-							fieldName,
-							decimalRangeCriterium.getLowerValue().doubleValue(),
-							decimalRangeCriterium.getUpperValue().doubleValue()), Occur.MUST)
-						.add(DoublePoint.newExactQuery(fieldName, decimalRangeCriterium.getLowerValue().doubleValue()), Occur.MUST_NOT)
-						.build();
-				
+			if (ranges.length == 1) {
+				query = createDecimalRangeQuery(fieldName, ranges[0]);
 			}
 			else {
-				query = new BooleanQuery.Builder()
-						.add(DoublePoint.newRangeQuery(
-							fieldName,
-							decimalRangeCriterium.getLowerValue().doubleValue(),
-							decimalRangeCriterium.getUpperValue().doubleValue()), Occur.MUST)
-						.add(DoublePoint.newExactQuery(fieldName, decimalRangeCriterium.getLowerValue().doubleValue()), Occur.MUST_NOT)
-						.add(DoublePoint.newExactQuery(fieldName, decimalRangeCriterium.getUpperValue().doubleValue()), Occur.MUST_NOT)
-						.build();
+				// Nest in should-query
+				final BooleanQuery.Builder rangeBooleanQuery = new BooleanQuery.Builder();
 				
+				for (DecimalRange range : ranges) {
+					rangeBooleanQuery.add(createDecimalRangeQuery(fieldName, range), Occur.SHOULD);
+				}
+
+				query = rangeBooleanQuery.build();
 			}
 			
 			occur = Occur.MUST;
@@ -508,6 +540,77 @@ public class LuceneItemIndex implements ItemIndex {
 		}
 
 		return new QueryAndOccur(query, occur);
+	}
+
+	private static Query createIntegerRangeQuery(String fieldName, IntegerRange range) {
+
+		final Query rangeQuery;
+		
+		if (range.includeLower() && range.includeUpper()) {
+
+			rangeQuery = IntPoint.newRangeQuery(fieldName, range.getLowerValue(), range.getUpperValue());
+			
+		}
+		else if (range.includeLower()) {
+			
+			rangeQuery = IntPoint.newRangeQuery(fieldName, range.getLowerValue(), range.getUpperValue() - 1);
+
+		}
+		else if (range.includeUpper()) {
+
+			rangeQuery = IntPoint.newRangeQuery(fieldName, range.getLowerValue() + 1, range.getUpperValue());
+
+		}
+		else {
+
+			rangeQuery = IntPoint.newRangeQuery(fieldName, range.getLowerValue() + 1, range.getUpperValue() - 1);
+		
+		}
+
+		return rangeQuery;
+	}
+	
+	private static Query createDecimalRangeQuery(String fieldName, DecimalRange range) {
+		final Query rangeQuery;
+		
+		if (range.includeLower() && range.includeUpper()) {
+			rangeQuery = DoublePoint.newRangeQuery(
+					fieldName,
+					range.getLowerValue().doubleValue(),
+					range.getUpperValue().doubleValue());
+		}
+		else if (range.includeLower()) {
+			rangeQuery = new BooleanQuery.Builder()
+					.add(DoublePoint.newRangeQuery(
+						fieldName,
+						range.getLowerValue().doubleValue(),
+						range.getUpperValue().doubleValue()), Occur.MUST)
+					.add(DoublePoint.newExactQuery(fieldName, range.getUpperValue().doubleValue()), Occur.MUST_NOT)
+					.build();
+		}
+		else if (range.includeUpper()) {
+			rangeQuery = new BooleanQuery.Builder()
+					.add(DoublePoint.newRangeQuery(
+						fieldName,
+						range.getLowerValue().doubleValue(),
+						range.getUpperValue().doubleValue()), Occur.MUST)
+					.add(DoublePoint.newExactQuery(fieldName, range.getLowerValue().doubleValue()), Occur.MUST_NOT)
+					.build();
+			
+		}
+		else {
+			rangeQuery = new BooleanQuery.Builder()
+					.add(DoublePoint.newRangeQuery(
+						fieldName,
+						range.getLowerValue().doubleValue(),
+						range.getUpperValue().doubleValue()), Occur.MUST)
+					.add(DoublePoint.newExactQuery(fieldName, range.getLowerValue().doubleValue()), Occur.MUST_NOT)
+					.add(DoublePoint.newExactQuery(fieldName, range.getUpperValue().doubleValue()), Occur.MUST_NOT)
+					.build();
+			
+		}
+
+		return rangeQuery;
 	}
 	
 	private static ItemsFacets computeFacets(List<Document> documents, Set<ItemAttribute> facetedAttributes) {

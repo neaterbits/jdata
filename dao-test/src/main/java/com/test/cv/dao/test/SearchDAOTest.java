@@ -21,6 +21,7 @@ import com.test.cv.model.items.SnowboardProfile;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.DecimalCriterium;
+import com.test.cv.search.criteria.DecimalInCriterium;
 import com.test.cv.search.facets.IndexRangeFacetedAttributeResult;
 import com.test.cv.search.facets.IndexSingleValueFacet;
 import com.test.cv.search.facets.IndexSingleValueFacetedAttributeResult;
@@ -155,6 +156,43 @@ public abstract class SearchDAOTest extends TestCase {
 		});
 	}
 	
+	public void testSnowboardIn() throws Exception {
+		checkSnowboard((searchDAO, itemId1, itemId2) -> {
+			final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
+
+			final ItemAttribute widthAttribute = snowboardAttributes.getByName("width");
+			 
+			assertThat(widthAttribute).isNotNull();
+			 
+			DecimalInCriterium widthCriterium = new DecimalInCriterium(widthAttribute, new BigDecimal [] { new BigDecimal("30.4"), new BigDecimal("32.8") });
+			
+			ISearchCursor search = searchDAO.search(
+					Arrays.asList(Snowboard.class),
+					Arrays.asList(widthCriterium),
+					null);
+			
+			List<String> itemIds = search.getItemIDs(0, Integer.MAX_VALUE);
+			
+			assertThat(itemIds.size()).isEqualTo(2);
+			assertThat(itemIds.contains(itemId1)).isTrue();
+			assertThat(itemIds.contains(itemId2)).isTrue();
+			
+			// match only one
+			widthCriterium = new DecimalInCriterium(widthAttribute, new BigDecimal [] { new BigDecimal("32.4"), new BigDecimal("32.8") });
+			
+			search = searchDAO.search(
+					Arrays.asList(Snowboard.class),
+					Arrays.asList(widthCriterium),
+					null);
+			
+			itemIds = search.getItemIDs(0, Integer.MAX_VALUE);
+			
+			assertThat(itemIds.size()).isEqualTo(1);
+			assertThat(itemIds.contains(itemId2)).isTrue();
+		});
+		
+	}
+	
 	public void testFacetsNoCriteria() throws Exception {
 		
 		final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
@@ -246,6 +284,7 @@ public abstract class SearchDAOTest extends TestCase {
 			 itemDAO.deleteItem(userId, itemId1);
 			 itemDAO.deleteItem(userId, itemId2);
 		}
-		
 	}
+	
+	
 }

@@ -31,6 +31,7 @@
 	    <module>index-lucene</module>
 	    <module>index-elasticsearch</module>
 	    <module>index-elasticsearch-aws</module>
+	    <module>integrationtest</module>
 	    <module>xmlstorage</module>
 	    <module>xmlstorage-local</module>
 	    <module>xmlstorage-s3</module>

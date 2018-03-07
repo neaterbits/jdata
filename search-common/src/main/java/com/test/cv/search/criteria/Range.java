@@ -1,17 +1,12 @@
 package com.test.cv.search.criteria;
 
-import com.test.cv.model.ItemAttribute;
-
-public class RangeCriteria<T> extends Criterium {
-
+public abstract class Range<T extends Comparable<T>> {
 	private final T lowerValue;
 	private final boolean includeLower;
 	private final T upperValue;
 	private final boolean includeUpper;
 	
-	RangeCriteria(ItemAttribute attribute, T lowerValue, boolean includeLower, T upperValue,
-			boolean includeUpper) {
-		super(attribute);
+	Range(T lowerValue, boolean includeLower, T upperValue, boolean includeUpper) {
 		this.lowerValue = lowerValue;
 		this.includeLower = includeLower;
 		this.upperValue = upperValue;

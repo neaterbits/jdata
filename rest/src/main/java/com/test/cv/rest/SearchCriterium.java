@@ -2,37 +2,41 @@ package com.test.cv.rest;
 
 public class SearchCriterium {
 	private String type; // type of object this belongs to
-	private String attribute; // attribute for thus
+	private String attribute; // attribute for this one
 	
-	// either a value or a range
-	private Object value;
-	private SearchRange range;
-	
+	// either a values ranges
+	private SearchCriteriumValue [] values;
+	private SearchRange [] ranges;
 	
 	public String getType() {
 		return type;
 	}
+	
 	public void setType(String type) {
 		this.type = type;
 	}
+	
 	public String getAttribute() {
 		return attribute;
 	}
+	
 	public void setAttribute(String attribute) {
 		this.attribute = attribute;
 	}
-	public Object getValue() {
-		return value;
+
+	SearchCriteriumValue[] getValues() {
+		return values;
 	}
-	public void setValue(Object value) {
-		this.value = value;
+
+	void setValues(SearchCriteriumValue[] values) {
+		this.values = values;
 	}
-	public SearchRange getRange() {
-		return range;
+
+	SearchRange[] getRanges() {
+		return ranges;
 	}
-	public void setRange(SearchRange range) {
-		this.range = range;
+
+	void setRanges(SearchRange[] ranges) {
+		this.ranges = ranges;
 	}
-	
-	
 }

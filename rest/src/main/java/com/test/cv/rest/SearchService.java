@@ -2,15 +2,18 @@ package com.test.cv.rest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.POST;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 
 import com.test.cv.common.IOUtil;
 import com.test.cv.common.ItemId;
@@ -18,18 +21,21 @@ import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.dao.SearchException;
+import com.test.cv.dao.index.IndexSearchDAO;
+import com.test.cv.integrationtest.IntegrationTestHelper;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.TypeInfo;
 import com.test.cv.search.SearchItem;
-import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.Criterium;
-import com.test.cv.search.criteria.DecimalCriterium;
-import com.test.cv.search.criteria.DecimalRangeCriterium;
-import com.test.cv.search.criteria.IntegerCriterium;
-import com.test.cv.search.criteria.IntegerRangeCriterium;
-import com.test.cv.search.criteria.StringCriterium;
+import com.test.cv.search.criteria.DecimalInCriterium;
+import com.test.cv.search.criteria.DecimalRange;
+import com.test.cv.search.criteria.DecimalRangesCriterium;
+import com.test.cv.search.criteria.IntegerInCriterium;
+import com.test.cv.search.criteria.IntegerRange;
+import com.test.cv.search.criteria.IntegerRangesCriterium;
+import com.test.cv.search.criteria.StringInCriterium;
 import com.test.cv.search.facets.IndexFacetedAttributeResult;
 import com.test.cv.search.facets.IndexRangeFacetedAttributeResult;
 import com.test.cv.search.facets.IndexSingleValueFacet;
@@ -37,9 +43,10 @@ import com.test.cv.search.facets.IndexSingleValueFacetedAttributeResult;
 import com.test.cv.search.facets.ItemsFacets;
 import com.test.cv.search.facets.TypeFacets;
 
+@Path("/search")
 public class SearchService extends BaseService {
 	
-	private static ISearchDAO getSearchDAO(HttpServletRequest request) {
+	private ISearchDAO getSearchDAO(HttpServletRequest request) {
 		
 		final ISearchDAO ret;
 		
@@ -47,7 +54,15 @@ public class SearchService extends BaseService {
 		
 		switch (storage) {
 		case LOCAL_FILE_LUCENE:
-			ret = null; // TODO Lucene DAO new XMLItemDAO(getLocalXMLStorage());
+			File baseDir = (File)request.getSession().getAttribute("baseDir");
+			
+			if (baseDir == null) {
+				baseDir = IntegrationTestHelper.makeBaseDir();
+				
+				request.getSession().setAttribute("baseDir", baseDir);
+			}
+			
+			ret = new IndexSearchDAO(IntegrationTestHelper.makeIndex(baseDir));
 			break;
 			
 		default:
@@ -57,7 +72,8 @@ public class SearchService extends BaseService {
 		return ret;
 	}
 	
-	@POST
+	@GET
+	@Path("search")
 	// TODO check that we adhere to best practices for pageNo and itemsPerPage
 	public SearchResult search(String freeText, String [] types, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, HttpServletRequest request) {
 		
@@ -70,54 +86,69 @@ public class SearchService extends BaseService {
 		}
 
 		// TODO support types
-		final ISearchCursor cursor;
-		try {
-			cursor = getSearchDAO(request).search(null, daoCriteria, null);
-		} catch (SearchException ex) {
-			throw new IllegalStateException("Failed to search", ex);
-		}
+		final SearchResult result = new SearchResult();
+			
+		ISearchDAO searchDAO = null;
 
-		final int totalMatchCount = cursor.getTotalMatchCount();
+		searchDAO = getSearchDAO(request);
 		
-		final int initialIdx;
-		final int count;
-		if (pageNo != null && itemsPerPage != null) {
-			if (pageNo < 1) {
-				throw new IllegalArgumentException("pageNo < 1");
+		try {
+			final ISearchCursor cursor;
+			try {
+				cursor = searchDAO.search(null, daoCriteria, null);
+			} catch (SearchException ex) {
+				throw new IllegalStateException("Failed to search", ex);
+			}
+	
+			final int totalMatchCount = cursor.getTotalMatchCount();
+			
+			final int initialIdx;
+			final int count;
+			if (pageNo != null && itemsPerPage != null) {
+				if (pageNo < 1) {
+					throw new IllegalArgumentException("pageNo < 1");
+				}
+				
+				initialIdx = itemsPerPage * (pageNo - 1); // starts at 1
+				count = itemsPerPage;
+			}
+			else {
+				// return all results
+				initialIdx = 0;
+				count = totalMatchCount;
 			}
 			
-			initialIdx = itemsPerPage * (pageNo - 1); // starts at 1
-			count = itemsPerPage;
+			final List<SearchItem> found = cursor.getItemIDsAndTitles(initialIdx, count);
+			
+			
+			final int numFound = found.size();
+			
+			result.setPageFirstItem(initialIdx);
+			result.setPageItemCount(numFound);
+			result.setTotalItemMatchCount(totalMatchCount);
+			
+			final SearchItemResult [] items = new SearchItemResult[numFound];
+			
+			if (cursor.getFacets() != null) {
+				result.setFacets(convertFacets(cursor.getFacets()));
+			}
+			
+			for (int i = 0; i < numFound; ++ i) {
+				final SearchItem foundItem = found.get(i);
+	
+				items[i] = new SearchItemResult(foundItem.getItemId(), foundItem.getTitle(), foundItem.getThumbWidth(), foundItem.getThumbHeight());
+			}
+			
+			result.setItems(items);
+			
 		}
-		else {
-			// return all results
-			initialIdx = 0;
-			count = totalMatchCount;
+		finally {
+			try {
+				searchDAO.close();
+			} catch (Exception ex) {
+				throw new IllegalStateException("Failed to close search DAO", ex);
+			}
 		}
-		
-		final List<SearchItem> found = cursor.getItemIDsAndTitles(initialIdx, count);
-		
-		final SearchResult result = new SearchResult();
-		
-		final int numFound = found.size();
-		
-		result.setPageFirstItem(initialIdx);
-		result.setPageItemCount(numFound);
-		result.setTotalItemMatchCount(totalMatchCount);
-		
-		final SearchItemResult [] items = new SearchItemResult[numFound];
-		
-		if (cursor.getFacets() != null) {
-			result.setFacets(convertFacets(cursor.getFacets()));
-		}
-		
-		for (int i = 0; i < numFound; ++ i) {
-			final SearchItem foundItem = found.get(i);
-
-			items[i] = new SearchItemResult(foundItem.getItemId(), foundItem.getTitle(), foundItem.getThumbWidth(), foundItem.getThumbHeight());
-		}
-		
-		result.setItems(items);
 
 		return result;
 	}
@@ -153,52 +184,82 @@ public class SearchService extends BaseService {
 
 		final Criterium criterium;
 		
-		final SearchRange range = searchCriterium.getRange();
-		if (range != null) {
+		final SearchRange [] ranges = searchCriterium.getRanges();
+		if (ranges != null) {
 			
 			switch (attribute.getAttributeType()) {
 			case STRING:
 				throw new UnsupportedOperationException("Range query for strings");
 				
 			case INTEGER:
-				criterium = new IntegerRangeCriterium(
-						attribute,
-						(Integer)range.getLower(), range.includeLower(),
-						(Integer)range.getUpper(), range.includeUpper());
+				final IntegerRange [] integerRanges = new IntegerRange[ranges.length];
+				
+				for (int i = 0; i < ranges.length; ++ i) {
+					final SearchRange range = ranges[i];
+
+					final IntegerRange integerRange = new IntegerRange(
+							(Integer)range.getLower(), range.includeLower(),
+							(Integer)range.getUpper(), range.includeUpper());
+					
+					integerRanges[i] = integerRange;
+				}
+				criterium = new IntegerRangesCriterium(attribute, integerRanges);
 				break;
 				
 			case DECIMAL:
-				criterium = new DecimalRangeCriterium(
-						attribute,
-						(BigDecimal)range.getLower(), range.includeLower(),
-						(BigDecimal)range.getUpper(), range.includeUpper());
+				final DecimalRange [] decimalRanges = new DecimalRange[ranges.length];
+
+				for (int i = 0; i < ranges.length; ++ i) {
+					final SearchRange range = ranges[i];
+
+					final DecimalRange decimalRange = new DecimalRange(
+							(BigDecimal)range.getLower(), range.includeLower(),
+							(BigDecimal)range.getUpper(), range.includeUpper());
+					
+					decimalRanges[i] = decimalRange;
+				}
+
+				criterium = new DecimalRangesCriterium(attribute, decimalRanges);
 				break;
 				
+			default:
+				throw new UnsupportedOperationException("Unknown attribute type " + attribute.getAttributeType());
+			}
+		}
+		else if (searchCriterium.getValues() != null) {
+			
+			switch (attribute.getAttributeType()) {
+			case STRING:
+				criterium = new StringInCriterium(attribute, convertArray(searchCriterium.getValues(), length -> new String[length], o -> (String)o.getValue()));
+				break;
+
+			case INTEGER:
+				criterium = new IntegerInCriterium(attribute, convertArray(searchCriterium.getValues(), length -> new Integer[length], o -> (Integer)o.getValue()));
+				break;
+
+			case DECIMAL:
+				criterium = new DecimalInCriterium(attribute, convertArray(searchCriterium.getValues(), length -> new BigDecimal[length], o -> (BigDecimal)o.getValue()));
+				break;
+
 			default:
 				throw new UnsupportedOperationException("Unknown attribute type " + attribute.getAttributeType());
 			}
 		}
 		else {
-			switch (attribute.getAttributeType()) {
-			case STRING:
-				criterium = new StringCriterium(attribute, (String)searchCriterium.getValue(), ComparisonOperator.EQUALS);
-				break;
-
-			case INTEGER:
-				criterium = new IntegerCriterium(attribute, (Integer)searchCriterium.getValue(), ComparisonOperator.EQUALS);
-				break;
-
-			case DECIMAL:
-				criterium = new DecimalCriterium(attribute, (BigDecimal)searchCriterium.getValue(), ComparisonOperator.EQUALS);
-				break;
-
-			default:
-				throw new UnsupportedOperationException("Unknown attribute type " + attribute.getAttributeType());
-			}
-			
+			throw new IllegalArgumentException("Neither values nor ranges set");
 		}
 
 		return criterium;
+	}
+	
+	private static <T, R> R [] convertArray(T [] input, Function<Integer, R []> createArray, Function<T, R> convert) {
+		final R []output = createArray.apply(input.length);
+		
+		for (int i = 0; i < input.length; ++ i) {
+			output[i] = convert.apply(input[i]);
+		}
+
+		return output;
 	}
 	
 	private static SearchFacetsResult convertFacets(ItemsFacets facets) {

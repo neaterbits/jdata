@@ -12,6 +12,7 @@ import com.test.cv.dao.index.IndexSearchDAO;
 import com.test.cv.dao.test.SearchDAOTest;
 import com.test.cv.index.ItemIndex;
 import com.test.cv.index.lucene.LuceneItemIndex;
+import com.test.cv.integrationtest.IntegrationTestHelper;
 import com.test.cv.xmlstorage.local.LocalXmlStorage;
 
 public class IndexSearchDAOTest extends SearchDAOTest {
@@ -20,7 +21,7 @@ public class IndexSearchDAOTest extends SearchDAOTest {
 	private final ItemIndex index;
 	
 	public IndexSearchDAOTest() {
-		baseDir = XMLDAOTestHelper.makeBaseDir();
+		baseDir = IntegrationTestHelper.makeBaseDir();
 		try {
 			final Directory luceneDirectory = FSDirectory.open(baseDir.toPath());
 		

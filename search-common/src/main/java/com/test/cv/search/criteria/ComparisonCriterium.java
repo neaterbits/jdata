@@ -2,12 +2,13 @@ package com.test.cv.search.criteria;
 
 import com.test.cv.model.ItemAttribute;
 
-public abstract class SingleValueCriteria<T> extends Criterium {
+public abstract class ComparisonCriterium<T extends Comparable<T>> 
+	extends ValueCriterium<T> {
 
 	private final T value;
 	private final ComparisonOperator comparisonOperator;
 
-	public SingleValueCriteria(ItemAttribute attribute, T value, ComparisonOperator comparisonOperator) {
+	public ComparisonCriterium(ItemAttribute attribute, T value, ComparisonOperator comparisonOperator) {
 		super(attribute);
 		
 		this.value = value;
@@ -21,4 +22,5 @@ public abstract class SingleValueCriteria<T> extends Criterium {
 	public final ComparisonOperator getComparisonOperator() {
 		return comparisonOperator;
 	}
+
 }
