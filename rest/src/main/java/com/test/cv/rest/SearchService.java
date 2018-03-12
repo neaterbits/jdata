@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
@@ -75,7 +76,21 @@ public class SearchService extends BaseService {
 	@GET
 	@Path("search")
 	// TODO check that we adhere to best practices for pageNo and itemsPerPage
-	public SearchResult search(String freeText, String [] types, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, HttpServletRequest request) {
+	public SearchResult search(String freeText, String [] types, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, boolean test, HttpServletRequest request) {
+		
+		final SearchResult result;
+		if (test) {
+			// Return a hardcoded testresult for simple local testing
+			result = makeTestResult();
+		}
+		else {
+			result = searchInDB(freeText, types, criteria, pageNo, itemsPerPage, request);
+		}
+
+		return result;
+	}
+
+	private SearchResult searchInDB(String freeText, String [] types, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, HttpServletRequest request) {
 		
 		final List<Criterium> daoCriteria; 
 		if (criteria != null) {
@@ -379,7 +394,7 @@ public class SearchService extends BaseService {
 		// titles, in order
 		// thumbnail sizes (byte width, byte height), in order
 		
-		final SearchResult searchResult = this.search(freeText, types, criteria, pageNo, itemsPerPage, request);
+		final SearchResult searchResult = this.search(freeText, types, criteria, pageNo, itemsPerPage, false, request);
 
 		// Add information to compression stream
 		
@@ -447,5 +462,41 @@ public class SearchService extends BaseService {
 		}
 
 		return baos.toByteArray();
+	}
+	
+	private SearchResult makeTestResult() {
+		final SearchResult result = new SearchResult();
+		
+		final SearchFacetsResult facets = new SearchFacetsResult();
+		
+		final SearchFacetedTypeResult sports = new SearchFacetedTypeResult();
+		
+		sports.setType("sports");
+		sports.setTypeDisplayName("Sports");
+		
+		final SearchFacetedTypeResult snowboard = new SearchFacetedTypeResult();
+		
+		snowboard.setType("snowboard");
+		snowboard.setTypeDisplayName("Snowboards");
+		
+		sports.setSubTypes(Arrays.asList(snowboard));
+		
+		final SearchFacetedTypeResult housing = new SearchFacetedTypeResult();
+		
+		housing.setType("housing");
+		housing.setTypeDisplayName("Housing");
+
+		final SearchFacetedTypeResult apartments = new SearchFacetedTypeResult();
+
+		apartments.setType("apartment");
+		apartments.setTypeDisplayName("Apartments");
+		
+		housing.setSubTypes(Arrays.asList(apartments));
+		
+		facets.setTypes(Arrays.asList(sports, housing));
+		
+		result.setFacets(facets);
+		
+		return result;
 	}
 }

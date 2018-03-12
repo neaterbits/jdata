@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.cv.common.IOUtil;
 import com.test.cv.dao.ItemStorageException;
@@ -51,6 +52,23 @@ public class JettyRunServlet {
 
 		private static final long serialVersionUID = 1L;
 
+		private static boolean isTest(HttpServletRequest req) {
+			final String testParam = req.getParameter("test");
+			
+			boolean test = "true".equals(testParam);
+
+			return test;
+		}
+		
+		@Override
+		protected void doOptions(HttpServletRequest req, HttpServletResponse resp)
+				throws ServletException, IOException {
+
+			if (isTest(req)) {
+				resp.setHeader("Access-Control-Allow-Origin", "*");
+			}
+		}
+
 		@Override
 		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			// TODO Auto-generated method stub
@@ -81,6 +99,8 @@ public class JettyRunServlet {
 			
 			final ObjectMapper mapper = new ObjectMapper();
 			
+			mapper.setSerializationInclusion(Include.NON_NULL);
+			
 			if (req.getContentLength() > 0) {
 				// Decode JSON
 						
@@ -94,15 +114,22 @@ public class JettyRunServlet {
 				searchCriteria = null;
 			}
 
+			final boolean test = isTest(req);
+
 			final SearchResult result = searchService.search(
 					freeText,
 					types,
 					searchCriteria != null ? searchCriteria.getCriteria() : null,
 					pageNo,
 					itemsPerPage,
+					test,
 					req);
-			
-			mapper.writeValue(resp.getOutputStream(), result);
+
+			if (test) {
+				resp.setHeader("Access-Control-Allow-Origin", "*");
+			}
+
+			mapper.writerWithDefaultPrettyPrinter().writeValue(resp.getOutputStream(), result);
 
 			resp.setStatus(200);
 		}
@@ -131,11 +158,11 @@ public class JettyRunServlet {
 			else {
 				// Posting item
 				final String type = req.getParameter("itemType");
-				
+
 				if (type == null) {
 					throw new ServletException("No type information for item");
 				}
-				
+
 				final TypeInfo typeInfo = ItemTypes.getTypeByName(type);
 				
 				if (typeInfo == null) {

@@ -9,6 +9,9 @@ public class SearchFacetedTypeResult {
 
 	private String type;
 	private String typeDisplayName;
+	
+	private List<SearchFacetedTypeResult> subTypes;
+	
 	private List<SearchFacetedAttributeResult> attributes;
 
 	public String getType() {
@@ -25,6 +28,14 @@ public class SearchFacetedTypeResult {
 
 	public void setTypeDisplayName(String typeDisplayName) {
 		this.typeDisplayName = typeDisplayName;
+	}
+	
+	public List<SearchFacetedTypeResult> getSubTypes() {
+		return subTypes;
+	}
+
+	public void setSubTypes(List<SearchFacetedTypeResult> subTypes) {
+		this.subTypes = subTypes;
 	}
 
 	public List<SearchFacetedAttributeResult> getAttributes() {
