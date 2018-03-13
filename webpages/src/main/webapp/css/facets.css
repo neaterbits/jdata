@@ -1,0 +1,11 @@
+@CHARSET "UTF-8";
+
+.facetType {
+	background-color: LightGrey;
+}
+.typeTitle  {
+	background-color: #AAAA77;
+	border: 1px;
+	border-color: black;
+}
+

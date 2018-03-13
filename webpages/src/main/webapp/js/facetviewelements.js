@@ -37,8 +37,6 @@ function FacetViewElements() {
 	this.createTypeListElement = function(parentElement, text) {
 		var li = document.createElement('li');
 		
-		li.innerHTML = "<span class='typeListElement'>" + text + "</span>";
-		
 		append(parentElement, li);
 
 		li.setAttribute("class", "facetTypeListElement");
