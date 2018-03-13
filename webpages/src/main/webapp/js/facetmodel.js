@@ -9,53 +9,10 @@ function FacetModel(serviceUrl, allowCrossOrigin) {
 	this.serviceUrl = serviceUrl;
 	this.allowCrossOrigin = allowCrossOrigin;
 	
-	this.getInitial = function(onsuccess) {
-
-		var t = this;
-
-		// Post to get initial for all known
-		this._postAjax(this.serviceUrl, function(response) {
-
-			t._updateFacets(response);
-			
-			onsuccess();
-		});
-	}
-	
-	
-	this.refresh = function(types, criteria, onsuccess) {
-		
-		var t = this;
-		
-		// Call REST service with criteria
-		this._postAjax(serviceURL, 'POST', criteria, function(response) {
-			t._updateFacets(response);
-
-			onsuccess();
-		});
+	this.updateFacets = function(facets) {
+		this.types = facets.types;
 	}
 
-	this._postAjax = function(url, onsuccess) {
-		var request = new XMLHttpRequest();
-
-		request.responseType = 'json';
-
-		request.onreadystatechange = function() {
-
-			if (this.readyState == 4 && this.status == 200) {
-				onsuccess(this.response);
-			}
-		};
-
-		request.open('POST', url, true);
-		
-		request.send();
-	};
-	
-	this._updateFacets = function(response) {
-		this.types = response.facets.types;
-	};
-	
 	this.getTypeId = function(typeIdx) {
 		return this.types[typeIdx].name;
 	}
@@ -66,34 +23,34 @@ function FacetModel(serviceUrl, allowCrossOrigin) {
 		if (typeof this.types === 'undefined') {
 			throw "No types defined for model";
 		}
-		
+
 		this._iterate(this.types, 'type', callerRootElement, onArray, onArrayElement);
-	};
+	}
 
 	this._iterate = function(modelCurArray, kind, callerCur, onArray, onArrayElement) {
 
-		callerCur = onArray(kind, modelCurArray.length, callerCur);
+		var arrayCur = onArray(kind, modelCurArray.length, callerCur);
 
 		for (var i = 0; i < modelCurArray.length; ++ i) {
 			var element = modelCurArray[i];
 
-			callerCur = onArrayElement(kind, element, i, callerCur);
+			var arrayElementCur = onArrayElement(kind, element, i, arrayCur);
 
 			if (kind === 'type') {
 
 				if (typeof element.subTypes !== 'undefined') {
-					this._iterate(element.subTypes, 'type', callerCur, onArray, onArrayElement);
+					this._iterate(element.subTypes, 'type', arrayElementCur, onArray, onArrayElement);
 				}
 
 				if (typeof element.attributes !== 'undefined') {
-					this._iterate(element.attribute, 'attribute', callerCur, onArray, onArrayElement);
+					this._iterate(element.attribute, 'attribute', arrayElementCur, onArray, onArrayElement);
 				}
 			}
 			else if (kind === 'attribute') {
 				if (typeof element.subAttribtues !== 'undefined') {
 					// Recursive attributes, eg County under State
 
-					this._iterate(element.subAttributes, 'attribute', callerCur, onArray, onArrayElement);
+					this._iterate(element.subAttributes, 'attribute', arrayElementCur, onArray, onArrayElement);
 				}
 			}
 			else {

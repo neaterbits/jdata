@@ -69,32 +69,12 @@ function FacetController(facetModel, facetView) {
 	this.refresh = function() {
 		
 		if (this.viewInitialized) {
-			
-			
-			// Search and from the result create a bunch of collapsable divs, one for each
-			// category of facets
-			// There will be a topmost one for selecting the type of item to return
-			
-			// First collect criteria from the last result and selections
-			// We have a list of all items that can be selected from containing a reference to all checkboxes
-			
-			var typesAndCriteria = this._collectCriteriaAndTypesFromSelections();
-			
-			this.model.refresh(typesAndCriteria.types, typesAndCriteria.criteria, function() {
-	
-				// Merge result into UI
-				this._updateUI(facetsResult);
-	
-			});
+			this._updateUI();
 		}
 		else {
-			var t = this;
-			this.model.getInitial(function() {
+			this.view.initFromModel(this.model);
 
-				t.view.initFromModel(t.model);
-
-				t.viewInitialized = true;
-			});
+			this.viewInitialized = true;
 		}
 	}
 	
@@ -113,7 +93,7 @@ function FacetController(facetModel, facetView) {
 		// TODO location can be shared but length/width/height does not make sense since is very different ranges depending on type of item
 	};
 	
-	this._collectCriteriaAndTypesFromSelections = function() {
+	this.collectCriteriaAndTypesFromSelections = function() {
 
 		var types = {};
 		var criteria = [];
