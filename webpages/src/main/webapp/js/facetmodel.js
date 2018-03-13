@@ -43,14 +43,27 @@ function FacetModel(serviceUrl, allowCrossOrigin) {
 				}
 
 				if (typeof element.attributes !== 'undefined') {
-					this._iterate(element.attribute, 'attribute', arrayElementCur, onArray, onArrayElement);
+					this._iterate(element.attributes, 'attribute', arrayElementCur, onArray, onArrayElement);
 				}
 			}
 			else if (kind === 'attribute') {
-				if (typeof element.subAttribtues !== 'undefined') {
-					// Recursive attributes, eg County under State
+				
+				// Iterate over values
+				if (typeof element.values !== 'undefined') {
+					
+					var valuesArrayCur = onArray('attributeValue', element.values.length, arrayElementCur);
+					
+					for (var attrIdx = 0; attrIdx < element.values.length; ++ attrIdx) {
+						var attrValue = element.values[attrIdx];
+						
+						var attrValueCur = onArrayElement('attributeValue', attrValue, attrIdx, valuesArrayCur);
+						
+						if (typeof attrValue.subAttributes !== 'undefined') {
+							// Recursive attributes, eg County under State
 
-					this._iterate(element.subAttributes, 'attribute', arrayElementCur, onArray, onArrayElement);
+							this._iterate(attrValue.subAttributes, 'attribute', attrValueCur, onArray, onArrayElement);
+						}
+					} 
 				}
 			}
 			else {

@@ -314,6 +314,7 @@ public class SearchService extends BaseService {
 					
 					final SearchSingleValueFacet searchValue = new SearchSingleValueFacet();
 					
+					searchValue.setValue(indexValue.getValue());
 					searchValue.setMatchCount(indexValue.getMatchCount());
 					
 					if (indexValue.getSubFacets() != null) {
@@ -480,6 +481,24 @@ public class SearchService extends BaseService {
 		snowboard.setTypeDisplayName("Snowboards");
 		
 		sports.setSubTypes(Arrays.asList(snowboard));
+		
+		final SearchSingleValueFacetedAttributeResult makeAttribute = new SearchSingleValueFacetedAttributeResult();
+		makeAttribute.setId("make");
+		makeAttribute.setName("Make");
+		makeAttribute.setValues(Arrays.asList(
+				new SearchSingleValueFacet("Jones", 3),
+				new SearchSingleValueFacet("Burton", 5))
+		);
+
+		final SearchSingleValueFacetedAttributeResult modelAttribute = new SearchSingleValueFacetedAttributeResult();
+		modelAttribute.setId("model");
+		modelAttribute.setName("Model");
+		modelAttribute.setValues(Arrays.asList(
+				new SearchSingleValueFacet("1234", 3),
+				new SearchSingleValueFacet("5678", 5))
+		);
+
+		snowboard.setAttributes(Arrays.asList(makeAttribute, modelAttribute));
 		
 		final SearchFacetedTypeResult housing = new SearchFacetedTypeResult();
 		

@@ -127,15 +127,54 @@ function FacetViewElements() {
 	
 	this.createAttributeListElement = function(parentElement, text) {
 		var li = document.createElement('li');
+		
+		li.style['list-style'] = 'none';
 
 		li.innerHTML = "<span class='attributeListElement'>" + text + "</span>";
 
 		append(parentElement, li);
 
 		li.setAttribute("class", "facetAttributeListElement");
-		// TODO add checkbox item 
-		return { 'listItem: ' : li, 'checkboxItem ' : null };
+
+		return li;
 	}
+
+	// Nested within attribute
+	this.createAttributeValueList = function(parentElement) {
+		var ul = document.createElement('ul');
+
+		append(parentElement, ul);
+
+		ul.setAttribute("class", "facetAttributeValueList");
+		
+		return ul;
+	}
+
+	this.createAttributeValueElement = function(parentElement, value, matchCount) {
+		var li = document.createElement('li');
+		
+		li.style['list-style'] = 'none';
+		
+		var checkbox = document.createElement('input');
+		
+		checkbox.type = 'checkbox';
+		
+		var span = document.createElement('span');
+		
+		span.setAttribute('class', 'attributeValueElement');
+		
+		span.innerHTML = value + ' (' + matchCount + ')';
+
+		append(li, checkbox);
+		append(li, span);
+		
+		append(parentElement, li);
+
+		li.setAttribute("class", "facetAttributeValueElement");
+
+		return { 'listItem: ' : li, 'checkboxItem ' : checkbox };
+	}
+
 
 	function append(parent, element) {
 
