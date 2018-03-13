@@ -27,6 +27,7 @@
 	    <module>dao-test</module>
 	    <module>xml</module>
 	    <module>search-common</module>
+	    <module>webpages</module>
 	    <module>index</module>
 	    <module>index-lucene</module>
 	    <module>index-elasticsearch</module>
