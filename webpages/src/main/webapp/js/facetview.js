@@ -42,11 +42,13 @@ function FacetView(divId, facetViewElements) {
 						
 						// This is a type-array.
 						// If cur is null, this is the root element
-						var parentDiv = cur == null
+						
+						var isRoot = cur == null;
+						var parentDiv = isRoot
 							? rootElement
 							: cur.getViewElement();
 
-						var typeListElement = t.getViewElementFactory().createTypeList(parentDiv);
+						var typeListElement = t.getViewElementFactory().createTypeList(parentDiv, isRoot);
 
 						cur = new FacetTypeList(t.getViewElementFactory(), typeListElement);
 					}
