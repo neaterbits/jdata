@@ -53,10 +53,10 @@ function FacetModel(serviceUrl, allowCrossOrigin) {
 					
 					var valuesArrayCur = onArray('attributeValue', element.values.length, arrayElementCur);
 					
-					for (var attrIdx = 0; attrIdx < element.values.length; ++ attrIdx) {
-						var attrValue = element.values[attrIdx];
+					for (var attrValueIdx = 0; attrValueIdx < element.values.length; ++ attrValueIdx) {
+						var attrValue = element.values[attrValueIdx];
 						
-						var attrValueCur = onArrayElement('attributeValue', attrValue, attrIdx, valuesArrayCur);
+						var attrValueCur = onArrayElement('attributeValue', attrValue, attrValueIdx, valuesArrayCur);
 						
 						if (typeof attrValue.subAttributes !== 'undefined') {
 							// Recursive attributes, eg County under State
@@ -64,6 +64,16 @@ function FacetModel(serviceUrl, allowCrossOrigin) {
 							this._iterate(attrValue.subAttributes, 'attribute', attrValueCur, onArray, onArrayElement);
 						}
 					} 
+				}
+				else if (typeof element.ranges !== 'undefined') {
+					var rangesArrayCur = onArray('attributeRange', element.ranges.length, arrayElementCur);
+					
+					for (var attrRangeIdx = 0; attrRangeIdx < element.ranges.length; ++ attrRangeIdx) {
+						var attrRange = element.ranges[attrRangeIdx];
+						
+						var attrRangeCur = onArrayElement('attributeRange', attrRange, attrRangeIdx, rangesArrayCur);
+					} 
+					
 				}
 			}
 			else {

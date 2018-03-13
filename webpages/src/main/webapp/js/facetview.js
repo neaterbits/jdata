@@ -62,7 +62,7 @@ function FacetView(divId, facetViewElements) {
 
 						cur = new FacetAttributeList(viewElementFactory, attributeListElement);
 					}
-					else if (kind === 'attributeValue') {
+					else if (kind === 'attributeValue' || kind === 'attributeRange') {
 						console.log("Attribute value array of length " + length + ", cur=" + JSON.stringify(cur));
 						
 						var viewElementFactory = cur.getViewElementFactory();
@@ -107,6 +107,21 @@ function FacetView(divId, facetViewElements) {
 
 						// Attribute within a type in list of attributes
 						var attributeElement = viewElementFactory.createAttributeValueElement(cur.getViewElement(), element.value, element.matchCount);
+						
+						cur = new FacetAttributeValue(viewElementFactory, attributeElement);
+					}
+					else if (kind == 'attributeRange') {
+						console.log("Attribute value element " + element.value + ", cur=" + JSON.stringify(cur));
+						
+						var text = '';
+						
+						text += (typeof element.lower !== 'undefined' ? element.lower : ' ');
+						
+						text += ' - ';
+						text += (typeof element.upper !== 'undefined' ? element.upper : '');
+
+						// Attribute within a type in list of attributes
+						var attributeElement = viewElementFactory.createAttributeValueElement(cur.getViewElement(), text, element.matchCount);
 						
 						cur = new FacetAttributeValue(viewElementFactory, attributeElement);
 					}

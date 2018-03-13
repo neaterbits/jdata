@@ -497,8 +497,19 @@ public class SearchService extends BaseService {
 				new SearchSingleValueFacet("1234", 3),
 				new SearchSingleValueFacet("5678", 5))
 		);
+		
+		final SearchRangeFacetedAttributeResult lengthAttribute = new SearchRangeFacetedAttributeResult();
+		
+		lengthAttribute.setId("length");
+		lengthAttribute.setName("Length");
+		lengthAttribute.setRanges(Arrays.asList(
+				new SearchFacetedAttributeDecimalRangeResult(null, new BigDecimal("160.0"), 2),
+				new SearchFacetedAttributeDecimalRangeResult(new BigDecimal("160.0"), new BigDecimal("165.0"), 2),
+				new SearchFacetedAttributeDecimalRangeResult(new BigDecimal("165.0"), new BigDecimal("170.0"), 3),
+				new SearchFacetedAttributeDecimalRangeResult(new BigDecimal("170.0"), null, 1))
+		);
 
-		snowboard.setAttributes(Arrays.asList(makeAttribute, modelAttribute));
+		snowboard.setAttributes(Arrays.asList(makeAttribute, modelAttribute, lengthAttribute));
 		
 		final SearchFacetedTypeResult housing = new SearchFacetedTypeResult();
 		

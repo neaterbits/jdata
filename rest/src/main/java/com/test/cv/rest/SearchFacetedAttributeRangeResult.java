@@ -2,16 +2,17 @@ package com.test.cv.rest;
 
 public abstract class SearchFacetedAttributeRangeResult<T> {
 
-	private int matchCount;
 	private T lower;
 	private T upper;
-
-
-	public int getMatchCount() {
-		return matchCount;
+	private int matchCount;
+	
+	public SearchFacetedAttributeRangeResult() {
+		
 	}
 
-	public void setMatchCount(int matchCount) {
+	public SearchFacetedAttributeRangeResult(T lower, T upper, int matchCount) {
+		this.lower = lower;
+		this.upper = upper;
 		this.matchCount = matchCount;
 	}
 
@@ -29,5 +30,13 @@ public abstract class SearchFacetedAttributeRangeResult<T> {
 
 	public void setUpper(T upper) {
 		this.upper = upper;
+	}
+
+	public int getMatchCount() {
+		return matchCount;
+	}
+
+	public void setMatchCount(int matchCount) {
+		this.matchCount = matchCount;
 	}
 }
