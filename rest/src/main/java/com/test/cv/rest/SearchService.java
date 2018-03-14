@@ -518,7 +518,7 @@ public class SearchService extends BaseService {
 				new SearchFacetedAttributeDecimalRangeResult(new BigDecimal("170.0"), null, 1))
 		);
 
-		snowboard.setAttributes(Arrays.asList(makeAttribute, burtonModelAttribute, lengthAttribute));
+		snowboard.setAttributes(Arrays.asList(makeAttribute, lengthAttribute));
 		
 		final SearchFacetedTypeResult housing = new SearchFacetedTypeResult();
 		
