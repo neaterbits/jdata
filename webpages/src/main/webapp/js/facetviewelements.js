@@ -219,7 +219,7 @@ function FacetViewElements() {
 	
 			var accordion = this._makeAccordion(listDiv);
 
-			valueNameDiv.onclick = accordion.onclick;
+			span.onclick = accordion.onclick;
 
 			append(li, accordion.element);
 		}
