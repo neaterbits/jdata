@@ -138,8 +138,6 @@ function FacetViewElements() {
 
 		ul.setAttribute("class", "facetAttributeList");
 		
-		ul.onclick = function() {  alert('attribute list clicked'); }
-		
 		return ul;
 	}
 	
