@@ -122,6 +122,8 @@ function FacetViewElements() {
 
 		ul.setAttribute("class", "facetAttributeList");
 		
+		ul.onclick = function() {  alert('attribute list clicked'); }
+		
 		return ul;
 	}
 	
@@ -130,13 +132,28 @@ function FacetViewElements() {
 		
 		li.style['list-style'] = 'none';
 
-		li.innerHTML = "<span class='attributeListElement'>" + text + "</span>";
+		// In order to have a clickable title, we must add a div
+
+		var attributeTitleDiv = document.createElement('div');
+		attributeTitleDiv.innerHTML = "<span class='attributeTitle'>" + text + "</span>";
+
+		var attributeDiv = document.createElement('div');
+
+		append(li, attributeTitleDiv);
+
+		var accordion = this._makeAccordion(attributeDiv);
+
+		attributeTitleDiv.onclick = accordion.onclick;
+		
+		//li.innerHTML = "<span class='attributeListElement'>" + text + "</span>";
+
+		append(li, accordion.element);
 
 		append(parentElement, li);
 
 		li.setAttribute("class", "facetAttributeListElement");
 
-		return li;
+		return attributeDiv;
 	}
 
 	// Nested within attribute
