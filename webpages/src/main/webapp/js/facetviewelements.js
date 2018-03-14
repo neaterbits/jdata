@@ -84,6 +84,10 @@ function FacetViewElements() {
 		return { 'element' : wrapperDiv, 'onclick' : onclick };
 	}
 	
+	this._getListsDiv = function(parentElement) {
+		return parentElement.getElementsByClassName('facetListsDiv')[0];
+	}
+	
 	// Nested within type container
 	this.createTypeList = function(parentElement, isRoot) {
 		var ul = document.createElement('ul');
@@ -94,8 +98,8 @@ function FacetViewElements() {
 		}
 		else{
 			// TODO perhaps find other way? But should not pass lsistDiv back to caller in createTypeContainer()
-			var listsDiv = parentElement.getElementsByClassName('facetListsDiv')[0]; // parentElement.childNodes.item(1);
-			
+			var listsDiv = this._getListsDiv(parentElement);
+
 			append(listsDiv, ul);
 		}
 
@@ -116,9 +120,12 @@ function FacetViewElements() {
 
 	// Nested within type container
 	this.createAttributeList = function(parentElement) {
+
+		var listsDiv = this._getListsDiv(parentElement);
+
 		var ul = document.createElement('ul');
 
-		append(parentElement, ul);
+		append(listsDiv, ul);
 
 		ul.setAttribute("class", "facetAttributeList");
 		
