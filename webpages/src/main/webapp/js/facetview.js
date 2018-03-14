@@ -1,7 +1,6 @@
 /**
- * Default facet view consisting of a set nested divs
- * 
- * The facet view is encapsulates by indices, the model has to be called to get all the names to display
+ * Facet view logic that creates the layout and collects selected criteria on checkbox clicks
+ * but does not operate on the DOM directly, rather calls separate instance for that
  */
 
 function FacetView(divId, facetViewElements) {
