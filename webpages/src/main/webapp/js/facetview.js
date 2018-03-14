@@ -50,7 +50,7 @@ function FacetView(divId, facetViewElements) {
 
 						var typeListElement = t.getViewElementFactory().createTypeList(parentDiv, isRoot);
 
-						var typeList = new FacetTypeList(t.getViewElementFactory(), typeListElement);
+						var typeList = new FacetTypeList(t.getViewElementFactory(), cur != null ? cur.getModelType() :null, typeListElement);
 						 
 						if (cur != null) { // If not root type list
 							cur.setTypeList(typeList);
@@ -66,7 +66,7 @@ function FacetView(divId, facetViewElements) {
 						// Array of attributes
 						var attributeListElement = viewElementFactory.createAttributeList(cur.getViewElement());
 
-						var attributeList = new FacetAttributeList(viewElementFactory, attributeListElement);
+						var attributeList = new FacetAttributeList(viewElementFactory, cur.getModelType(), attributeListElement);
 						
 						cur.setAttributeList(attributeList);
 						
@@ -80,7 +80,7 @@ function FacetView(divId, facetViewElements) {
 						// Array of attributes
 						var attributeListElement = viewElementFactory.createAttributeValueList(cur.getViewElement());
 
-						var attributeValueList = new FacetAttributeValueList(viewElementFactory, attributeListElement);
+						var attributeValueList = new FacetAttributeValueList(viewElementFactory, cur.getModelType(), attributeListElement);
 						
 						cur.setAttributeValueList(attributeValueList);
 
@@ -105,7 +105,7 @@ function FacetView(divId, facetViewElements) {
 						// Add a div for the particular type, will have a box for expanding the type
 						var typeElement = viewElementFactory.createTypeContainer(cur.getViewElement(), element.typeDisplayName);
 						
-						var typeContainer = new FacetTypeContainer(viewElementFactory, typeElement, element.typeDisplayName);
+						var typeContainer = new FacetTypeContainer(viewElementFactory, element.type, typeElement, element.typeDisplayName);
 						
 						cur.addType(typeContainer);
 						
@@ -117,7 +117,7 @@ function FacetView(divId, facetViewElements) {
 						// Attribute within a type in list of attributes
 						var attributeElement = viewElementFactory.createAttributeListElement(cur.getViewElement(), element.name);
 						
-						var attribute = new FacetAttribute(viewElementFactory, attributeElement);
+						var attribute = new FacetAttribute(viewElementFactory, cur.getModelType(), attributeElement);
 						
 						cur.addAttribute(attribute);
 						
@@ -135,7 +135,7 @@ function FacetView(divId, facetViewElements) {
 								element.matchCount,
 								hasSubAttributes);
 						
-						var attributeValue = new FacetAttributeValue(viewElementFactory, attributeElement.listItem, attributeElement.checkboxItem);
+						var attributeValue = new FacetAttributeValue(viewElementFactory, cur.getModelType(), attributeElement.listItem, attributeElement.checkboxItem);
 						
 						var onCheckboxClicked = function(checked) {
 							if (hasSubAttributes) {
@@ -172,7 +172,7 @@ function FacetView(divId, facetViewElements) {
 						// Attribute within a type in list of attributes
 						var attributeElement = viewElementFactory.createAttributeValueElement(cur.getViewElement(), text, element.matchCount);
 						
-						var attributeRange = new FacetAttributeValue(viewElementFactory, attributeElement);
+						var attributeRange = new FacetAttributeValue(viewElementFactory, cur.getModelType(), attributeElement);
 
 						// For the purpose of UI object tree, we just use addValue() since there is not much difference between ranges and values,
 						// we only look at the value of the checkbox
@@ -189,12 +189,6 @@ function FacetView(divId, facetViewElements) {
 		
 		var x = 123;
 		
-	};
-	
-	this.isAttributeSelected = function(path) {
-		var attribute = this._findAttribute(path);
-		
-		return attribute.isSelected();
 	};
 
 	// Find the FacetAttribute for this path
@@ -238,14 +232,15 @@ function FacetView(divId, facetViewElements) {
 	};
 
 	
-	function FacetsElementBase(type, viewElementFactory, viewElement) {
+	function FacetsElementBase(className, viewElementFactory, modelType, viewElement) {
 
 		if (typeof viewElement === 'undefined' || viewElement == null) {
 			throw "No view element: " + viewElement;
 		}
 		
-		this.type = type;
+		this.className = className;
 		this.viewElementFactory = viewElementFactory;
+		this.modelType = modelType;
 		this.viewElement = viewElement;
 	}
 	
@@ -255,6 +250,10 @@ function FacetView(divId, facetViewElements) {
 	
 	FacetsElementBase.prototype.getViewElement = function() {
 		return this.viewElement;
+	}
+
+	FacetsElementBase.prototype.getModelType = function() {
+		return this.modelType;
 	}
 
 	FacetsElementBase.prototype._iterateIfDefined = function(iterable, each) {
@@ -278,8 +277,8 @@ function FacetView(divId, facetViewElements) {
 	}
 
 	// Container for a facet type
-	function FacetTypeContainer(viewElementFactory, container) {
-		FacetsElementBase.call(this, 'FacetTypeContainer', viewElementFactory, container);
+	function FacetTypeContainer(viewElementFactory, modelType, container) {
+		FacetsElementBase.call(this, 'FacetTypeContainer', viewElementFactory, modelType, container);
 	}
 	
 	FacetTypeContainer.prototype = Object.create(FacetsElementBase.prototype);
@@ -302,8 +301,8 @@ function FacetView(divId, facetViewElements) {
 	}
 
 	// List of facet types ("Snowboards", "Skis", "Apartments") 
-	function FacetTypeList(viewElementFactory, listItem) {
-		FacetsElementBase.call(this, 'FacetTypeList', viewElementFactory, listItem);
+	function FacetTypeList(viewElementFactory, modelType, listItem) {
+		FacetsElementBase.call(this, 'FacetTypeList', viewElementFactory, modelType, listItem);
 
 		this.types = [];
 	}
@@ -321,8 +320,8 @@ function FacetView(divId, facetViewElements) {
 	}
 
 	// List of faceted attributes ("With", "Price")
-	function FacetAttributeList(viewElementFactory, listItem) {
-		FacetsElementBase.call(this, 'FacetAttributeList', viewElementFactory, listItem);
+	function FacetAttributeList(viewElementFactory, modelType, listItem) {
+		FacetsElementBase.call(this, 'FacetAttributeList', viewElementFactory, modelType, listItem);
 
 		this.attributes = [];
 	}
@@ -341,8 +340,8 @@ function FacetView(divId, facetViewElements) {
 
 	// One attribute for a type, eg "Length" under "Skis"
 	// will link to a checkbox to select
-	function FacetAttribute(viewElementFactory, listItem) {
-		FacetsElementBase.call(this, 'FacetAttribute', viewElementFactory, listItem);
+	function FacetAttribute(viewElementFactory, modelType, listItem) {
+		FacetsElementBase.call(this, 'FacetAttribute', viewElementFactory, modelType, listItem);
 	}
 	
 	FacetAttribute.prototype = Object.create(FacetsElementBase.prototype);
@@ -359,8 +358,8 @@ function FacetView(divId, facetViewElements) {
 	}
 
 	// List of faceted attributes ("With", "Price")
-	function FacetAttributeValueList(viewElementFactory, listItem) {
-		FacetsElementBase.call(this, 'FacetAttributeValueList', viewElementFactory, listItem);
+	function FacetAttributeValueList(viewElementFactory, modelType, listItem) {
+		FacetsElementBase.call(this, 'FacetAttributeValueList', viewElementFactory, modelType, listItem);
 
 		this.values = [];
 	}
@@ -378,11 +377,10 @@ function FacetView(divId, facetViewElements) {
 		this.values.push(value);
 	}
 
-	function FacetAttributeValue(viewElementFactory, listItem, checkboxItem) {
-		FacetsElementBase.call(this, 'FacetAttributeValue', viewElementFactory, listItem);
+	function FacetAttributeValue(viewElementFactory, modelType, listItem, checkboxItem) {
+		FacetsElementBase.call(this, 'FacetAttributeValue', viewElementFactory, modelType, listItem);
 	
 		this.checkboxItem = checkboxItem;
-		
 	}
 	
 	FacetAttributeValue.prototype = Object.create(FacetsElementBase.prototype);
