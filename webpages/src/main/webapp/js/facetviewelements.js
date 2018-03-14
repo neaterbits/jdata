@@ -85,6 +85,15 @@ function FacetViewElements() {
 	}
 	
 	this._getListsDiv = function(parentElement) {
+
+		if (typeof parentElement === 'undefined') {
+			throw '_getListsDiv: not an element';
+		}
+
+		if (typeof parentElement.getElementsByClassName == 'undefined') {
+			throw "_getListsDiv: Not an element: " + parentElement;
+		}
+
 		return parentElement.getElementsByClassName('facetListsDiv')[0];
 	}
 	
@@ -174,36 +183,59 @@ function FacetViewElements() {
 		return ul;
 	}
 
-	this.createAttributeValueElement = function(parentElement, value, matchCount) {
+	this.createAttributeValueElement = function(parentElement, value, matchCount, hasSubAttributes) {
 		var li = document.createElement('li');
 		
 		li.style['list-style'] = 'none';
 		
 		var checkbox = document.createElement('input');
-		
 		checkbox.type = 'checkbox';
 		
 		var span = document.createElement('span');
-		
 		span.setAttribute('class', 'attributeValueElement');
-		
 		span.innerHTML = value + ' (' + matchCount + ')';
 
-		append(li, checkbox);
-		append(li, span);
+		if (hasSubAttributes) {
+			// There are sub attributes so we have to make sure they are
+			var valueNameDiv = document.createElement('div');
+
+			append(valueNameDiv, checkbox);
+			append(valueNameDiv, span);
+
+
+			append(li, valueNameDiv);
+
+			var listDiv = document.createElement('div');
+			listDiv.setAttribute('class', 'facetListsDiv');
+	
+			var accordion = this._makeAccordion(listDiv);
+
+			valueNameDiv.onclick = accordion.onclick;
+
+			append(li, accordion.element);
+		}
+		else {
 		
+			append(li, checkbox);
+			append(li, span);
+		}
+			
 		append(parentElement, li);
 
 		li.setAttribute("class", "facetAttributeValueElement");
 
-		return { 'listItem: ' : li, 'checkboxItem ' : checkbox };
+		return { 'listItem' : li, 'checkboxItem' : checkbox };
 	}
 
 
 	function append(parent, element) {
 
+		if (typeof parent === 'undefined') {
+			throw 'append: not an element';
+		}
+
 		if (typeof parent.appendChild === 'undefined') {
-			throw 'not an element';
+			throw 'append: not an element';
 		}
 		parent.appendChild(element);
 	}

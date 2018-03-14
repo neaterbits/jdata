@@ -1,5 +1,6 @@
 package com.test.cv.rest;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class SearchSingleValueFacet {
@@ -17,13 +18,15 @@ public class SearchSingleValueFacet {
 		
 	}
 
-	public SearchSingleValueFacet(Object value, int matchCount) {
+	public SearchSingleValueFacet(Object value, int matchCount, SearchFacetedAttributeResult ... subAttributes) {
 		if (value == null) {
 			throw new IllegalArgumentException("value == null");
 		}
 		
 		this.value = value;
 		this.matchCount = matchCount;
+		
+		this.subAttributes = subAttributes.length == 0 ? null : Arrays.asList(subAttributes);
 	}
 	
 	public Object getValue() {

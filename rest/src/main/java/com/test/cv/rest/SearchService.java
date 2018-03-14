@@ -481,23 +481,32 @@ public class SearchService extends BaseService {
 		snowboard.setTypeDisplayName("Snowboards");
 		
 		sports.setSubTypes(Arrays.asList(snowboard));
-		
+
+		final SearchSingleValueFacetedAttributeResult jonesModelAttribute = new SearchSingleValueFacetedAttributeResult();
+		jonesModelAttribute.setId("model");
+		jonesModelAttribute.setName("Model");
+		jonesModelAttribute.setValues(Arrays.asList(
+				new SearchSingleValueFacet("1234", 2),
+				new SearchSingleValueFacet("5678", 1))
+		);
+
+		final SearchSingleValueFacetedAttributeResult burtonModelAttribute = new SearchSingleValueFacetedAttributeResult();
+		burtonModelAttribute.setId("model");
+		burtonModelAttribute.setName("Model");
+		burtonModelAttribute.setValues(Arrays.asList(
+				new SearchSingleValueFacet("8765", 3),
+				new SearchSingleValueFacet("4321", 2))
+		);
+
 		final SearchSingleValueFacetedAttributeResult makeAttribute = new SearchSingleValueFacetedAttributeResult();
 		makeAttribute.setId("make");
 		makeAttribute.setName("Make");
 		makeAttribute.setValues(Arrays.asList(
-				new SearchSingleValueFacet("Jones", 3),
-				new SearchSingleValueFacet("Burton", 5))
+				new SearchSingleValueFacet("Jones", 3, jonesModelAttribute),
+				new SearchSingleValueFacet("Burton", 5, burtonModelAttribute))
 		);
 
-		final SearchSingleValueFacetedAttributeResult modelAttribute = new SearchSingleValueFacetedAttributeResult();
-		modelAttribute.setId("model");
-		modelAttribute.setName("Model");
-		modelAttribute.setValues(Arrays.asList(
-				new SearchSingleValueFacet("1234", 3),
-				new SearchSingleValueFacet("5678", 5))
-		);
-		
+
 		final SearchRangeFacetedAttributeResult lengthAttribute = new SearchRangeFacetedAttributeResult();
 		
 		lengthAttribute.setId("length");
@@ -509,7 +518,7 @@ public class SearchService extends BaseService {
 				new SearchFacetedAttributeDecimalRangeResult(new BigDecimal("170.0"), null, 1))
 		);
 
-		snowboard.setAttributes(Arrays.asList(makeAttribute, modelAttribute, lengthAttribute));
+		snowboard.setAttributes(Arrays.asList(makeAttribute, burtonModelAttribute, lengthAttribute));
 		
 		final SearchFacetedTypeResult housing = new SearchFacetedTypeResult();
 		

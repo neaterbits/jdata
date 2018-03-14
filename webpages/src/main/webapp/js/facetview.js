@@ -105,10 +105,16 @@ function FacetView(divId, facetViewElements) {
 					else if (kind == 'attributeValue') {
 						console.log("Attribute value element " + element.value + ", cur=" + JSON.stringify(cur));
 
-						// Attribute within a type in list of attributes
-						var attributeElement = viewElementFactory.createAttributeValueElement(cur.getViewElement(), element.value, element.matchCount);
+						var hasSubAttributes = typeof element.subAttributes !== 'undefined';
 						
-						cur = new FacetAttributeValue(viewElementFactory, attributeElement);
+						// Attribute within a type in list of attributes
+						var attributeElement = viewElementFactory.createAttributeValueElement(
+								cur.getViewElement(),
+								element.value,
+								element.matchCount,
+								hasSubAttributes);
+						
+						cur = new FacetAttributeValue(viewElementFactory, attributeElement.listItem, attributeElement.checkboxItem);
 					}
 					else if (kind == 'attributeRange') {
 						console.log("Attribute value element " + element.value + ", cur=" + JSON.stringify(cur));
@@ -184,6 +190,11 @@ function FacetView(divId, facetViewElements) {
 
 	
 	function FacetsElementBase(viewElementFactory, viewElement) {
+
+		if (typeof viewElement === 'undefined' || viewElement == null) {
+			throw "No view element: " + viewElement;
+		}
+		
 		this.viewElementFactory = viewElementFactory;
 		this.viewElement = viewElement;
 	}
@@ -240,8 +251,8 @@ function FacetView(divId, facetViewElements) {
 
 	FacetAttributeValueList.prototype = Object.create(FacetsElementBase.prototype);
 
-	function FacetAttributeValue(viewElementFactory, checkboxItem) {
-		FacetsElementBase.call(this, viewElementFactory, checkboxItem);
+	function FacetAttributeValue(viewElementFactory, listItem, checkboxItem) {
+		FacetsElementBase.call(this, viewElementFactory, listItem);
 	
 		this.checkboxItem = checkboxItem;
 	
