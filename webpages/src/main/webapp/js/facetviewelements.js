@@ -27,7 +27,7 @@ function FacetViewElements() {
 		// Make it possible to show and hide the below lists
 		var accordion = this._makeAccordion(listsDiv); // this._makeShowHide(listsDiv);
 		
-		typeDiv.onclick = accordion.onclick;
+		typeTitleDiv.onclick = accordion.onclick;
 
 		append(typeDiv, accordion.element);
 
@@ -51,7 +51,7 @@ function FacetViewElements() {
 		return { 'element' : listsDiv, 'onclick' : onclick };
 	}
 	
-	
+	// TODO there are some issue in this, try collapse Snowboards, then Sports, then expand both again
 	this._makeAccordion = function(listsDiv) {
 		var wrapperDiv = document.createElement('div');
 		
@@ -60,17 +60,28 @@ function FacetViewElements() {
 		wrapperDiv.style.height = 'auto';
 		
 		append(wrapperDiv, listsDiv);
+
+		var t = wrapperDiv;
 		
 		var onclick = function(event) {
 			var heightToSet = listsDiv.offsetHeight;
+		
+			if (t.getAttribute('data-accordion-in-progress') === true) {
+				event.stopPropagation();
+				return;
+			}
 			
 			if (wrapperDiv.clientHeight) {
+				
+				t.setAttribute('data-accordion-in-progress', true)
+				
 				wrapperDiv.style.height = listsDiv.clientHeight + 'px';
 				
 				// TODO does not work on first click if doing this without timeout
 				// See original method at https://stackoverflow.com/questions/25096068/css-animation-to-hide-and-show-content-like-an-accordion
 				setTimeout(function() {
 					wrapperDiv.style.height = 0 + 'px';
+					t.setAttribute('data-accordion-in-progress', false)
 				},
 				100);
 			}
