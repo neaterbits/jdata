@@ -243,6 +243,10 @@ function FacetViewElements() {
 	this.setCheckBoxChecked = function(checkbox, checked) {
 		checkbox.checked = checked;
 	}
+	
+	this.isCheckboxSelected = function(checkbox) {
+		return checkbox.checked;
+	};
 
 	function append(parent, element) {
 

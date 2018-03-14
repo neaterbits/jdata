@@ -29,7 +29,7 @@ function FacetView(divId, facetViewElements) {
 
 		// Iterate through facet model, called back for each single element (like type or attribute)
 		// and list element (subtype or attribute value/range)
-		model.iterate(
+		this.rootTypes = model.iterate(
 				null,
 				
 				// Array of elements
@@ -135,31 +135,16 @@ function FacetView(divId, facetViewElements) {
 								element.matchCount,
 								hasSubAttributes);
 						
-						var attributeValue = new FacetAttributeValue(
+						var attributeValue = new FacetAttributeSingleValue(
 												viewElementFactory,
 												cur.getModelType(),
 												cur.getAttributeId(),
+												element.value,
 												attributeElement.listItem,
 												attributeElement.checkboxItem);
 						
-						var onCheckboxClicked = function(checked) {
-							if (hasSubAttributes) {
-								// We must update the state of all sub attributes. If checked, update all sub attributes as checked.
-								// otherwise mark all as non-checked
+						t._setAttributeCheckboxListener(viewElementFactory, attributeValue, hasSubAttributes);
 								
-								// Iterate recursively
-								attributeValue.iterate(function(kind, obj) {
-									console.log('Sub obj: ' + kind + ", " + JSON.stringify(obj));
-									if (kind === 'FacetAttributeValue') {
-										// Set checked-property to same
-										obj.getViewElementFactory().setCheckBoxChecked(obj.checkboxItem, checked);
-									}
-								});
-							}
-						};
-
-						viewElementFactory.setCheckboxOnClick(attributeElement.checkboxItem, onCheckboxClicked);
-						
 						cur.addValue(attributeValue);
 						
 						cur = attributeValue;
@@ -177,12 +162,15 @@ function FacetView(divId, facetViewElements) {
 						// Attribute within a type in list of attributes
 						var attributeElement = viewElementFactory.createAttributeValueElement(cur.getViewElement(), text, element.matchCount);
 						
-						var attributeRange = new FacetAttributeValue(
+						var attributeRange = new FacetAttributeRange(
 								viewElementFactory,
 								cur.getModelType(),
 								cur.getAttributeId(),
+								element,
 								attributeElement.listItem,
 								attributeElement.checkboxItem);
+
+						t._setAttributeCheckboxListener(viewElementFactory, attributeRange, false);
 
 						// For the purpose of UI object tree, we just use addValue() since there is not much difference between ranges and values,
 						// we only look at the value of the checkbox
@@ -200,6 +188,146 @@ function FacetView(divId, facetViewElements) {
 		var x = 123;
 		
 	};
+	
+	this._setAttributeCheckboxListener = function(viewElementFactory, attributeValue, hasSubAttributes) {
+		
+		var t = this;
+
+		var onCheckboxClicked = function(checked) {
+			if (hasSubAttributes) {
+				// We must update the state of all sub attributes. If checked, update all sub attributes as checked.
+				// otherwise mark all as non-checked
+				
+				// Iterate recursively
+				attributeValue.iterate(function(kind, obj) {
+					console.log('Sub obj: ' + kind + ", " + JSON.stringify(obj));
+					if (kind === 'FacetAttributeSingleValue' || kind == 'FacetAttributeRange') {
+						// Set checked-property to same
+						obj.getViewElementFactory().setCheckBoxChecked(obj.checkboxItem, checked);
+					}
+				});
+			}
+			
+			var criteria = t.collectCriteriaAndTypesFromSelections();
+			
+			console.log('serach criteria changed:\n' + print(criteria));
+		};
+
+		viewElementFactory.setCheckboxOnClick(attributeValue.checkboxItem, onCheckboxClicked);
+	}
+
+	this.collectCriteriaAndTypesFromSelections = function() {
+
+		var types = {};
+		var criteria = [];
+		
+		this.rootTypes.iterate(function(className, obj) {
+			if (className == 'FacetAttributeValueList') {
+				
+				var attributeValues = obj.getValues();
+				
+				// Iterate all values and figure how many are selected
+				var numSelected = 0;
+				
+				for (var i = 0; i < attributeValues.length; ++ i) {
+					var value = attributeValues[i];
+
+					if (obj.getViewElementFactory().isCheckboxSelected(value.checkboxItem)) {
+						++ numSelected;
+					}
+				}
+				
+				if (numSelected > 0) {
+					
+					// Add type so that query can have list of which types attribute are from (for faster search)
+					types[obj.getModelType()] = '';
+
+					var criterium = {
+						type : obj.getModelType(),
+						attribute : obj.getAttributeId(),
+					};
+					
+					
+					// Scan again to add values to search criteria
+					for (var i = 0; i < attributeValues.length; ++ i) {
+						var value = attributeValues[i];
+
+						if (obj.getViewElementFactory().isCheckboxSelected(value.checkboxItem)) {
+							++ numSelected;
+							
+							if (value.getClassName() === 'FacetAttributeSingleValue') {
+								if (typeof criterium.values === 'undefined') {
+									criterium.values = [];
+								}
+								criterium.values.push({ value : value.getModelValue() });
+							}
+							else if (value.getClassName() === 'FacetAttributeRange') {
+								if (typeof criterium.ranges === 'undefined') {
+									criterium.ranges = [];
+								}
+
+								var mr = value.getModelRange();
+								
+								var range = { };
+								
+								if (typeof mr.lower !== 'undefined') {
+									range.lower = mr.lower;
+									range.includeLower = true;
+								}
+								
+								if (typeof mr.upper !== 'undefined') {
+									range.upper = mr.upper;
+									range.includeUpper = true;
+								}
+								
+								criterium.ranges.push(range);
+							}
+						}
+					}
+					
+					criteria.push(criterium);
+				}
+			}
+		});
+
+		return { 'types' : Object.keys(types), criteria };
+	};
+
+	this._makeCriterium = function(attributeId, type, selectionCount) {
+
+		// There is a selection, add criterium
+		var criterium = {
+				'type' : type,
+				'attribute' : attributeId
+		};
+
+		var values = [];
+
+		var numAdded = 0;
+		for (var selectionIdx = 0; selectionIdx < selectionCount; ++ selectionIdx) {
+			var selected = this.view.isAttributeSelected(typeIdx, attrIdx, selectionIdx);
+
+			if (attribute.isValueAttribute()) {
+				var value = attribute.getValue(selectionIdx);
+
+				values.push(value);
+			}
+			else if (attribute.isRangeAttribute()) {
+				var range = attribute.getRange(selectionIdx);
+
+				values.push( { 'lower' :  range.getLower(), 'includeLower' : true, 'upper' : range.getUpper(), 'includeUpper' : false } );
+			}
+			else {
+				throw "Neither value nor range attribute: " + attribute.getName();
+			}
+		}
+		
+		values += ' ]';
+		
+		criterium.values = values;
+		
+		return criterium;
+	}
 
 	// Find the FacetAttribute for this path
 	this._findAttribute = function(path) {
@@ -253,7 +381,11 @@ function FacetView(divId, facetViewElements) {
 		this.modelType = modelType;
 		this.viewElement = viewElement;
 	}
-	
+
+	FacetsElementBase.prototype.getClassName = function() {
+		return this.className;
+	}
+
 	FacetsElementBase.prototype.getViewElementFactory = function() {
 		return this.viewElementFactory;
 	}
@@ -281,7 +413,7 @@ function FacetView(divId, facetViewElements) {
 	}
 
 	FacetsElementBase.prototype._iterateCurAndSub = function(each) {
-		each(this.type, this);
+		each(this.className, this);
 		
 		this._iterateSub(each);
 	}
@@ -391,6 +523,7 @@ function FacetView(divId, facetViewElements) {
 		return this.attributeId;
 	}
 
+	
 	FacetAttributeValueList.prototype.addValue = function(value) {
 
 		checkNonNull(value);
@@ -398,8 +531,12 @@ function FacetView(divId, facetViewElements) {
 		this.values.push(value);
 	}
 
-	function FacetAttributeValue(viewElementFactory, modelType, attributeId, listItem, checkboxItem) {
-		FacetsElementBase.call(this, 'FacetAttributeValue', viewElementFactory, modelType, listItem);
+	FacetAttributeValueList.prototype.getValues = function() {
+		return this.values;
+	}
+
+	function FacetAttributeValue(className, viewElementFactory, modelType, attributeId, listItem, checkboxItem) {
+		FacetsElementBase.call(this, className, viewElementFactory, modelType, listItem);
 	
 		this.attributeId = attributeId;
 		this.checkboxItem = checkboxItem;
@@ -425,6 +562,29 @@ function FacetView(divId, facetViewElements) {
 		this.attributeList = attributeList;
 	}
 	
+	function FacetAttributeSingleValue(viewElementFactory, modelType, attributeId, modelValue, listItem, checkboxItem) {
+		FacetAttributeValue.call(this, 'FacetAttributeSingleValue', viewElementFactory, attributeId, modelType, listItem, checkboxItem);
+
+		this.modelValue = modelValue;
+	}
+
+	FacetAttributeSingleValue.prototype = Object.create(FacetAttributeValue.prototype);
+
+	FacetAttributeSingleValue.prototype.getModelValue = function() {
+		return this.modelValue;
+	}
+
+	function FacetAttributeRange(viewElementFactory, modelType, attributeId, modelRange, listItem, checkboxItem) {
+		FacetAttributeValue.call(this, 'FacetAttributeRange', viewElementFactory, attributeId, modelType, listItem, checkboxItem);
+
+		this.modelRange = modelRange;
+	}
+
+	FacetAttributeRange.prototype = Object.create(FacetAttributeValue.prototype);
+
+	FacetAttributeRange.prototype.getModelRange = function() {
+		return this.modelRange;
+	}
 
 	function checkNonNull(obj) {
 		if (typeof obj === 'undefined' || obj == null) {

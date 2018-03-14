@@ -24,7 +24,7 @@ function FacetModel(serviceUrl, allowCrossOrigin) {
 			throw "No types defined for model";
 		}
 
-		this._iterate(this.types, 'type', callerRootElement, onArray, onArrayElement);
+		return this._iterate(this.types, 'type', callerRootElement, onArray, onArrayElement);
 	}
 
 	this._iterate = function(modelCurArray, kind, callerCur, onArray, onArrayElement) {
@@ -80,6 +80,8 @@ function FacetModel(serviceUrl, allowCrossOrigin) {
 				throw "Unknown kind: " + kind;
 			}
 		}
+		
+		return arrayCur;
 	};
 
 	// Get names of types at some level
