@@ -192,7 +192,7 @@ function FacetViewElements() {
 		return ul;
 	}
 
-	this.createAttributeValueElement = function(parentElement, value, matchCount, hasSubAttributes) {
+	this.createAttributeValueElement = function(parentElement, value, matchCount, hasSubAttributes, onCheckboxClicked) {
 		var li = document.createElement('li');
 		
 		li.style['list-style'] = 'none';
@@ -200,17 +200,20 @@ function FacetViewElements() {
 		var checkbox = document.createElement('input');
 		checkbox.type = 'checkbox';
 		
+		checkbox.onclick = function(event) {
+			onCheckboxClicked(checkbox.checked);
+		};
+		
 		var span = document.createElement('span');
 		span.setAttribute('class', 'attributeValueElement');
 		span.innerHTML = value + ' (' + matchCount + ')';
-
+		
 		if (hasSubAttributes) {
 			// There are sub attributes so we have to make sure they are
 			var valueNameDiv = document.createElement('div');
 
 			append(valueNameDiv, checkbox);
 			append(valueNameDiv, span);
-
 
 			append(li, valueNameDiv);
 
