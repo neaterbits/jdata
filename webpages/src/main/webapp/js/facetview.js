@@ -128,23 +128,32 @@ function FacetView(divId, facetViewElements) {
 
 						var hasSubAttributes = typeof element.subAttributes !== 'undefined';
 						
-						var onCheckboxClicked = function(checked) {
-							if (hasSubAttributes) {
-								// We must update the state of all sub attributes. If checked, update all sub attributes as checked.
-								// otherwise mark all as non-checked
-								
-							}
-						};
-						
 						// Attribute within a type in list of attributes
 						var attributeElement = viewElementFactory.createAttributeValueElement(
 								cur.getViewElement(),
 								element.value,
 								element.matchCount,
-								hasSubAttributes,
-								onCheckboxClicked);
+								hasSubAttributes);
 						
 						var attributeValue = new FacetAttributeValue(viewElementFactory, attributeElement.listItem, attributeElement.checkboxItem);
+						
+						var onCheckboxClicked = function(checked) {
+							if (hasSubAttributes) {
+								// We must update the state of all sub attributes. If checked, update all sub attributes as checked.
+								// otherwise mark all as non-checked
+								
+								// Iterate recursively
+								attributeValue.iterate(function(kind, obj) {
+									console.log('Sub obj: ' + kind + ", " + JSON.stringify(obj));
+									if (kind === 'FacetAttributeValue') {
+										// Set checked-property to same
+										obj.getViewElementFactory().setCheckBoxChecked(obj.checkboxItem, checked);
+									}
+								});
+							}
+						};
+
+						viewElementFactory.setCheckboxOnClick(attributeElement.checkboxItem, onCheckboxClicked);
 						
 						cur.addValue(attributeValue);
 						
@@ -247,13 +256,38 @@ function FacetView(divId, facetViewElements) {
 	FacetsElementBase.prototype.getViewElement = function() {
 		return this.viewElement;
 	}
-	
+
+	FacetsElementBase.prototype._iterateIfDefined = function(iterable, each) {
+		if (typeof iterable !== 'undefined') {
+			iterable.iterate(each);
+		}
+	}
+
+	FacetsElementBase.prototype._iterateArray = function(array, each) {
+		array.forEach(function (e) { e._iterateCurAndSub(each); } )
+	}
+
+	FacetsElementBase.prototype.iterate = function(each) {
+		this._iterateSub(each);
+	}
+
+	FacetsElementBase.prototype._iterateCurAndSub = function(each) {
+		each(this.type, this);
+		
+		this._iterateSub(each);
+	}
+
 	// Container for a facet type
 	function FacetTypeContainer(viewElementFactory, container) {
 		FacetsElementBase.call(this, 'FacetTypeContainer', viewElementFactory, container);
 	}
 	
 	FacetTypeContainer.prototype = Object.create(FacetsElementBase.prototype);
+
+	FacetTypeContainer.prototype._iterateSub = function(each) {
+		this._iterateIfDefined(this.typeList, each)
+		this._iterateIfDefined(this.attributeList, each)
+	}
 
 	FacetTypeContainer.prototype.setTypeList = function(typeList) {
 		checkNonNull(typeList);
@@ -276,6 +310,10 @@ function FacetView(divId, facetViewElements) {
 
 	FacetTypeList.prototype = Object.create(FacetsElementBase.prototype);
 
+	FacetTypeList.prototype._iterateSub = function(each) {
+		this._iterateArray(this.types, each);
+	}
+
 	FacetTypeList.prototype.addType = function(type) {
 		checkNonNull(type);
 		
@@ -291,6 +329,10 @@ function FacetView(divId, facetViewElements) {
 
 	FacetAttributeList.prototype = Object.create(FacetsElementBase.prototype);
 
+	FacetAttributeList.prototype._iterateSub = function(each) {
+		this._iterateArray(this.attributes, each);
+	}
+
 	FacetAttributeList.prototype.addAttribute = function(attribute) {
 		checkNonNull(attribute);
 		
@@ -304,6 +346,10 @@ function FacetView(divId, facetViewElements) {
 	}
 	
 	FacetAttribute.prototype = Object.create(FacetsElementBase.prototype);
+
+	FacetAttribute.prototype._iterateSub = function(each) {
+		this.attributeValueList._iterateCurAndSub(each);
+	}
 
 	FacetAttribute.prototype.setAttributeValueList = function(attributeValueList) {
 		
@@ -321,6 +367,10 @@ function FacetView(divId, facetViewElements) {
 
 	FacetAttributeValueList.prototype = Object.create(FacetsElementBase.prototype);
 
+	FacetAttributeValueList.prototype._iterateSub = function(each) {
+		this._iterateArray(this.values, each);
+	}
+
 	FacetAttributeValueList.prototype.addValue = function(value) {
 
 		checkNonNull(value);
@@ -336,7 +386,13 @@ function FacetView(divId, facetViewElements) {
 	}
 	
 	FacetAttributeValue.prototype = Object.create(FacetsElementBase.prototype);
-	
+
+	FacetAttributeValue.prototype._iterateSub = function(each) {
+		if (typeof this.attributeList !== 'undefined') {
+			this.attributeList._iterateCurAndSub(each);
+		}
+	}
+
 	// For subattributes
 	FacetAttributeValue.prototype.setAttributeList = function(attributeList) {
 		
@@ -344,6 +400,7 @@ function FacetView(divId, facetViewElements) {
 
 		this.attributeList = attributeList;
 	}
+	
 
 	function checkNonNull(obj) {
 		if (typeof obj === 'undefined' || obj == null) {
