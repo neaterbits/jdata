@@ -192,6 +192,16 @@ function FacetViewElements() {
 		return ul;
 	}
 
+	this.createAttributeRangeList = function(parentElement) {
+		var ul = document.createElement('ul');
+
+		append(parentElement, ul);
+
+		ul.setAttribute("class", "facetAttributeRangeList");
+		
+		return ul;
+	}
+
 	this.createAttributeValueElement = function(parentElement, value, matchCount, hasSubAttributes) {
 		var li = document.createElement('li');
 		

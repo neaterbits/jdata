@@ -62,10 +62,15 @@ function FacetView(divId, facetViewElements) {
 
 						cur = t._addFacetAttributeList(cur.getViewElementFactory(), cur);
 					}
-					else if (kind === 'attributeValue' || kind === 'attributeRange') {
+					else if (kind === 'attributeValue') {
 						console.log("Attribute value array of length " + length + ", cur=" + print(cur));
 						
 						cur = t._addFacetAttributeValueList(cur.getViewElementFactory(), cur);
+					}
+					else if (kind === 'attributeRange') {
+						console.log("Attribute range array of length " + length + ", cur=" + print(cur));
+						
+						cur = t._addFacetAttributeRangeList(cur.getViewElementFactory(), cur);
 					}
 					else {
 						throw "Neither type nor attribute: " + kind;
@@ -132,9 +137,22 @@ function FacetView(divId, facetViewElements) {
 
 		var attributeValueList = new FacetAttributeValueList(viewElementFactory, cur.getModelType(), cur.getAttributeId(), attributeListElement);
 		
-		cur.setAttributeValueList(attributeValueList);
+		cur.setAttributeValueOrRangeList(attributeValueList);
 
 		return attributeValueList;
+	}
+	
+	this._addFacetAttributeRangeList = function(viewElementFactor, cur) {
+		var viewElementFactory = cur.getViewElementFactory();
+
+		// Array of attributes
+		var attributeListElement = viewElementFactory.createAttributeRangeList(cur.getViewElement());
+
+		var attributeRangeList = new FacetAttributeRangeList(viewElementFactory, cur.getModelType(), cur.getAttributeId(), attributeListElement);
+		
+		cur.setAttributeValueOrRangeList(attributeRangeList);
+
+		return attributeRangeList;
 	}
 	
 	this._addFacetType = function(viewElementFactory, cur, element) {
@@ -205,9 +223,8 @@ function FacetView(divId, facetViewElements) {
 
 		this._setAttributeCheckboxListener(viewElementFactory, attributeRange, false);
 
-		// For the purpose of UI object tree, we just use addValue() since there is not much difference between ranges and values,
-		// we only look at the value of the checkbox
-		cur.addValue(attributeRange);
+		console.log('cur type: ' + cur.getClassName());
+		cur.addRange(attributeRange);
 
 		return attributeRange;
 	};
@@ -245,9 +262,11 @@ function FacetView(divId, facetViewElements) {
 		var criteria = [];
 		
 		this.rootTypes.iterate(function(className, obj) {
-			if (className == 'FacetAttributeValueList') {
+			if (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeList') {
 				
-				var attributeValues = obj.getValues();
+				var attributeValues = className == 'FacetAttributeValueList'
+						? obj.getValues()
+						: obj.getRanges();
 				
 				// Iterate all values and figure how many are selected
 				var numSelected = 0;
@@ -518,14 +537,14 @@ function FacetView(divId, facetViewElements) {
 	}
 
 	FacetAttribute.prototype._iterateSub = function(each) {
-		this.attributeValueList._iterateCurAndSub(each);
+		this.attributeValueOrRangeList._iterateCurAndSub(each);
 	}
 
-	FacetAttribute.prototype.setAttributeValueList = function(attributeValueList) {
+	FacetAttribute.prototype.setAttributeValueOrRangeList = function(attributeValueOrRangeList) {
 		
-		checkNonNull(attributeValueList);
+		checkNonNull(attributeValueOrRangeList);
 		
-		this.attributeValueList = attributeValueList;
+		this.attributeValueOrRangeList = attributeValueOrRangeList;
 	}
 
 	// List of faceted attributes ("With", "Price")
@@ -556,6 +575,34 @@ function FacetView(divId, facetViewElements) {
 
 	FacetAttributeValueList.prototype.getValues = function() {
 		return this.values;
+	}
+
+	function FacetAttributeRangeList(viewElementFactory, modelType, attributeId, listItem) {
+		FacetsElementBase.call(this, 'FacetAttributeRangeList', viewElementFactory, modelType, listItem);
+
+		this.attributeId = attributeId;
+		this.ranges = [];
+	}
+
+	FacetAttributeRangeList.prototype = Object.create(FacetsElementBase.prototype);
+
+	FacetAttributeRangeList.prototype._iterateSub = function(each) {
+		this._iterateArray(this.ranges, each);
+	}
+
+	FacetAttributeRangeList.prototype.getAttributeId = function() {
+		return this.attributeId;
+	}
+	
+	FacetAttributeRangeList.prototype.addRange = function(range) {
+
+		checkNonNull(range);
+
+		this.ranges.push(range);
+	}
+
+	FacetAttributeRangeList.prototype.getRanges = function() {
+		return this.ranges;
 	}
 
 	function FacetAttributeValue(className, viewElementFactory, modelType, attributeId, listItem, checkboxItem) {
@@ -596,7 +643,8 @@ function FacetView(divId, facetViewElements) {
 	FacetAttributeSingleValue.prototype.getModelValue = function() {
 		return this.modelValue;
 	}
-
+	
+	
 	function FacetAttributeRange(viewElementFactory, modelType, attributeId, modelRange, listItem, checkboxItem) {
 		FacetAttributeValue.call(this, 'FacetAttributeRange', viewElementFactory, attributeId, modelType, listItem, checkboxItem);
 
