@@ -49,7 +49,7 @@ function FacetView(divId, facetViewElements) {
 
 						var typeListElement = t.getViewElementFactory().createTypeList(parentDiv, isRoot);
 
-						var typeList = new FacetTypeList(t.getViewElementFactory(), cur != null ? cur.getModelType() :null, typeListElement);
+						var typeList = new FacetTypeList(t.getViewElementFactory(), cur != null ? cur.getModelType() : null, typeListElement);
 						 
 						if (cur != null) { // If not root type list
 							cur.setTypeList(typeList);
@@ -60,30 +60,12 @@ function FacetView(divId, facetViewElements) {
 					else if (kind === 'attribute') {
 						console.log("Attribute array of length " + length + ", cur=" + print(cur));
 
-						var viewElementFactory = cur.getViewElementFactory();
-
-						// Array of attributes
-						var attributeListElement = viewElementFactory.createAttributeList(cur.getViewElement());
-
-						var attributeList = new FacetAttributeList(viewElementFactory, cur.getModelType(), attributeListElement);
-						
-						cur.setAttributeList(attributeList);
-						
-						cur = attributeList;
+						cur = t._addFacetAttributeList(cur.getViewElementFactory(), cur);
 					}
 					else if (kind === 'attributeValue' || kind === 'attributeRange') {
 						console.log("Attribute value array of length " + length + ", cur=" + print(cur));
 						
-						var viewElementFactory = cur.getViewElementFactory();
-
-						// Array of attributes
-						var attributeListElement = viewElementFactory.createAttributeValueList(cur.getViewElement());
-
-						var attributeValueList = new FacetAttributeValueList(viewElementFactory, cur.getModelType(), cur.getAttributeId(), attributeListElement);
-						
-						cur.setAttributeValueList(attributeValueList);
-
-						cur = attributeValueList;
+						cur = t._addFacetAttributeValueList(cur.getViewElementFactory(), cur);
 					}
 					else {
 						throw "Neither type nor attribute: " + kind;
@@ -101,81 +83,22 @@ function FacetView(divId, facetViewElements) {
 					if (kind == 'type') {
 						console.log("Type element " + element.typeDisplayName + ", cur=" + print(cur));
 						
-						// Add a div for the particular type, will have a box for expanding the type
-						var typeElement = viewElementFactory.createTypeContainer(cur.getViewElement(), element.typeDisplayName);
-						
-						var typeContainer = new FacetTypeContainer(viewElementFactory, element.type, typeElement, element.typeDisplayName);
-						
-						cur.addType(typeContainer);
-						
-						cur = typeContainer;
+						cur = t._addFacetType(viewElementFactory, cur, element);
 					}
 					else if (kind == 'attribute') {
 						console.log("Attribute element " + element.displayName + ", cur=" + print(cur));
 
-						// Attribute within a type in list of attributes
-						var attributeElement = viewElementFactory.createAttributeListElement(cur.getViewElement(), element.name);
-						
-						var attribute = new FacetAttribute(viewElementFactory, cur.getModelType(), element.id, attributeElement);
-						
-						cur.addAttribute(attribute);
-						
-						cur = attribute;
+						cur = t._addFacetAttribute(viewElementFactory, cur, element);
 					}
 					else if (kind == 'attributeValue') {
 						console.log("Attribute value element " + element.value + ", cur=" + print(cur));
-
-						var hasSubAttributes = typeof element.subAttributes !== 'undefined';
 						
-						// Attribute within a type in list of attributes
-						var attributeElement = viewElementFactory.createAttributeValueElement(
-								cur.getViewElement(),
-								element.value,
-								element.matchCount,
-								hasSubAttributes);
-						
-						var attributeValue = new FacetAttributeSingleValue(
-												viewElementFactory,
-												cur.getModelType(),
-												cur.getAttributeId(),
-												element.value,
-												attributeElement.listItem,
-												attributeElement.checkboxItem);
-						
-						t._setAttributeCheckboxListener(viewElementFactory, attributeValue, hasSubAttributes);
-								
-						cur.addValue(attributeValue);
-						
-						cur = attributeValue;
+						cur = t._addFacetSingleValue(viewElementFactory, cur, element);
 					}
 					else if (kind == 'attributeRange') {
 						console.log("Attribute value element " + element.value + ", cur=" + print(cur));
 						
-						var text = '';
-						
-						text += (typeof element.lower !== 'undefined' ? element.lower : ' ');
-						
-						text += ' - ';
-						text += (typeof element.upper !== 'undefined' ? element.upper : '');
-
-						// Attribute within a type in list of attributes
-						var attributeElement = viewElementFactory.createAttributeValueElement(cur.getViewElement(), text, element.matchCount);
-						
-						var attributeRange = new FacetAttributeRange(
-								viewElementFactory,
-								cur.getModelType(),
-								cur.getAttributeId(),
-								element,
-								attributeElement.listItem,
-								attributeElement.checkboxItem);
-
-						t._setAttributeCheckboxListener(viewElementFactory, attributeRange, false);
-
-						// For the purpose of UI object tree, we just use addValue() since there is not much difference between ranges and values,
-						// we only look at the value of the checkbox
-						cur.addValue(attributeRange);
-
-						cur = attributeRange;
+						cur = t._addFacetAttributeRange(viewElementFactory, cur, element);
 					}
 					else {
 						throw "Neither type nor attribute: " + kind;
@@ -186,6 +109,107 @@ function FacetView(divId, facetViewElements) {
 		
 		var x = 123;
 		
+	};
+	
+	this._addFacetAttributeList = function(viewElementFactory, cur) {
+		var viewElementFactory = cur.getViewElementFactory();
+
+		// Array of attributes
+		var attributeListElement = viewElementFactory.createAttributeList(cur.getViewElement());
+
+		var attributeList = new FacetAttributeList(viewElementFactory, cur.getModelType(), attributeListElement);
+		
+		cur.setAttributeList(attributeList);
+		
+		return attributeList;
+	}
+
+	this._addFacetAttributeValueList = function(viewElementFactor, cur) {
+		var viewElementFactory = cur.getViewElementFactory();
+
+		// Array of attributes
+		var attributeListElement = viewElementFactory.createAttributeValueList(cur.getViewElement());
+
+		var attributeValueList = new FacetAttributeValueList(viewElementFactory, cur.getModelType(), cur.getAttributeId(), attributeListElement);
+		
+		cur.setAttributeValueList(attributeValueList);
+
+		return attributeValueList;
+	}
+	
+	this._addFacetType = function(viewElementFactory, cur, element) {
+		// Add a div for the particular type, will have a box for expanding the type
+		var typeElement = viewElementFactory.createTypeContainer(cur.getViewElement(), element.typeDisplayName);
+		
+		var typeContainer = new FacetTypeContainer(viewElementFactory, element.type, typeElement, element.typeDisplayName);
+		
+		cur.addType(typeContainer);
+
+		return typeContainer;
+	}
+
+	this._addFacetAttribute = function(viewElementFactory, cur, element) {
+		// Attribute within a type in list of attributes
+		var attributeElement = viewElementFactory.createAttributeListElement(cur.getViewElement(), element.name);
+		
+		var attribute = new FacetAttribute(viewElementFactory, cur.getModelType(), element.id, attributeElement);
+		
+		cur.addAttribute(attribute);
+		
+		return attribute;
+	}
+
+	this._addFacetSingleValue = function(viewElementFactory, cur, element) {
+		var hasSubAttributes = typeof element.subAttributes !== 'undefined';
+		
+		// Attribute within a type in list of attributes
+		var attributeElement = viewElementFactory.createAttributeValueElement(
+				cur.getViewElement(),
+				element.value,
+				element.matchCount,
+				hasSubAttributes);
+		
+		var attributeValue = new FacetAttributeSingleValue(
+								viewElementFactory,
+								cur.getModelType(),
+								cur.getAttributeId(),
+								element.value,
+								attributeElement.listItem,
+								attributeElement.checkboxItem);
+		
+		this._setAttributeCheckboxListener(viewElementFactory, attributeValue, hasSubAttributes);
+				
+		cur.addValue(attributeValue);
+
+		return attributeValue;
+	}
+	
+	this._addFacetAttributeRange = function(viewElementFactory, cur, element) {
+		var text = '';
+		
+		text += (typeof element.lower !== 'undefined' ? element.lower : ' ');
+		
+		text += ' - ';
+		text += (typeof element.upper !== 'undefined' ? element.upper : '');
+
+		// Attribute within a type in list of attributes
+		var attributeElement = viewElementFactory.createAttributeValueElement(cur.getViewElement(), text, element.matchCount);
+		
+		var attributeRange = new FacetAttributeRange(
+				viewElementFactory,
+				cur.getModelType(),
+				cur.getAttributeId(),
+				element,
+				attributeElement.listItem,
+				attributeElement.checkboxItem);
+
+		this._setAttributeCheckboxListener(viewElementFactory, attributeRange, false);
+
+		// For the purpose of UI object tree, we just use addValue() since there is not much difference between ranges and values,
+		// we only look at the value of the checkbox
+		cur.addValue(attributeRange);
+
+		return attributeRange;
 	};
 	
 	this._setAttributeCheckboxListener = function(viewElementFactory, attributeValue, hasSubAttributes) {
