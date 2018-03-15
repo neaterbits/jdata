@@ -3,8 +3,13 @@
  * but does not operate on the DOM directly, rather calls separate instance for that
  */
 
+
 function FacetView(divId, facetViewElements) {
 
+	var ITER_CONTINUE = 1; 	// Continue recursive iteration
+	var ITER_BREAK = 2; 	// Break out of iteration, also current level (eg for arrays, skip the rest of indices)
+	var ITER_SKIP_SUB = 3;	// Skip recursion into sub elements but continue all iteration at same level 
+	
 	this.divId = divId;
 	this.facetViewElements = facetViewElements;
 	
@@ -250,7 +255,7 @@ function FacetView(divId, facetViewElements) {
 			
 			var criteria = t.collectCriteriaAndTypesFromSelections();
 			
-			console.log('serach criteria changed:\n' + print(criteria));
+			console.log('search criteria changed:\n' + print(criteria));
 		};
 
 		viewElementFactory.setCheckboxOnClick(attributeValue.checkboxItem, onCheckboxClicked);
@@ -441,23 +446,83 @@ function FacetView(divId, facetViewElements) {
 	}
 
 	FacetsElementBase.prototype._iterateIfDefined = function(iterable, each) {
-		if (typeof iterable !== 'undefined') {
-			iterable.iterate(each);
-		}
-	}
+		
+		var exitCode = ITER_CONTINUE;
 
-	FacetsElementBase.prototype._iterateArray = function(array, each) {
-		array.forEach(function (e) { e._iterateCurAndSub(each); } )
+		if (typeof iterable !== 'undefined') {
+			var iter = iterable.iterate(each, iterable);
+			
+			if (iter == ITER_SKIP_SUB) {
+				throw "Should not return ITER_SKIP_SUB from sub elements";
+			}
+			
+			exitCode = iter;
+		}
+		
+		return exitCode;
 	}
 
 	FacetsElementBase.prototype.iterate = function(each) {
-		this._iterateSub(each);
+		this._iterateSub(function(className, obj, parent) {
+
+			each(className, obj);
+			
+			return ITER_CONTINUE;
+		});
+	}
+	
+	FacetsElementBase.prototype.iterateUntilReturnFalse = function(each) {
+		return this._iterateSub(function(className, obj, parent) {
+			return each(className, obj, parent);
+		});
 	}
 
-	FacetsElementBase.prototype._iterateCurAndSub = function(each) {
-		each(this.className, this);
+	
+	FacetsElementBase.prototype._iterateArray = function(array, each) {
 		
-		this._iterateSub(each);
+		var exitCode = ITER_CONTINUE;
+		
+		for (var i = 0; i < array.length; ++ i) {
+			var iter = array[i]._iterateCurAndSub(each, this);
+			
+			if (iter == ITER_CONTINUE ) {
+				// Continue loop
+			}
+			else if (iter == ITER_BREAK) {
+				exitCode = ITER_BREAK;
+				break;
+			}
+			else if (iter == ITER_SKIP_SUB) {
+				throw "Should not return ITER_SKIP_SUB from sub elements";
+			}
+			else {
+				throw "Unknown iter code: " + iter;
+			}
+		}
+
+		return exitCode;
+	}
+
+
+	FacetsElementBase.prototype._iterateCurAndSub = function(each, parent) {
+		
+		var iter = each(this.className, this, parent);
+		var exitCode;
+		
+		if (iter == ITER_CONTINUE ) {
+			exitCode = this._iterateSub(each);
+		}
+		else if (iter == ITER_BREAK) {
+			exitCode = ITER_BREAK;
+		}
+		else if (iter == ITER_SKIP_SUB) {
+			exitCode = ITER_CONTINUE;
+		}
+		else {
+			throw "Unknown iter code: " + iter;
+		}
+
+		return exitCode;
 	}
 
 	// Container for a facet type
@@ -468,8 +533,18 @@ function FacetView(divId, facetViewElements) {
 	FacetTypeContainer.prototype = Object.create(FacetsElementBase.prototype);
 
 	FacetTypeContainer.prototype._iterateSub = function(each) {
-		this._iterateIfDefined(this.typeList, each)
-		this._iterateIfDefined(this.attributeList, each)
+
+		var iter = this._iterateIfDefined(this.typeList, each);
+		if (iter === ITER_BREAK) {
+			return ITER_BREAK;
+		}
+
+		iter = this._iterateIfDefined(this.attributeList, each);
+		if (iter === ITER_BREAK) {
+			return ITER_BREAK;
+		}
+
+		return ITER_CONTINUE;
 	}
 
 	FacetTypeContainer.prototype.setTypeList = function(typeList) {
@@ -494,7 +569,7 @@ function FacetView(divId, facetViewElements) {
 	FacetTypeList.prototype = Object.create(FacetsElementBase.prototype);
 
 	FacetTypeList.prototype._iterateSub = function(each) {
-		this._iterateArray(this.types, each);
+		return this._iterateArray(this.types, each);
 	}
 
 	FacetTypeList.prototype.addType = function(type) {
@@ -513,7 +588,7 @@ function FacetView(divId, facetViewElements) {
 	FacetAttributeList.prototype = Object.create(FacetsElementBase.prototype);
 
 	FacetAttributeList.prototype._iterateSub = function(each) {
-		this._iterateArray(this.attributes, each);
+		return this._iterateArray(this.attributes, each);
 	}
 
 	FacetAttributeList.prototype.addAttribute = function(attribute) {
@@ -537,7 +612,7 @@ function FacetView(divId, facetViewElements) {
 	}
 
 	FacetAttribute.prototype._iterateSub = function(each) {
-		this.attributeValueOrRangeList._iterateCurAndSub(each);
+		return this.attributeValueOrRangeList._iterateCurAndSub(each, this);
 	}
 
 	FacetAttribute.prototype.setAttributeValueOrRangeList = function(attributeValueOrRangeList) {
@@ -558,7 +633,7 @@ function FacetView(divId, facetViewElements) {
 	FacetAttributeValueList.prototype = Object.create(FacetsElementBase.prototype);
 
 	FacetAttributeValueList.prototype._iterateSub = function(each) {
-		this._iterateArray(this.values, each);
+		return this._iterateArray(this.values, each);
 	}
 
 	FacetAttributeValueList.prototype.getAttributeId = function() {
@@ -587,7 +662,7 @@ function FacetView(divId, facetViewElements) {
 	FacetAttributeRangeList.prototype = Object.create(FacetsElementBase.prototype);
 
 	FacetAttributeRangeList.prototype._iterateSub = function(each) {
-		this._iterateArray(this.ranges, each);
+		return this._iterateArray(this.ranges, each);
 	}
 
 	FacetAttributeRangeList.prototype.getAttributeId = function() {
@@ -620,8 +695,10 @@ function FacetView(divId, facetViewElements) {
 
 	FacetAttributeValue.prototype._iterateSub = function(each) {
 		if (typeof this.attributeList !== 'undefined') {
-			this.attributeList._iterateCurAndSub(each);
+			return this.attributeList._iterateCurAndSub(each, this);
 		}
+		
+		return ITER_CONTINUE;
 	}
 
 	// For subattributes
