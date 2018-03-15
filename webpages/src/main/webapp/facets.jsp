@@ -9,7 +9,7 @@
 <script src="js/searchview.js" type="text/javascript"></script>
 </head>
 <body>
-<h2>Hello World!</h2>
+<h2>Test</h2>
 <div id='facets'></div>
 </body>
 <script type="text/javascript">

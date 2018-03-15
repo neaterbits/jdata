@@ -160,29 +160,29 @@ function FacetView(divId, facetViewElements) {
 		return attributeRangeList;
 	}
 	
-	this._addFacetType = function(viewElementFactory, cur, element) {
+	this._addFacetType = function(viewElementFactory, cur, element, index) {
 		// Add a div for the particular type, will have a box for expanding the type
 		var typeElement = viewElementFactory.createTypeContainer(cur.getViewElement(), element.typeDisplayName);
 		
 		var typeContainer = new FacetTypeContainer(viewElementFactory, element.type, typeElement, element.typeDisplayName);
 		
-		cur.addType(typeContainer);
+		cur.addType(typeContainer, index);
 
 		return typeContainer;
 	}
 
-	this._addFacetAttribute = function(viewElementFactory, cur, element) {
+	this._addFacetAttribute = function(viewElementFactory, cur, element, index) {
 		// Attribute within a type in list of attributes
 		var attributeElement = viewElementFactory.createAttributeListElement(cur.getViewElement(), element.name);
 		
 		var attribute = new FacetAttribute(viewElementFactory, cur.getModelType(), element.id, attributeElement);
 		
-		cur.addAttribute(attribute);
+		cur.addAttribute(attribute, index);
 		
 		return attribute;
 	}
 
-	this._addFacetSingleValue = function(viewElementFactory, cur, element) {
+	this._addFacetSingleValue = function(viewElementFactory, cur, element, index) {
 		var hasSubAttributes = typeof element.subAttributes !== 'undefined';
 		
 		// Attribute within a type in list of attributes
@@ -202,12 +202,12 @@ function FacetView(divId, facetViewElements) {
 		
 		this._setAttributeCheckboxListener(viewElementFactory, attributeValue, hasSubAttributes);
 				
-		cur.addValue(attributeValue);
+		cur.addValue(attributeValue, index);
 
 		return attributeValue;
 	}
 	
-	this._addFacetAttributeRange = function(viewElementFactory, cur, element) {
+	this._addFacetAttributeRange = function(viewElementFactory, cur, element, index) {
 		var text = '';
 		
 		text += (typeof element.lower !== 'undefined' ? element.lower : ' ');
@@ -229,7 +229,7 @@ function FacetView(divId, facetViewElements) {
 		this._setAttributeCheckboxListener(viewElementFactory, attributeRange, false);
 
 		console.log('cur type: ' + cur.getClassName());
-		cur.addRange(attributeRange);
+		cur.addRange(attributeRange, index);
 
 		return attributeRange;
 	};
@@ -261,6 +261,225 @@ function FacetView(divId, facetViewElements) {
 		viewElementFactory.setCheckboxOnClick(attributeValue.checkboxItem, onCheckboxClicked);
 	}
 
+	/**
+	 * Refresh from a new model, removing adding new types or attributes, removing those no longer present.
+	 * We do that without rebuilding the whole thing, this way current selection state is maintained
+	 */
+	this.refreshFromNewModel = function(model) {
+		
+		// First iterate over all items and set them as not in use, this will allow us to remove unused elements later
+		this.rootTypes.iterate(function(className, obj) { obj.setInUse(false); })
+
+		// Iterate over model to mark all elements that are still there as in use
+		this._markAllStillInDataModelAsInUse(model);
+
+		// Remove unused elements first so that indices become correct when inserting elements from model afterwards
+		this._removeElementsNotInUse(model);
+		
+		// Mark elements as used
+		// Also add UI elements for any new elements from model
+		this._addAllNewElementsFromDataModel(model);
+	}
+
+	this._addAllNewElementsFromDataModel = function(model) {
+
+		var t = this;
+
+		model.iterate(
+				this.rootTypes,
+				
+				// Array of elements
+				function (kind, length, cur) {
+					
+					if (kind === 'type') {
+						// FacetTypeList under FacetTypeContainer
+						if (isNotNull(cur.getTypeList())) {
+							// Existing list
+							cur = cur.getTypeList();
+						}
+						else {
+							cur = t._addTypeList(cur.getViewElementFactory(), cur);
+						}
+					}
+					else if (kind === 'attribute') {
+						// Cur may be FacetTypeContainer or FacetAttributeValue (in case of subattributes)
+						if (isNotNull(cur.getAttributeList())) {
+							// Existing list
+							cur = cur.getAttributeList();
+						}
+						else {
+							cur = t._addAttributeList(cur.getViewElementFactory(), cur);
+						}
+					}
+					else if (kind === 'attributeValue' || kind === 'attributeRange') {
+						if (isNotNull(cur.getAttributeList())) {
+							cur = cur.getAttributeList();
+						}
+						else {
+							cur = t._addAttributeValueList(cur.getViewElementFactory(), cur);
+						}
+					}
+					else {
+						throw "Unknown data model element: " + kind;
+					}
+
+					return cur;
+				},
+				
+				// Array element
+				function (kind, element, index, cur) {
+
+					if (kind == 'type') {
+
+						// cur is FacetTypeList
+						if (!cur.hasType(element.type)) {
+							// Add type element at index, may be in the middle of other entries in the type list
+							this._addFacetType(cur.getViewElementFactory(), cur, element, index);
+						}
+					}
+					else if (kind == 'attribute') {
+						// FacetTypeContainer or FacetAttributeSingleValue (for subattributes)
+						if (!cur.hasAttribute(element.id)) {
+							this._addFacetAttribute(cur.getViewElementFactory(), cur, element, index);
+						}
+					}
+					else if (kind === 'attributeValue') {
+						// cur is FacetAttributeValueList
+						if (!cur.hasAttributeValue(element.value)) {
+							this._addFacetAttributeValue(cur.getViewElementFactory(), cur, element, index);
+						}
+					}
+					else if (kind === 'attributeRange') {
+						// cur is FacetAttributeValueList
+						if (!cur.hasAttributeRange(element)) {
+							this._addFacetAttributeRange(cur.getViewElementFactory(), cur, element, index);
+						}
+					}
+					else {
+						throw "Unknown data element type: " + kind;
+					}
+				});
+	};
+
+	this._markAllStillInDataModelAsInUse = function(model) {
+		model.iterate(
+				this.rootTypes,
+
+				function (kind, length, cur) {
+					if (kind === 'type') {
+						// FacetTypeList under FacetTypeContainer
+						if (isNotNull(cur.getTypeList())) {
+							// Existing list
+							cur.getTypeList().setInUse(true);
+							
+							cur = cur.getTypeList();
+						}
+					}
+					else if (kind === 'attribute') {
+						// Cur may be FacetTypeContainer or FacetAttributeValue (in case of subattributes)
+						if (isNotNull(cur.getAttributeList())) {
+							// Existing list
+							cur.getAttributeList().setInUse(true);
+							
+							cur = cur.getAttributeList();
+						}
+					}
+					else if (kind === 'attributeValue' || kind === 'attributeRange') {
+						if (isNotNull(cur.getAttributeOrRangeList())) {
+							cur.getAttributeOrRangeList().setInUse(true);
+							
+							cur = cur.getAttributeOrRangeList();
+						}
+					}
+					else {
+						throw "Unknown data model element: " + kind;
+					}
+				},
+
+				function (kind, element, index, cur) {
+					if (kind == 'type') {
+						// cur is FacetTypeList
+						var typeIndex = cur.findType(element.type);
+						if (typeIndx >= 0) {
+							cur.getTypes()[typeIndex].setInUse(true);
+							
+							cur = cur.getTypes();
+						}
+					}
+					else if (kind == 'attribute') {
+						// FacetTypeContainer or FacetAttributeSingleValue (for subattributes)
+						var attributeIndex = cur.findAttribue(element.id);
+						if (attributeIndex >= 0) {
+							cur.getAttributes()[attributeIndex].setInUse(true);
+							
+							cur = cur.getAttributes();
+						}
+					}
+					else if (kind === 'attributeValue') {
+						// cur is FacetAttributeValueList
+						var valueIndex = cur.findAttribute(element.value);
+						if (valueIndex >= 0) {
+							cur.getValues()[valueIndex].setInUse(true);
+							
+							cur = cur.getValues();
+						}
+					}
+					else if (kind === 'attributeRange') {
+						// cur is FacetAttributeValueList
+						var rangeIndex = cur.findRange(element);
+						if (rangeIndex >= 0) {
+							cur.getRanges()[rangeIndex].setInUse(true);
+							
+							cur = cur.getRanges();
+						}
+					}
+					else {
+						throw "Unknown data element type: " + kind;
+					}
+ 				});
+	}
+	
+	this._removeElementsNotInUse = function() {
+		this.rootTypes.iterateWithReturnValue(function (className, obj, parent) {
+			
+			var iter;
+
+			if (!obj.isInUse()) {
+				// Object no longer in use so must remove from DOM and skip recursing to sub-elements
+				// since we only need to remove this element from the DOM
+				
+				// This depends on the type of element this is. It might be
+				// - a type, if type is no longer matched
+				// - an attribute, if no matching elements have attribute set
+				// - a typelist, if no subtypes match
+				// - an attribute list, if type or single attribute value no longer has any attributes for matching elements
+				// - an attribute value, if no matching elements have this value for the attribute
+				// - an attribute range, if no matching elements are within this range for the attribute
+				
+				
+				// It might not be
+				// - an attribute value list, since an empty such would mean the attribute should not be returned in the first place
+				// - an attribute range list, since an empty such would mean the attribute should not be returned in the first place
+
+				if (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeList') {
+					throw "Classname " + className + " should either be in use or not appear here";
+				}
+
+				parent.removeSub(obj);
+
+				// Remove from DOM
+				obj.getViewElementFactory().removeElement(obj.getViewElement());
+				
+				iter = ITER_SKIP_SUB;
+			}
+			else {
+				iter = ITER_CONTINUE;
+			}
+			
+			return iter;
+		});
+	}
+	
 	this.collectCriteriaAndTypesFromSelections = function() {
 
 		var types = {};
@@ -268,7 +487,8 @@ function FacetView(divId, facetViewElements) {
 		
 		this.rootTypes.iterate(function(className, obj) {
 			if (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeList') {
-				
+
+				// Get array of either FacetAttributeSingleValue or FacetAttributeRange
 				var attributeValues = className == 'FacetAttributeValueList'
 						? obj.getValues()
 						: obj.getRanges();
@@ -445,25 +665,38 @@ function FacetView(divId, facetViewElements) {
 		return this.modelType;
 	}
 
-	FacetsElementBase.prototype._iterateIfDefined = function(iterable, each) {
-		
+	FacetsElementBase.prototype.getInUse = function() {
+		return this.inUse;
+	}
+
+	FacetsElementBase.prototype.setInUse = function(inUse) {
+		this.inUse = inUse;
+	}
+	
+	FacetsElementBase.prototype._iterateIfDefinedAndNonNull = function(iterable, each) {
+
 		var exitCode = ITER_CONTINUE;
 
-		if (typeof iterable !== 'undefined') {
-			var iter = iterable.iterate(each, iterable);
+		if (isNotNull(iterable)) {
 			
+			var iter = iterable._iterateCurAndSub(each, this);
+
 			if (iter == ITER_SKIP_SUB) {
 				throw "Should not return ITER_SKIP_SUB from sub elements";
 			}
-			
+
 			exitCode = iter;
 		}
-		
+
+		console.log('_iterateIfDefinedAndNonNull return: ' + exitCode);
+
 		return exitCode;
 	}
 
 	FacetsElementBase.prototype.iterate = function(each) {
 		this._iterateSub(function(className, obj, parent) {
+
+			console.log('Class name: ' + className);
 
 			each(className, obj);
 			
@@ -471,7 +704,7 @@ function FacetView(divId, facetViewElements) {
 		});
 	}
 	
-	FacetsElementBase.prototype.iterateUntilReturnFalse = function(each) {
+	FacetsElementBase.prototype.iterateWithReturnValue = function(each) {
 		return this._iterateSub(function(className, obj, parent) {
 			return each(className, obj, parent);
 		});
@@ -525,6 +758,43 @@ function FacetView(divId, facetViewElements) {
 		return exitCode;
 	}
 
+	FacetsElementBase.prototype._checkAndRemoveFromArray = function(array, obj) {
+		checkNonNull(obj);
+		
+		var index = array.indexOd(obj);
+		
+		if (index < 0) {
+			throw "Element not found in array";
+		}
+		
+		array.splice(index, 1);
+	}
+	
+	FacetsElementBase.prototype._addToArrayWithOptionalIndex = function(array, index, obj) {
+
+		checkNonNull(obj);
+		
+		if (isNotNull(index) && index < array.length) {
+			array.splice(index, 0, obj);
+		}
+		else {
+			array.push(obj);
+		}
+	}
+	
+	FacetAttributeList.prototype._arrayHasAttribute = function(attributes, attributeId) {
+		checkNonNull(attributes);
+		checkNonNul(attributeId);
+
+		for (var i = 0; i < attributes.length; ++ i) {
+			if (attributes[i].attributeId === attributeId) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	// Container for a facet type
 	function FacetTypeContainer(viewElementFactory, modelType, container) {
 		FacetsElementBase.call(this, 'FacetTypeContainer', viewElementFactory, modelType, container);
@@ -534,17 +804,21 @@ function FacetView(divId, facetViewElements) {
 
 	FacetTypeContainer.prototype._iterateSub = function(each) {
 
-		var iter = this._iterateIfDefined(this.typeList, each);
+		var iter = this._iterateIfDefinedAndNonNull(this.typeList, each);
 		if (iter === ITER_BREAK) {
 			return ITER_BREAK;
 		}
 
-		iter = this._iterateIfDefined(this.attributeList, each);
+		iter = this._iterateIfDefinedAndNonNull(this.attributeList, each);
 		if (iter === ITER_BREAK) {
 			return ITER_BREAK;
 		}
 
 		return ITER_CONTINUE;
+	}
+
+	FacetTypeContainer.prototype.getTypeList = function() {
+		return this.typeList;
 	}
 
 	FacetTypeContainer.prototype.setTypeList = function(typeList) {
@@ -553,10 +827,38 @@ function FacetView(divId, facetViewElements) {
 		this.typeList = typeList;
 	}
 
+	FacetTypeContainer.prototype.getAttributeList = function() {
+		return this.attributeList;
+	}
+
 	FacetTypeContainer.prototype.setAttributeList = function(attributeList) {
 		checkNonNull(attributeList);
 		
 		this.attributeList = attributeList;
+	}
+
+	FacetTypeList.prototype.removeSub = function(obj) {
+		checkNonNull(obj);
+		
+		if (obj === this.typeList) {
+			this.typeList = null;
+		}
+		else if (obj === attributeList) {
+			this.attributeList = null;
+		}
+		else {
+			throw "obj matched neither typeList nor attributeList";
+		}
+	}
+
+	FacetTypeContainer.prototype.isType = function(type) {
+		for (var i = 0; i < this.types.length; ++ i) {
+			if (this.types[i].type === type) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	// List of facet types ("Snowboards", "Skis", "Apartments") 
@@ -572,10 +874,14 @@ function FacetView(divId, facetViewElements) {
 		return this._iterateArray(this.types, each);
 	}
 
-	FacetTypeList.prototype.addType = function(type) {
+	FacetTypeList.prototype.addType = function(type, index) {
 		checkNonNull(type);
-		
-		this.types.push(type);
+	
+		this._addToArrayWithOptionalIndex(this.types, index, type);
+	}
+
+	FacetTypeList.prototype.removeSub = function(obj) {
+		this._checkAndRemoveFromArray(this.types, obj);
 	}
 
 	// List of faceted attributes ("With", "Price")
@@ -591,10 +897,18 @@ function FacetView(divId, facetViewElements) {
 		return this._iterateArray(this.attributes, each);
 	}
 
-	FacetAttributeList.prototype.addAttribute = function(attribute) {
+	FacetAttributeList.prototype.hasAttribute = function(attributeId) {
+		return this._arrayHasAttribute(this.attributes, attributeId);
+	}
+
+	FacetAttributeList.prototype.addAttribute = function(attribute, index) {
 		checkNonNull(attribute);
 		
-		this.attributes.push(attribute);
+		this._addToArrayWithOptionalIndex(this.attributes, index, attribute);
+	}
+
+	FacetAttributeList.prototype.removeSub = function(obj) {
+		this._checkAndRemoveFromArray(this.attribute, obj);
 	}
 
 	// One attribute for a type, eg "Length" under "Skis"
@@ -622,6 +936,16 @@ function FacetView(divId, facetViewElements) {
 		this.attributeValueOrRangeList = attributeValueOrRangeList;
 	}
 
+	FacetAttribute.prototype.removeSub = function(obj) {
+		checkNonNull(obj);
+		
+		if (obj !== this.attributeValueOrRangeList) {
+			throw "Obj is not attributeValueOrRangeList";
+		}
+		
+		this.attributeValueOrRangeList = null;
+	}
+
 	// List of faceted attributes ("With", "Price")
 	function FacetAttributeValueList(viewElementFactory, modelType, attributeId, listItem) {
 		FacetsElementBase.call(this, 'FacetAttributeValueList', viewElementFactory, modelType, listItem);
@@ -639,17 +963,20 @@ function FacetView(divId, facetViewElements) {
 	FacetAttributeValueList.prototype.getAttributeId = function() {
 		return this.attributeId;
 	}
-
 	
-	FacetAttributeValueList.prototype.addValue = function(value) {
+	FacetAttributeValueList.prototype.addValue = function(value, index) {
 
 		checkNonNull(value);
 
-		this.values.push(value);
+		this._addToArrayWithOptionalIndex(this.values, index, value);
 	}
 
 	FacetAttributeValueList.prototype.getValues = function() {
 		return this.values;
+	}
+
+	FacetAttributeValueList.prototype.removeSub = function(obj) {
+		this._checkAndRemoveFromArray(this.values, obj);
 	}
 
 	function FacetAttributeRangeList(viewElementFactory, modelType, attributeId, listItem) {
@@ -669,15 +996,35 @@ function FacetView(divId, facetViewElements) {
 		return this.attributeId;
 	}
 	
-	FacetAttributeRangeList.prototype.addRange = function(range) {
+	FacetAttributeRangeList.prototype.addRange = function(range, index) {
 
 		checkNonNull(range);
 
-		this.ranges.push(range);
+		this._addToArrayWithOptionalIndex(this.ranges, index, range);
 	}
 
 	FacetAttributeRangeList.prototype.getRanges = function() {
 		return this.ranges;
+	}
+
+	FacetAttributeRangeList.prototype.removeSub = function(obj) {
+		this._checkAndRemoveFromArray(this.ranges, obj);
+	}
+
+	FacetAttributeRangeList.prototype.findRange = function(range) {
+		for (var i = 0; i < this.ranges.length; ++ i) {
+			var r = this.ranges[i];
+			
+			if (r.lower == range.lower && r.upper == range.upper) {
+				return i;
+			}
+		}
+		
+		return -1;
+	}
+
+	FacetAttributeRangeList.prototype.hasRange = function(range) {
+		return this.findRange(range) >= 0;
 	}
 
 	function FacetAttributeValue(className, viewElementFactory, modelType, attributeId, listItem, checkboxItem) {
@@ -694,21 +1041,39 @@ function FacetView(divId, facetViewElements) {
 	}
 
 	FacetAttributeValue.prototype._iterateSub = function(each) {
-		if (typeof this.attributeList !== 'undefined') {
+		if (isNotNull(this.attributeList)) {
 			return this.attributeList._iterateCurAndSub(each, this);
 		}
 		
 		return ITER_CONTINUE;
 	}
 
+	FacetAttributeValue.prototype.removeSub = function(obj) {
+		checkNonNull(obj);
+		
+		if (obj !== this.attributeList) {
+			throw "Obj is not attributelist";
+		}
+		
+		this.attributeList = null;
+	}
+
 	// For subattributes
+	FacetAttributeValue.prototype.getAttributeList = function() {
+		return this.attributeList;
+	}
+
 	FacetAttributeValue.prototype.setAttributeList = function(attributeList) {
 		
 		checkNonNull(attributeList);
 
 		this.attributeList = attributeList;
 	}
-	
+
+	FacetAttributeValue.prototype.hasAttribute = function(attributeId) {
+		return this._arrayHasAttribute(this.attributesList, attributeId);
+	}
+
 	function FacetAttributeSingleValue(viewElementFactory, modelType, attributeId, modelValue, listItem, checkboxItem) {
 		FacetAttributeValue.call(this, 'FacetAttributeSingleValue', viewElementFactory, attributeId, modelType, listItem, checkboxItem);
 
@@ -733,9 +1098,17 @@ function FacetView(divId, facetViewElements) {
 	FacetAttributeRange.prototype.getModelRange = function() {
 		return this.modelRange;
 	}
+	
+	function isNotNull(obj) {
+		return typeof obj !== 'undefined' && obj != null;
+	}
+
+	function isUndefinedOrNull(obj) {
+		return typeof obj === 'undefined' || obj == null;
+	}
 
 	function checkNonNull(obj) {
-		if (typeof obj === 'undefined' || obj == null) {
+		if (isUndefinedOrNull(obj)) {
 			throw "obj not set: " + obj;
 		}
 	}
