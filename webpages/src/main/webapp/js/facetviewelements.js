@@ -63,6 +63,7 @@ function FacetViewElements() {
 
 		var t = wrapperDiv;
 		
+		// TODO might use a data- attribute for the state instead on looking at wrapperDiv.clientDiv, seems to break sometimes.
 		var onclick = function(event) {
 			var heightToSet = listsDiv.offsetHeight;
 		
