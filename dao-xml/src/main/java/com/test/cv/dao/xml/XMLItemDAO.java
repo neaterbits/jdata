@@ -39,7 +39,7 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 
 	static {
 		try {
-			jaxbContext = JAXBContext.newInstance(Item.class, Snowboard.class);
+			jaxbContext = JAXBContext.newInstance(ItemTypes.getTypeClasses());
 		} catch (JAXBException ex) {
 			throw new IllegalStateException("Failed to initialize JAXB context", ex);
 		}

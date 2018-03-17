@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.xml.XMLItemDAO;
+import com.test.cv.integrationtest.IntegrationTestHelper;
 import com.test.cv.model.Item;
 import com.test.cv.model.cv.Language;
 import com.test.cv.model.items.ItemTypes;
@@ -41,8 +42,10 @@ public abstract class BaseService {
 		return new Language [] { language };
 	}
 	
+	private static final File localBaseDir = new File("/Users/nils.lorentzen/cvs");
+	
 	static IItemStorage getLocalXMLStorage() {
-		return new LocalXmlStorage(new File("/Users/nils.lorentzen/cvs"));
+		return new LocalXmlStorage(localBaseDir);
 	}
 
 	static IItemDAO getItemDAO(HttpServletRequest request) {
@@ -53,7 +56,8 @@ public abstract class BaseService {
 		
 		switch (storage) {
 		case LOCAL_FILE_LUCENE:
-			ret = new XMLItemDAO(getLocalXMLStorage(), null);
+			final File indexDir = new File(localBaseDir, "index");
+			ret = new XMLItemDAO(getLocalXMLStorage(), IntegrationTestHelper.makeIndex(indexDir));
 			break;
 			
 		default:

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.test.cv.model.Item;
 import com.test.cv.model.attributes.ClassAttributes;
+import com.test.cv.model.housing.RentalApartment;
 
 public class ItemTypes {
 	
@@ -14,9 +15,14 @@ public class ItemTypes {
 	private static final List<Class<? extends Item>> types = Arrays.asList(
 			Snowboard.class,
 			Ski.class,
+			RentalApartment.class,
 			Item.class);
 	
 	private static final Map<String, TypeInfo> typesByName;
+	
+	public static Class<?> [] getTypeClasses() {
+		return types.toArray(new Class<?>[types.size()]);
+	}
 	
 	public static String getTypeName(Class<? extends Item> type) {
 		return type.getSimpleName();

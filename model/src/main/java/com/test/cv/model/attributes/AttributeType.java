@@ -7,7 +7,8 @@ public enum AttributeType {
 	INTEGER,
 	LONG,
 	DECIMAL,
-	ENUM;
+	ENUM,
+	BOOLEAN;
 	
 	public static AttributeType fromClass(Class<?> propertyType) {
 		final AttributeType attributeType;
@@ -26,6 +27,9 @@ public enum AttributeType {
 		}
 		else if (propertyType.equals(BigDecimal.class)) {
 			attributeType = AttributeType.DECIMAL;
+		}
+		else if (propertyType.equals(Boolean.class) || propertyType.equals(boolean.class)) {
+			attributeType = AttributeType.BOOLEAN;
 		}
 		else {
 			attributeType = null;

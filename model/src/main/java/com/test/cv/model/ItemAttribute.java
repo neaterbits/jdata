@@ -131,6 +131,10 @@ public final class ItemAttribute {
 			case ENUM:
 				itemAttributeValue = new EnumAttributeValue(this, (Enum<?>)value);
 				break;
+				
+			case BOOLEAN:
+				itemAttributeValue = new BooleanAttributeValue(this, (Boolean)value);
+				break;
 
 			default:
 				throw new UnsupportedOperationException("Unknown attribute type " + getAttributeType());

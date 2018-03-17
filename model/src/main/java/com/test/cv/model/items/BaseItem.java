@@ -27,6 +27,9 @@ public abstract class BaseItem extends Item {
 	@Column
 	private Integer productionYear;
 
+	@Column
+	private String descriptionHtml;
+	
 	// Non-searchable sub items, eg items that are part of the same package and
 	// not sold separately, eg ski poles that belong to skies or snowboard bindings not sold separately
 	// TODO better way to model this?
@@ -55,4 +58,13 @@ public abstract class BaseItem extends Item {
 	public void setProductionYear(Integer productionYear) {
 		this.productionYear = productionYear;
 	}
+
+	public String getDescriptionHtml() {
+		return descriptionHtml;
+	}
+
+	public void setDescriptionHtml(String descriptionHtml) {
+		this.descriptionHtml = descriptionHtml;
+	}
+	
 }

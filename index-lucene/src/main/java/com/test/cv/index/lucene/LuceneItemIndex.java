@@ -40,6 +40,7 @@ import com.test.cv.index.IndexSearchCursor;
 import com.test.cv.index.IndexSearchItem;
 import com.test.cv.index.ItemIndex;
 import com.test.cv.index.ItemIndexException;
+import com.test.cv.model.BooleanAttributeValue;
 import com.test.cv.model.DecimalAttributeValue;
 import com.test.cv.model.EnumAttributeValue;
 import com.test.cv.model.IntegerAttributeValue;
@@ -151,6 +152,16 @@ public class LuceneItemIndex implements ItemIndex {
 			else if (attributeValue instanceof EnumAttributeValue) {
 				final Enum<?> value = ((EnumAttributeValue)attributeValue).getValue();
 				field = new StringField(fieldName, value.name(), storeValue ? Field.Store.YES : Field.Store.NO);
+			}
+			else if (attributeValue instanceof BooleanAttributeValue) {
+				// TODO possible to store as boolean? use int field for now
+				final boolean value = ((BooleanAttributeValue)attributeValue).getValue().booleanValue();
+				
+				field = new IntPoint(fieldName, value ? 1 : 0);
+
+				if (storeValue) {
+					storedField = new StoredField(fieldName, value ? 1 : 0);
+				}
 			}
 			else {
 				throw new UnsupportedOperationException("Unknown attribute type : " + attributeValue.getClass());
