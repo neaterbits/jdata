@@ -1,7 +1,7 @@
 package com.test.cv.model.housing;
 
 public enum Laundry {
-	IN_APARTMENT,
+	WD_IN_UNIT,
 	ON_SITE,
 	NONE
 }

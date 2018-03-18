@@ -3,6 +3,7 @@ package com.test.cv.model;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.util.Date;
 
 import com.test.cv.model.annotations.DecimalRange;
 import com.test.cv.model.annotations.IntegerRange;
@@ -134,6 +135,10 @@ public final class ItemAttribute {
 				
 			case BOOLEAN:
 				itemAttributeValue = new BooleanAttributeValue(this, (Boolean)value);
+				break;
+				
+			case DATE:
+				itemAttributeValue = new DateAttributeValue(this, (Date)value);
 				break;
 
 			default:

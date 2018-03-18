@@ -1,7 +1,9 @@
 package com.test.cv.model.housing;
 
 public enum Parking {
-	GARAGE,
+	CARPOOL,
+	DETACHED_GARAGE,
+	OFF_STREET,
 	STREET,
 	NONE;
 }

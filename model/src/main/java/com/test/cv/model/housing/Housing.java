@@ -1,5 +1,8 @@
 package com.test.cv.model.housing;
 
+import java.math.BigDecimal;
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
@@ -19,7 +22,14 @@ public class Housing extends BaseItem {
 
 	@Column
 	@Facet
-	private Integer numberOfBathrooms;
+	private BigDecimal numberOfBathrooms; // can have 1.5 bathrooms, eg one with shower and toilet, one with only topilet
+
+	@Column
+	@Facet
+	private BigDecimal squarage;
+	
+	@Column
+	private Date availableDate;
 
 	public Integer getNumberOfRooms() {
 		return numberOfRooms;
@@ -37,12 +47,28 @@ public class Housing extends BaseItem {
 		this.numberOfBedrooms = numberOfBedrooms;
 	}
 
-	public Integer getNumberOfBathrooms() {
+	public BigDecimal getNumberOfBathrooms() {
 		return numberOfBathrooms;
 	}
 
-	public void setNumberOfBathrooms(Integer numberOfBathrooms) {
+	public void setNumberOfBathrooms(BigDecimal numberOfBathrooms) {
 		this.numberOfBathrooms = numberOfBathrooms;
+	}
+	
+	public BigDecimal getSquarage() {
+		return squarage;
+	}
+
+	public void setSquarage(BigDecimal squarage) {
+		this.squarage = squarage;
+	}
+
+	public Date getAvailableDate() {
+		return availableDate;
+	}
+
+	public void setAvailableDate(Date availableDate) {
+		this.availableDate = availableDate;
 	}
 }
 

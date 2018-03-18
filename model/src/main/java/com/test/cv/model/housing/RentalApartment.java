@@ -38,6 +38,14 @@ public class RentalApartment extends Housing {
 	@Facet
 	private Boolean smoking;
 
+	@Column
+	@Facet
+	private Boolean cats;
+
+	@Column
+	@Facet
+	private Boolean dogs;
+
 	public BigDecimal getCostPerMonth() {
 		return costPerMonth;
 	}
@@ -68,5 +76,21 @@ public class RentalApartment extends Housing {
 
 	public void setSmoking(Boolean smoking) {
 		this.smoking = smoking;
+	}
+
+	public Boolean getCats() {
+		return cats;
+	}
+
+	public void setCats(Boolean cats) {
+		this.cats = cats;
+	}
+
+	public Boolean getDogs() {
+		return dogs;
+	}
+
+	public void setDogs(Boolean dogs) {
+		this.dogs = dogs;
 	}
 }

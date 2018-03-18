@@ -1,6 +1,7 @@
 package com.test.cv.model.attributes;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 public enum AttributeType {
 	STRING,
@@ -8,7 +9,8 @@ public enum AttributeType {
 	LONG,
 	DECIMAL,
 	ENUM,
-	BOOLEAN;
+	BOOLEAN,
+	DATE;
 	
 	public static AttributeType fromClass(Class<?> propertyType) {
 		final AttributeType attributeType;
@@ -30,6 +32,9 @@ public enum AttributeType {
 		}
 		else if (propertyType.equals(Boolean.class) || propertyType.equals(boolean.class)) {
 			attributeType = AttributeType.BOOLEAN;
+		}
+		else if (propertyType.equals(Date.class)) {
+			attributeType = AttributeType.DATE;
 		}
 		else {
 			attributeType = null;

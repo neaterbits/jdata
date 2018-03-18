@@ -41,6 +41,7 @@ import com.test.cv.index.IndexSearchItem;
 import com.test.cv.index.ItemIndex;
 import com.test.cv.index.ItemIndexException;
 import com.test.cv.model.BooleanAttributeValue;
+import com.test.cv.model.DateAttributeValue;
 import com.test.cv.model.DecimalAttributeValue;
 import com.test.cv.model.EnumAttributeValue;
 import com.test.cv.model.IntegerAttributeValue;
@@ -161,6 +162,14 @@ public class LuceneItemIndex implements ItemIndex {
 
 				if (storeValue) {
 					storedField = new StoredField(fieldName, value ? 1 : 0);
+				}
+			}
+			else if (attributeValue instanceof DateAttributeValue) {
+				final long value = ((DateAttributeValue)attributeValue).getValue().getTime();
+				field = new LongPoint(fieldName, value);
+
+				if (storeValue) {
+					storedField = new StoredField(fieldName, value);
 				}
 			}
 			else {
