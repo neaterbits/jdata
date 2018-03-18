@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.xml.XMLItemDAO;
+import com.test.cv.index.ItemIndex;
 import com.test.cv.integrationtest.IntegrationTestHelper;
 import com.test.cv.model.Item;
 import com.test.cv.model.cv.Language;
@@ -48,6 +49,19 @@ public abstract class BaseService {
 		return new LocalXmlStorage(localBaseDir);
 	}
 
+	private static ItemIndex luceneIndex;
+
+	// Lucene index must be static to avoid creating the writer multiple times
+	// We synchronize this on class level
+	private synchronized static ItemIndex assureIndex(File indexDir) {
+
+		if (luceneIndex == null) {
+			luceneIndex = IntegrationTestHelper.makeIndex(indexDir);
+		}
+		
+		return luceneIndex;
+	}
+
 	static IItemDAO getItemDAO(HttpServletRequest request) {
 		
 		final IItemDAO ret;
@@ -57,9 +71,9 @@ public abstract class BaseService {
 		switch (storage) {
 		case LOCAL_FILE_LUCENE:
 			final File indexDir = new File(localBaseDir, "index");
-			ret = new XMLItemDAO(getLocalXMLStorage(), IntegrationTestHelper.makeIndex(indexDir));
+			ret = new XMLItemDAO(getLocalXMLStorage(), assureIndex(indexDir));
 			break;
-			
+
 		default:
 			throw new UnsupportedOperationException("TODO - unsupported storage " + storage);
 		}
