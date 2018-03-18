@@ -1,5 +1,6 @@
 package com.test.cv.jetty.test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -13,6 +14,8 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.test.cv.common.IOUtil;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.model.Item;
@@ -37,6 +40,7 @@ public class JettyRunServlet {
 		server.setHandler(contextHandler);
 		
 		contextHandler.addServlet(SearchServlet.class, "/search/*");
+		contextHandler.addServlet(ItemServlet.class, "/items/*");
 		//contextHandler.addServletWithMapping(SearchServlet.class, "/search/*");
 		
 		try {
@@ -142,10 +146,12 @@ public class JettyRunServlet {
 		@Override
 		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+			System.out.println("## post to items servlet");
+			
 			final ItemService itemService = new ItemService();
 			final String userId = req.getParameter("userId");
 
-			if (req.getPathInfo().contains("image")) {
+			if (req.getPathInfo() != null && req.getPathInfo().contains("image")) {
 				// Posting image
 				final String itemId = req.getPathInfo().split("/")[1];
 				
@@ -171,7 +177,13 @@ public class JettyRunServlet {
 
 				final ObjectMapper mapper = new ObjectMapper();
 				
-				final Item item = mapper.readValue(req.getInputStream(), typeInfo.getType());
+				mapper.setDateFormat(new StdDateFormat());
+				
+				final byte [] data = IOUtil.readAll(req.getInputStream());
+				
+				System.out.println("Received data:\n" + new String(data));
+				
+				final Item item = mapper.readValue(new ByteArrayInputStream(data), typeInfo.getType());
 				
 				try {
 					itemService.storeItem(userId, item, req);
