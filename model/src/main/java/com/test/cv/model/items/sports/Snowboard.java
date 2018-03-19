@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.test.cv.model.annotations.DecimalRange;
 import com.test.cv.model.annotations.Facet;
+import com.test.cv.model.annotations.FacetEntity;
 import com.test.cv.model.annotations.FacetAttribute;
 import com.test.cv.model.annotations.FacetAttributes;
 
@@ -27,6 +28,7 @@ import com.test.cv.model.annotations.FacetAttributes;
 	})
 })
 @Entity(name="snowboard")
+@FacetEntity("Snowboards")
 @XmlRootElement
 public class Snowboard extends SportsItem {
 

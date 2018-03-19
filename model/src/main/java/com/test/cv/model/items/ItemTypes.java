@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
+import com.test.cv.model.annotations.FacetEntity;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.housing.RentalApartment;
 import com.test.cv.model.items.sports.Ski;
@@ -52,15 +53,19 @@ public class ItemTypes {
 
 	// TODO get from annotation
 	public static String getTypeDisplayName(Class<? extends Item> type) {
-		return getTypeName(type);
+		return getTypeInfo(type).getFacetDisplayName();
 	}
 	
 	public static Class<? extends Item> getType(Item item) {
 		return item.getClass();
 	}
 	
+	public static TypeInfo getTypeInfo(Class<? extends Item> type) {
+		return getTypeByName(getTypeName(type));
+	}
+	
 	public static TypeInfo getTypeInfo(Item item) {
-		return getTypeByName(getTypeName(getType(item)));
+		return getTypeInfo(getType(item));
 	}
 	
 	public static Set<ItemAttribute> getFacetAttributes(String ... types) {
@@ -92,7 +97,11 @@ public class ItemTypes {
 			
 			final ClassAttributes attributes = ClassAttributes.getFromClass(type);
 			
-			typesByName.put(typeName, new TypeInfo(type, attributes));
+			final FacetEntity facetEntity = type.getAnnotation(FacetEntity.class);
+			
+			final String facetTypeDisplayName = facetEntity != null ? facetEntity.value() : type.getSimpleName();
+			
+			typesByName.put(typeName, new TypeInfo(type, facetTypeDisplayName, attributes));
 		}
 	}
 	

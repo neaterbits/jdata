@@ -293,6 +293,7 @@ public class SearchService extends BaseService {
 			final List<SearchFacetedAttributeResult> facetAttributesResult = convertAttributeList(typeFacet.getAttributes());
 			
 			typeResult.setType(getTypeId(typeFacet.getType()));
+			typeResult.setDisplayName(getTypeDisplayName(typeFacet.getType()));
 			typeResult.setAttributes(facetAttributesResult);
 			
 			typeFacetsResult.add(typeResult);
@@ -484,12 +485,12 @@ public class SearchService extends BaseService {
 		final SearchFacetedTypeResult sports = new SearchFacetedTypeResult();
 		
 		sports.setType("sports");
-		sports.setTypeDisplayName("Sports");
+		sports.setDisplayName("Sports");
 		
 		final SearchFacetedTypeResult snowboard = new SearchFacetedTypeResult();
 		
 		snowboard.setType("snowboard");
-		snowboard.setTypeDisplayName("Snowboards");
+		snowboard.setDisplayName("Snowboards");
 		
 		sports.setSubTypes(Arrays.asList(snowboard));
 
@@ -534,12 +535,12 @@ public class SearchService extends BaseService {
 		final SearchFacetedTypeResult housing = new SearchFacetedTypeResult();
 		
 		housing.setType("housing");
-		housing.setTypeDisplayName("Housing");
+		housing.setDisplayName("Housing");
 
 		final SearchFacetedTypeResult apartments = new SearchFacetedTypeResult();
 
 		apartments.setType("apartment");
-		apartments.setTypeDisplayName("Apartments");
+		apartments.setDisplayName("Apartments");
 		
 		housing.setSubTypes(Arrays.asList(apartments));
 		

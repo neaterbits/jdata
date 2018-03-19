@@ -8,7 +8,7 @@ import java.util.List;
 public class SearchFacetedTypeResult {
 
 	private String type;
-	private String typeDisplayName;
+	private String displayName;
 	
 	private List<SearchFacetedTypeResult> subTypes;
 	
@@ -22,12 +22,12 @@ public class SearchFacetedTypeResult {
 		this.type = type;
 	}
 
-	public String getTypeDisplayName() {
-		return typeDisplayName;
+	public String getDisplayName() {
+		return displayName;
 	}
 
-	public void setTypeDisplayName(String typeDisplayName) {
-		this.typeDisplayName = typeDisplayName;
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 	
 	public List<SearchFacetedTypeResult> getSubTypes() {

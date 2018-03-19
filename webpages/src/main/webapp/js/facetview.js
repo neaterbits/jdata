@@ -91,7 +91,7 @@ function FacetView(divId, facetViewElements) {
 
 					// For each element, add to div-model
 					if (kind == 'type') {
-						console.log("Type element " + element.typeDisplayName + ", cur=" + print(cur));
+						console.log("Type element " + element.displayName + ", cur=" + print(cur));
 						
 						cur = t._addFacetType(viewElementFactory, cur, element);
 					}
@@ -162,9 +162,9 @@ function FacetView(divId, facetViewElements) {
 	
 	this._addFacetType = function(viewElementFactory, cur, element, index) {
 		// Add a div for the particular type, will have a box for expanding the type
-		var typeElement = viewElementFactory.createTypeContainer(cur.getViewElement(), element.typeDisplayName);
+		var typeElement = viewElementFactory.createTypeContainer(cur.getViewElement(), element.displayName);
 		
-		var typeContainer = new FacetTypeContainer(viewElementFactory, element.type, typeElement, element.typeDisplayName);
+		var typeContainer = new FacetTypeContainer(viewElementFactory, element.type, typeElement, element.displayName);
 		
 		cur.addType(typeContainer, index);
 

@@ -9,8 +9,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.test.cv.model.annotations.IntegerRange;
 import com.test.cv.model.annotations.DecimalRange;
 import com.test.cv.model.annotations.Facet;
+import com.test.cv.model.annotations.FacetEntity;
 
 @Entity(name="boat")
+@FacetEntity("Boats")
 @XmlRootElement
 public class Boat extends Vehicle {
 

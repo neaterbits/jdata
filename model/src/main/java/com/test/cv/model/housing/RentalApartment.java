@@ -8,8 +8,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.test.cv.model.annotations.DecimalRange;
 import com.test.cv.model.annotations.Facet;
+import com.test.cv.model.annotations.FacetEntity;
 
 @Entity(name="rental_apartment")
+@FacetEntity("Rental apratments")
 @XmlRootElement
 public class RentalApartment extends Housing {
 
