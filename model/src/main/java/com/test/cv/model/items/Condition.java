@@ -5,5 +5,6 @@ public enum Condition {
 	LIKE_NEW,
 	EXCELLENT,
 	GOOD,
-	FAIR;
+	FAIR,
+	SALVAGE;
 }
