@@ -30,6 +30,10 @@ public class Housing extends BaseItem {
 	
 	@Column
 	private Date availableDate;
+	
+	@Column
+	@Facet
+	private Boolean wheelchairAccessible; 
 
 	public Integer getNumberOfRooms() {
 		return numberOfRooms;
@@ -70,6 +74,13 @@ public class Housing extends BaseItem {
 	public void setAvailableDate(Date availableDate) {
 		this.availableDate = availableDate;
 	}
-}
 
+	public Boolean getWheelchairAccessible() {
+		return wheelchairAccessible;
+	}
+
+	public void setWheelchairAccessible(Boolean wheelchairAccessible) {
+		this.wheelchairAccessible = wheelchairAccessible;
+	}
+}
 

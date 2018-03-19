@@ -28,12 +28,20 @@ public class RentalApartment extends Housing {
 	
 	@Column
 	@Facet
+	private ApartmentType apartmentType;
+	
+	@Column
+	@Facet
 	private Laundry laundry;
 	
 	@Column
 	@Facet
 	private Parking parking;
 	
+	@Column
+	@Facet
+	private Furnishment furnishment;
+
 	@Column
 	@Facet
 	private Boolean smoking;
@@ -53,6 +61,14 @@ public class RentalApartment extends Housing {
 	public void setCostPerMonth(BigDecimal costPerMonth) {
 		this.costPerMonth = costPerMonth;
 	}
+	
+	public ApartmentType getApartmentType() {
+		return apartmentType;
+	}
+
+	public void setApartmentType(ApartmentType apartmentType) {
+		this.apartmentType = apartmentType;
+	}
 
 	public Laundry getLaundry() {
 		return laundry;
@@ -68,6 +84,14 @@ public class RentalApartment extends Housing {
 
 	public void setParking(Parking parking) {
 		this.parking = parking;
+	}
+	
+	public Furnishment getFurnishment() {
+		return furnishment;
+	}
+
+	public void setFurnishment(Furnishment furnishment) {
+		this.furnishment = furnishment;
 	}
 
 	public Boolean getSmoking() {
