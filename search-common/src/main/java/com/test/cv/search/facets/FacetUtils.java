@@ -35,10 +35,14 @@ public class FacetUtils {
 	public static <I, F> ItemsFacets computeFacets(List<I> documents, Set<ItemAttribute> facetedAttributes, FacetFunctions<I, F> functions) {
 		
 		// Sort by type of item
-		final Set<Class<? extends Item>> distinctTypes =
+		final Set<Class<? extends Item>> distinctTypesSet =
 				facetedAttributes.stream()
 					.map(attribute -> attribute.getItemType())
 					.collect(Collectors.toSet());
+		
+		final List<Class<? extends Item>> distinctTypes = new ArrayList<>(distinctTypesSet);
+		
+		distinctTypes.sort((t1, t2) -> String.CASE_INSENSITIVE_ORDER.compare(ItemTypes.getTypeDisplayName(t1), ItemTypes.getTypeDisplayName(t2)));
 		
 		final List<TypeFacets> typeFacets = new ArrayList<>(distinctTypes.size());
 		
