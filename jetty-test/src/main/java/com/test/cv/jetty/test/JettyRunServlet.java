@@ -118,7 +118,7 @@ public class JettyRunServlet {
 				searchCriteria = null;
 			}
 
-			final boolean test = isTest(req);
+			final boolean testdata = "true".equals(req.getParameter("testdata"));
 
 			final SearchResult result = searchService.search(
 					freeText,
@@ -126,10 +126,10 @@ public class JettyRunServlet {
 					searchCriteria != null ? searchCriteria.getCriteria() : null,
 					pageNo,
 					itemsPerPage,
-					test,
+					testdata,
 					req);
 
-			if (test) {
+			if (isTest(req)) {
 				resp.setHeader("Access-Control-Allow-Origin", "*");
 			}
 

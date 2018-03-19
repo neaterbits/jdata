@@ -16,7 +16,7 @@ function SearchView(
 	this.facetModel = facetModel;
 	this.facetController = facetController;
 	this.gallery = gallery;
-	
+
 	this.hasPerformedInitialSearch = false;
 
 	this._getInitial = function(onsuccess) {
@@ -28,8 +28,11 @@ function SearchView(
 			t._updateFacets(response.facets, onsuccess);
 		});
 	}
-	
-	
+
+	this.setServiceUrl = function(url) {
+		this.serviceUrl = url;
+	}
+
 	this._refreshFromCriteria = function(types, criteria, onsuccess) {
 		
 		var t = this;
@@ -48,12 +51,12 @@ function SearchView(
 		onsuccess();
 	}
 	
-	// Search based on
-	this.refresh = function() {
+	// Search based on current criteria
+	this.refresh = function(completeRefresh) {
 
 		var t = this;
 
-		if (this.hasPerformedInitialSearch) {
+		if (!completeRefresh && this.hasPerformedInitialSearch) {
 			// Get selected criteria from facet controller
 			var criteria = this.facetController.collectCriteriaAndTypesFromSelections();
 
@@ -79,7 +82,7 @@ function SearchView(
 		};
 
 		request.open('POST', url, true);
-		
+
 		request.send();
 	};
 }

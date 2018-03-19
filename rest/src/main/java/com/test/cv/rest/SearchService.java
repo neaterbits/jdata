@@ -76,10 +76,10 @@ public class SearchService extends BaseService {
 	@GET
 	@Path("search")
 	// TODO check that we adhere to best practices for pageNo and itemsPerPage
-	public SearchResult search(String freeText, String [] types, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, boolean test, HttpServletRequest request) {
+	public SearchResult search(String freeText, String [] types, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, Boolean testdata, HttpServletRequest request) {
 		
 		final SearchResult result;
-		if (test) {
+		if (testdata) {
 			// Return a hardcoded testresult for simple local testing
 			result = makeTestResult();
 		}

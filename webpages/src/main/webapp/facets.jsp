@@ -10,10 +10,16 @@
 </head>
 <body>
 <h2>Test</h2>
+<input id="use_test_data" type="checkbox" checked>Use test data<br/>
 <div id='facets'></div>
 </body>
 <script type="text/javascript">
 	window.onload = function() {
+		
+		var useTestData = false;
+		
+		document.getElementById("use_test_data").checked = useTestData;
+		
 		
 		var facetModel = new FacetModel();
 
@@ -25,13 +31,34 @@
 		
 		var controller = new FacetController(facetModel, view);
 		view.init(controller);
-
+		
 		var searchView = new SearchView(
-					"http://localhost:8080/search?test=true",
+					getServiceUrl(useTestData),
 					facetModel,
 					controller);
 		
-		searchView.refresh();
+		searchView.refresh(true);
+		
+		document.getElementById("use_test_data").onchange = function(e) {
+
+			var checked = e.target.checked;
+			
+			searchView.setServiceUrl(getServiceUrl(checked));
+			
+			searchView.refresh(true);
+			
+			return false;
+		}
+	}
+	
+	function getServiceUrl(testdata) {
+		var url = "http://localhost:8080/search?test=true";
+
+		if (testdata) {
+			url += "&testdata=" + testdata;
+		}
+
+		return url;
 	}
 </script>
 </html>
