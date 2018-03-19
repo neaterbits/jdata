@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.test.cv.model.AttributeEnum;
@@ -102,7 +103,7 @@ public class FacetUtils {
 						// TODO avoid instantiation?
 						// TODO subfacets
 						if (singleValueResult == null) {
-							singleValueResult = new IndexSingleValueFacetedAttributeResult(attribute, new HashMap<>());
+							singleValueResult = new IndexSingleValueFacetedAttributeResult(attribute, new TreeMap<>());
 							attributeResults.put(attribute, singleValueResult);
 						}
 						
