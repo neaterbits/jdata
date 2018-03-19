@@ -203,13 +203,14 @@ function FacetViewElements() {
 		return ul;
 	}
 
-	this.createAttributeValueElement = function(parentElement, value, matchCount, hasSubAttributes) {
+	this.createAttributeValueElement = function(parentElement, value, matchCount, hasSubAttributes, checked) {
 		var li = document.createElement('li');
 		
 		li.style['list-style'] = 'none';
 		
 		var checkbox = document.createElement('input');
 		checkbox.type = 'checkbox';
+		checkbox.checked = checked;
 		
 		var span = document.createElement('span');
 		span.setAttribute('class', 'attributeValueElement');

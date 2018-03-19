@@ -190,7 +190,8 @@ function FacetView(divId, facetViewElements) {
 				cur.getViewElement(),
 				element.value,
 				element.matchCount,
-				hasSubAttributes);
+				hasSubAttributes,
+				true);
 		
 		var attributeValue = new FacetAttributeSingleValue(
 								viewElementFactory,
@@ -216,7 +217,7 @@ function FacetView(divId, facetViewElements) {
 		text += (typeof element.upper !== 'undefined' ? element.upper : '');
 
 		// Attribute within a type in list of attributes
-		var attributeElement = viewElementFactory.createAttributeValueElement(cur.getViewElement(), text, element.matchCount);
+		var attributeElement = viewElementFactory.createAttributeValueElement(cur.getViewElement(), text, element.matchCount, false, true);
 		
 		var attributeRange = new FacetAttributeRange(
 				viewElementFactory,
