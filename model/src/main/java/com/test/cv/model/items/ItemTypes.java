@@ -8,6 +8,8 @@ import java.util.Map;
 import com.test.cv.model.Item;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.housing.RentalApartment;
+import com.test.cv.model.items.sports.Ski;
+import com.test.cv.model.items.sports.Snowboard;
 
 public class ItemTypes {
 	

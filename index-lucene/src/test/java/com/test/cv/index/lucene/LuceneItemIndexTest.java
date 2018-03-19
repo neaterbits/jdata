@@ -14,7 +14,7 @@ import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.StringAttributeValue;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.items.ItemTypes;
-import com.test.cv.model.items.Snowboard;
+import com.test.cv.model.items.sports.Snowboard;
 import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.Criterium;
 import com.test.cv.search.criteria.DecimalCriterium;

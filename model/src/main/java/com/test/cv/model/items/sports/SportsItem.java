@@ -1,6 +1,8 @@
-package com.test.cv.model.items;
+package com.test.cv.model.items.sports;
 
 import javax.persistence.MappedSuperclass;
+
+import com.test.cv.model.items.PhysicalItem;
 
 // TODO makes sense to split in types likes this?
 

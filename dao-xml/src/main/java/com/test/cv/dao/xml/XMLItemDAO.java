@@ -26,7 +26,7 @@ import com.test.cv.model.ItemPhoto;
 import com.test.cv.model.ItemPhotoCategory;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.items.ItemTypes;
-import com.test.cv.model.items.Snowboard;
+import com.test.cv.model.items.sports.Snowboard;
 import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.api.IItemStorage.ImageMetaData;
 import com.test.cv.xmlstorage.api.IItemStorage.ImageResult;

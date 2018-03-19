@@ -17,8 +17,8 @@ import com.test.cv.dao.IFoundItemPhotoThumbnail;
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.model.ItemPhoto;
-import com.test.cv.model.items.Snowboard;
-import com.test.cv.model.items.SnowboardProfile;
+import com.test.cv.model.items.sports.Snowboard;
+import com.test.cv.model.items.sports.SnowboardProfile;
 
 import junit.framework.TestCase;
 

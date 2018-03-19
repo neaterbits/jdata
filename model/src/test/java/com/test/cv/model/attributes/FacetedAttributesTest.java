@@ -1,7 +1,7 @@
 package com.test.cv.model.attributes;
 
 import com.test.cv.model.ItemAttribute;
-import com.test.cv.model.items.Snowboard;
+import com.test.cv.model.items.sports.Snowboard;
 
 import junit.framework.TestCase;
 

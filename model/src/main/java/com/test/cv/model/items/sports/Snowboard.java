@@ -1,4 +1,4 @@
-package com.test.cv.model.items;
+package com.test.cv.model.items.sports;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
