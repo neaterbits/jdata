@@ -7,13 +7,13 @@ public class SearchItemResult {
 
 	private String id;
 	private String title;
-	private int thumbWidth;
-	private int thumbHeight;
+	private Integer thumbWidth;
+	private Integer thumbHeight;
 
 	public SearchItemResult() {
 	}
 
-	public SearchItemResult(String id, String title, int thumbWidth, int thumbHeight) {
+	public SearchItemResult(String id, String title, Integer thumbWidth, Integer thumbHeight) {
 		super();
 		this.id = id;
 		this.title = title;
@@ -35,19 +35,19 @@ public class SearchItemResult {
 		this.title = title;
 	}
 
-	public int getThumbWidth() {
+	public Integer getThumbWidth() {
 		return thumbWidth;
 	}
 
-	public void setThumbWidth(int thumbWidth) {
+	public void setThumbWidth(Integer thumbWidth) {
 		this.thumbWidth = thumbWidth;
 	}
 
-	public int getThumbHeight() {
+	public Integer getThumbHeight() {
 		return thumbHeight;
 	}
 
-	public void setThumbHeight(int thumbHeight) {
+	public void setThumbHeight(Integer thumbHeight) {
 		this.thumbHeight = thumbHeight;
 	}
 }
