@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Facet {
-
+	public String value();
 	public IntegerRange [] integerRanges() default {};
 	public DecimalRange [] decimalRanges() default {};
 	

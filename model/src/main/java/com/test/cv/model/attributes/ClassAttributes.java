@@ -100,6 +100,7 @@ public class ClassAttributes {
 
 
 			final boolean isFacet;
+			final String facetDisplayName;
 			final IntegerRange [] integerRanges;
 			final DecimalRange [] decimalRanges;
 
@@ -107,6 +108,7 @@ public class ClassAttributes {
 
 			if (fieldFacet != null) {
 				isFacet = true;
+				facetDisplayName = fieldFacet.value();
 				integerRanges = fieldFacet.integerRanges();
 				decimalRanges = fieldFacet.decimalRanges();
 			}
@@ -116,11 +118,13 @@ public class ClassAttributes {
 				
 				if (facetAttribute != null) {
 					isFacet = true;
+					facetDisplayName = facetAttribute.displayName();
 					integerRanges = facetAttribute.integerRanges();
 					decimalRanges = facetAttribute.decimalRanges();
 				}
 				else {
 					isFacet = false;
+					facetDisplayName = null;
 					integerRanges = null;
 					decimalRanges = null;
 				}
@@ -155,6 +159,7 @@ public class ClassAttributes {
 					fieldNameOverride,
 					storeFieldInIndex,
 					isFacet,
+					facetDisplayName,
 					integerRanges,
 					decimalRanges);
 

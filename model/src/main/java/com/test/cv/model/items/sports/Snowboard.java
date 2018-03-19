@@ -9,8 +9,9 @@ import com.test.cv.model.annotations.Facet;
 import com.test.cv.model.annotations.FacetAttribute;
 import com.test.cv.model.annotations.FacetAttributes;
 
+// Belongs to superclass so must define here
 @FacetAttributes({
-	@FacetAttribute(name="width", decimalRanges={
+	@FacetAttribute(name="width", displayName = "Width", decimalRanges={
 			@DecimalRange(upper=27.0),
 			@DecimalRange(lower=27.0,upper=29.0),
 			@DecimalRange(lower=29.0,upper=31.0),
@@ -18,7 +19,7 @@ import com.test.cv.model.annotations.FacetAttributes;
 			@DecimalRange(lower=33.0)
 	}),
 
-	@FacetAttribute(name="length", decimalRanges={
+	@FacetAttribute(name="length", displayName = "Height", decimalRanges={
 			@DecimalRange(upper=150.0),
 			@DecimalRange(lower=150.0,upper=160.0),
 			@DecimalRange(lower=160.0,upper=170),
@@ -29,7 +30,7 @@ import com.test.cv.model.annotations.FacetAttributes;
 @XmlRootElement
 public class Snowboard extends SportsItem {
 
-	@Facet
+	@Facet("Profile")
 	@Column
 	private SnowboardProfile profile;
 	

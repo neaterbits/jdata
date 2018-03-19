@@ -15,7 +15,9 @@ import com.test.cv.model.annotations.Facet;
 public class Boat extends Vehicle {
 
 	@Column
-	@Facet(decimalRanges={
+	@Facet(
+		value = "Overall length",
+		decimalRanges={
 			@DecimalRange(upper=10.0),
 			@DecimalRange(lower=10.0, upper=20.0),
 			@DecimalRange(lower=20.0, upper=30.0),
@@ -26,11 +28,13 @@ public class Boat extends Vehicle {
 	private BigDecimal lengthOverall;
 
 	@Column
-	@Facet
+	@Facet("Propulsion type")
 	private BoatPropulsionType propulsionType;
 
 	@Column
-	@Facet(integerRanges={
+	@Facet(
+		value = "Engine hours",
+		integerRanges={
 			@IntegerRange(upper=500),
 			@IntegerRange(lower=500, upper=1000),
 			@IntegerRange(lower=1000, upper=5000),

@@ -23,6 +23,7 @@ public final class ItemAttribute {
 	
 	// Does this attribute have facets?
 	private final boolean isFaceted;
+	private final String facetDisplayName;
 	
 	// Ay integer ranges if this is an integer attribute
 	private final FacetedAttributeIntegerRange [] integerRanges;
@@ -32,6 +33,7 @@ public final class ItemAttribute {
 				String fieldNameOverride,
 				boolean storeValueInSearchIndex,
 				boolean isFaceted,
+				String facetDisplayName,
 				IntegerRange [] integerRanges, DecimalRange [] decimalRanges) {
 	
 		if (itemType == null) {
@@ -59,6 +61,7 @@ public final class ItemAttribute {
 		}
 
 		this.isFaceted = isFaceted;
+		this.facetDisplayName = facetDisplayName;
 		this.integerRanges = integerRanges == null || integerRanges.length == 0 ? null : convertIntegerRanges(integerRanges);
 		this.decimalRanges = decimalRanges == null || decimalRanges.length == 0 ? null : convertDecimalRanges(decimalRanges);
 	}
@@ -152,11 +155,6 @@ public final class ItemAttribute {
 		return itemAttributeValue;
 	}
 
-	// TODO use annotations
-	public String getDisplayName() {
-		return property.getName();
-	}
-	
 	public AttributeType getAttributeType() {
 		final Class<?> propertyType = property.getPropertyType();
 
@@ -180,6 +178,10 @@ public final class ItemAttribute {
 
 	public boolean isFaceted() {
 		return isFaceted;
+	}
+
+	public String getFacetDisplayName() {
+		return facetDisplayName != null ? facetDisplayName : property.getName();
 	}
 
 	public FacetedAttributeIntegerRange[] getIntegerRanges() {

@@ -15,19 +15,19 @@ import com.test.cv.model.annotations.Facet;
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public abstract class BaseItem extends Item {
 
-	@Facet
+	@Facet("Make")
 	@Column
 	private String make;
 
-	@Facet
+	@Facet("Model")
 	@Column
 	private String model;
 	
-	@Facet
+	@Facet("Production year")
 	@Column
 	private Integer productionYear;
 	
-	@Facet
+	@Facet("Seller")
 	@Column
 	private Seller seller;
 

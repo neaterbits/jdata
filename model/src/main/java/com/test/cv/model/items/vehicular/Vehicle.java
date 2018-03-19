@@ -9,7 +9,7 @@ import com.test.cv.model.items.Condition;
 public abstract class Vehicle extends BaseItem {
 
 	@Column
-	@Facet
+	@Facet("Condition")
 	private Condition condition;
 
 	public Condition getCondition() {

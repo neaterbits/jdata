@@ -14,7 +14,8 @@ import com.test.cv.model.annotations.Facet;
 public class RentalApartment extends Housing {
 
 	@Column
-	@Facet(decimalRanges={
+	@Facet(value = "Cost per month",
+			decimalRanges={
 			@DecimalRange(upper=500),
 			@DecimalRange(lower=500,  upper=1000),
 			@DecimalRange(lower=1000, upper=1500),
@@ -27,31 +28,31 @@ public class RentalApartment extends Housing {
 	private BigDecimal costPerMonth;
 	
 	@Column
-	@Facet
+	@Facet("Apartment type")
 	private ApartmentType apartmentType;
 	
 	@Column
-	@Facet
+	@Facet("Laundry")
 	private Laundry laundry;
 	
 	@Column
-	@Facet
+	@Facet("Parking")
 	private Parking parking;
 	
 	@Column
-	@Facet
+	@Facet("Furnishment")
 	private Furnishment furnishment;
 
 	@Column
-	@Facet
+	@Facet("Smoking allowed")
 	private Boolean smoking;
 
 	@Column
-	@Facet
+	@Facet("Cats allowed")
 	private Boolean cats;
 
 	@Column
-	@Facet
+	@Facet("Dogs allowed")
 	private Boolean dogs;
 
 	public BigDecimal getCostPerMonth() {

@@ -392,7 +392,7 @@ public class SearchService extends BaseService {
 			}
 
 			searchFacetedAttribute.setId(indexFacetedAttribute.getAttribute().getName());
-			searchFacetedAttribute.setName(indexFacetedAttribute.getAttribute().getDisplayName());
+			searchFacetedAttribute.setName(indexFacetedAttribute.getAttribute().getFacetDisplayName());
 			
 			facetAttributesResult.add(searchFacetedAttribute);
 		}

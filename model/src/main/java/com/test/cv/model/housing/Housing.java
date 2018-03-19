@@ -13,26 +13,26 @@ import com.test.cv.model.items.BaseItem;
 public class Housing extends BaseItem {
 	
 	@Column
-	@Facet
+	@Facet("Number of rooms")
 	private Integer numberOfRooms;
 
 	@Column
-	@Facet
+	@Facet("Number of bedrooms")
 	private Integer numberOfBedrooms;
 
 	@Column
-	@Facet
+	@Facet("Number of bathrooms")
 	private BigDecimal numberOfBathrooms; // can have 1.5 bathrooms, eg one with shower and toilet, one with only topilet
 
 	@Column
-	@Facet
+	@Facet("Squarage")
 	private BigDecimal squarage;
 	
 	@Column
 	private Date availableDate;
 	
 	@Column
-	@Facet
+	@Facet("Wheelchair accesible")
 	private Boolean wheelchairAccessible; 
 
 	public Integer getNumberOfRooms() {
