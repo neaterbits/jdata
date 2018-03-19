@@ -2,7 +2,7 @@ package com.test.cv.search.facets;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +14,7 @@ import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.attributes.facets.FacetedAttributeComparableRange;
 import com.test.cv.model.items.ItemTypes;
+import com.test.cv.model.items.TypeInfo;
 
 public class FacetUtils {
 	public interface FacetFunctions<I, F> {
@@ -48,9 +49,12 @@ public class FacetUtils {
 		
 		for (Class<? extends Item> itemType : distinctTypes) {
 		
-			final List<ItemAttribute> typeAttributes = facetedAttributes.stream()
+			final List<ItemAttribute> typeAttributesUnsorted = facetedAttributes.stream()
 				.filter(attribute -> attribute.getItemType().equals(itemType))
 				.collect(Collectors.toList());
+			
+			final TypeInfo typeInfo = ItemTypes.getTypeInfo(itemType);
+			final List<ItemAttribute> typeAttributes = typeInfo.getAttributes().sortInFacetOrder(typeAttributesUnsorted, false);
 			
 			final String typeName = ItemTypes.getTypeName(itemType);
 			
@@ -71,7 +75,9 @@ public class FacetUtils {
 	
 	private static <I, F> TypeFacets computeFacetsForType(Class<? extends Item> itemType, List<I> documents, List<ItemAttribute> typeAttributes, FacetFunctions<I, F> functions) {
 		
-		final Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults = new HashMap<>(typeAttributes.size());
+		// LinkedHashMap to maintain order
+		// TODO iterate over attributes first? But worse with regards to cache locality
+		final Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults = new LinkedHashMap<>(typeAttributes.size());
 		//final List<IndexFacetedAttributeResult> attributeResults = new ArrayList<>(typeAttributes.size());
 		
 		for (I d : documents) {

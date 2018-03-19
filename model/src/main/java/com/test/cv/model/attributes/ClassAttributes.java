@@ -7,6 +7,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import com.test.cv.model.annotations.DecimalRange;
 import com.test.cv.model.annotations.Facet;
 import com.test.cv.model.annotations.FacetAttribute;
 import com.test.cv.model.annotations.FacetAttributes;
+import com.test.cv.model.annotations.FacetEntity;
 import com.test.cv.model.annotations.IndexItemAttribute;
 import com.test.cv.model.annotations.IndexItemAttributeTransient;
 import com.test.cv.model.annotations.IntegerRange;
@@ -33,6 +35,54 @@ public class ClassAttributes {
 	private ClassAttributes(Class<? extends Item> type, List<ItemAttribute> attributes) {
 		this.type = type;
 		this.attributes = attributes;
+	}
+	
+	public List<ItemAttribute> sortInFacetOrder(Collection<ItemAttribute> attributes, boolean checkAllPropertiesPresentInList) {
+		final List<ItemAttribute> attributesInFacetOrder;
+		final FacetEntity facetEntity = type.getAnnotation(FacetEntity.class);
+
+		if (facetEntity != null && facetEntity.propertyOrder() != null) {
+			attributesInFacetOrder = new ArrayList<>(attributes.size());
+			
+			// First find all attributes in property order
+			for (String property : facetEntity.propertyOrder()) {
+				ItemAttribute found = null;
+				
+				for (ItemAttribute attribute : attributes) {
+					if (attribute.getName().equals(property)) {
+						found = attribute;
+						break;
+					}
+				}
+
+				if (found == null) {
+					if (checkAllPropertiesPresentInList) {
+						throw new IllegalStateException("No attribute with property name " + property + " from facet entity order list");
+					}
+					
+					// System.err.println("Could not find attr " + property);
+				}
+				else {
+					if (attributesInFacetOrder.contains(found)) {
+						throw new IllegalStateException("Already added property from property order list: " + property);
+					}
+					
+					attributesInFacetOrder.add(found);
+				}
+			}
+			
+			// Now add all that are not specified in order
+			for (ItemAttribute attribute : attributes) {
+				if (!attributesInFacetOrder.contains(attribute)) {
+					attributesInFacetOrder.add(attribute);
+				}
+			}
+		}
+		else {
+			attributesInFacetOrder = new ArrayList<>(attributes);
+		}
+		
+		return attributesInFacetOrder;
 	}
 	
 	public static List<ItemAttributeValue<?>> getValues(Item item) {
@@ -97,7 +147,6 @@ public class ClassAttributes {
 				// Not for indexing
 				continue;
 			}
-
 
 			final boolean isFacet;
 			final String facetDisplayName;
@@ -216,7 +265,7 @@ public class ClassAttributes {
 				break;
 			}
 		}
-		
+
 		if (found == null) {
 			throw new IllegalStateException("Could not find facet for attribute with name " + facetAttribute.name());
 		}

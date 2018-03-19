@@ -12,7 +12,12 @@ import com.test.cv.model.annotations.Facet;
 import com.test.cv.model.annotations.FacetEntity;
 
 @Entity(name="boat")
-@FacetEntity("Boats")
+@FacetEntity(value = "Boats", propertyOrder = {
+		"propulsionType",
+		"lengthOverall",
+		"condition",
+		"engineHours"
+})
 @XmlRootElement
 public class Boat extends Vehicle {
 

@@ -9,4 +9,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FacetEntity {
 	public String value();
+	
+	public String [] propertyOrder() default {};
 }
