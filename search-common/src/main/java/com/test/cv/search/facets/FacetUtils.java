@@ -23,6 +23,10 @@ public class FacetUtils {
 		
 		BigDecimal getDecimalValue(F field);
 		
+		<T extends Enum<T>> T getEnumValue(Class<T> enumClass, F field);
+		
+		Boolean getBooleanValue(F field);
+		
 		Object getObjectValue(ItemAttribute attribute, F field);
 	}
 

@@ -77,7 +77,13 @@ public class SearchService extends BaseService {
 	@Path("search")
 	// TODO check that we adhere to best practices for pageNo and itemsPerPage
 	public SearchResult search(String freeText, String [] types, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, Boolean testdata, HttpServletRequest request) {
-		
+
+		// If no types passed, this is the initial search so pass all
+		if (types == null) {
+			// All types
+			types = ItemTypes.getTypeNames();
+		}
+
 		final SearchResult result;
 		if (testdata) {
 			// Return a hardcoded testresult for simple local testing
@@ -110,7 +116,7 @@ public class SearchService extends BaseService {
 		try {
 			final ISearchCursor cursor;
 			try {
-				cursor = searchDAO.search(null, daoCriteria, null);
+				cursor = searchDAO.search(null, daoCriteria, ItemTypes.getFacetAttributes(types));
 			} catch (SearchException ex) {
 				throw new IllegalStateException("Failed to search", ex);
 			}
@@ -291,6 +297,8 @@ public class SearchService extends BaseService {
 			
 			typeFacetsResult.add(typeResult);
 		}
+		
+		result.setTypes(typeFacetsResult);
 
 		return result;
 	}
@@ -319,6 +327,8 @@ public class SearchService extends BaseService {
 					if (indexValue.getSubFacets() != null) {
 						searchValue.setSubAttributes(convertAttributeList(indexValue.getSubFacets()));
 					}
+					
+					searchValues.add(searchValue);
 				}
 				
 				searchSingleValueFacetedAttribute.setValues(searchValues);
@@ -383,6 +393,8 @@ public class SearchService extends BaseService {
 
 			searchFacetedAttribute.setId(indexFacetedAttribute.getAttribute().getName());
 			searchFacetedAttribute.setName(indexFacetedAttribute.getAttribute().getDisplayName());
+			
+			facetAttributesResult.add(searchFacetedAttribute);
 		}
 
 		return facetAttributesResult;

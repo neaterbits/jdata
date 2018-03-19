@@ -198,6 +198,17 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 				return (BigDecimal)field;
 			}
 
+			@SuppressWarnings("unchecked")
+			@Override
+			public <T extends Enum<T>> T getEnumValue(Class<T> enumClass, Object field) {
+				return (T)field;
+			}
+
+			@Override
+			public Boolean getBooleanValue(Object field) {
+				return (Boolean)field;
+			}
+
 			@Override
 			public Object getObjectValue(ItemAttribute attribute, Object field) {
 				return field;

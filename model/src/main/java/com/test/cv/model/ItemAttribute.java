@@ -168,6 +168,10 @@ public final class ItemAttribute {
 
 		return attributeType;
 	}
+	
+	public Class<?> getAttributeValueClass() {
+		return property.getPropertyType();
+	}
 
 	
 	public boolean shouldStoreValueInSearchIndex() {

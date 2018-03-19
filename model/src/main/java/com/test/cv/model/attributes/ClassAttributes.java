@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
@@ -227,5 +228,9 @@ public class ClassAttributes {
 				.filter(attribute -> attribute.getName().equals(name))
 				.findFirst()
 				.orElse(null);
+	}
+	
+	public void forEach(Consumer<ItemAttribute> consumer) {
+		attributes.forEach(consumer);
 	}
 }

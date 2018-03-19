@@ -88,10 +88,6 @@ public class JettyRunServlet {
 			
 			String [] types = req.getParameterValues("types");
 			
-			if (types == null) {
-				types = new String[0];
-			}
-			
 			final String pageNoString = req.getParameter("pageNo");
 			final int pageNo = pageNoString == null ? 1 : Integer.parseInt(pageNoString);
 			

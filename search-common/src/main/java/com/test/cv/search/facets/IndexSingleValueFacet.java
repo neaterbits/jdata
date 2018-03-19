@@ -33,4 +33,10 @@ public class IndexSingleValueFacet {
 	public List<IndexFacetedAttributeResult> getSubFacets() {
 		return subFacets;
 	}
+
+	@Override
+	public String toString() {
+		return "IndexSingleValueFacet [value=" + value + ", matchCount=" + matchCount + ", subFacets=" + subFacets
+				+ "]";
+	}
 }

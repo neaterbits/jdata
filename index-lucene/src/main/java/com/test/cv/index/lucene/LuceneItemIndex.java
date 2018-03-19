@@ -293,7 +293,7 @@ public class LuceneItemIndex implements ItemIndex {
 			}
 
 			@Override
-				public ItemsFacets getFacets() {
+			public ItemsFacets getFacets() {
 				
 				// Must find all distinct results of each attribute for the items
 				return facets;
@@ -657,6 +657,32 @@ public class LuceneItemIndex implements ItemIndex {
 			}
 
 			@Override
+			public <T extends Enum<T>> T getEnumValue(Class<T> enumClass, IndexableField field) {
+				final T [] enums = enumClass.getEnumConstants();
+				
+				T found = null;
+				
+				for (T e : enums) {
+					if (e.name().equals(field.stringValue())) {
+						found = e;
+						break;
+					}
+				}
+
+				if (found == null) {
+					throw new IllegalStateException("No enum found for " + field.stringValue());
+				}
+
+				return found;
+			}
+
+			@Override
+			public Boolean getBooleanValue(IndexableField field) {
+				return field.numericValue().intValue() != 0 ? true : false;
+			}
+
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			@Override
 			public Object getObjectValue(ItemAttribute attribute, IndexableField field) {
 				
 				final AttributeType attributeType = attribute.getAttributeType();
@@ -674,6 +700,14 @@ public class LuceneItemIndex implements ItemIndex {
 					
 				case DECIMAL:
 					result = getDecimalValue(field);
+					break;
+					
+				case ENUM:
+					result = getEnumValue((Class<? extends Enum>)attribute.getAttributeValueClass(), field);
+					break;
+					
+				case BOOLEAN:
+					result = getBooleanValue(field);
 					break;
 					
 				default:

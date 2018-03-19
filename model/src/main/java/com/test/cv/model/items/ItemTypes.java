@@ -2,10 +2,14 @@ package com.test.cv.model.items;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.test.cv.model.Item;
+import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.housing.RentalApartment;
 import com.test.cv.model.items.sports.Ski;
@@ -22,12 +26,22 @@ public class ItemTypes {
 			RentalApartment.class,
 			Item.class);
 	
+	private static final List<String> typeNames;
+	
 	private static final Map<String, TypeInfo> typesByName;
+	
+	static {
+		typeNames = types.stream().map(t -> getTypeName(t)).collect(Collectors.toList());
+	}
 	
 	public static Class<?> [] getTypeClasses() {
 		return types.toArray(new Class<?>[types.size()]);
 	}
-	
+
+	public static String [] getTypeNames() {
+		return typeNames.toArray(new String[typeNames.size()]);
+	}
+
 	public static String getTypeName(Class<? extends Item> type) {
 		return type.getSimpleName();
 	}
@@ -48,6 +62,24 @@ public class ItemTypes {
 	public static TypeInfo getTypeInfo(Item item) {
 		return getTypeByName(getTypeName(getType(item)));
 	}
+	
+	public static Set<ItemAttribute> getFacetAttributes(String ... types) {
+		final Set<ItemAttribute> facetAttributes = new HashSet<>();
+
+		for (String typeName : types) {
+			final TypeInfo typeInfo = getTypeByName(typeName);
+			
+			typeInfo.getAttributes().forEach(itemAttribute -> {
+				if (itemAttribute.isFaceted()) {
+					facetAttributes.add(itemAttribute);
+				}
+			});
+		}
+		
+		return facetAttributes;
+	}
+	
+	
 	static {
 		typesByName = new HashMap<>();
 		
