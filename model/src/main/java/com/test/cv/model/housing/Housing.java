@@ -6,6 +6,7 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
+import com.test.cv.model.annotations.DecimalRange;
 import com.test.cv.model.annotations.Facet;
 import com.test.cv.model.items.BaseItem;
 
@@ -25,7 +26,14 @@ public class Housing extends BaseItem {
 	private BigDecimal numberOfBathrooms; // can have 1.5 bathrooms, eg one with shower and toilet, one with only topilet
 
 	@Column
-	@Facet("Squarage")
+	@Facet(value = "Squarage",
+			decimalRanges = {
+					@DecimalRange(upper=500),
+					@DecimalRange(lower=500, upper=1000),
+					@DecimalRange(lower=1000, upper=1500),
+					@DecimalRange(lower=1500, upper=2000),
+					@DecimalRange(lower=2500)
+			})
 	private BigDecimal squarage;
 	
 	@Column
