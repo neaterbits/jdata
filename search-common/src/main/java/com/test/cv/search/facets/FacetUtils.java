@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.test.cv.model.AttributeEnum;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.attributes.facets.FacetedAttributeComparableRange;
@@ -111,7 +112,17 @@ public class FacetUtils {
 							IndexSingleValueFacet valueFacet = singleValueResult.getForValue(value);
 							
 							if (valueFacet == null) {
-								valueFacet = new IndexSingleValueFacet(value, null);
+								
+								final Object displayValue;
+								
+								if (value instanceof AttributeEnum) {
+									displayValue = ((AttributeEnum)value).getDisplayName();
+								}
+								else {
+									displayValue = value;
+								}
+								
+								valueFacet = new IndexSingleValueFacet(value, displayValue, null);
 								
 								singleValueResult.putForValue(value, valueFacet);
 							}

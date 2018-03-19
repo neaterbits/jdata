@@ -322,7 +322,7 @@ public class SearchService extends BaseService {
 					
 					final SearchSingleValueFacet searchValue = new SearchSingleValueFacet();
 					
-					searchValue.setValue(indexValue.getValue());
+					searchValue.setValue(indexValue.getDisplayValue());
 					searchValue.setMatchCount(indexValue.getMatchCount());
 					
 					if (indexValue.getSubFacets() != null) {
