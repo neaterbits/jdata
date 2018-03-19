@@ -6,5 +6,6 @@ public enum Parking {
 	ATTACHED_GARAGE,
 	OFF_STREET,
 	STREET,
+	VALET_PARKING,
 	NONE;
 }
