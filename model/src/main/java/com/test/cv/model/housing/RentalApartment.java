@@ -11,7 +11,7 @@ import com.test.cv.model.annotations.Facet;
 import com.test.cv.model.annotations.FacetEntity;
 
 @Entity(name="rental_apartment")
-@FacetEntity("Rental apratments")
+@FacetEntity("Rental apartments")
 @XmlRootElement
 public class RentalApartment extends Housing {
 
