@@ -26,6 +26,10 @@ public abstract class BaseItem extends Item {
 	@Facet
 	@Column
 	private Integer productionYear;
+	
+	@Facet
+	@Column
+	private Seller seller;
 
 	@Column
 	private String descriptionHtml;
@@ -53,6 +57,14 @@ public abstract class BaseItem extends Item {
 
 	public Integer getProductionYear() {
 		return productionYear;
+	}
+
+	public Seller getSeller() {
+		return seller;
+	}
+
+	public void setSeller(Seller seller) {
+		this.seller = seller;
 	}
 
 	public void setProductionYear(Integer productionYear) {

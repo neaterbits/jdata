@@ -10,6 +10,7 @@ import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.housing.RentalApartment;
 import com.test.cv.model.items.sports.Ski;
 import com.test.cv.model.items.sports.Snowboard;
+import com.test.cv.model.items.vehicular.Boat;
 
 public class ItemTypes {
 	
@@ -17,6 +18,7 @@ public class ItemTypes {
 	private static final List<Class<? extends Item>> types = Arrays.asList(
 			Snowboard.class,
 			Ski.class,
+			Boat.class,
 			RentalApartment.class,
 			Item.class);
 	
