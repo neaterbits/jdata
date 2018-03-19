@@ -53,7 +53,9 @@ public abstract class BaseService {
 
 	// Lucene index must be static to avoid creating the writer multiple times
 	// We synchronize this on class level
-	private synchronized static ItemIndex assureIndex(File indexDir) {
+	synchronized static ItemIndex assureIndex() {
+
+		final File indexDir = new File(localBaseDir, "index");
 
 		if (luceneIndex == null) {
 			luceneIndex = IntegrationTestHelper.makeIndex(indexDir);
@@ -70,8 +72,7 @@ public abstract class BaseService {
 		
 		switch (storage) {
 		case LOCAL_FILE_LUCENE:
-			final File indexDir = new File(localBaseDir, "index");
-			ret = new XMLItemDAO(getLocalXMLStorage(), assureIndex(indexDir));
+			ret = new XMLItemDAO(getLocalXMLStorage(), assureIndex());
 			break;
 
 		default:

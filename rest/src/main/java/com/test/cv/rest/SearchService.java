@@ -63,7 +63,7 @@ public class SearchService extends BaseService {
 				request.getSession().setAttribute("baseDir", baseDir);
 			}
 			
-			ret = new IndexSearchDAO(IntegrationTestHelper.makeIndex(baseDir));
+			ret = new IndexSearchDAO(assureIndex());
 			break;
 			
 		default:
@@ -135,7 +135,6 @@ public class SearchService extends BaseService {
 			
 			final List<SearchItem> found = cursor.getItemIDsAndTitles(initialIdx, count);
 			
-			
 			final int numFound = found.size();
 			
 			result.setPageFirstItem(initialIdx);
@@ -150,7 +149,7 @@ public class SearchService extends BaseService {
 			
 			for (int i = 0; i < numFound; ++ i) {
 				final SearchItem foundItem = found.get(i);
-	
+				
 				items[i] = new SearchItemResult(foundItem.getItemId(), foundItem.getTitle(), foundItem.getThumbWidth(), foundItem.getThumbHeight());
 			}
 			
