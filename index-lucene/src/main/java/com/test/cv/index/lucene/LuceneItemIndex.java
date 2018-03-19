@@ -282,9 +282,10 @@ public class LuceneItemIndex implements ItemIndex {
 
 							// TODO perhaps parameterize attribute names
 							// since this layer ought to be more generic
+							final IndexableField titleField = d.getField("title");
 							return new IndexSearchItem(
 									d.getField("id").stringValue(),
-									d.getField("title").stringValue(),
+									titleField != null ? titleField.stringValue() : null,
 									thumbWidth != null  ? thumbWidth.numericValue().intValue() : null,
 									thumbHeight != null ? thumbHeight.numericValue().intValue() : null);
 						})
