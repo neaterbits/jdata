@@ -111,6 +111,10 @@ public final class ItemAttribute {
 		return fieldNameOverride != null ? fieldNameOverride : property.getName();
 	}
 	
+	public boolean isSingleValue() {
+		return integerRanges == null && decimalRanges == null;
+	}
+	
 	public Object getObjectValue(Item item) {
 		final Object value;
 		try {

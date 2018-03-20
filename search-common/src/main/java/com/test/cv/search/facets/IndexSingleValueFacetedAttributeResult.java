@@ -13,6 +13,9 @@ public class IndexSingleValueFacetedAttributeResult extends IndexFacetedAttribut
 
 	private final Map<Object, IndexSingleValueFacet> values;
 	
+	// Count for elements where there were no match
+	private int noAttributeValueCount;
+	
 	public IndexSingleValueFacetedAttributeResult(ItemAttribute attribute, Map<Object, IndexSingleValueFacet> values) {
 		super(attribute);
 
@@ -29,5 +32,13 @@ public class IndexSingleValueFacetedAttributeResult extends IndexFacetedAttribut
 	
 	public void putForValue(Object value, IndexSingleValueFacet valueFacet) {
 		values.put(value, valueFacet);
+	}
+	
+	public void addToNoAttributeValueCount() {
+		++ this.noAttributeValueCount;
+	}
+	
+	public int getNoAttributeValueCount() {
+		return noAttributeValueCount;
 	}
 }

@@ -333,7 +333,10 @@ public class SearchService extends BaseService {
 				}
 				
 				searchSingleValueFacetedAttribute.setValues(searchValues);
-				
+				if (indexSingleValueFacetedAttributeResult.getNoAttributeValueCount() != 0) {
+					searchSingleValueFacetedAttribute.setNoAttributeValueCount(indexSingleValueFacetedAttributeResult.getNoAttributeValueCount());
+				}
+
 				searchFacetedAttribute = searchSingleValueFacetedAttribute;
 			}
 			else if (indexFacetedAttribute instanceof IndexRangeFacetedAttributeResult) {

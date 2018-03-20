@@ -3,14 +3,12 @@ package com.test.cv.search.facets;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.test.cv.model.AttributeEnum;
@@ -115,8 +113,6 @@ public class FacetUtils {
 				attributeResults);
 		
 		
-		System.out.println("## got attribute results: " + attributeResults);
-		
 		// Now we process subattributes, we do that by processing a list of 
 		// Does this have any sub-attributes in the list of attributes?
 		// TODO might cache in a map of lists in ClassAttributes?
@@ -219,33 +215,46 @@ public class FacetUtils {
 				}
 				else {
 					// Single-value
-					IndexSingleValueFacetedAttributeResult singleValueResult = (IndexSingleValueFacetedAttributeResult)attributeResults.get(attribute);
-					
-					// TODO avoid instantiation?
-					if (singleValueResult == null) {
-						
-						singleValueResult = new IndexSingleValueFacetedAttributeResult(attribute, new TreeMap<>(ATTRIBUTE_VALUE_COMPARATOR));
-						attributeResults.put(attribute, singleValueResult);
-					}
+					final IndexSingleValueFacetedAttributeResult singleValueResult = assureSingleResult(attribute, attributeResults);
 					
 					final Object value = functions.getObjectValue(attribute, field);
 					
-					if (value != null) {
-						IndexSingleValueFacet valueFacet = singleValueResult.getForValue(value);
-						
-						if (valueFacet == null) {
-							final Object displayValue = getAttributeDisplayValue(attribute, value);
-							
-							valueFacet = new IndexSingleValueFacet(value, displayValue, null);
-							
-							singleValueResult.putForValue(value, valueFacet);
-						}
-						
-						valueFacet.increaseMatchCount();
+					if (value == null) {
+						throw new IllegalStateException("Expected field value when field is present");
 					}
+					IndexSingleValueFacet valueFacet = singleValueResult.getForValue(value);
+					
+					if (valueFacet == null) {
+						final Object displayValue = getAttributeDisplayValue(attribute, value);
+						
+						valueFacet = new IndexSingleValueFacet(value, displayValue, null);
+						
+						singleValueResult.putForValue(value, valueFacet);
+					}
+					
+					valueFacet.increaseMatchCount();
 				}
 			}
 		}
+		else {
+			// No value so add to no-value count
+			if (attribute.isSingleValue()) {
+				assureSingleResult(attribute, attributeResults).addToNoAttributeValueCount();
+			}
+		}
+	}
+	
+	private static IndexSingleValueFacetedAttributeResult assureSingleResult(ItemAttribute attribute, Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults) {
+		IndexSingleValueFacetedAttributeResult singleValueResult = (IndexSingleValueFacetedAttributeResult)attributeResults.get(attribute);
+		
+		// TODO avoid instantiation?
+		if (singleValueResult == null) {
+			
+			singleValueResult = new IndexSingleValueFacetedAttributeResult(attribute, new TreeMap<>(ATTRIBUTE_VALUE_COMPARATOR));
+			attributeResults.put(attribute, singleValueResult);
+		}
+		
+		return singleValueResult;
 	}
 	
 	private static Object getAttributeDisplayValue(ItemAttribute attribute, Object value) {
