@@ -74,6 +74,27 @@ public class FacetUtils {
 	}
 
 	
+	private static final Comparator<Object> ATTRIBUTE_VALUE_COMPARATOR = (o1, o2) -> {
+		final int result;
+		
+		if (o1 instanceof String) {
+			final String s1 = (String)o1;
+			final String s2 = (String)o2;
+			
+			result = String.CASE_INSENSITIVE_ORDER.compare(s1, s2);
+		}
+		else {
+			@SuppressWarnings("unchecked")
+			final Comparable<Object> c1 = (Comparable<Object>)o1;
+			@SuppressWarnings("unchecked")
+			final Comparable<Object> c2 = (Comparable<Object>)o2;
+					
+			result = c1.compareTo(c2);
+		}
+		
+		return result;
+	};
+	
 	private static <I, F> TypeFacets computeFacetsForType(Class<? extends Item> itemType, List<I> documents, List<ItemAttribute> typeAttributes, FacetFunctions<I, F> functions) {
 		
 		// LinkedHashMap to maintain order
@@ -83,109 +104,93 @@ public class FacetUtils {
 		
 		for (I d : documents) {
 			for (ItemAttribute attribute : typeAttributes) {
-				final F field = functions.getField(d, attribute.getName());
-				
-				if (field == null) {
-					continue;
-				}
-				
-				// Get the field value from document
-				if (attribute.isFaceted()) {
-					if (attribute.getIntegerRanges() != null) {
-						
-						// Find which range we are in
-						final int value = functions.getIntegerValue(field);
-
-						computeFacetsForRange(attribute, attribute.getIntegerRanges(), value, attributeResults);
-					}
-					else if (attribute.getDecimalRanges() != null) {
-						
-						// Find which range we are in
-						final BigDecimal value = functions.getDecimalValue(field);
-						
-						computeFacetsForRange(attribute, attribute.getDecimalRanges(), value, attributeResults);
-					}
-					else {
-						// Single-value
-						IndexSingleValueFacetedAttributeResult singleValueResult = (IndexSingleValueFacetedAttributeResult)attributeResults.get(attribute);
-						
-						// 
-						
-						// TODO avoid instantiation?
-						// TODO subfacets
-						if (singleValueResult == null) {
-							
-							final Comparator<Object> comparator =  (o1, o2) -> {
-								final int result;
-								
-								if (o1 instanceof String) {
-									final String s1 = (String)o1;
-									final String s2 = (String)o2;
-									
-									
-									result = String.CASE_INSENSITIVE_ORDER.compare(s1, s2);
-								}
-								else {
-									@SuppressWarnings("unchecked")
-									final Comparable<Object> c1 = (Comparable<Object>)o1;
-									@SuppressWarnings("unchecked")
-									final Comparable<Object> c2 = (Comparable<Object>)o2;
-											
-									result = c1.compareTo(c2);
-								}
-								
-								return result;
-							};
-							singleValueResult = new IndexSingleValueFacetedAttributeResult(attribute, new TreeMap<>(comparator));
-							attributeResults.put(attribute, singleValueResult);
-						}
-						
-						final Object value = functions.getObjectValue(attribute, field);
-						
-						if (value != null) {
-							IndexSingleValueFacet valueFacet = singleValueResult.getForValue(value);
-							
-							if (valueFacet == null) {
-								
-								final Object displayValue;
-								
-								if (value instanceof AttributeEnum) {
-									displayValue = ((AttributeEnum)value).getDisplayName();
-								}
-								else if (value instanceof Boolean) {
-									final boolean val = (Boolean)value;
-									
-									if (val && attribute.getTrueString() != null) {
-										displayValue = attribute.getTrueString();
-									}
-									else if (!val && attribute.getFalseString() != null) {
-										displayValue = attribute.getFalseString();
-									}
-									else {
-										displayValue = value;
-									}
-								}
-								else {
-									displayValue = value;
-								}
-								
-								valueFacet = new IndexSingleValueFacet(value, displayValue, null);
-								
-								singleValueResult.putForValue(value, valueFacet);
-							}
-							
-							valueFacet.increaseMatchCount();
-						}
-						
-						// Find or add corresponding value
-					}
-				}
+				processAttribute(d, functions, attribute, attributeResults);
 			}
 		}
 
 		final TypeFacets typeFacets = new TypeFacets(itemType, new ArrayList<>(attributeResults.values()));
 		
 		return typeFacets;
+	}
+	
+	private static <I, F> void processAttribute(I d, FacetFunctions<I, F> functions, ItemAttribute attribute, Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults) {
+		final F field = functions.getField(d, attribute.getName());
+		
+		if (field != null) {
+		
+			// Get the field value from document
+			if (attribute.isFaceted()) {
+				if (attribute.getIntegerRanges() != null) {
+					
+					// Find which range we are in
+					final int value = functions.getIntegerValue(field);
+	
+					computeFacetsForRange(attribute, attribute.getIntegerRanges(), value, attributeResults);
+				}
+				else if (attribute.getDecimalRanges() != null) {
+					
+					// Find which range we are in
+					final BigDecimal value = functions.getDecimalValue(field);
+					
+					computeFacetsForRange(attribute, attribute.getDecimalRanges(), value, attributeResults);
+				}
+				else {
+					// Single-value
+					IndexSingleValueFacetedAttributeResult singleValueResult = (IndexSingleValueFacetedAttributeResult)attributeResults.get(attribute);
+					
+					// TODO avoid instantiation?
+					if (singleValueResult == null) {
+						
+						singleValueResult = new IndexSingleValueFacetedAttributeResult(attribute, new TreeMap<>(ATTRIBUTE_VALUE_COMPARATOR));
+						attributeResults.put(attribute, singleValueResult);
+					}
+					
+					final Object value = functions.getObjectValue(attribute, field);
+					
+					if (value != null) {
+						IndexSingleValueFacet valueFacet = singleValueResult.getForValue(value);
+						
+						if (valueFacet == null) {
+							final Object displayValue = getAttributeDisplayValue(attribute, value);
+							
+							valueFacet = new IndexSingleValueFacet(value, displayValue, null);
+							
+							singleValueResult.putForValue(value, valueFacet);
+						}
+						
+						valueFacet.increaseMatchCount();
+					}
+					
+					// Find or add corresponding value
+				}
+			}
+		}
+	}
+	
+	private static Object getAttributeDisplayValue(ItemAttribute attribute, Object value) {
+		final Object displayValue;
+		
+		if (value instanceof AttributeEnum) {
+			displayValue = ((AttributeEnum)value).getDisplayName();
+		}
+		else if (value instanceof Boolean) {
+			final boolean val = (Boolean)value;
+			
+			if (val && attribute.getTrueString() != null) {
+				displayValue = attribute.getTrueString();
+			}
+			else if (!val && attribute.getFalseString() != null) {
+				displayValue = attribute.getFalseString();
+			}
+			else {
+				displayValue = value;
+			}
+		}
+		else {
+			displayValue = value;
+		}
+
+		return displayValue;
 	}
 
 
