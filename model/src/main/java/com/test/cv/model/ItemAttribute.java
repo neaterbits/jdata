@@ -212,6 +212,7 @@ public final class ItemAttribute {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((itemType == null) ? 0 : itemType.hashCode());
 		result = prime * result + ((property == null) ? 0 : property.hashCode());
 		return result;
 	}
@@ -225,11 +226,21 @@ public final class ItemAttribute {
 		if (getClass() != obj.getClass())
 			return false;
 		ItemAttribute other = (ItemAttribute) obj;
+		if (itemType == null) {
+			if (other.itemType != null)
+				return false;
+		} else if (!itemType.equals(other.itemType))
+			return false;
 		if (property == null) {
 			if (other.property != null)
 				return false;
 		} else if (!property.equals(other.property))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return getName();
 	}
 }
