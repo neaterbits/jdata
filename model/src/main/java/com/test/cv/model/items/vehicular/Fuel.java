@@ -4,7 +4,9 @@ import com.test.cv.model.AttributeEnum;
 
 public enum Fuel implements AttributeEnum {
 	GAS("Gas"),
-	DIESEL("Diesel");
+	DIESEL("Diesel"),
+	HYBRID("Hybrid"),
+	ELECTRIC("Electric");
 
 	private final String displayName;
 

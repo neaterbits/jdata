@@ -5,6 +5,8 @@ import com.test.cv.model.AttributeEnum;
 public enum TitleStatus implements AttributeEnum {
 
 	CLEAN("Clean"),
+	LIEN("Lien"),
+	REBUILT("Rebuilt"),
 	SALVAGE("Salvage");
 	
 	private final String displayName;

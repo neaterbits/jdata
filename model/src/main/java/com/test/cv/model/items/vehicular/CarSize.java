@@ -4,6 +4,7 @@ import com.test.cv.model.AttributeEnum;
 
 public enum CarSize implements AttributeEnum {
 
+	SUB_COMPACT("Sub-compact"),
 	COMPACT("Compact"),
 	MID_SIZE("Mid-size"),
 	FULL_SIZE("Full-size");
