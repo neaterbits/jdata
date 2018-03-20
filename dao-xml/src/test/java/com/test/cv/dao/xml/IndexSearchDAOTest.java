@@ -39,6 +39,6 @@ public class IndexSearchDAOTest extends SearchDAOTest {
 
 	@Override
 	protected ISearchDAO getSearchDAO() {
-		return new IndexSearchDAO(index);
+		return new IndexSearchDAO(index, true);
 	}
 }

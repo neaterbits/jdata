@@ -63,7 +63,7 @@ public class SearchService extends BaseService {
 				request.getSession().setAttribute("baseDir", baseDir);
 			}
 			
-			ret = new IndexSearchDAO(assureIndex());
+			ret = new IndexSearchDAO(assureIndex(), false);
 			break;
 			
 		default:

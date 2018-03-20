@@ -18,14 +18,17 @@ import com.test.cv.search.facets.ItemsFacets;
 public class IndexSearchDAO implements ISearchDAO {
 
 	private final ItemIndex index;
+	private final boolean closeIndexOnClose;
 	
-	public IndexSearchDAO(ItemIndex index) {
+	
+	public IndexSearchDAO(ItemIndex index, boolean closeIndexOnClose) {
 		
 		if (index == null) {
 			throw new IllegalArgumentException("index == null");
 		}
 
 		this.index = index;
+		this.closeIndexOnClose = closeIndexOnClose;
 	}
 
 	@Override
@@ -64,7 +67,9 @@ public class IndexSearchDAO implements ISearchDAO {
 
 	@Override
 	public void close() throws Exception {
-		index.close();
+		if (closeIndexOnClose) {
+			index.close();
+		}
 	}
 	
 }
