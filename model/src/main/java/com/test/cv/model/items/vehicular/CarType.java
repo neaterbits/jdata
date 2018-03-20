@@ -13,6 +13,7 @@ public enum CarType implements AttributeEnum {
 	PICKUP("Pickup"),
 	VAN("Van"),
 	WAGON("Wagon"),
+	OFFROAD("Offroad"),
 	BUS("Bus"); // TODO separate main type for bus?
 	
 	private final String displayName;

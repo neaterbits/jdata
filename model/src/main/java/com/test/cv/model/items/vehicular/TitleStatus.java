@@ -7,6 +7,7 @@ public enum TitleStatus implements AttributeEnum {
 	CLEAN("Clean"),
 	LIEN("Lien"),
 	REBUILT("Rebuilt"),
+	MISSING("Missing"),
 	SALVAGE("Salvage");
 	
 	private final String displayName;
