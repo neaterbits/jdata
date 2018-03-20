@@ -670,7 +670,7 @@ public class LuceneItemIndex implements ItemIndex {
 				}
 
 				if (found == null) {
-					throw new IllegalStateException("No enum found for " + field.stringValue());
+					throw new IllegalStateException("No enum found for " + field.stringValue() + " in enum " + enumClass.getName());
 				}
 
 				return found;
