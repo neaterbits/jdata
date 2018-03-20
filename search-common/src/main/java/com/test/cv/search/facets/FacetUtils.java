@@ -3,11 +3,14 @@ package com.test.cv.search.facets;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.test.cv.model.AttributeEnum;
@@ -102,15 +105,95 @@ public class FacetUtils {
 		final Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults = new LinkedHashMap<>(typeAttributes.size());
 		//final List<IndexFacetedAttributeResult> attributeResults = new ArrayList<>(typeAttributes.size());
 		
-		for (I d : documents) {
-			for (ItemAttribute attribute : typeAttributes) {
-				processAttribute(d, functions, attribute, attributeResults);
-			}
+		
+		// Process all attributes except subattributes
+		processAttributes(
+				documents,
+				typeAttributes,
+				functions,
+				(d, attr) -> attr.getFacetSuperAttribute() == null,
+				attributeResults);
+		
+		
+		System.out.println("## got attribute results: " + attributeResults);
+		
+		// Now we process subattributes, we do that by processing a list of 
+		// Does this have any sub-attributes in the list of attributes?
+		// TODO might cache in a map of lists in ClassAttributes?
+
+		
+		for (ItemAttribute attribute : typeAttributes) {
+			processSubAttributes(documents, typeAttributes, attribute, attributeResults, functions);
 		}
 
 		final TypeFacets typeFacets = new TypeFacets(itemType, new ArrayList<>(attributeResults.values()));
-		
+
 		return typeFacets;
+	}
+	
+	private static <I, F> void processSubAttributes(
+			List<I> documents,
+			List<ItemAttribute> allAttributes,
+			ItemAttribute superAttribute,
+			Map<ItemAttribute, IndexFacetedAttributeResult> superAttributeResults,
+			FacetFunctions<I, F> functions) {
+		
+		final List<ItemAttribute> subAttributes = allAttributes.stream()
+				.filter(attr -> superAttribute.getName().equals(attr.getFacetSuperAttribute()))
+				.collect(Collectors.toList());
+		
+		if (!subAttributes.isEmpty()) {
+				// Must go through all match-values found for this attribute
+	
+			// Only single-value attributes have subattributes
+			final IndexSingleValueFacetedAttributeResult attributeValues = (IndexSingleValueFacetedAttributeResult)superAttributeResults.get(superAttribute);
+			
+			if (attributeValues == null) {
+				// No matching values for this attribute
+			}
+			else {
+		
+				for (IndexSingleValueFacet singleValue : attributeValues.getValues()) {
+					// Now loop through all documents again to find values for sub attribute
+					// where the attribute match this value
+					
+					// This has subattributes, we collect them here and add sub attributes of this facet attribute
+					final Map<ItemAttribute, IndexFacetedAttributeResult> subAttributeResults = new LinkedHashMap<>(subAttributes.size());
+		
+					processAttributes(
+							documents,
+							subAttributes,
+							functions,
+							(document, sub) -> {
+								
+								final F field = functions.getField(document, superAttribute.getName());
+		
+								return field != null
+										? singleValue.getValue().equals(functions.getObjectValue(superAttribute, field))
+										: false;
+							},
+							subAttributeResults);
+					
+					// Now we have collected results for all the direct sub attributes, add them to super-attribute value
+					singleValue.setSubFacets(new ArrayList<>(subAttributeResults.values()));
+					
+					// For each sub-attribute, check whether they also have sub attributes
+					for (ItemAttribute subAttribute : subAttributes) {
+						processSubAttributes(documents, allAttributes, subAttribute, subAttributeResults, functions);
+					}
+				}
+			}
+		}
+	}
+	
+	private static <I, F> void processAttributes(List<I> documents, List<ItemAttribute> typeAttributes, FacetFunctions<I, F> functions, BiPredicate<I, ItemAttribute> includeAttribute, Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults) {
+		for (I d : documents) {
+			for (ItemAttribute attribute : typeAttributes) {
+				if (includeAttribute == null || includeAttribute.test(d, attribute)) {
+					processAttribute(d, functions, attribute, attributeResults);
+				}
+			}
+		}
 	}
 	
 	private static <I, F> void processAttribute(I d, FacetFunctions<I, F> functions, ItemAttribute attribute, Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults) {
@@ -160,8 +243,6 @@ public class FacetUtils {
 						
 						valueFacet.increaseMatchCount();
 					}
-					
-					// Find or add corresponding value
 				}
 			}
 		}

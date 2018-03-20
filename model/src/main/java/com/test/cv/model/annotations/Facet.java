@@ -9,6 +9,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Facet {
 	public String value();
+
+	public String superAttribute() default "";
+
 	public IntegerRange [] integerRanges() default {};
 	public DecimalRange [] decimalRanges() default {};
 

@@ -19,7 +19,7 @@ public abstract class BaseItem extends Item {
 	@Column
 	private String make;
 
-	@Facet("Model")
+	@Facet(value = "Model", superAttribute="make")
 	@Column
 	private String model;
 	

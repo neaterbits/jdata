@@ -7,7 +7,7 @@ public class IndexSingleValueFacet {
 	private final Object value;
 	private final Object displayValue;
 	private int matchCount;
-	private final List<IndexFacetedAttributeResult> subFacets;
+	private List<IndexFacetedAttributeResult> subFacets;
 
 	public IndexSingleValueFacet(Object value, Object displayValue, List<IndexFacetedAttributeResult> subFacets) {
 		if (value == null) {
@@ -38,6 +38,10 @@ public class IndexSingleValueFacet {
 
 	public List<IndexFacetedAttributeResult> getSubFacets() {
 		return subFacets;
+	}
+
+	public void setSubFacets(List<IndexFacetedAttributeResult> subFacets) {
+		this.subFacets = subFacets;
 	}
 
 	@Override

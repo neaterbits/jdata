@@ -13,6 +13,8 @@ public @interface FacetAttribute {
 
 	public String displayName() default "";
 	
+	public String superAttribute() default "";
+
 	public IntegerRange [] integerRanges() default {};
 	public DecimalRange [] decimalRanges() default {};
 

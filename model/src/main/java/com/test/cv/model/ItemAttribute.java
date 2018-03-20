@@ -25,6 +25,9 @@ public final class ItemAttribute {
 	private final boolean isFaceted;
 	private final String facetDisplayName;
 	
+	// For sub-attributes
+	private final String facetSuperAttribute;
+	
 	// Ay integer ranges if this is an integer attribute
 	private final FacetedAttributeIntegerRange [] integerRanges;
 	private final FacetedAttributeDecimalRange [] decimalRanges;
@@ -38,6 +41,7 @@ public final class ItemAttribute {
 				boolean storeValueInSearchIndex,
 				boolean isFaceted,
 				String facetDisplayName,
+				String facetSuperAttribute,
 				IntegerRange [] integerRanges, DecimalRange [] decimalRanges,
 				String trueString, String falseString) {
 	
@@ -67,6 +71,7 @@ public final class ItemAttribute {
 
 		this.isFaceted = isFaceted;
 		this.facetDisplayName = facetDisplayName;
+		this.facetSuperAttribute = facetSuperAttribute;
 		this.integerRanges = integerRanges == null || integerRanges.length == 0 ? null : convertIntegerRanges(integerRanges);
 		this.decimalRanges = decimalRanges == null || decimalRanges.length == 0 ? null : convertDecimalRanges(decimalRanges);
 
@@ -190,6 +195,10 @@ public final class ItemAttribute {
 
 	public String getFacetDisplayName() {
 		return facetDisplayName != null ? facetDisplayName : property.getName();
+	}
+
+	public String getFacetSuperAttribute() {
+		return facetSuperAttribute;
 	}
 
 	public FacetedAttributeIntegerRange[] getIntegerRanges() {
