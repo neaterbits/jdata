@@ -2,6 +2,7 @@ package com.test.cv.search.facets;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,7 +114,29 @@ public class FacetUtils {
 						// TODO avoid instantiation?
 						// TODO subfacets
 						if (singleValueResult == null) {
-							singleValueResult = new IndexSingleValueFacetedAttributeResult(attribute, new TreeMap<>());
+							
+							final Comparator<Object> comparator =  (o1, o2) -> {
+								final int result;
+								
+								if (o1 instanceof String) {
+									final String s1 = (String)o1;
+									final String s2 = (String)o2;
+									
+									
+									result = String.CASE_INSENSITIVE_ORDER.compare(s1, s2);
+								}
+								else {
+									@SuppressWarnings("unchecked")
+									final Comparable<Object> c1 = (Comparable<Object>)o1;
+									@SuppressWarnings("unchecked")
+									final Comparable<Object> c2 = (Comparable<Object>)o2;
+											
+									result = c1.compareTo(c2);
+								}
+								
+								return result;
+							};
+							singleValueResult = new IndexSingleValueFacetedAttributeResult(attribute, new TreeMap<>(comparator));
 							attributeResults.put(attribute, singleValueResult);
 						}
 						
