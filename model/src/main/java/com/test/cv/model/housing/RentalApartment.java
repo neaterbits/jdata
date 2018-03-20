@@ -59,15 +59,15 @@ public class RentalApartment extends Housing {
 	private Furnishment furnishment;
 
 	@Column
-	@Facet("Smoking allowed")
+	@Facet(value = "Smoking allowed", trueString="Yes", falseString="No")
 	private Boolean smoking;
 
 	@Column
-	@Facet("Cats allowed")
+	@Facet(value = "Cats allowed", trueString="Yes", falseString="No")
 	private Boolean cats;
 
 	@Column
-	@Facet("Dogs allowed")
+	@Facet(value = "Dogs allowed", trueString="Yes", falseString="No")
 	private Boolean dogs;
 
 	public BigDecimal getCostPerMonth() {

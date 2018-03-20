@@ -28,13 +28,18 @@ public final class ItemAttribute {
 	// Ay integer ranges if this is an integer attribute
 	private final FacetedAttributeIntegerRange [] integerRanges;
 	private final FacetedAttributeDecimalRange [] decimalRanges;
+	
+	// For boolean attributes
+	private final String trueString;
+	private final String falseString;
 
 	public ItemAttribute(Class<? extends Item> itemType, PropertyDescriptor property,
 				String fieldNameOverride,
 				boolean storeValueInSearchIndex,
 				boolean isFaceted,
 				String facetDisplayName,
-				IntegerRange [] integerRanges, DecimalRange [] decimalRanges) {
+				IntegerRange [] integerRanges, DecimalRange [] decimalRanges,
+				String trueString, String falseString) {
 	
 		if (itemType == null) {
 			throw new IllegalArgumentException("itemType == null");
@@ -64,6 +69,9 @@ public final class ItemAttribute {
 		this.facetDisplayName = facetDisplayName;
 		this.integerRanges = integerRanges == null || integerRanges.length == 0 ? null : convertIntegerRanges(integerRanges);
 		this.decimalRanges = decimalRanges == null || decimalRanges.length == 0 ? null : convertDecimalRanges(decimalRanges);
+
+		this.trueString = trueString != null ? trueString : "true";
+		this.falseString = falseString != null ? falseString : "false";
 	}
 	
 	private static FacetedAttributeIntegerRange[] convertIntegerRanges(IntegerRange [] ranges) {
@@ -190,6 +198,14 @@ public final class ItemAttribute {
 
 	public FacetedAttributeDecimalRange[] getDecimalRanges() {
 		return decimalRanges;
+	}
+	
+	public String getTrueString() {
+		return trueString;
+	}
+
+	public String getFalseString() {
+		return falseString;
 	}
 
 	@Override

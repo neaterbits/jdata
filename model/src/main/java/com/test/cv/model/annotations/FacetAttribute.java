@@ -15,5 +15,7 @@ public @interface FacetAttribute {
 	
 	public IntegerRange [] integerRanges() default {};
 	public DecimalRange [] decimalRanges() default {};
-	
+
+	public String trueString() default "";
+	public String falseString() default "";
 }

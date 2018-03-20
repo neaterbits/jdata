@@ -152,6 +152,8 @@ public class ClassAttributes {
 			final String facetDisplayName;
 			final IntegerRange [] integerRanges;
 			final DecimalRange [] decimalRanges;
+			final String trueString;
+			final String falseString;
 
 			final Facet fieldFacet = findAnnotation(Facet.class, type, propertyDescriptor);
 
@@ -160,6 +162,8 @@ public class ClassAttributes {
 				facetDisplayName = fieldFacet.value();
 				integerRanges = fieldFacet.integerRanges();
 				decimalRanges = fieldFacet.decimalRanges();
+				trueString = fieldFacet.trueString();
+				falseString = fieldFacet.falseString();
 			}
 			else {
 				// Check if specified in subclass
@@ -170,12 +174,16 @@ public class ClassAttributes {
 					facetDisplayName = facetAttribute.displayName();
 					integerRanges = facetAttribute.integerRanges();
 					decimalRanges = facetAttribute.decimalRanges();
+					trueString = facetAttribute.trueString();
+					falseString = facetAttribute.falseString();
 				}
 				else {
 					isFacet = false;
 					facetDisplayName = null;
 					integerRanges = null;
 					decimalRanges = null;
+					trueString = null;
+					falseString = null;
 				}
 			}
 			
@@ -210,7 +218,9 @@ public class ClassAttributes {
 					isFacet,
 					facetDisplayName,
 					integerRanges,
-					decimalRanges);
+					decimalRanges,
+					trueString,
+					falseString);
 
 			attributes.add(attribute);
 		}

@@ -40,7 +40,7 @@ public class Housing extends BaseItem {
 	private Date availableDate;
 	
 	@Column
-	@Facet("Wheelchair accesible")
+	@Facet(value = "Wheelchair accesible", trueString="Yes", falseString="No")
 	private Boolean wheelchairAccessible; 
 
 	public Integer getNumberOfRooms() {

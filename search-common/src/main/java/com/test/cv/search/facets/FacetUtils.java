@@ -129,6 +129,19 @@ public class FacetUtils {
 								if (value instanceof AttributeEnum) {
 									displayValue = ((AttributeEnum)value).getDisplayName();
 								}
+								else if (value instanceof Boolean) {
+									final boolean val = (Boolean)value;
+									
+									if (val && attribute.getTrueString() != null) {
+										displayValue = attribute.getTrueString();
+									}
+									else if (!val && attribute.getFalseString() != null) {
+										displayValue = attribute.getFalseString();
+									}
+									else {
+										displayValue = value;
+									}
+								}
 								else {
 									displayValue = value;
 								}
