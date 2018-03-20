@@ -16,6 +16,7 @@ import com.test.cv.model.housing.RentalApartment;
 import com.test.cv.model.items.sports.Ski;
 import com.test.cv.model.items.sports.Snowboard;
 import com.test.cv.model.items.vehicular.Boat;
+import com.test.cv.model.items.vehicular.Car;
 
 public class ItemTypes {
 	
@@ -24,6 +25,7 @@ public class ItemTypes {
 			Snowboard.class,
 			Ski.class,
 			Boat.class,
+			Car.class,
 			RentalApartment.class,
 			Item.class);
 	
