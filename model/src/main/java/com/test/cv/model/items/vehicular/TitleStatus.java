@@ -8,7 +8,8 @@ public enum TitleStatus implements AttributeEnum {
 	LIEN("Lien"),
 	REBUILT("Rebuilt"),
 	MISSING("Missing"),
-	SALVAGE("Salvage");
+	SALVAGE("Salvage"),
+	PARTS_ONLY("Parts Only");
 	
 	private final String displayName;
 
