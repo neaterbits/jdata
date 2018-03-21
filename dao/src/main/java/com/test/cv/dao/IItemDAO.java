@@ -50,7 +50,7 @@ public interface IItemDAO extends AutoCloseable {
 	void updateItem(String userId, Item item) throws ItemStorageException;
 	
 	void addPhotoAndThumbnailForItem(String userId, String itemId,
-			InputStream thumbnailInputStream, String thumbnailMimeType,
+			InputStream thumbnailInputStream, String thumbnailMimeType, int thumbWidth, int thumbHeight, 
 			InputStream photoInputStream, String photoMimeType) throws ItemStorageException;
 
 	// move thumbnail indices to change priority, ie update order

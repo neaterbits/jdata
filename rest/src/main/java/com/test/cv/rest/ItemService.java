@@ -65,6 +65,9 @@ public class ItemService extends BaseService {
 		
 		if (width <= bb && height <= bb) {
 			thumbnailInputStream = new ByteArrayInputStream(imageData);
+			
+			thumbWidth = width;
+			thumbHeight = height;
 		}
 		else {
 			
@@ -102,7 +105,7 @@ public class ItemService extends BaseService {
 		// Must create a thumbnail from photo
 		// Some JPEGs may have thumbnails already
 		
-		getItemDAO(request).addPhotoAndThumbnailForItem(userId, itemId, thumbnailInputStream, thumbnailMimeType, photoInputStream1, photoMimeType);
+		getItemDAO(request).addPhotoAndThumbnailForItem(userId, itemId, thumbnailInputStream, thumbnailMimeType, thumbWidth, thumbHeight, photoInputStream1, photoMimeType);
 	}
 	
 	

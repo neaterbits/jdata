@@ -22,6 +22,12 @@
 		<version>7.2.1</version>
 	</dependency>
 
+	<dependency>
+		<groupId>org.apache.lucene</groupId>
+		<artifactId>lucene-analyzers-common</artifactId>
+		<version>7.2.1</version>
+	</dependency>
+
 	<!-- test dependencies --> 
 
     <dependency>

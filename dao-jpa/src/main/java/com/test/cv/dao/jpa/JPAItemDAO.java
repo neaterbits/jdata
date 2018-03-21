@@ -131,13 +131,15 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	
 	@Override
 	public void addPhotoAndThumbnailForItem(String userId, String itemId, InputStream thumbnailInputStream,
-			String thumbnailMimeType, InputStream photoInputStream, String photoMimeType) throws ItemStorageException {
+			String thumbnailMimeType, int thumbWidth, int thumbHeight, InputStream photoInputStream, String photoMimeType) throws ItemStorageException {
 
 		final EntityTransaction tx = entityManager.getTransaction();
 		
 		boolean ok = false;
 		
 		tx.begin();
+
+		final int thumbnailIndex;
 		
 		try {
 			final IFoundItem foundItem = getItem(userId, itemId);
@@ -152,7 +154,6 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 			
 			final int iptCount = getNumThumbnails(userId, itemId);
 			
-			final int thumbnailIndex;
 			if (iptCount == 0) {
 				thumbnailIndex = 0;
 			}
@@ -169,7 +170,9 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 			thumbnail.setMimeType(thumbnailMimeType);
 			thumbnail.setItem(item);
 			thumbnail.setIndex(thumbnailIndex);
-			
+			thumbnail.setWidth(thumbWidth);
+			thumbnail.setHeight(thumbHeight);
+
 			try {
 				thumbnail.setData(IOUtil.readAll(thumbnailInputStream));
 			} catch (IOException ex) {

@@ -23,6 +23,12 @@ public class ItemPhotoThumbnail {
 	@Column(nullable=false) // thumbnails and photos are ordered when presented, index 0 is the default appearing in listings
 	private int index;
 	
+	@Column
+	private int width;
+	
+	@Column
+	private int height;
+	
 	@ManyToOne(optional=false)
 	private Item item;
 	
@@ -49,6 +55,22 @@ public class ItemPhotoThumbnail {
 
 	public void setIndex(int index) {
 		this.index = index;
+	}
+	
+	public int getWidth() {
+		return width;
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
 	}
 
 	public Item getItem() {

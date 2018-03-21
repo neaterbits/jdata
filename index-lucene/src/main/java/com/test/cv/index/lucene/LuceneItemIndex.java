@@ -1,9 +1,15 @@
 package com.test.cv.index.lucene;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +25,7 @@ import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
@@ -33,6 +40,7 @@ import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
@@ -69,6 +77,8 @@ import com.test.cv.search.facets.ItemsFacets;
 
 public class LuceneItemIndex implements ItemIndex {
 
+	private static final String THUMBS_FIELD = "thumbs";
+	
 	private final Directory directory;
 	private IndexWriter writer;
 	private DirectoryReader reader;
@@ -96,7 +106,6 @@ public class LuceneItemIndex implements ItemIndex {
 
 	@Override
 	public void indexItemAttributes(Class<? extends Item> itemType, String typeName, List<ItemAttributeValue<?>> attributeValues) throws ItemIndexException {
-
 		final Document document = new Document();
 
 		// Must have ID
@@ -188,31 +197,187 @@ public class LuceneItemIndex implements ItemIndex {
 		}
 
 		try {
-			/*
-			final IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer());
-			final IndexWriter writer = new IndexWriter(directory, config);
-			*/
 			writer.addDocument(document);
 			writer.commit();
-			//writer.close();
-			
 		} catch (IOException ex) {
 			throw new ItemIndexException("Failed to write document for item", ex);
 		}
 	}
-
-	@Override
-	public IndexSearchCursor search(String freeText, List<Criterium> criteria, Set<ItemAttribute> facetAttributes) throws ItemIndexException {
-
+	
+	
+	private IndexReader refreshReader() throws ItemIndexException {
 		try {
-			final DirectoryReader newReader = DirectoryReader.openIfChanged(this.reader);
+			final DirectoryReader newReader = DirectoryReader.openIfChanged(this.reader, this.writer);
 
-			if (newReader != null) {
+			if (newReader != null && this.reader != newReader) {
+				this.reader.close();
 				this.reader = newReader;
+			}
+
+			if (!reader.isCurrent()) {
+				throw new IllegalStateException("Not current");
 			}
 		} catch (IOException ex) {
 			throw new ItemIndexException("Could not reopen reader", ex);
 		}
+
+		return reader;
+	}
+	
+	private Document refreshReaderGetDoc(String itemId) throws ItemIndexException {
+		final IndexReader reader = refreshReader();
+		final IndexSearcher searcher = new IndexSearcher(reader);
+		
+		final Query query = new TermQuery(new Term("id", itemId));
+		
+		try {
+			final TopDocs docs = searcher.search(query, Integer.MAX_VALUE);
+			
+			if (docs.totalHits > 1L) {
+				throw new IllegalStateException("More than one match");
+			}
+
+			return searcher.doc(docs.scoreDocs[0].doc);
+		} catch (IOException ex) {
+			throw new ItemIndexException("Could not read doc with id " + itemId, ex);
+		}
+	}
+	
+	private static byte [] longsToBytes(Long [] longs) {
+		// Encode longs as byte array
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream(longs.length * 8);
+		final DataOutputStream dataOutput = new DataOutputStream(baos);
+		
+		for (long l : longs) {
+			try {
+				dataOutput.writeLong(l);
+			} catch (IOException ex) {
+				throw new IllegalStateException("Exception while writing to buf", ex);
+			}
+		}
+		
+		return baos.toByteArray();
+	}
+	
+	
+	private static Long [] bytesToLongs(byte [] bytes) {
+		// Encode longs as byte array
+		final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+		final DataInputStream dataInput = new DataInputStream(bais);
+		
+		final List<Long> longs = new ArrayList<>(bytes.length / 8);
+		
+		for (;;) {
+			try {
+				final long l = dataInput.readLong();
+				
+				longs.add(l);
+			} catch (EOFException ex) {
+				break;
+			}
+			catch (IOException ex) {
+				throw new IllegalStateException("Exception while reading from buf", ex);
+			}
+		}
+		
+		return longs.toArray(new Long[longs.size()]);
+	}
+	
+	private static long encodeSize(int width, int height) {
+		return ((long)width) << 32 | height;
+	}
+
+	@Override
+	public void indexThumbnailSize(String itemId, int index, int thumbWidth, int thumbHeight) throws ItemIndexException {
+		final Document doc = refreshReaderGetDoc(itemId);
+		
+		// Get all value
+		final IndexableField field = doc.getField(THUMBS_FIELD);
+
+		Long [] sizes;
+		
+		if (field != null) {
+			sizes = bytesToLongs(field.binaryValue().bytes);
+			
+			final int len = sizes.length;
+			if (index >= len) {
+				final int newLen = index + 1;
+				sizes = Arrays.copyOf(sizes, newLen);
+				Arrays.fill(sizes, len, newLen, 0L);
+			}
+		}
+		else {
+			sizes = new Long[index + 1];
+
+			Arrays.fill(sizes, 0L);
+		}
+		
+		sizes[index] = encodeSize(thumbWidth, thumbHeight);
+		
+		updateThumbnailSizes(doc, itemId, sizes);
+	}
+	
+	private void updateThumbnailSizes(Document doc, String itemId, Long [] sizes) throws ItemIndexException {
+		final byte [] bytes = longsToBytes(sizes);
+
+		
+		// Workaround since does not work to search on id if just re-indexing field
+		// and the field contains eg. hyphen
+		// TODO might be necessary for other fields as well with regard to facets
+		final IndexableField idField = doc.getField("id");
+
+		doc.removeField("id");
+		doc.add(new StringField("id", idField.stringValue(), Field.Store.YES));
+		
+		doc.removeFields(THUMBS_FIELD);
+		doc.add(new StoredField(THUMBS_FIELD, bytes));
+
+		try {
+			writer.updateDocument(new Term("id", itemId), doc);
+			writer.commit();
+		} catch (IOException ex) {
+			throw new ItemIndexException("Failed to update thumb sizes", ex);
+		}
+	}
+	
+
+	@Override
+	public void deletePhotoAndThumbnailForItem(String itemId, int photoNo) throws ItemIndexException {
+		final Document doc = refreshReaderGetDoc(itemId);
+		final IndexableField field = doc.getField(THUMBS_FIELD);
+		final Long [] sizes = bytesToLongs(field.binaryValue().bytes);
+		
+		// Use list methods for simplicity
+		final List<Long> sizeList = Arrays.stream(sizes).collect(Collectors.toList());
+
+		sizeList.remove(photoNo);
+
+		updateThumbnailSizes(doc, itemId, sizeList.toArray(new Long[sizeList.size()]));
+	}
+
+	@Override
+	public void movePhotoAndThumbnailForItem(String itemId, int photoNo, int toIndex) throws ItemIndexException {
+		final Document doc = refreshReaderGetDoc(itemId);
+		final IndexableField field = doc.getField(THUMBS_FIELD);
+		final Long [] sizes = bytesToLongs(field.binaryValue().bytes);
+
+		final Long toMove = sizes[photoNo];
+		
+		// Use list methods for simplicity
+		final List<Long> sizeList = Arrays.stream(sizes).collect(Collectors.toList());
+
+		sizeList.remove(photoNo);
+
+		// Add at to-index
+		sizeList.add(toIndex, toMove);
+
+		updateThumbnailSizes(doc, itemId, sizeList.toArray(new Long[sizeList.size()]));
+	}
+
+	@Override
+	public IndexSearchCursor search(String freeText, List<Criterium> criteria, Set<ItemAttribute> facetAttributes) throws ItemIndexException {
+		
+		refreshReader();
 
 		final IndexSearcher searcher = new IndexSearcher(reader);
 		
@@ -270,6 +435,7 @@ public class LuceneItemIndex implements ItemIndex {
 						.collect(Collectors.toList());
 			}
 
+			
 			@Override
 			public List<SearchItem> getItemIDsAndTitles(int initialIdx, int count) {
 				return documents.stream()
@@ -277,8 +443,28 @@ public class LuceneItemIndex implements ItemIndex {
 						.limit(count)
 						.map(d -> {
 							
-							final IndexableField thumbWidth = d.getField("thumbWidth");
-							final IndexableField thumbHeight = d.getField("thumbHeight");
+							final Integer thumbWidth;
+							final Integer thumbHeight;
+							
+							final IndexableField thumbField = d.getField(THUMBS_FIELD);
+							if (thumbField != null) {
+								final byte [] data = thumbField.binaryValue().bytes;
+								final Long [] longs = bytesToLongs(data);
+								
+								if (longs.length > 0) {
+									thumbWidth = (int)(longs[0] >> 32);
+									thumbHeight = (int)(longs[0] & 0xFFFFFFFF); 
+								}
+								else {
+									thumbWidth = null;
+									thumbHeight = null;
+								}
+							}
+							else {
+								thumbWidth = null;
+								thumbHeight = null;
+							}
+							
 
 							// TODO perhaps parameterize attribute names
 							// since this layer ought to be more generic
@@ -286,8 +472,9 @@ public class LuceneItemIndex implements ItemIndex {
 							return new IndexSearchItem(
 									d.getField("id").stringValue(),
 									titleField != null ? titleField.stringValue() : null,
-									thumbWidth != null  ? thumbWidth.numericValue().intValue() : null,
-									thumbHeight != null ? thumbHeight.numericValue().intValue() : null);
+									thumbWidth,
+									thumbHeight
+							);
 						})
 						.collect(Collectors.toList());
 			}

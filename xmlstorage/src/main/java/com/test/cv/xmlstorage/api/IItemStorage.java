@@ -59,7 +59,7 @@ public interface IItemStorage {
 
 	ImageResult getPhotoForItem(String userId, String itemId, int photoNo) throws StorageException;
 
-	void addPhotoAndThumbnailForItem(String userId, String itemId,
+	int addPhotoAndThumbnailForItem(String userId, String itemId,
 			InputStream thumbnailInputStream, String thumbnailMimeType,
 			InputStream photoInputStream, String photoMimeType) throws StorageException;
 	

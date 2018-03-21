@@ -82,27 +82,16 @@ public class S3XMLStorage extends BaseXMLStorage implements IItemStorage {
 
 	@Override
 	public void deleteAllItemFiles(String userId, String itemId) throws StorageException {
-
-		final ILock lock = obtainLock(userId, itemId);
-		
-		try {
-			deleteDirecoryFiles(userId, itemId, ItemFileType.XML);
-			deleteDirecoryFiles(userId, itemId, ItemFileType.THUMBNAIL);
-			deleteDirecoryFiles(userId, itemId, ItemFileType.PHOTO);
-		}
-		finally {
-			releaseLock(userId, itemId, lock);
-			
-			deleteLock(userId, itemId);
-		}
-		
+		deleteDirecoryFiles(userId, itemId, ItemFileType.XML);
+		deleteDirecoryFiles(userId, itemId, ItemFileType.THUMBNAIL);
+		deleteDirecoryFiles(userId, itemId, ItemFileType.PHOTO);
 	}
 
 	@Override
-	public void addPhotoAndThumbnailForItem(String userId, String itemId, InputStream thumbnailInputStream,
+	public int addPhotoAndThumbnailForItem(String userId, String itemId, InputStream thumbnailInputStream,
 			String thumbnailMimeType, InputStream photoInputStream, String photoMimeType) throws StorageException {
 		
-		
+		throw new UnsupportedOperationException("TODO");
 	}
 
 	private void deleteDirecoryFiles(String userId, String itemId, ItemFileType itemFileType) throws StorageException {
@@ -126,20 +115,13 @@ public class S3XMLStorage extends BaseXMLStorage implements IItemStorage {
 
 	@Override
 	public void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException {
-		final ILock lock = obtainLock(userId, itemId);
-
 		final String thumbFileName;
 		final String photoFileName;
 
-		try {
-			thumbFileName = deleteImageFile(userId, itemId, ItemFileType.THUMBNAIL, photoNo);
-			photoFileName = deleteImageFile(userId, itemId, ItemFileType.PHOTO, photoNo);
+		thumbFileName = deleteImageFile(userId, itemId, ItemFileType.THUMBNAIL, photoNo);
+		photoFileName = deleteImageFile(userId, itemId, ItemFileType.PHOTO, photoNo);
 
-			removeFromImageList(userId, itemId, thumbFileName, photoFileName);
-		}
-		finally {
-			releaseLock(userId, itemId, lock);
-		}
+		removeFromImageList(userId, itemId, thumbFileName, photoFileName);
 	}
 
 	@Override
@@ -164,23 +146,6 @@ public class S3XMLStorage extends BaseXMLStorage implements IItemStorage {
 		return result;
 	}
 
-	@Override
-	protected ILock obtainLock(String userId, String itemId) throws StorageException {
-
-		// There is no way to lock a file in S3 safely so must use DynamoDB or similar
-		throw new UnsupportedOperationException("TODO");
-	}
-
-	@Override
-	protected void releaseLock(String userId, String itemId, ILock lock) {
-		throw new UnsupportedOperationException("TODO");
-	}
-
-	protected void deleteLock(String userId, String itemId) {
-		throw new UnsupportedOperationException("TODO");
-	}
-
-	
 	@Override
 	protected InputStream getImageListInputForItem(String userId, String itemId, String fileName) throws StorageException {
 		

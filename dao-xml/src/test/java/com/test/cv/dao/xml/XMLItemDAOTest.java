@@ -20,6 +20,7 @@ public class XMLItemDAOTest extends ItemDAOTest {
 	
 	@Override
 	protected IItemDAO getItemDAO() {
-		return new XMLItemDAO(new LocalXmlStorage(baseDir), index);
+		final LocalXmlStorage localXmlStorage = new LocalXmlStorage(baseDir);
+		return new XMLItemDAO(localXmlStorage, index, localXmlStorage);
 	}
 }

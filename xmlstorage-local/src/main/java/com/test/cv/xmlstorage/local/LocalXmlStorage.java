@@ -16,9 +16,10 @@ import com.test.cv.common.IOUtil;
 import com.test.cv.xmlstorage.api.BaseXMLStorage;
 import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.api.ItemFileType;
+import com.test.cv.xmlstorage.api.LockProvider;
 import com.test.cv.xmlstorage.api.StorageException;
 
-public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
+public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage, LockProvider {
 
 	private final File baseDir;
 
@@ -70,7 +71,7 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 		return result;
 	}
 	
-	private static class LocalFileLock implements ILock {
+	private static class LocalFileLock implements Lock {
 		private final FileLock lock;
 
 		LocalFileLock(FileLock lock) {
@@ -79,7 +80,7 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 	}
 
 	@Override
-	protected ILock obtainLock(String userId, String itemId) throws StorageException {
+	public Lock obtainLock(String userId, String itemId) throws LockException {
 		final File file = getLockFile(userId, itemId);
 		
 		final FileLock fileLock;
@@ -89,14 +90,14 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 			fileLock = fileChannel.lock();
 		}
 		catch (IOException ex) {
-			throw new StorageException("Failed to obtain file lock for " + file, ex);
+			throw new LockException("Failed to obtain file lock for " + file, ex);
 		}
 
 		return new LocalFileLock(fileLock);
 	}
 
 	@Override
-	public void releaseLock(String userId, String itemId, ILock lock) {
+	public void releaseLock(Lock lock) {
 		try {
 			((LocalFileLock)lock).lock.release();
 		} catch (IOException ex) {
@@ -213,25 +214,17 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 
 	@Override
 	public void deleteAllItemFiles(String userId, String itemId) throws StorageException {
-		
-		final ILock lock = obtainLock(userId, itemId);
-		
-		try {
-			IOUtil.deleteDirectoryRecursively(itemDir(userId, itemId));
-		}
-		finally {
-			releaseLock(userId, itemId, lock);
-		}
+		IOUtil.deleteDirectoryRecursively(itemDir(userId, itemId));
 	}
 
 
 	@Override
-	public void addPhotoAndThumbnailForItem(String userId, String itemId,
+	public int addPhotoAndThumbnailForItem(String userId, String itemId,
 			InputStream thumbnailInputStream, String thumbnailMimeType,
 			InputStream photoInputStream, String photoMimeType) throws StorageException {
 		
-		final ILock lock = obtainLock(userId, itemId);
-		
+		final int index;
+
 		try {
 			final String thumbFileName = allocateFileName(userId, itemId, ItemFileType.THUMBNAIL, thumbnailMimeType);
 
@@ -245,7 +238,7 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 
 				writeAndCloseOutput(photoInputStream, new FileOutputStream(itemFile(userId, itemId, ItemFileType.PHOTO, photoFileName)));
 
-				addToImageList(userId, itemId, thumbFileName, thumbnailMimeType, photoFileName, photoMimeType);
+				index = addToImageList(userId, itemId, thumbFileName, thumbnailMimeType, photoFileName, photoMimeType);
 				
 				ok = true;
 			}
@@ -261,28 +254,20 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 		catch (FileNotFoundException ex) {
 			throw new StorageException("Failed to open thumb output file", ex);
 		}
-		finally {
-			releaseLock(userId, itemId, lock);
-		}
+
+		return index;
 	}
 
 	@Override
 	public void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException {
-		final ILock lock = obtainLock(userId, itemId);
+		final String thumbFileName = getImageFileName(userId, itemId, ItemFileType.THUMBNAIL, photoNo);
+		final String photoFileName = getImageFileName(userId, itemId, ItemFileType.PHOTO, photoNo);
 		
-		try {
-			final String thumbFileName = getImageFileName(userId, itemId, ItemFileType.THUMBNAIL, photoNo);
-			final String photoFileName = getImageFileName(userId, itemId, ItemFileType.PHOTO, photoNo);
-			
-			itemFile(userId, itemId, ItemFileType.THUMBNAIL, thumbFileName).delete();
-			itemFile(userId, itemId, ItemFileType.PHOTO, photoFileName).delete();
-			
-			// Remove from image as well
-			removeFromImageList(userId, itemId, thumbFileName, photoFileName);
-		}
-		finally {
-			releaseLock(userId, itemId, lock);
-		}
+		itemFile(userId, itemId, ItemFileType.THUMBNAIL, thumbFileName).delete();
+		itemFile(userId, itemId, ItemFileType.PHOTO, photoFileName).delete();
+		
+		// Remove from image as well
+		removeFromImageList(userId, itemId, thumbFileName, photoFileName);
 	}
 
 	@Override

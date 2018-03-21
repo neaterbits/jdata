@@ -1,5 +1,6 @@
 package com.test.cv.index.lucene;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
@@ -15,6 +16,7 @@ import com.test.cv.model.StringAttributeValue;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.sports.Snowboard;
+import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.Criterium;
 import com.test.cv.search.criteria.DecimalCriterium;
@@ -150,6 +152,37 @@ public class LuceneItemIndexTest extends TestCase {
 			System.err.println("Caught throwable " + t);
 			t.printStackTrace();
 			throw t;
+		}
+	}
+	
+	public void testThumbnail() throws IOException, Exception {
+		try (LuceneItemIndex index = new LuceneItemIndex(new RAMDirectory())) {
+			
+			final ClassAttributes attributes = ClassAttributes.getFromClass(Snowboard.class);
+			
+			final ItemAttribute idAttribute = attributes.getByName("id");
+			final ItemAttribute makeAttribute = attributes.getByName("make");
+			
+			final String itemId = "1234-5678";
+			
+			final StringAttributeValue idAttributeValue = new StringAttributeValue(idAttribute, itemId);
+			final StringAttributeValue makeAttributeValue = new StringAttributeValue(makeAttribute, "Burton");
+	
+			index.indexItemAttributes(Snowboard.class, ItemTypes.getTypeName(Snowboard.class), Arrays.asList(idAttributeValue, makeAttributeValue));
+			
+			index.indexThumbnailSize(itemId, 0, 320, 240);
+			index.indexThumbnailSize(itemId, 1, 300, 250);
+			index.indexThumbnailSize(itemId, 2, 290, 340);
+
+			final IndexSearchCursor searchCursor = index.search(
+					null,
+					Arrays.asList(new StringCriterium(idAttribute, itemId, ComparisonOperator.EQUALS)),
+					null);
+			
+			final SearchItem item = searchCursor.getItemIDsAndTitles(0, 1).get(0);
+			
+			assertThat(item.getThumbWidth()).isEqualTo(320);
+			assertThat(item.getThumbHeight()).isEqualTo(240);
 		}
 	}
 

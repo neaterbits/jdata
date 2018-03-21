@@ -37,10 +37,6 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		}
 	}
 	
-	protected interface ILock {
-		
-	}
-	
 	/**
 	 * List all files indices in-order. These might not be monotonically increasing
 	 * since files may have been deleted
@@ -143,40 +139,18 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	
 	protected abstract String [] listFiles(String userId, String itemId, ItemFileType itemFileType);
 
-	/**
-	 * Lock files for this user and this item by creating a lock file or object
-	 * This might block for a while if there are other ongoing operations for this userId/itemId combination
-	 * @param userId
-	 * @param itemId
-	 */
-	protected abstract ILock obtainLock(String userId, String itemId) throws StorageException;
-	
-	/**
-	 * Release lock for userId/itemId
-	 * 
-	 * @param userId
-	 * @param itemId
-	 */
-	protected abstract void releaseLock(String userId, String itemId, ILock lock);
 
 	@Override
 	public int getNumThumbnailsAndPhotosForItem(String userId, String itemId) throws StorageException {
 
-		final ILock lock = obtainLock(userId, itemId);
-	
 		final String [] thumbs;
 		final String [] photos;
 
-		try {
-			thumbs = listFiles(userId, itemId, ItemFileType.THUMBNAIL);
-			photos = listFiles(userId, itemId, ItemFileType.PHOTO);
-	
-			if (thumbs.length != photos.length) {
-				throw new IllegalStateException("mismatch between thumbs and photos");
-			}
-		}
-		finally {
-			releaseLock(userId, itemId, lock);
+		thumbs = listFiles(userId, itemId, ItemFileType.THUMBNAIL);
+		photos = listFiles(userId, itemId, ItemFileType.PHOTO);
+
+		if (thumbs.length != photos.length) {
+			throw new IllegalStateException("mismatch between thumbs and photos");
 		}
 		
 		return thumbs.length;
@@ -219,7 +193,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	}
 	
 	
-	protected final void addToImageList(String userId, String itemId,
+	protected final int addToImageList(String userId, String itemId,
 			String thumbnailFileName, String thumbnailMimeType,
 			String photoFileName, String photoMimeType) throws StorageException {
 		final Images imageList = getOrCreateImageList(userId, itemId);
@@ -233,6 +207,8 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		imageList.getImages().add(image);
 
 		writeImageList(userId, itemId, imageList);
+		
+		return imageList.getImages().size() - 1;
 	}
 
 	protected final void removeFromImageList(String userId, String itemId,
@@ -312,28 +288,21 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	@Override
 	public final List<ImageResult> getThumbnailsForItem(String userId, String itemId) throws StorageException {
 
-		final ILock lock = obtainLock(userId, itemId);
-		
 		final List<ImageResult> result;
 		
-		try {
-			final Images images = getOrCreateImageList(userId, itemId);
-			
-			int fileNo = 0;
-			
-			result = new ArrayList<>(images.getImages().size());
-			
-			for (fileNo = 0; fileNo < images.getImages().size(); ++ fileNo) {
+		final Images images = getOrCreateImageList(userId, itemId);
+		
+		int fileNo = 0;
+		
+		result = new ArrayList<>(images.getImages().size());
+		
+		for (fileNo = 0; fileNo < images.getImages().size(); ++ fileNo) {
 
-				final String fileName = getImageFileName(userId, itemId, ItemFileType.THUMBNAIL, images, fileNo);
+			final String fileName = getImageFileName(userId, itemId, ItemFileType.THUMBNAIL, images, fileNo);
+		
+			final ImageResult image = getImageFileForItem(userId, itemId, ItemFileType.THUMBNAIL, fileName);
 			
-				final ImageResult image = getImageFileForItem(userId, itemId, ItemFileType.THUMBNAIL, fileName);
-				
-				result.add(image);
-			}
-		}
-		finally {
-			releaseLock(userId, itemId, lock);
+			result.add(image);
 		}
 		
 		return result;
@@ -351,24 +320,17 @@ public abstract class BaseXMLStorage implements IItemStorage {
 
 	@Override
 	public final ImageMetaData getThumbnailMetaDataForItem(String userId, String itemId, int photoNo) throws StorageException {
-		final ILock lock = obtainLock(userId, itemId);
-
 		final ImageMetaData metaData;
 		
-		try {
-			final Images imageList = getImageList(userId, itemId);
-			
-			if (imageList == null || imageList.getImages().size() <= photoNo) {
-				metaData = null;
-			}
-			else {
-				final ImageData imageData = imageList.getImages().get(photoNo).getThumb();
-				
-				metaData = new ImageMetaData(imageData.getMimeType(), imageData.getSize(), imageData.getWidth(), imageData.getHeight());
-			}
+		final Images imageList = getImageList(userId, itemId);
+		
+		if (imageList == null || imageList.getImages().size() <= photoNo) {
+			metaData = null;
 		}
-		finally {
-			releaseLock(userId, itemId, lock);
+		else {
+			final ImageData imageData = imageList.getImages().get(photoNo).getThumb();
+			
+			metaData = new ImageMetaData(imageData.getMimeType(), imageData.getSize(), imageData.getWidth(), imageData.getHeight());
 		}
 
 		return metaData;
@@ -376,26 +338,12 @@ public abstract class BaseXMLStorage implements IItemStorage {
 
 	@Override
 	public final ImageResult getThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException {
-		final ILock lock = obtainLock(userId, itemId);
-
-		try {
-			return getImageFileForItem(userId, itemId, photoNo, ItemFileType.THUMBNAIL);
-		}
-		finally {
-			releaseLock(userId, itemId, lock);
-		}
+		return getImageFileForItem(userId, itemId, photoNo, ItemFileType.THUMBNAIL);
 	}
 
 	@Override
 	public final ImageResult getPhotoForItem(String userId, String itemId, int photoNo) throws StorageException {
-		final ILock lock = obtainLock(userId, itemId);
-
-		try {
-			return getImageFileForItem(userId, itemId, photoNo, ItemFileType.PHOTO);
-		}
-		finally {
-			releaseLock(userId, itemId, lock);
-		}
+		return getImageFileForItem(userId, itemId, photoNo, ItemFileType.PHOTO);
 	}
 
 	@Override

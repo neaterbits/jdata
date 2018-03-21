@@ -4,6 +4,8 @@ import java.io.File;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.assertj.core.internal.cglib.core.Local;
+
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.xml.XMLItemDAO;
 import com.test.cv.index.ItemIndex;
@@ -45,7 +47,7 @@ public abstract class BaseService {
 	
 	private static final File localBaseDir = new File("/Users/nils.lorentzen/cvs");
 	
-	static IItemStorage getLocalXMLStorage() {
+	static LocalXmlStorage getLocalXMLStorage() {
 		return new LocalXmlStorage(localBaseDir);
 	}
 
@@ -72,7 +74,8 @@ public abstract class BaseService {
 		
 		switch (storage) {
 		case LOCAL_FILE_LUCENE:
-			ret = new XMLItemDAO(getLocalXMLStorage(), assureIndex());
+			final LocalXmlStorage localXmlStorage = getLocalXMLStorage();
+			ret = new XMLItemDAO(localXmlStorage, assureIndex(), localXmlStorage);
 			break;
 
 		default:

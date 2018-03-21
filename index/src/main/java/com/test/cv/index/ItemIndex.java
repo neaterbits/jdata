@@ -21,6 +21,17 @@ public interface ItemIndex extends AutoCloseable {
 	
 	void indexItemAttributes(Class<? extends Item> itemType, String typeName, List<ItemAttributeValue<?>> attributeValues) throws ItemIndexException;
 	
+	/**
+	 * @param itemId item ID
+	 * @param index index of thumbnail, from 0 to n
+	 * @param thumbWidth width of thumb as stored
+	 * @param thumbHeight height of thumb as stored
+	 */
+	void indexThumbnailSize(String itemId, int photoNo, int thumbWidth, int thumbHeight) throws ItemIndexException;
+
+	void deletePhotoAndThumbnailForItem(String itemId, int photoNo) throws ItemIndexException;
+
+	void movePhotoAndThumbnailForItem(String itemId, int photoNo, int toIndex) throws ItemIndexException;
 
 	/**
 	 * Search for values in an index based on types

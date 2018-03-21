@@ -82,7 +82,7 @@ public abstract class ItemDAOTest extends TestCase {
 			 final ByteArrayInputStream thumbnailInputStream = new ByteArrayInputStream("thumbnail".getBytes());
 			 final ByteArrayInputStream photoInputStream = new ByteArrayInputStream("photo".getBytes());
 
-			 itemDAO.addPhotoAndThumbnailForItem(userId, itemId, thumbnailInputStream, "image/png", photoInputStream, "image/jpeg");
+			 itemDAO.addPhotoAndThumbnailForItem(userId, itemId, thumbnailInputStream, "image/png", 320, 240, photoInputStream, "image/jpeg");
 
 			 // Retrieve back
 			 final List<IFoundItemPhotoThumbnail> thumbnails = itemDAO.getPhotoThumbnails(userId, itemId);
@@ -329,7 +329,7 @@ public abstract class ItemDAOTest extends TestCase {
 		 final ByteArrayInputStream thumbnailInputStream = new ByteArrayInputStream(thumbnail);
 		 final ByteArrayInputStream photoInputStream = new ByteArrayInputStream(photo);
 
-		 itemDAO.addPhotoAndThumbnailForItem(userId, itemId, thumbnailInputStream, "image/png", photoInputStream, "image/jpeg");
+		 itemDAO.addPhotoAndThumbnailForItem(userId, itemId, thumbnailInputStream, "image/png", 320, 240, photoInputStream, "image/jpeg");
 	}
 
 	public void testDeleteThumbnailAndPhoto() throws Exception {
