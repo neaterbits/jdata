@@ -27,12 +27,12 @@ public class ItemService extends BaseService {
 	@POST
 	@Path("items")
 	@Consumes("application/json")
-	@Produces("application/json")
+	@Produces("application/text")
 	public String storeItem(@QueryParam("userId") String userId, Item item, HttpServletRequest request) throws ItemStorageException {
 		// Received an item as JSon, store it
 		final String itemId = getItemDAO(request).addItem(userId, item);
 		
-		return "{ 'itemId : '" + itemId + "' }";
+		return itemId;
 	}
 	
 	@POST

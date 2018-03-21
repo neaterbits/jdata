@@ -14,7 +14,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.test.cv.common.IOUtil;
 import com.test.cv.dao.ItemStorageException;
@@ -182,7 +181,9 @@ public class JettyRunServlet {
 				final Item item = mapper.readValue(new ByteArrayInputStream(data), typeInfo.getType());
 				
 				try {
-					itemService.storeItem(userId, item, req);
+					final String itemId = itemService.storeItem(userId, item, req);
+					
+					resp.getOutputStream().write(itemId.getBytes());
 				} catch (ItemStorageException ex) {
 					throw new ServletException("Failed to store item", ex);
 				}
