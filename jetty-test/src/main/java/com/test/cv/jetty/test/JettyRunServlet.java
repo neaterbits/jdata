@@ -147,11 +147,12 @@ public class JettyRunServlet {
 			final String userId = req.getParameter("userId");
 
 			if (req.getPathInfo() != null && req.getPathInfo().contains("image")) {
+				final int index = Integer.parseInt(req.getParameter("index"));
 				// Posting image
 				final String itemId = req.getPathInfo().split("/")[1];
 				
 				try {
-					itemService.storeImage(userId, itemId, IOUtil.readAll(req.getInputStream()), req);
+					itemService.storeImage(userId, itemId, index, IOUtil.readAll(req.getInputStream()), req);
 				} catch (ItemStorageException ex) {
 					throw new ServletException("Failed to store image", ex);
 				}
