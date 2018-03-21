@@ -56,20 +56,23 @@ public class ItemService extends BaseService {
 		final ByteArrayInputStream thumbnailInputStream;
 		final String thumbnailMimeType = photoMimeType;
 		
-		if (image.getWidth() <= bb && image.getHeight() <= bb) {
+		final int width = image.getWidth();
+		final int height = image.getHeight();
+		
+		if (width <= bb && height <= bb) {
 			thumbnailInputStream = new ByteArrayInputStream(imageData);
 		}
 		else {
 			
-			if (image.getWidth() >= image.getHeight()) {
+			if (width >= height) {
 				// landscape
-				final double scaleDown = bb / image.getWidth();
+				final double scaleDown = bb / (double)width;
 				thumbWidth = bb;
-				thumbHeight = (int)(image.getHeight() * scaleDown);
+				thumbHeight = (int)(height * scaleDown);
 			}
 			else {
-				final double scaleDown = bb / image.getHeight();
-				thumbWidth = (int)(image.getWidth() * scaleDown);
+				final double scaleDown = bb / (double)height;
+				thumbWidth = (int)(width * scaleDown);
 				thumbHeight = bb;
 			}
 			
