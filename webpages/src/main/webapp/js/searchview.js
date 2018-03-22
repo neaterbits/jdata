@@ -167,12 +167,16 @@ function SearchView(
 		provisionalImage.style.height = thumbHeight;
 		*/
 
+		/*
 		var url = URL.createObjectURL(imageData);
-		image.src = url; // imageData;
+		image.src = url;
 
 		image.onload = function() {
 			URL.revokeObjectURL(url);
 		}
+		*/
+
+		image.src = imageData;
 
 		div.append(image);
 		
@@ -263,16 +267,14 @@ function SearchView(
 					
 					//var buf = response.slice(offset, offset + thumbSize);
 
-					/*
 					var base64 = base64_encode(dataView, offset, thumbSize);
 					
-					console.log('## base 64: ' + base64.length + " from " + offset + ", size " + thumbSize + ' :\n' + base64);
+					// console.log('## base 64: ' + base64.length + " from " + offset + ", size " + thumbSize + ' :\n' + base64);
 					
 					// Render thumb in view, create the 'data:' part of <img>
 					var data = 'data:' + mimeType + ';base64,' + base64;
-					*/
 					
-					var data = new Blob([new Uint8Array(response, offset, thumbSize)]);
+			//		var data = new Blob([new Uint8Array(response, offset, thumbSize)]);
 					
 					images.push(data);
 				}
@@ -326,7 +328,7 @@ function SearchView(
 
 		const base64chars = [
 			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'w', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 			'+', '/'
 		];
@@ -380,10 +382,13 @@ function SearchView(
 			result += _base64_one(buf, base64chars);
 		}
 		
-		var mod = 4 - (result.length % 4);
-		
-		for (var i = 0; i < mod; ++ i) {
-			result += '=';
+		var mod = result.length % 4;
+		if (mod != 0) {
+			var remainder = 4 - remainder;
+
+			for (var i = 0; i < remainder; ++ i) {
+				result += '=';
+			}
 		}
 
 		return result;
