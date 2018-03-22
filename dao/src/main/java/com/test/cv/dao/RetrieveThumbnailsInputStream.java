@@ -83,6 +83,10 @@ public abstract class RetrieveThumbnailsInputStream extends InputStream {
 				nextByte = getNextDataByte();
 				break;
 				
+			case DONE:
+				nextByte = -1;
+				break;
+				
 			default:
 				throw new IllegalStateException("Unknown state " + state);
 				
