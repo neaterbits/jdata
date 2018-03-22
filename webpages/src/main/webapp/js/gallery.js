@@ -156,7 +156,7 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 				t.scrollTimeoutSet = true;
 				
 				setTimeout(function() {
-						t._getImagesIfNotScrolled(curFirstY, t.firstY, t.firstIndex, t.lastIndex - t.firstIndex + 1);
+						t._getImagesIfNotScrolled(level + 1, curFirstY, t.firstY, t.firstIndex, t.lastIndex - t.firstIndex + 1);
 						t.scrollTimeoutSet = false;
 					},
 					100);
@@ -167,13 +167,73 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 		this.exit(level, 'computeAndRender');
 	}
 	
-	this._getImagesIfNotScrolled = function(timeoutStartY, curY, firstIndex, count) {
+	this._getImagesIfNotScrolled = function(level, timeoutStartY, curY, firstIndex, count) {
 		if (timeoutStartY == curY) {
+			
 			// Not scrolled since timeout started, load images
 			console.log('Load images from ' + timeoutStartY);
 
-			// Now just load images
-			this.getImages(firstIndex, count);
+			var t = this;
+
+			// Call external functions to load images
+			this.getImages(firstIndex, count, function(imageDataArray) {
+
+				var rowNo = firstIndex / t.itemsPerRow;
+
+				var rowWidth = t._getRowWidth();
+				var numRows = t.rowDivs.length;
+
+				for (var row = 0, i = 0; row < numRows && i < count; ++ row) {
+					
+					// tallest item in row
+					var rowMaxHeight = t._findRowMaxItemHeight(row, t.itemsPerRow);
+					
+					// height of this row, eg first and last row may have additional spacing so items are taller
+					var rowHeight = t._getRowHeight(rowMaxHeight, row, numRows);
+
+					var rowDiv = t.rowDivs[row];
+					var itemsThisRow = rowDiv.childNodes.length;
+					
+					// Store new elements in array and then replace all at once
+					var newRowItems = [];
+					
+					t._addRowItems(level + 1, rowDiv, i, itemsThisRow, rowWidth, rowHeight,
+							function (index, title, itemWidth, itemHeight) {
+
+								var imageData = imageDataArray[index];
+								var item;
+								
+								if (imageData == null) {
+									item = rowDiv.childNodes[index - i];
+								}
+								else if (typeof imageData === 'undefined') {
+									throw "Image data undefined at: " + index;
+								}
+								else {
+									item = t.makeImageHTMLElement(title, imageData);
+								}
+								
+								return item;
+							},
+							function (element) {
+								newRowItems.push(element);
+							});
+			
+					for (var c = 0; c < itemsThisRow && i < count; ++ c) {
+						
+						var rowItem = rowDiv.childNodes[c];
+						
+						if (typeof rowItem === 'undefined' || rowItem == null) {
+							throw "No row item";
+						}
+
+						// Replace element
+						rowDiv.replaceChild(newRowItems[c], rowItem)
+						
+						++ i;
+					}
+				}
+			});
 		}
 	}
 	
@@ -381,7 +441,9 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 		this.exit(level, 'addDivs');
 	}
 	
-	
+	this._getRowWidth = function() {
+		return this.width;
+	}
 
 	this._addDivsWithAddFunc = function(level, startIndex, startPos, itemsPerRow, heightToAdd, downwards, addRowDiv) {
 
@@ -402,9 +464,9 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 		
 		var numRows = ((this.widths.length - 1) / itemsPerRow) + 1;
 		var rowNo = startIndex / itemsPerRow;
-		
-		var rowWidth = this.width;
-		
+
+		var rowWidth = this._getRowWidth();
+
 		var lastRenderedElement = null;
 		
 		for (var i = startIndex; i < this.widths.length; i += (downwards ? itemsPerRow : -itemsPerRow)) {
@@ -424,8 +486,15 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 
 			rowNo = rowNo + (downwards ? 1 : -1);
 
+			var t = this;
 			// Add row items to the row
-			this._addRowItems(level + 1, rowDiv, i, itemsThisRow, rowWidth);
+			this._addRowItems(level + 1, rowDiv, i, itemsThisRow, rowWidth, rowHeight,
+					function (index, title, itemWidth, itemHeight) {
+						return t.makeProvisionalHTMLElement(index, title, itemWidth, itemHeight);
+					},
+					function (element) {
+						rowDiv.append(element);
+					});
 			
 			this.log(level, 'Adding row no ' + rowNo + ', first elem ' + i + ' at y pos ' + y + ' of height ' + rowHeight);
 			
@@ -475,8 +544,7 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 	/**
 	 * Helper to add the items in one gallery row
 	 */
-	this._addRowItems = function(level, rowDiv, firstItemIndex, itemsThisRow, rowWidth) {
-
+	this._addRowItems = function(level, rowDiv, firstItemIndex, itemsThisRow, rowWidth, rowHeight, makeElement, addElement) {
 		var x = 0;
 
 		var totalRowItemWidths = 0;
@@ -492,7 +560,7 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 			var itemWidth = this.widths[index];
 			var itemHeight = this.heights[index];
 
-			var itemElement = this.makeProvisionalHTMLElement(index, this.titles[index], itemWidth, itemHeight);
+			var itemElement = makeElement(index, this.titles[index], itemWidth, itemHeight);
 
 			// Add to model at relative offsets
 			
@@ -500,22 +568,27 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 
 			// this.log(level, 'set spacing to ' + spacing + '/' + rowWidth + '/' + totalRowItemWidths + '/' + itemsThisRow);
 			
-			itemElement.setAttribute('style',
-					'position : relative; ' +
-					/*
-					'display : inline-block; ' +
-					*/
-					'float : left; ' +
-					'margin-left : ' + spacing + 'px; ' +
-					'top : ' + (rowHeight - itemHeight) / 2 + 'px; ' +
-					'width : ' + itemWidth + '; ' +
-					'height : ' + itemHeight + '; ' +
-					'background-color : white; ');
+			this._applyItemStyles(itemElement, rowHeight, itemWidth, itemHeight, spacing);
 
-			rowDiv.append(itemElement);
+			addElement(itemElement);
 			
 			x += itemWidth;
 		}
+	}
+	
+	this._applyItemStyles = function(itemElement, rowHeight, itemWidth, itemHeight, spacing) {
+		itemElement.setAttribute('style',
+				'position : relative; ' +
+				/*
+				'display : inline-block; ' +
+				*/
+				'float : left; ' +
+				'margin-left : ' + spacing + 'px; ' +
+				'top : ' + (rowHeight - itemHeight) / 2 + 'px; ' +
+				'width : ' + itemWidth + '; ' +
+				'height : ' + itemHeight + '; ' +
+				'background-color : white; ');
+		
 	}
 
 	this._computeItemsPerRow = function() {

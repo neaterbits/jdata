@@ -21,6 +21,21 @@ function SearchView(
 
 	this.hasPerformedInitialSearch = false;
 	this.curResponse = null;
+	
+	/*
+	var buf = new ArrayBuffer(4);
+	
+	var view = new DataView(buf);
+	
+	view.setInt8(0, 97);
+	view.setInt8(1, 98);
+	view.setInt8(2, 99);
+	view.setInt8(3, 100);
+	
+	console.log('Base 64: ' + base64_encode(view, 0, 4));
+	
+	throw "exit searchview";
+	*/
 
 	this._getInitial = function(onsuccess) {
 
@@ -111,10 +126,8 @@ function SearchView(
 		return new Gallery(galleryDivId, 20, 20,
 				// Create element
 				_makeGalleryProvisionalItem,
-				function (index, count) { searchView._getThumbnailImages(index, count); },
-				function (index, provisional, image) {
-					return provisional;
-				});
+				function (index, count, onsuccess) { searchView._getThumbnailImages(index, count, onsuccess); },
+				_makeGalleryImageItem);
 	}
 	
 	function _makeGalleryProvisionalItem(index, title, thumbWidth, thumbHeight) {
@@ -142,16 +155,42 @@ function SearchView(
 		
 		return div;
 	}
-	
-	this._getThumbnailImages = function(index, count) {
+
+	function _makeGalleryImageItem(title, imageData) {
+		var div = document.createElement('div');
+
+		var image = document.createElement('img');
+
+		/*
+		provisionalImage.style.width = thumbWidth;
+		provisionalImage.style.height = thumbHeight;
+		*/
+		
+		image.src = imageData;
+
+		div.append(image);
+		
+		var textDiv = document.createElement('div');
+
+		// Add index as a text to the element
+		var textSpan = document.createElement('span');
+		
+		textSpan.innerHTML = title;
+
+		textDiv.append(textSpan);
+
+		div.append(textDiv);
+
+		textDiv.setAttribute('style', 'text-align : center;');
+		
+		return div;
+	}
+
+	this._getThumbnailImages = function(index, count, onsuccess) {
 		var itemIds = "";
 		
-		console.log('## adding itemIds from ' + index + ", " + count + " items");
-
 		for (var i = 0; i < count; ++ i) {
 			var itemId = this.curResponse.items[index + i].id;
-
-			console.log('# adding at ' + (index + i));
 
 			itemIds += "&itemId=";
 			itemIds += itemId;
@@ -159,22 +198,7 @@ function SearchView(
 
 		var url = this.thumbsUrl + itemIds;
 
-		function _hexDigit(x) {
-			var s;
-			
-			if (x < 10) {
-				s = "" + x;
-			}
-			else if (x > 15) {
-				throw "Digit out of range: " + x;
-			}
-			else {
-				s = String.fromCharCode(65 + (x - 9));
-			}
-			
-			return s;
-		}
-		
+
 		function hexdump(buffer, start, count) {
 
 			var s = "";
@@ -186,8 +210,8 @@ function SearchView(
 				
 				var b = hexView.getInt8(i);
 
-				var digit1 = _hexDigit(b >> 4);
-				var digit2 = _hexDigit(b & 0x0000000F);
+				var digit1 = hexDigit(b >> 4);
+				var digit2 = hexDigit(b & 0x0000000F);
 
 				s += digit1;
 				s += digit2;
@@ -206,6 +230,8 @@ function SearchView(
 
 			var dataView = new DataView(response);
 			var offset = 0;
+			
+			var images = [];
 
 			for (;;) {
 				var thumbSize = dataView.getInt32(offset);
@@ -226,17 +252,34 @@ function SearchView(
 
 				console.log('## ' + offset + ': got thumb of size ' + thumbSize + " with mime type '" + mimeType + "'");
 				
-				offset += thumbSize;
 				
 				if (thumbSize > 0) {
-					// Render thumb in view
+					
+					//var buf = response.slice(offset, offset + thumbSize);
+					
+					var src = "";
+					
+					var base64 = base64_encode(dataView, offset, thumbSize);
+					
+					console.log('## base 64: ' + base64.length + " from " + offset + ", size " + thumbSize + ' : ' + base64);
+					
+					// Render thumb in view, create the 'data:' part of <img>
+					var data = 'data:' + mimeType + ';base64,' + base64;
+					
+					images.push(data);
 				}
-				
+				else {
+					images.push(null);
+				}
+
+				offset += thumbSize;
+
 				if (offset >= response.byteLength) {
 					break;
 				}
 			}
-			
+
+			onsuccess(images);
 		});
 	}
 
@@ -267,4 +310,141 @@ function SearchView(
 	function print(obj) {
 		return JSON.stringify(obj, null, 2);
 	}
+
+	
+	
+	// For base-64 encoding bytes
+	function base64_encode(dataView, start, length) {
+
+		const base64chars = [
+			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'w', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+			'+', '/'
+		];
+
+		var result = "";
+		
+		var buf = { buffer : 0, bufferedBits : 0 };
+		
+		for (var i = 0; i < length;) {
+			
+			// console.log('start of loop, ' + i + ': ' + buf.buffer + '/0x' + hexNum(buf.buffer) + ', ' + buf.bufferedBits);
+			
+			if (buf.bufferedBits <= 8) {
+				// May read another byte, shift remaining up to upper
+				
+				var b = dataView.getUint8(start + i);
+				
+				// or in read byte after current number of bits
+				var freeSpace = 16 - buf.bufferedBits;
+
+				if (buf.buffer < 0) {
+					throw "Negative buf value";
+				}
+				
+				var r = b << (freeSpace - 8);
+
+				if (r < 0) {
+					throw "Negative r value";
+				}
+
+				buf.buffer |= r;
+				
+				if (buf.buffer < 0) {
+					throw "Negative buf value";
+				}
+				
+				// Now is 8 more
+				buf.bufferedBits += 8;
+			
+				// One more element processed
+				++ i;
+			}
+
+			// console.log('after read, ' + i + ': ' + buf.buffer + '/0x' + hexNum(buf.buffer) + ', ' + buf.bufferedBits);
+			
+			result += _base64_one(buf, base64chars);
+		}
+		
+		// Now convert any remaining data
+		while (buf.bufferedBits > 0) {
+			result += _base64_one(buf, base64chars);
+		}
+		
+		var mod = 4 - (result.length % 4);
+		
+		for (var i = 0; i < mod; ++ i) {
+			result += '=';
+		}
+
+		return result;
+	}
+	
+	function _base64_one(buf, base64chars) {
+
+		// Can now encode from bits
+		var c = buf.buffer >> 10;
+		
+		if (c < 0) {
+			console.log('Negative value for 0x' + buf.buffer + '/' + hexNum(buf.buffer) + '/' + buf.bufferedBits);
+		}
+
+		// console.log('Encode 0x' + hexNum(c) + ' : ' + base64chars[c]);
+		
+		if (c >= 64) {
+			throw "char to be encoded out of range: " + c;
+		}
+
+		// Got 6 uppermost bits, so skip those
+		buf.buffer = (buf.buffer << 6) & 0x0000FFFF;
+		buf.bufferedBits -= 6;
+
+		if (buf.buffer < 0) {
+			throw "Negative buf value";
+		}
+
+		var s = base64chars[c];
+		
+		if (typeof s === 'undefined') {
+			throw 'Undefined for ' + c;
+		}
+		
+		return s;
+	}
+	
+	function hexNum(n) {
+
+		var chars = [];
+		
+		if (n == 0) {
+			chars.push("0");
+		}
+		else{
+			while (n > 0) {
+				chars.push(hexDigit(n % 16));
+				
+				n >>= 4;
+			}
+		}
+
+		return chars.reverse().join("");
+	}
+	
+	function hexDigit(x) {
+		var s;
+		
+		if (x < 10) {
+			s = "" + x;
+		}
+		else if (x > 15) {
+			throw "Digit out of range: " + x;
+		}
+		else {
+			s = String.fromCharCode(65 + (x - 9));
+		}
+		
+		return s;
+	}
+		
 }
