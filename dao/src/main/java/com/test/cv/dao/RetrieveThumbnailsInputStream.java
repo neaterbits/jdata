@@ -18,6 +18,7 @@ public abstract class RetrieveThumbnailsInputStream extends InputStream {
 		public final InputStream thumbnail;
 
 		public Thumbnail(String mimeType, int thumbnailSize, InputStream thumbnail) {
+			
 			this.mimeType = mimeType;
 			this.thumbnailSize = thumbnailSize;
 			this.thumbnail = thumbnail;
@@ -132,7 +133,7 @@ public abstract class RetrieveThumbnailsInputStream extends InputStream {
 		final Thumbnail result;
 		
 		if (thumbnail.thumbnailSize == -1) {
-			// Unknown size, just read all into byte buffer
+			// Unknown size, just read all into byte buffer in order to figure out size
 			final byte [] data = IOUtil.readAll(thumbnail.thumbnail);
 		
 			result = new Thumbnail(thumbnail.mimeType, data.length, new ByteArrayInputStream(data));
