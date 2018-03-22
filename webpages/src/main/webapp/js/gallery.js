@@ -465,7 +465,7 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 			var itemWidth = this.widths[index];
 			var itemHeight = this.heights[index];
 
-			var itemElement = this.makeProvisionalHTMLElement(index);
+			var itemElement = this.makeProvisionalHTMLElement(index, this.titles[index], itemWidth, itemHeight);
 
 			// Add to model at relative offsets
 			

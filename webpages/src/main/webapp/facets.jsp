@@ -12,7 +12,7 @@
 <body style='height: 100%'>
 <h2>Test</h2>
 <input id="use_test_data" type="checkbox" checked>Use test data<br/>
-<div style='width: 100%; height: 90%'>
+<div style='width: 100%; height: 90%; margin: 0; padding: 0; border-box;'>
 	<div id='facets' style='display: inline-block; width: 30%; height: 100%; margin: 0; padding: 0; box-sizing: border-box; overflow: scroll'></div>
 	
 	<!-- TODO not set wrapper? Create wrapper in gallery so not setting style on gallery -->
@@ -65,17 +65,29 @@
 	function initGallery() {
 		var gallery = new Gallery('gallery', 20, 20,
 				// Create element
-				function(index) {
-					var div = document.createElement('div');
-					
-					// Add index as a text to the element
-					var textElement = document.createElement('span');
+				function(index, title, thumbWidth, thumbHeight) {
 
-					textElement.innerHTML = "" + index;
+					var div = document.createElement('div');
+
+					var provisionalImage = document.createElement('div');
+
+					provisionalImage.style.width = thumbWidth;
+					provisionalImage.style.height = thumbHeight;
+
+					div.append(provisionalImage);
 					
-					div.append(textElement);
+					var textDiv = document.createElement('div');
+
+					// Add index as a text to the element
+					var textSpan = document.createElement('span');
 					
-					textElement.setAttribute('style', 'text-align : center;');
+					textSpan.innerHTML = title;
+
+					textDiv.append(textSpan);
+
+					div.append(textDiv);
+
+					textDiv.setAttribute('style', 'text-align : center;');
 					
 					return div;
 				},
