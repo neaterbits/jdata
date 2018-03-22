@@ -43,6 +43,7 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 	// Store functions for later
 	this.makeProvisionalHTMLElement = makeProvisionalHTMLElement;
 	this.getImages = getImages;
+
 	this.makeImageHTMLElement = makeImageHTMLElement;
 	
 	var outerDiv = document.getElementById(divId);
@@ -145,9 +146,23 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 			var viewYPos = - (clientRects.top - innerDiv.offsetTop);
 			
 			t._updateOnScroll(viewYPos);
+			
+			var curFirstY = t.firstY;
+			
+			setTimeout(function() { t._getImagesIfNotScrolled(curFirstY, t.firstY, t.firstIndex, t.lastIndex - t.firstIndex + 1); }, 100);
 		});
 
 		this.exit(level, 'computeAndRender');
+	}
+	
+	this._getImagesIfNotScrolled = function(timeoutStartY, curY, firstIndex, count) {
+		if (timeoutStartY == curY) {
+			// Not scrolled since timeout started, load images
+			console.log('Load images from ' + timeoutStartY);
+
+			// Now just load images
+			this.getImages(firstIndex, count);
+		}
 	}
 	
 	this._updateOnScroll = function(curY) {

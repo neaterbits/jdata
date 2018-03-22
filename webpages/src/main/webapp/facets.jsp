@@ -40,13 +40,12 @@
 		var facetController = new FacetController(facetModel, facetView);
 		facetView.init(facetController);
 		
-		var gallery = initGallery();
-		
 		var searchView = new SearchView(
-					getServiceUrl(useTestData),
+					getSearchUrl(useTestData),
+					getThumbsUrl(useTestData),
 					facetModel,
 					facetController,
-					gallery);
+					'gallery');
 
 		searchView.refresh(true);
 		
@@ -62,48 +61,19 @@
 		}
 	}
 	
-	function initGallery() {
-		var gallery = new Gallery('gallery', 20, 20,
-				// Create element
-				function(index, title, thumbWidth, thumbHeight) {
-
-					var div = document.createElement('div');
-
-					var provisionalImage = document.createElement('div');
-
-					provisionalImage.style.width = thumbWidth;
-					provisionalImage.style.height = thumbHeight;
-
-					div.append(provisionalImage);
-					
-					var textDiv = document.createElement('div');
-
-					// Add index as a text to the element
-					var textSpan = document.createElement('span');
-					
-					textSpan.innerHTML = title;
-
-					textDiv.append(textSpan);
-
-					div.append(textDiv);
-
-					textDiv.setAttribute('style', 'text-align : center;');
-					
-					return div;
-				},
-				function (index) { 
-					// Return images for index
-				},
-				function (index, provisional, image) {
-					return provisional;
-				});
-
-		return gallery;
-	}
 	
-	
-	function getServiceUrl(testdata) {
+	function getSearchUrl(testdata) {
 		var url = "http://localhost:8080/search?test=true";
+
+		if (testdata) {
+			url += "&testdata=" + testdata;
+		}
+
+		return url;
+	}
+
+	function getThumbsUrl(testdata) {
+		var url = "http://localhost:8080/search/thumbnails?test=true";
 
 		if (testdata) {
 			url += "&testdata=" + testdata;
