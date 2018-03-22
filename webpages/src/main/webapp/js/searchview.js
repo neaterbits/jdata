@@ -348,22 +348,9 @@ function SearchView(
 				
 				// or in read byte after current number of bits
 				var freeSpace = 16 - buf.bufferedBits;
-
-				if (buf.buffer < 0) {
-					throw "Negative buf value";
-				}
-				
 				var r = b << (freeSpace - 8);
 
-				if (r < 0) {
-					throw "Negative r value";
-				}
-
 				buf.buffer |= r;
-				
-				if (buf.buffer < 0) {
-					throw "Negative buf value";
-				}
 				
 				// Now is 8 more
 				buf.bufferedBits += 8;
@@ -398,24 +385,15 @@ function SearchView(
 
 		// Can now encode from bits
 		var c = buf.buffer >> 10;
-		
-		if (c < 0) {
-			console.log('Negative value for 0x' + buf.buffer + '/' + hexNum(buf.buffer) + '/' + buf.bufferedBits);
-		}
-
 		// console.log('Encode 0x' + hexNum(c) + ' : ' + base64chars[c]);
 		
-		if (c >= 64) {
+		if (c < 0 || c >= 64) {
 			throw "char to be encoded out of range: " + c;
 		}
 
 		// Got 6 uppermost bits, so skip those
 		buf.buffer = (buf.buffer << 6) & 0x0000FFFF;
 		buf.bufferedBits -= 6;
-
-		if (buf.buffer < 0) {
-			throw "Negative buf value";
-		}
 
 		var s = base64chars[c];
 		
