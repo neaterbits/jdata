@@ -142,10 +142,8 @@ public class JettyRunServlet {
 
 			if (req.getPathInfo() != null && req.getPathInfo().contains("thumbnails")) {
 
-				final String userId = req.getParameter("userId");
-
 				// Retrieve thumbnails as a stream
-				final String [] itemIds = req.getParameterValues("itemIds");
+				final String [] itemIds = req.getParameterValues("itemId");
 				
 				final SearchService searchService = new SearchService();
 
