@@ -135,8 +135,13 @@ public class JettyRunServlet {
 
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			
+			if (isTest(req)) {
+				resp.setHeader("Access-Control-Allow-Origin", "*");
+			}
+
 			if (req.getPathInfo() != null && req.getPathInfo().contains("thumbnails")) {
-				
+
 				final String userId = req.getParameter("userId");
 
 				// Retrieve thumbnails as a stream
