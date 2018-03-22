@@ -949,6 +949,14 @@ public class LuceneItemIndex implements ItemIndex {
 	@Override
 	public ItemId[] expandToItemIdUserId(String[] itemIds) throws ItemIndexException {
 		
+		if (itemIds == null) {
+			throw new IllegalArgumentException("itemIds == null");
+		}
+
+		if (itemIds.length == 0) {
+			throw new IllegalArgumentException("No item IDs specified");
+		}
+
 		final Map<String, Integer> itemIdToIndex = new HashMap<>(itemIds.length);
 
 		for (int i = 0; i < itemIds.length; ++ i) {
@@ -961,6 +969,10 @@ public class LuceneItemIndex implements ItemIndex {
 		final BooleanQuery.Builder booleanQuery = new BooleanQuery.Builder();
 
 		for (String value : itemIds) {
+			if (value == null || value.trim().isEmpty()) {
+				throw new IllegalArgumentException("null or empty itemId");
+			}
+
 			booleanQuery.add(new TermQuery(new Term("id", value)), Occur.SHOULD);
 		}
 
