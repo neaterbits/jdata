@@ -972,7 +972,7 @@ public class LuceneItemIndex implements ItemIndex {
 			if (value == null || value.trim().isEmpty()) {
 				throw new IllegalArgumentException("null or empty itemId");
 			}
-
+			
 			booleanQuery.add(new TermQuery(new Term("id", value)), Occur.SHOULD);
 		}
 
@@ -982,6 +982,10 @@ public class LuceneItemIndex implements ItemIndex {
 			topDocs = new IndexSearcher(refreshReader()).search(query, itemIds.length);
 		} catch (IOException ex) {
 			throw new ItemIndexException("Failed to search for items", ex);
+		}
+		
+		if (topDocs.totalHits != itemIds.length) {
+			throw new IllegalStateException("Mismatch in found and input of item IDs: " + topDocs.totalHits + " / " + itemIds.length);
 		}
 		
 		for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
@@ -997,6 +1001,12 @@ public class LuceneItemIndex implements ItemIndex {
 				
 			} catch (IOException ex) {
 				throw new ItemIndexException("Failed to read doc", ex);
+			}
+		}
+		
+		for (int i = 0; i < result.length; ++ i) {
+			if (result[i] == null) {
+				throw new IllegalStateException("Did not find use ID for all item IDs: " + i);
 			}
 		}
 		
