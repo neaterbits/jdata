@@ -154,7 +154,7 @@ function SearchView(
 			console.log('# adding at ' + (index + i));
 
 			if (i > 0) {
-				itemIds += ",";
+				itemIds += "&";
 			}
 			
 			itemIds += itemId;
