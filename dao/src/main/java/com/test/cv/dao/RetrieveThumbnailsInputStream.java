@@ -23,6 +23,11 @@ public abstract class RetrieveThumbnailsInputStream extends InputStream {
 			this.thumbnailSize = thumbnailSize;
 			this.thumbnail = thumbnail;
 		}
+
+		@Override
+		public String toString() {
+			return mimeType + "/" + thumbnailSize + "/" + String.format("%08x", System.identityHashCode(thumbnail));
+		}
 	}
 
 	enum State {
