@@ -9,7 +9,17 @@ import com.test.cv.model.annotations.FacetEntity;
 import com.test.cv.model.annotations.IntegerRange;
 
 @Entity(name="car")
-@FacetEntity("Cars")
+@FacetEntity(value="Cars", propertyOrder = {
+	"carType",
+	"size",
+	"fuel",
+	"transmission",
+	"cylinders",
+	"drive",
+	"titleStatus",
+	"odometer",
+	"paintColor"
+	})
 @XmlRootElement
 public class Car extends Vehicle {
 	
