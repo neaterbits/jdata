@@ -14,9 +14,10 @@ public class SearchItemResult {
 	}
 
 	public SearchItemResult(String id, String title, Integer thumbWidth, Integer thumbHeight) {
-		super();
 		this.id = id;
 		this.title = title;
+		this.thumbWidth = thumbWidth;
+		this.thumbHeight = thumbHeight;
 	}
 
 	public String getId() {
