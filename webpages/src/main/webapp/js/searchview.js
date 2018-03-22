@@ -160,13 +160,19 @@ function SearchView(
 		var div = document.createElement('div');
 
 		var image = document.createElement('img');
+		
 
 		/*
 		provisionalImage.style.width = thumbWidth;
 		provisionalImage.style.height = thumbHeight;
 		*/
-		
-		image.src = imageData;
+
+		var url = URL.createObjectURL(imageData);
+		image.src = url; // imageData;
+
+		image.onload = function() {
+			URL.revokeObjectURL(url);
+		}
 
 		div.append(image);
 		
@@ -256,15 +262,17 @@ function SearchView(
 				if (thumbSize > 0) {
 					
 					//var buf = response.slice(offset, offset + thumbSize);
-					
-					var src = "";
-					
+
+					/*
 					var base64 = base64_encode(dataView, offset, thumbSize);
 					
-					console.log('## base 64: ' + base64.length + " from " + offset + ", size " + thumbSize + ' : ' + base64);
+					console.log('## base 64: ' + base64.length + " from " + offset + ", size " + thumbSize + ' :\n' + base64);
 					
 					// Render thumb in view, create the 'data:' part of <img>
 					var data = 'data:' + mimeType + ';base64,' + base64;
+					*/
+					
+					var data = new Blob([new Uint8Array(response, offset, thumbSize)]);
 					
 					images.push(data);
 				}
