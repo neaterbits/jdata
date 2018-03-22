@@ -139,6 +139,8 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 		var outerDiv = this._getOuterElement();
 		
 		var t = this;
+		
+		
 		// Add scroll listener
 		this._getOuterElement().addEventListener('scroll', function(e) {
 			// figure out how far we have scrolled into the div
@@ -149,7 +151,17 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 			
 			var curFirstY = t.firstY;
 			
-			setTimeout(function() { t._getImagesIfNotScrolled(curFirstY, t.firstY, t.firstIndex, t.lastIndex - t.firstIndex + 1); }, 100);
+			if (!t.scrollTimeoutSet) { // avoid having multiple timeouts
+			
+				t.scrollTimeoutSet = true;
+				
+				setTimeout(function() {
+						t._getImagesIfNotScrolled(curFirstY, t.firstY, t.firstIndex, t.lastIndex - t.firstIndex + 1);
+						t.scrollTimeoutSet = false;
+					},
+					100);
+			}
+			
 		});
 
 		this.exit(level, 'computeAndRender');

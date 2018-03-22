@@ -153,17 +153,90 @@ function SearchView(
 
 			console.log('# adding at ' + (index + i));
 
-			if (i > 0) {
-				itemIds += "&";
-			}
-			
+			itemIds += "&itemId=";
 			itemIds += itemId;
 		}
 
-		var url = this.thumbsUrl + "&itemIds=" + itemIds;
+		var url = this.thumbsUrl + itemIds;
 
-		this._sendAjax(url, 'GET', 'blob', function(response) {
-			console.log('## Got images response: ' + response.size);
+		function _hexDigit(x) {
+			var s;
+			
+			if (x < 10) {
+				s = "" + x;
+			}
+			else if (x > 15) {
+				throw "Digit out of range: " + x;
+			}
+			else {
+				s = String.fromCharCode(65 + (x - 9));
+			}
+			
+			return s;
+		}
+		
+		function hexdump(buffer, start, count) {
+
+			var s = "";
+			var hexView = new DataView(response);
+
+			console.log('Hex dump:');
+			var lineStart = 0;
+			for (var i = 0; i < 200; ++ i) {
+				
+				var b = hexView.getInt8(i);
+
+				var digit1 = _hexDigit(b >> 4);
+				var digit2 = _hexDigit(b & 0x0000000F);
+
+				s += digit1;
+				s += digit2;
+				
+				if (s.length >= 32) {
+					console.log("" + i + "/" + lineStart + ": " + s);
+					s = "";
+					lineStart = i;
+				}
+			}
+		}
+		
+		this._sendAjax(url, 'GET', 'arraybuffer', function(response) {
+
+			console.log('## Got images response: ' + response.byteLength);
+
+			var dataView = new DataView(response);
+			var offset = 0;
+
+			for (;;) {
+				var thumbSize = dataView.getInt32(offset);
+				
+				offset += 4;
+				
+				var mimeType = "";
+				// read content type as 0-terminated string
+				for (;;) {
+					var int8 = dataView.getInt8(offset ++);
+					if (int8 == 0) {
+						break;
+					}
+					else {
+						mimeType += String.fromCharCode(int8);
+					}
+				}
+
+				console.log('## ' + offset + ': got thumb of size ' + thumbSize + " with mime type '" + mimeType + "'");
+				
+				offset += thumbSize;
+				
+				if (thumbSize > 0) {
+					// Render thumb in view
+				}
+				
+				if (offset >= response.byteLength) {
+					break;
+				}
+			}
+			
 		});
 	}
 
