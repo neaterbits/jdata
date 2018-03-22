@@ -11,13 +11,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 import com.test.cv.common.IOUtil;
-import com.test.cv.common.ItemId;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
 import com.test.cv.dao.ItemStorageException;
@@ -156,7 +156,11 @@ public class SearchService extends BaseService {
 			for (int i = 0; i < numFound; ++ i) {
 				final SearchItem foundItem = found.get(i);
 				
-				items[i] = new SearchItemResult(foundItem.getItemId(), foundItem.getTitle(), foundItem.getThumbWidth(), foundItem.getThumbHeight());
+				items[i] = new SearchItemResult(
+						foundItem.getItemId(),
+						foundItem.getTitle(),
+						foundItem.getThumbWidth() != null ? foundItem.getThumbWidth() : THUMBNAIL_MAX_SIZE,
+						foundItem.getThumbHeight() != null ? foundItem.getThumbHeight() : THUMBNAIL_MAX_SIZE);
 			}
 			
 			result.setItems(items);
@@ -449,6 +453,15 @@ public class SearchService extends BaseService {
 	@Path("/thumbnails")
 	// Get item thumbnails as one big compressed JPEG? Or as a stream of JPEGs?
 	public byte [] getThumbnails(String [] itemIds, HttpServletRequest request) {
+
+		// Compact item IDs
+		final List<String> filtered = Arrays.stream(itemIds)
+			.filter(id -> id != null)
+			.map(id -> id.trim())
+			.filter(id -> !id.isEmpty())
+			.collect(Collectors.toList());
+		
+		itemIds = filtered.toArray(new String[filtered.size()]);
 
 		// Return thumbnails as concatenated JPEGs
 		InputStream inputStream = null;

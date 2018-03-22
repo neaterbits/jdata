@@ -52,7 +52,7 @@ public class ItemService extends BaseService {
 		final BufferedImage image = ImageIO.read(photoInputStream2);
 
 		// Scale image, keeping aspect ratio
-		final int bb = 240;
+		final int bb = THUMBNAIL_MAX_SIZE;
 		
 		final int thumbWidth;
 		final int thumbHeight;

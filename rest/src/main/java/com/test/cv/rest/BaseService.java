@@ -17,6 +17,9 @@ import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.local.LocalXmlStorage;
 
 public abstract class BaseService {
+	
+	protected static final int THUMBNAIL_MAX_SIZE = 240;
+	
 	enum Storage {
 		JPA_RELATIONAL, // standard relational database
 		AMAZON_S3_ES, // S3 and ElasticSearch in AWS
