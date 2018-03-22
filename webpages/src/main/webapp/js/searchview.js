@@ -26,6 +26,8 @@ function SearchView(
 		// Post to get initial for all known
 		this._postAjax(this.serviceUrl, function(response) {
 			t._updateFacets(response.facets, onsuccess);
+
+			t._refreshGallery(response.items);
 		});
 	}
 
@@ -40,6 +42,8 @@ function SearchView(
 		// Call REST service with criteria
 		this._postAjax(serviceURL, 'POST', criteria, function(response) {
 			t._updateFacets(response.facets, onsuccess);
+
+			t._refreshGallery(response.items);
 		});
 	}
 
@@ -85,4 +89,34 @@ function SearchView(
 
 		request.send();
 	};
+	
+	this._refreshGallery = function(items) {
+
+		this.gallery.refresh(function (initial, eachItem, metaDataComplete) {
+			
+			
+			// Add a lot of items just to test scrolling when using many items
+			
+			console.log("Gallery: adding " + items.length + " items");
+
+			// Tell gallery about number of items before adding item metadata
+			initial(items.length);
+			
+			// Add all metadata, ie. title and dimensions
+			for (var i = 0; i < items.length; ++ i) {
+				var item = items[i];
+
+				console.log("Gallery: adding item " + i + " : " + print(item));
+
+				eachItem(item.title, item.thumbWidth, item.thumbHeight);
+			}
+
+			// Tell gallery that we have added all metadata and that it can perform the refresh
+			metaDataComplete();
+		});
+	}
+
+	function print(obj) {
+		return JSON.stringify(obj, null, 2);
+	}
 }

@@ -1,4 +1,4 @@
-<html>
+<html style='height: 100%'>
 <head>
 <link rel="stylesheet" type="text/css" href="css/facets.css">
 <script src="js/facetpath.js" type="text/javascript"></script>
@@ -6,12 +6,20 @@
 <script src="js/facetview.js" type="text/javascript"></script>
 <script src="js/facetmodel.js" type="text/javascript"></script>
 <script src="js/facetcontroller.js" type="text/javascript"></script>
+<script src="js/gallery.js" type="text/javascript"></script>
 <script src="js/searchview.js" type="text/javascript"></script>
 </head>
-<body>
+<body style='height: 100%'>
 <h2>Test</h2>
 <input id="use_test_data" type="checkbox" checked>Use test data<br/>
-<div id='facets'></div>
+<div style='width: 100%; height: 90%'>
+	<div id='facets' style='display: inline-block; width: 30%; height: 100%; margin: 0; padding: 0; box-sizing: border-box; overflow: scroll'></div>
+	
+	<!-- TODO not set wrapper? Create wrapper in gallery so not setting style on gallery -->
+	<div style='display: inline-block; width: 65%; height: 100%; margin: 0; padding: 0; box-sizing: border-box;'>
+		<div id='gallery'></div>
+	</div>
+</div>
 </body>
 <script type="text/javascript">
 	window.onload = function() {
@@ -27,16 +35,19 @@
 		var viewElements = new FacetViewElements();
 		
 		// View related logic
-		var view = new FacetView('facets', viewElements);
+		var facetView = new FacetView('facets', viewElements);
 		
-		var controller = new FacetController(facetModel, view);
-		view.init(controller);
+		var facetController = new FacetController(facetModel, facetView);
+		facetView.init(facetController);
+		
+		var gallery = initGallery();
 		
 		var searchView = new SearchView(
 					getServiceUrl(useTestData),
 					facetModel,
-					controller);
-		
+					facetController,
+					gallery);
+
 		searchView.refresh(true);
 		
 		document.getElementById("use_test_data").onchange = function(e) {
@@ -50,6 +61,34 @@
 			return false;
 		}
 	}
+	
+	function initGallery() {
+		var gallery = new Gallery('gallery', 20, 20,
+				// Create element
+				function(index) {
+					var div = document.createElement('div');
+					
+					// Add index as a text to the element
+					var textElement = document.createElement('span');
+
+					textElement.innerHTML = "" + index;
+					
+					div.append(textElement);
+					
+					textElement.setAttribute('style', 'text-align : center;');
+					
+					return div;
+				},
+				function (index) { 
+					// Return images for index
+				},
+				function (index, provisional, image) {
+					return provisional;
+				});
+
+		return gallery;
+	}
+	
 	
 	function getServiceUrl(testdata) {
 		var url = "http://localhost:8080/search?test=true";
