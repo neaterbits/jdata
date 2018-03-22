@@ -10,8 +10,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,12 +40,14 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.LeafCollector;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
+import com.test.cv.common.ItemId;
 import com.test.cv.index.IndexSearchCursor;
 import com.test.cv.index.IndexSearchItem;
 import com.test.cv.index.ItemIndex;
@@ -105,7 +109,7 @@ public class LuceneItemIndex implements ItemIndex {
 	}
 
 	@Override
-	public void indexItemAttributes(Class<? extends Item> itemType, String typeName, List<ItemAttributeValue<?>> attributeValues) throws ItemIndexException {
+	public void indexItemAttributes(String userId, Class<? extends Item> itemType, String typeName, List<ItemAttributeValue<?>> attributeValues) throws ItemIndexException {
 		final Document document = new Document();
 
 		// Must have ID
@@ -191,7 +195,9 @@ public class LuceneItemIndex implements ItemIndex {
 				document.add(storedField);
 			}
 		}
-		
+
+		document.add(new StringField("userId", userId, Field.Store.YES));
+
 		if (!idFound) {
 			throw new IllegalArgumentException("No ID attribute supplied");
 		}
@@ -937,6 +943,52 @@ public class LuceneItemIndex implements ItemIndex {
 		public boolean needsScores() {
 			return false;
 		}
+	}
+	
+	
+	@Override
+	public ItemId[] expandToItemIdUserId(String[] itemIds) throws ItemIndexException {
+		
+		final Map<String, Integer> itemIdToIndex = new HashMap<>(itemIds.length);
+
+		for (int i = 0; i < itemIds.length; ++ i) {
+			itemIdToIndex.put(itemIds[i], i);
+		}
+		
+		final ItemId[] result = new ItemId[itemIds.length];
+		
+		// Query all documents for item IDs
+		final BooleanQuery.Builder booleanQuery = new BooleanQuery.Builder();
+
+		for (String value : itemIds) {
+			booleanQuery.add(new TermQuery(new Term("id", value)), Occur.SHOULD);
+		}
+
+		final Query query = booleanQuery.build();
+		final TopDocs topDocs;
+		try {
+			topDocs = new IndexSearcher(refreshReader()).search(query, itemIds.length);
+		} catch (IOException ex) {
+			throw new ItemIndexException("Failed to search for items", ex);
+		}
+		
+		for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
+			try {
+				final Document doc = reader.document(scoreDoc.doc);
+				
+				final String id = doc.getField("id").stringValue();
+				final String userId = doc.getField("userId").stringValue();
+				
+				final int index = itemIdToIndex.get(id);
+				
+				result[index] = new ItemId(userId, id);
+				
+			} catch (IOException ex) {
+				throw new ItemIndexException("Failed to read doc", ex);
+			}
+		}
+		
+		return result;
 	}
 
 	@Override

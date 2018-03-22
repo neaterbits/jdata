@@ -13,6 +13,14 @@ public class ItemId {
 	}
 
 	public ItemId(String userId, String itemId) {
+		if (userId == null) {
+			throw new IllegalArgumentException("userId == null");
+		}
+		
+		if (itemId == null) {
+			throw new IllegalArgumentException("itemId == null");
+		}
+		
 		this.userId = userId;
 		this.itemId = itemId;
 	}

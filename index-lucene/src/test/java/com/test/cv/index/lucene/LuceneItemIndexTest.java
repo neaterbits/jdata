@@ -35,6 +35,8 @@ public class LuceneItemIndexTest extends TestCase {
 
 	public void testAddAndSearch() throws Exception {
 
+		final String userId = "user123";
+		
 		try (LuceneItemIndex index = new LuceneItemIndex(new RAMDirectory())) {
 		
 			final ClassAttributes attributes = ClassAttributes.getFromClass(Snowboard.class);
@@ -49,7 +51,7 @@ public class LuceneItemIndexTest extends TestCase {
 			final IntegerAttributeValue yearAttrbuteValue = new IntegerAttributeValue(yearAttribute, 2015);
 			final DecimalAttributeValue widthAttributeValue = new DecimalAttributeValue(widthAttribute, new BigDecimal("32.5"));
 	
-			index.indexItemAttributes(Snowboard.class, ItemTypes.getTypeName(Snowboard.class), Arrays.asList(idAttributeValue, makeAttributeValue, yearAttrbuteValue, widthAttributeValue));
+			index.indexItemAttributes(userId, Snowboard.class, ItemTypes.getTypeName(Snowboard.class), Arrays.asList(idAttributeValue, makeAttributeValue, yearAttrbuteValue, widthAttributeValue));
 
 			IndexSearchCursor cursor = search(index, new StringCriterium(makeAttribute, "Burton", ComparisonOperator.EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
@@ -156,6 +158,9 @@ public class LuceneItemIndexTest extends TestCase {
 	}
 	
 	public void testThumbnail() throws IOException, Exception {
+
+		final String userId = "user123";
+
 		try (LuceneItemIndex index = new LuceneItemIndex(new RAMDirectory())) {
 			
 			final ClassAttributes attributes = ClassAttributes.getFromClass(Snowboard.class);
@@ -168,7 +173,7 @@ public class LuceneItemIndexTest extends TestCase {
 			final StringAttributeValue idAttributeValue = new StringAttributeValue(idAttribute, itemId);
 			final StringAttributeValue makeAttributeValue = new StringAttributeValue(makeAttribute, "Burton");
 	
-			index.indexItemAttributes(Snowboard.class, ItemTypes.getTypeName(Snowboard.class), Arrays.asList(idAttributeValue, makeAttributeValue));
+			index.indexItemAttributes(userId, Snowboard.class, ItemTypes.getTypeName(Snowboard.class), Arrays.asList(idAttributeValue, makeAttributeValue));
 			
 			index.indexThumbnailSize(itemId, 0, 320, 240);
 			index.indexThumbnailSize(itemId, 1, 300, 250);

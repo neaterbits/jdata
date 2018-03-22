@@ -132,6 +132,25 @@ public class JettyRunServlet {
 
 			resp.setStatus(200);
 		}
+
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			if (req.getPathInfo() != null && req.getPathInfo().contains("thumbnails")) {
+				
+				final String userId = req.getParameter("userId");
+
+				// Retrieve thumbnails as a stream
+				final String [] itemIds = req.getParameterValues("itemIds");
+				
+				final SearchService searchService = new SearchService();
+
+				final byte [] data = searchService.getThumbnails(itemIds, req);
+				
+				resp.getOutputStream().write(data);
+				
+				resp.getOutputStream().close();
+			}
+		}
 	}
 	
 	public static class ItemServlet extends HttpServlet {

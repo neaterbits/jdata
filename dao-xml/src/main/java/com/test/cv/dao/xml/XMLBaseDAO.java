@@ -63,7 +63,7 @@ abstract class XMLBaseDAO {
 		
 		// TODO index on an async-queue with retries
 		try {
-			index.indexItemAttributes(itemType, ItemTypes.getTypeName(itemType), attributeValues);
+			index.indexItemAttributes(userId, itemType, ItemTypes.getTypeName(itemType), attributeValues);
 		} catch (ItemIndexException ex) {
 			try {
 				xmlStorage.deleteAllItemFiles(userId, itemId);

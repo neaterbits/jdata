@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.List;
 
-import com.test.cv.common.ItemId;
 import com.test.cv.dao.IFoundItem;
 import com.test.cv.dao.IFoundItemPhotoThumbnail;
 import com.test.cv.dao.IItemDAO;
@@ -261,10 +260,10 @@ public abstract class ItemDAOTest extends TestCase {
 			 
 			 addPhotoAndThumbnail(itemDAO, user2Id, itemId3, "thumbnail3_1".getBytes(), "photo3_1".getBytes());
 
-			 final ItemId [] itemIds = new ItemId [] {
-				new ItemId(user1Id, itemId1),
-				new ItemId(user2Id, itemId2),
-				new ItemId(user2Id, itemId3)
+			 final String [] itemIds = new String[] {
+				itemId1,
+				itemId2,
+				itemId3
 			 };
 			 
 			 final InputStream thumbnailStream = itemDAO.retrieveAndConcatenateThumbnails(itemIds);

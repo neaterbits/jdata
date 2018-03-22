@@ -445,22 +445,17 @@ public class SearchService extends BaseService {
 		return baos.toByteArray();
 	}
 		
-	
+
+	@Path("/thumbnails")
 	// Get item thumbnails as one big compressed JPEG? Or as a stream of JPEGs?
-	public byte [] getThumbnails(String userId, String [] itemIds, HttpServletRequest request) {
-
-		final ItemId [] array = new ItemId[itemIds.length];
-
-		for (int i = 0; i < itemIds.length; ++i) {
-			array[i] = new ItemId(userId, itemIds[i]);
-		}
+	public byte [] getThumbnails(String [] itemIds, HttpServletRequest request) {
 
 		// Return thumbnails as concatenated JPEGs
 		InputStream inputStream = null;
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream(50000);
 
 		try {
-			inputStream = getItemDAO(request).retrieveAndConcatenateThumbnails(array);
+			inputStream = getItemDAO(request).retrieveAndConcatenateThumbnails(itemIds);
 
 			IOUtil.copyStreams(inputStream, baos);
 		} catch (ItemStorageException ex) {

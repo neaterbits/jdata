@@ -3,6 +3,7 @@ package com.test.cv.index;
 import java.util.List;
 import java.util.Set;
 
+import com.test.cv.common.ItemId;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.ItemAttributeValue;
@@ -19,7 +20,7 @@ public interface ItemIndex extends AutoCloseable {
 	 * @param attributeValues values to index
 	 */
 	
-	void indexItemAttributes(Class<? extends Item> itemType, String typeName, List<ItemAttributeValue<?>> attributeValues) throws ItemIndexException;
+	void indexItemAttributes(String userId, Class<? extends Item> itemType, String typeName, List<ItemAttributeValue<?>> attributeValues) throws ItemIndexException;
 	
 	/**
 	 * @param itemId item ID
@@ -32,6 +33,8 @@ public interface ItemIndex extends AutoCloseable {
 	void deletePhotoAndThumbnailForItem(String itemId, int photoNo) throws ItemIndexException;
 
 	void movePhotoAndThumbnailForItem(String itemId, int photoNo, int toIndex) throws ItemIndexException;
+
+	ItemId [] expandToItemIdUserId(String [] itemIds) throws ItemIndexException;
 
 	/**
 	 * Search for values in an index based on types

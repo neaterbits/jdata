@@ -74,7 +74,7 @@ public interface IItemDAO extends AutoCloseable {
 	 * @return stream of concatenated thumbnails
 	 */
 	
-	InputStream retrieveAndConcatenateThumbnails(ItemId [] itemIds) throws ItemStorageException;
+	InputStream retrieveAndConcatenateThumbnails(String [] itemIds) throws ItemStorageException;
 
 	// Mostly for test verification that thumbnails and photos are deleted
 	int getNumThumbnails(String userId, String itemId) throws ItemStorageException;

@@ -436,7 +436,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 		}
 	}
 	@Override
-	public InputStream retrieveAndConcatenateThumbnails(ItemId[] itemIds) {
+	public InputStream retrieveAndConcatenateThumbnails(String[] itemIds) {
 		
 		// Query the first thumbnail of every item, using left outer join
 		/*
@@ -452,7 +452,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 				+ "  and ipt.index = 0";
 		
 		final List<Long> ids = Arrays.stream(itemIds)
-				.map(itemId -> Long.parseLong(itemId.getItemId()))
+				.map(itemId -> Long.parseLong(itemId))
 				.collect(Collectors.toList());
 		
 		@SuppressWarnings("unchecked")
@@ -464,7 +464,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 		final Map<String, Integer> map = new HashMap<>(itemIds.length);
 
 		for (int i = 0; i < itemIds.length; ++ i) {
-			map.put(itemIds[i].getItemId(), i);
+			map.put(itemIds[i], i);
 		}
 		
 		final List<JPAThumbnail> thumbnails = rows.stream()
@@ -476,7 +476,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 		
 		for (int i = 0; i < itemIds.length; ++ i) {
 			// Set to empty thumbnail by default
-			sorted.add(new JPAThumbnail("", 0, null, itemIds[i].getItemId()));
+			sorted.add(new JPAThumbnail("", 0, null, itemIds[i]));
 		}
 		
 		for (JPAThumbnail thumbnail : thumbnails) {

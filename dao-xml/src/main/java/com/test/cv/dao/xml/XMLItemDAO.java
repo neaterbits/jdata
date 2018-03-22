@@ -327,9 +327,17 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	}
 	
 	@Override
-	public InputStream retrieveAndConcatenateThumbnails(ItemId[] itemIds) throws ItemStorageException {
+	public InputStream retrieveAndConcatenateThumbnails(String[] itemIdStrings) throws ItemStorageException {
 		
-		// Retrieve thumbnails across user IDs from storage. Pass in all since might retreieve in parallell
+		// Search in index to get convert to userId/itemId mapping
+		final ItemId[] itemIds;
+		try {
+			itemIds = index.expandToItemIdUserId(itemIdStrings);
+		} catch (ItemIndexException ex) {
+			throw new ItemStorageException("Failed to expand item IDs from index", ex);
+		}
+		
+		// Retrieve thumbnails across user IDs from storage. Pass in all since might retrieve in parallell
 		final Map<String, Integer> map = makeItemIdToIndexMap(itemIds);
 		
 		final List<Thumbnail> sorted = new ArrayList<>(itemIds.length);
@@ -341,6 +349,14 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		
 		try {
 			xmlStorage.retrieveThumbnails(itemIds, (imageResult, itemId) -> {
+				if (itemId == null) {
+					throw new IllegalArgumentException("itemId == null");
+				}
+
+				if (!map.containsKey(itemId.getItemId())) {
+					throw new IllegalStateException("No item id " + itemId.getItemId() + " in " + map);
+				}
+				
 				final int index = map.get(itemId.getItemId());
 				
 				sorted.set(index, new Thumbnail(imageResult.mimeType, imageResult.imageSize, imageResult.inputStream));
