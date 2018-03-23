@@ -144,7 +144,7 @@ function SearchView(
 		);
 	}
 
-	function _makeGalleryProvisionalItem(index, data, thumbWidth, thumbHeight) {
+	function _makeGalleryProvisionalItem(index, data) {
 		var div = document.createElement('div');
 
 		var provisionalImage = document.createElement('div');

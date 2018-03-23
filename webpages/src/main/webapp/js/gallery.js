@@ -602,7 +602,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 			// Add row items to the row
 			var rowHeight = this._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRows, rowWidth,
 					function (index, provisionalData, itemWidth, itemHeight) {
-						return t.galleryView.makeProvisionalHTMLElement(index, provisionalData, itemWidth, itemHeight);
+						return t.galleryView.makeProvisionalHTMLElement(index, provisionalData);
 					},
 					function (element, indexInRow) {
 						rowDiv.append(element);
