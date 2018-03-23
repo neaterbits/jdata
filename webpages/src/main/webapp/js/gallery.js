@@ -287,6 +287,20 @@ function Gallery(divId, config, galleryModel, galleryView) {
 	
 	this._getImagesIfNotScrolled = function(level, timeoutStartY, curY, firstIndex, count) {
 		
+		function getRowItemDivs(rowDiv) {
+			var itemsThisRow = rowDiv.childNodes.length;
+			
+			// Store new elements in array and then replace all at once
+			var rowWidthHeights = [];
+			for (var j = 0; j < itemsThisRow; ++ j) {
+				var itemElement = rowDiv.childNodes[j];
+
+				rowWidthHeights.push({ width : itemElement.clientWidth})
+			}
+			
+			return rowWidthHeights;
+		}
+		
 		this.enter(level, '_getImagesIfNotScrolled', [ 'timeoutStartY', timeoutStartY, 'curY', curY, 'firstIndex', firstIndex, 'count', count]);
 
 		if (timeoutStartY == curY) {
@@ -310,7 +324,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 					var itemsThisRow = rowDiv.childNodes.length;
 					
 					// Store new elements in array and then replace all at once
-					//var newRowItems = [];
+					var rowWidthHeights = getRowItemDivs(rowDiv);
 					
 					t._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
 							function (index, provisionalData, itemWidth, itemHeight) {
@@ -337,21 +351,17 @@ function Gallery(divId, config, galleryModel, galleryView) {
 							});
 					
 					i += itemsThisRow;
-			/*
-					for (var c = 0; c < itemsThisRow && i < count; ++ c) {
-						
-						var rowItem = rowDiv.childNodes[c];
-						
-						if (typeof rowItem === 'undefined' || rowItem == null) {
-							throw "No row item";
-						}
 
-						// Replace element
-						rowDiv.replaceChild(newRowItems[c], rowItem)
-						
-						++ i;
+					var updatedRowWidthHeights = getRowItemDivs(rowDiv);
+
+					for (var j = 0; j < itemsThisRow; ++ j) {
+						var prevDim = rowWidthHeights[j];
+						var curDim  = updatedRowWidthHeights[j];
+
+						if (prevDim.width !== curDim.width || prevDim.height !== curDim.height) {
+							throw "Gallery item dimensions changed between provisional and updated";
+						}
 					}
-				*/
 				}
 			});
 		}
