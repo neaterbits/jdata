@@ -33,7 +33,6 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 	this.columnSpacing = columnSpacing;
 	this.rowSpacing = rowSpacing;
 	this.width = 800;
-	this.visibleHeight = 300;
 
 	this.rowDivs = new Array();
 
@@ -93,6 +92,10 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 
 		this.exit(level, 'refresh');
 	};
+	
+	this.getVisibleHeight = function() {
+		return this._getInnerElement().clientHeight;
+	};
 
 	this._computeAndRender = function (level) {
 		
@@ -114,12 +117,19 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 		
 		// Must set element height
 		// TODO use jQuery?
-		this._getOuterElement().setAttribute('style',
-				'width: ' + this.width + '; height: ' + this.visibleHeight + '; overflow : auto; background-color : blue;');
+		var outerDiv = this._getOuterElement();
+		var innerDiv = this._getInnerElement();
 
-		// TODO use jQuery?
-		this._getInnerElement().setAttribute('style',
-				'width: ' + this.width + '; height: ' + this.height + '; display : block;');
+		outerDiv.style.width = this.width;
+		outerDiv.style.height = '100%';
+		outerDiv.style.overflow = 'auto';
+		outerDiv.style['background-color'] = 'blue';
+		
+		innerDiv.style.width = this.width;
+		innerDiv.style.height = '100%';
+		innerDiv.style.display = 'block';
+		
+		var t = this;
 
 		// We can now render within the visible area by adding divs and displaying them as we scroll
 		// at a relative position to the display area
@@ -133,13 +143,7 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 		// Set the offset of each element to that, but what about sizes? Once we scroll an element out, we must add a new one
 		
 		// Start at the current ones
-		this._addDivs(level + 1, 0, 0, itemsPerRow, this.visibleHeight);
-		
-		var innerDiv = this._getInnerElement();
-		var outerDiv = this._getOuterElement();
-		
-		var t = this;
-		
+		this._addDivs(level + 1, 0, 0, itemsPerRow, this.getVisibleHeight());
 		
 		// Add scroll listener
 		this._getOuterElement().addEventListener('scroll', function(e) {
@@ -244,7 +248,7 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 		
 		this.enter(level, 'updateOnScroll', ['curY', curY], [ 'firstY',  this.firstY,  'lastY', this.lastY ]);
 
-		if (curY + this.visibleHeight < this.firstY) {
+		if (curY + this.getVisibleHeight() < this.firstY) {
 			this.log(level, 'Scrolled to view completely above previous');
 
 			// We are scrolling upwards totally out of current area
@@ -261,14 +265,14 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 		}
 		else if (curY > this.lastY) {
 			// We are scrolling downwards totally out of visible area, just add items for the pos in question
-			this.log(level, 'Scrolled to completely below previous curY ' + curY + ' visibleHeight ' + this.visibleHeight + ' > lastY ' + this.lastY);
+			this.log(level, 'Scrolled to completely below previous curY ' + curY + ' visibleHeight ' + this.getVisibleHeight() + ' > lastY ' + this.lastY);
 
 			this._redrawCompletelyAt(level + 1, curY);
 		}
-		else if (this.lastY - curY < this.visibleHeight) {
+		else if (this.lastY - curY < this.getVisibleHeight()) {
 			// Scrolling down partly out of visible area
 			// First figure out how much visible space that must be added
-			var heightToAdd = this.visibleHeight - (this.lastY - curY);
+			var heightToAdd = this.getVisibleHeight() - (this.lastY - curY);
 
 			this.log(level, 'Scrolled to view partly below previous, must add ' + heightToAdd);
 
@@ -311,7 +315,7 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 		this.firstIndex = elem.firstItemIndex;
 		this.firstY = curY;
 
-		this._addDivs(level + 1, elem.firstItemIndex, elem.firstRowYPos, this.itemsPerRow, this.visibleHeight);
+		this._addDivs(level + 1, elem.firstItemIndex, elem.firstRowYPos, this.itemsPerRow, this.getVisibleHeight());
 		
 		this.exit(level, 'redrawCompletelyAt');
 	};
