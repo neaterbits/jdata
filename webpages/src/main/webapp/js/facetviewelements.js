@@ -112,8 +112,10 @@ function FacetViewElements() {
 	// Nested within type container
 	this.createTypeList = function(parentElement, isRoot) {
 		var ul = document.createElement('ul');
-		
+
 		if (isRoot) {
+			ul.style.margin = '0px';
+
 			// append straight under root
 			append(parentElement, ul);
 		}
