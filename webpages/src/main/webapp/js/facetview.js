@@ -253,8 +253,8 @@ function FacetView(divId, facetViewElements) {
 			}
 			
 			var criteria = t.collectCriteriaAndTypesFromSelections();
+
 			
-			console.log('search criteria changed:\n' + print(criteria));
 		};
 
 		viewElementFactory.setCheckboxOnClick(attributeValue.checkboxItem, onCheckboxClicked);
@@ -687,15 +687,11 @@ function FacetView(divId, facetViewElements) {
 			exitCode = iter;
 		}
 
-		console.log('_iterateIfDefinedAndNonNull return: ' + exitCode);
-
 		return exitCode;
 	}
 
 	FacetsElementBase.prototype.iterate = function(each) {
 		this._iterateSub(function(className, obj, parent) {
-
-			console.log('Class name: ' + className);
 
 			each(className, obj);
 			
