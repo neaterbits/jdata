@@ -159,7 +159,7 @@ function SearchView(
 		// Add index as a text to the element
 		var textSpan = document.createElement('span');
 		
-		textSpan.innerHTML = 'asjdhf ijshfjhs fkhas fjkh sdkfhjas kfh klsfls fjlkjsfl jasfkljs lfkjskl aaabbbccc';
+		textSpan.innerHTML = data.title;
 
 		// Don't make text wider that thumb
 		textDiv.style.width = data.thumbWidth;
