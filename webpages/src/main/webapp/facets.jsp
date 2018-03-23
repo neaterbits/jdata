@@ -35,23 +35,11 @@
 		
 		document.getElementById("use_test_data").checked = useTestData;
 		
-		
-		var facetModel = new FacetModel();
-
-		// creates HTML elements
-		var viewElements = new FacetViewElements();
-		
-		// View related logic
-		var facetView = new FacetView('facets', viewElements);
-		
-		var facetController = new FacetController(facetModel, facetView);
-		facetView.init(facetController);
-		
+			
 		var searchView = new SearchView(
 					getSearchUrl(useTestData),
 					getThumbsUrl(useTestData),
-					facetModel,
-					facetController,
+					'facets',
 					'gallery');
 
 		searchView.refresh(true);

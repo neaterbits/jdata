@@ -9,9 +9,19 @@
 function SearchView(
 		searchUrl,
 		thumbsUrl,
-		facetModel,
-		facetController,
+		facetsDiv,
 		galleryDivId) {
+
+	var facetModel = new FacetModel();
+
+	// creates HTML elements
+	var viewElements = new FacetViewElements();
+	
+	// View related logic
+	var facetView = new FacetView(facetsDiv, viewElements);
+	
+	var facetController = new FacetController(facetModel, facetView);
+	facetView.init(facetController);
 
 	this.searchUrl = searchUrl;
 	this.thumbsUrl = thumbsUrl;
