@@ -33,6 +33,7 @@ import com.test.cv.search.criteria.Criterium;
 import com.test.cv.search.criteria.DecimalInCriterium;
 import com.test.cv.search.criteria.DecimalRange;
 import com.test.cv.search.criteria.DecimalRangesCriterium;
+import com.test.cv.search.criteria.EnumInCriterium;
 import com.test.cv.search.criteria.IntegerInCriterium;
 import com.test.cv.search.criteria.IntegerRange;
 import com.test.cv.search.criteria.IntegerRangesCriterium;
@@ -264,6 +265,11 @@ public class SearchService extends BaseService {
 			case DECIMAL:
 				criterium = new DecimalInCriterium(attribute, convertArray(searchCriterium.getValues(), length -> new BigDecimal[length], o -> (BigDecimal)o.getValue()));
 				break;
+				
+			case ENUM:
+				// Find enum-class from attribute
+				criterium = makeEnumCriterium(attribute, searchCriterium);
+				break;
 
 			default:
 				throw new UnsupportedOperationException("Unknown attribute type " + attribute.getAttributeType());
@@ -274,6 +280,13 @@ public class SearchService extends BaseService {
 		}
 
 		return criterium;
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static EnumInCriterium<?> makeEnumCriterium(ItemAttribute attribute, SearchCriterium searchCriterium) {
+		final Class enumClass = attribute.getAttributeValueClass();
+
+		return new EnumInCriterium<>(attribute, convertArray(searchCriterium.getValues(), length -> new Enum[length], o -> (Enum)Enum.valueOf(enumClass, (String)o.getValue())));
 	}
 	
 	private static <T, R> R [] convertArray(T [] input, Function<Integer, R []> createArray, Function<T, R> convert) {
@@ -326,7 +339,8 @@ public class SearchService extends BaseService {
 					
 					final SearchSingleValueFacet searchValue = new SearchSingleValueFacet();
 					
-					searchValue.setValue(indexValue.getDisplayValue());
+					searchValue.setValue(indexValue.getValue());
+					searchValue.setDisplayValue(indexValue.getDisplayValue());
 					searchValue.setMatchCount(indexValue.getMatchCount());
 					
 					if (indexValue.getSubFacets() != null) {

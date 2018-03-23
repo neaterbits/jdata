@@ -7,6 +7,9 @@ public class SearchSingleValueFacet {
 	
 	private Object value;
 	
+	// If what to display differs from value, null otherwise
+	private Object displayValue;
+	
 	// Number matching this attribute
 	private int matchCount;
 
@@ -35,6 +38,14 @@ public class SearchSingleValueFacet {
 
 	public void setValue(Object value) {
 		this.value = value;
+	}
+	
+	public Object getDisplayValue() {
+		return displayValue;
+	}
+
+	public void setDisplayValue(Object displayValue) {
+		this.displayValue = displayValue;
 	}
 
 	public int getMatchCount() {

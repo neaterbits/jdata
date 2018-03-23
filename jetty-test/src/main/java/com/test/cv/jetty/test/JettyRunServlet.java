@@ -21,7 +21,7 @@ import com.test.cv.model.Item;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.TypeInfo;
 import com.test.cv.rest.ItemService;
-import com.test.cv.rest.SearchCriteria;
+import com.test.cv.rest.SearchCriterium;
 import com.test.cv.rest.SearchResult;
 import com.test.cv.rest.SearchService;
 
@@ -69,6 +69,7 @@ public class JettyRunServlet {
 
 			if (isTest(req)) {
 				resp.setHeader("Access-Control-Allow-Origin", "*");
+				resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
 			}
 		}
 
@@ -85,7 +86,7 @@ public class JettyRunServlet {
 			// Get parameters
 			String freeText = null;
 			
-			String [] types = req.getParameterValues("types");
+			String [] types = req.getParameterValues("type");
 			
 			final String pageNoString = req.getParameter("pageNo");
 			final int pageNo = pageNoString == null ? 1 : Integer.parseInt(pageNoString);
@@ -94,7 +95,7 @@ public class JettyRunServlet {
 			final int itemsPerPage = itemsPerPageString == null ? Integer.MAX_VALUE : Integer.parseInt(itemsPerPageString);			
 			System.out.println("Types: " + Arrays.toString(types));
 			
-			final SearchCriteria searchCriteria;
+			final SearchCriterium [] searchCriteria;
 			
 			final ObjectMapper mapper = new ObjectMapper();
 			
@@ -107,7 +108,7 @@ public class JettyRunServlet {
 				
 				System.out.println("Got json \"" + json + "\"");
 				
-				searchCriteria = mapper.readValue(json, SearchCriteria.class);
+				searchCriteria = mapper.readValue(json, SearchCriterium[].class);
 			}
 			else {
 				searchCriteria = null;
@@ -118,7 +119,7 @@ public class JettyRunServlet {
 			final SearchResult result = searchService.search(
 					freeText,
 					types,
-					searchCriteria != null ? searchCriteria.getCriteria() : null,
+					searchCriteria,
 					pageNo,
 					itemsPerPage,
 					testdata,

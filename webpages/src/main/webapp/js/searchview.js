@@ -17,9 +17,18 @@ function SearchView(
 	// creates HTML elements
 	var viewElements = new FacetViewElements();
 	
-	// View related logic
-	var facetView = new FacetView(facetsDiv, viewElements);
+	var t = this;
 	
+	// View related logic
+	var facetView = new FacetView(facetsDiv, viewElements, function(criteria) {
+		console.log("Criteria updated: " + criteria);
+		t._refreshFromCriteria(criteria.types, criteria.criteria, function () {
+			console.log('refresh done');
+		});
+
+		console.log("called refresh");
+	});
+
 	var facetController = new FacetController(facetModel, facetView);
 	facetView.init(facetController);
 
@@ -74,8 +83,16 @@ function SearchView(
 		
 		var t = this;
 		
+		var url = this.searchUrl;
+		
+		for (var i = 0; i < types.length; ++ i) {
+			url += "&type=";
+			url += types[i];
+		}
+
 		// Call REST service with criteria
-		this._postAjax(serviceURL, 'POST', criteria, function(response) {
+		this._sendAjax(url, 'POST', 'json', 'application/json', JSON.stringify(criteria), function(response) {
+			
 			t._updateFacets(response.facets, onsuccess);
 
 			t._refreshGallery(response.items);
@@ -109,10 +126,10 @@ function SearchView(
 	}
 
 	this._postAjax = function(url, onsuccess) {
-		this._sendAjax(url, 'POST', 'json', onsuccess);
+		this._sendAjax(url, 'POST', 'json', null, null, onsuccess);
 	}
 	
-	this._sendAjax = function(url, method, responseType, onsuccess) {
+	this._sendAjax = function(url, method, responseType, requestContentType, requestContent, onsuccess) {
 		var request = new XMLHttpRequest();
 
 		if (responseType != null) {
@@ -128,7 +145,7 @@ function SearchView(
 
 		request.open(method, url, true);
 
-		request.send();
+		request.send(requestContent);
 	};
 	
 	
@@ -269,7 +286,7 @@ function SearchView(
 			}
 		}
 		
-		this._sendAjax(url, 'GET', 'arraybuffer', function(response) {
+		this._sendAjax(url, 'GET', 'arraybuffer', null, null, function(response) {
 
 			var dataView = new DataView(response);
 			var offset = 0;

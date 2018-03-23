@@ -4,7 +4,7 @@
  */
 
 
-function FacetView(divId, facetViewElements) {
+function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	var ITER_CONTINUE = 1; 	// Continue recursive iteration
 	var ITER_BREAK = 2; 	// Break out of iteration, also current level (eg for arrays, skip the rest of indices)
@@ -12,6 +12,7 @@ function FacetView(divId, facetViewElements) {
 	
 	this.divId = divId;
 	this.facetViewElements = facetViewElements;
+	this.onCriteriaChanged = onCriteriaChanged;
 	
 	this.init = function(controller) {
 		this.controller = controller;
@@ -185,10 +186,14 @@ function FacetView(divId, facetViewElements) {
 	this._addFacetSingleValue = function(viewElementFactory, cur, element, index) {
 		var hasSubAttributes = typeof element.subAttributes !== 'undefined';
 		
+		var displayValue = isNotNull(element.displayValue)
+			? element.displayValue
+			: element.value;
+		
 		// Attribute within a type in list of attributes
 		var attributeElement = viewElementFactory.createAttributeValueElement(
 				cur.getViewElement(),
-				element.value,
+				displayValue,
 				element.matchCount,
 				hasSubAttributes,
 				true);
@@ -198,6 +203,7 @@ function FacetView(divId, facetViewElements) {
 								cur.getModelType(),
 								cur.getAttributeId(),
 								element.value,
+								element.displayValue,
 								attributeElement.listItem,
 								attributeElement.checkboxItem);
 		
@@ -254,7 +260,7 @@ function FacetView(divId, facetViewElements) {
 			
 			var criteria = t.collectCriteriaAndTypesFromSelections();
 
-			
+			t.onCriteriaChanged(criteria);
 		};
 
 		viewElementFactory.setCheckboxOnClick(attributeValue.checkboxItem, onCheckboxClicked);
@@ -637,7 +643,7 @@ function FacetView(divId, facetViewElements) {
 
 	
 	function FacetsElementBase(className, viewElementFactory, modelType, viewElement) {
-
+		
 		if (typeof viewElement === 'undefined' || viewElement == null) {
 			throw "No view element: " + viewElement;
 		}
@@ -1069,10 +1075,11 @@ function FacetView(divId, facetViewElements) {
 		return this._arrayHasAttribute(this.attributesList, attributeId);
 	}
 
-	function FacetAttributeSingleValue(viewElementFactory, modelType, attributeId, modelValue, listItem, checkboxItem) {
-		FacetAttributeValue.call(this, 'FacetAttributeSingleValue', viewElementFactory, attributeId, modelType, listItem, checkboxItem);
+	function FacetAttributeSingleValue(viewElementFactory, modelType, attributeId, modelValue, displayValue, listItem, checkboxItem) {
+		FacetAttributeValue.call(this, 'FacetAttributeSingleValue', viewElementFactory, modelType, attributeId, listItem, checkboxItem);
 
 		this.modelValue = modelValue;
+		this.displayValue = displayValue;
 	}
 
 	FacetAttributeSingleValue.prototype = Object.create(FacetAttributeValue.prototype);
@@ -1083,7 +1090,7 @@ function FacetView(divId, facetViewElements) {
 	
 	
 	function FacetAttributeRange(viewElementFactory, modelType, attributeId, modelRange, listItem, checkboxItem) {
-		FacetAttributeValue.call(this, 'FacetAttributeRange', viewElementFactory, attributeId, modelType, listItem, checkboxItem);
+		FacetAttributeValue.call(this, 'FacetAttributeRange', viewElementFactory, modelType, attributeId, listItem, checkboxItem);
 
 		this.modelRange = modelRange;
 	}
