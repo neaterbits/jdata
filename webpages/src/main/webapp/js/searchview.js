@@ -125,11 +125,16 @@ function SearchView(
 		
 		return new Gallery(galleryDivId, 20, 20,
 				// Create element
-				_makeGalleryProvisionalItem,
-				function (index, count, onsuccess) { searchView._getThumbnailImages(index, count, onsuccess); },
-				_makeGalleryImageItem);
+				{ 
+					getImages : function (index, count, onsuccess) { searchView._getThumbnailImages(index, count, onsuccess); }
+				},
+				{
+					makeProvisionalHTMLElement : _makeGalleryProvisionalItem,
+					makeImageHTMLElement : _makeGalleryImageItem
+				}
+		);
 	}
-	
+
 	function _makeGalleryProvisionalItem(index, title, thumbWidth, thumbHeight) {
 		var div = document.createElement('div');
 

@@ -4,26 +4,43 @@
  * divId - ID of element that will be root
  * columnSpacing - horizontal spacing
  * rowSpacing - vertical spacing
- * makeProvisionalHTMLElement - must return item to render initially before has downloaded thumbnail (or similar)
- *  parameters to function:
- *    - index - index into list of items passed to .refresh()
- *    - title - title of element
- *    - width - width of image to be loaded afterwards
- *    - height - height of image to be loaded afterwards
- *    
- * getImages - callback to get thumbnails or other content asynchronously when a user has stopped scrolling
- * makeImageHTMLElement - render an image item after downloaded. Returns HTML element (could be same as provisional)
- *  parameters to function:
- *    - index - index into list of items passed to .refresh()
- *    - provisional - previously created provisional item
- *    - image - the image loaded by getImages()
- *    
+ * galleryModel - user implementation of gallery model
+ * galleryView - user implementation of gallery view
+ * 
  * return - new HTML element or just return the provisional one if could be updated
  * 
  */
 
+/**
+ * View functions:
+ * 
+ * Make DOM element to be shown while images are being loaded from server
+ *  - index - index of element to show in virtual array
+ *  - title - tile text of element
+ *  - itemWidth - width of complete item
+ *  - itemHeight - height of complete item
+ * 
+ * makeProvisionalHTMLElement(index, title, itemWidth, itemHeight)
+ * 
+ * 
+ * Make the DOM element to show after image has been loaded from server.
+ * 
+ * makeImageHTMLElement(title, imagedata)
+ *  - title - title text for image
+ *  - imagedata - image data, user specific (eg. a Blob)
+ */
 
-function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, getImages, makeImageHTMLElement) {
+/**
+ * Model functions
+ * 
+ * getImages(firstIndex, count, onsuccess) 
+ *  - firstIndex - index into virtual array of images
+ *  - count - number of items to get images for, starting at firstIndex
+ *  - onsuccess - function to be called back with an array of elements that represents the images (user specific)
+
+ */
+
+function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 	
 	if (typeof columnSpacing != 'number') {
 		throw 'Columnspacing is not an int ' + typeof columnSpacing;
@@ -32,6 +49,8 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 	this.divId = divId;
 	this.columnSpacing = columnSpacing;
 	this.rowSpacing = rowSpacing;
+	this.galleryModel = galleryModel;
+	this.galleryView = galleryView;
 	this.width = 800;
 
 	this.rowDivs = new Array();
@@ -40,11 +59,6 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 	this.firstY = 0; // y position in virtual fiv of first visible element
 
 	// Store functions for later
-	this.makeProvisionalHTMLElement = makeProvisionalHTMLElement;
-	this.getImages = getImages;
-
-	this.makeImageHTMLElement = makeImageHTMLElement;
-	
 	var outerDiv = document.getElementById(divId);
 	outerDiv.setAttribute('style', 'overflow:scroll');
 
@@ -180,7 +194,7 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 			var t = this;
 
 			// Call external functions to load images
-			this.getImages(firstIndex, count, function(imageDataArray) {
+			this.galleryModel.getImages(firstIndex, count, function(imageDataArray) {
 
 				var rowNo = firstIndex / t.itemsPerRow;
 
@@ -214,7 +228,7 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 									throw "Image data undefined at: " + index;
 								}
 								else {
-									item = t.makeImageHTMLElement(title, imageData);
+									item = t.galleryView.makeImageHTMLElement(title, imageData);
 								}
 								
 								return item;
@@ -494,7 +508,7 @@ function Gallery(divId, columnSpacing, rowSpacing, makeProvisionalHTMLElement, g
 			// Add row items to the row
 			this._addRowItems(level + 1, rowDiv, i, itemsThisRow, rowWidth, rowHeight,
 					function (index, title, itemWidth, itemHeight) {
-						return t.makeProvisionalHTMLElement(index, title, itemWidth, itemHeight);
+						return t.galleryView.makeProvisionalHTMLElement(index, title, itemWidth, itemHeight);
 					},
 					function (element) {
 						rowDiv.append(element);
