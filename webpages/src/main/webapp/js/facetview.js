@@ -42,7 +42,7 @@ function FacetView(divId, facetViewElements) {
 					// For each element, add to div-model
 					if (kind === 'type') {
 						
-						console.log("Type array of length " + length + ", cur=" + print(cur));
+						// console.log("Type array of length " + length + ", cur=" + print(cur));
 						
 						// This is a type-array.
 						// If cur is null, this is the root element
@@ -63,17 +63,17 @@ function FacetView(divId, facetViewElements) {
 						cur = typeList;
 					}
 					else if (kind === 'attribute') {
-						console.log("Attribute array of length " + length + ", cur=" + print(cur));
+						// console.log("Attribute array of length " + length + ", cur=" + print(cur));
 
 						cur = t._addFacetAttributeList(cur.getViewElementFactory(), cur);
 					}
 					else if (kind === 'attributeValue') {
-						console.log("Attribute value array of length " + length + ", cur=" + print(cur));
+						// console.log("Attribute value array of length " + length + ", cur=" + print(cur));
 						
 						cur = t._addFacetAttributeValueList(cur.getViewElementFactory(), cur);
 					}
 					else if (kind === 'attributeRange') {
-						console.log("Attribute range array of length " + length + ", cur=" + print(cur));
+						// console.log("Attribute range array of length " + length + ", cur=" + print(cur));
 						
 						cur = t._addFacetAttributeRangeList(cur.getViewElementFactory(), cur);
 					}
@@ -91,22 +91,22 @@ function FacetView(divId, facetViewElements) {
 
 					// For each element, add to div-model
 					if (kind == 'type') {
-						console.log("Type element " + element.displayName + ", cur=" + print(cur));
+						// console.log("Type element " + element.displayName + ", cur=" + print(cur));
 						
 						cur = t._addFacetType(viewElementFactory, cur, element);
 					}
 					else if (kind == 'attribute') {
-						console.log("Attribute element " + element.displayName + ", cur=" + print(cur));
+						// console.log("Attribute element " + element.displayName + ", cur=" + print(cur));
 
 						cur = t._addFacetAttribute(viewElementFactory, cur, element);
 					}
 					else if (kind == 'attributeValue') {
-						console.log("Attribute value element " + element.value + ", cur=" + print(cur));
+						// console.log("Attribute value element " + element.value + ", cur=" + print(cur));
 						
 						cur = t._addFacetSingleValue(viewElementFactory, cur, element);
 					}
 					else if (kind == 'attributeRange') {
-						console.log("Attribute value element " + element.value + ", cur=" + print(cur));
+						// console.log("Attribute value element " + element.value + ", cur=" + print(cur));
 						
 						cur = t._addFacetAttributeRange(viewElementFactory, cur, element);
 					}
@@ -229,7 +229,6 @@ function FacetView(divId, facetViewElements) {
 
 		this._setAttributeCheckboxListener(viewElementFactory, attributeRange, false);
 
-		console.log('cur type: ' + cur.getClassName());
 		cur.addRange(attributeRange, index);
 
 		return attributeRange;
@@ -246,7 +245,6 @@ function FacetView(divId, facetViewElements) {
 				
 				// Iterate recursively
 				attributeValue.iterate(function(kind, obj) {
-					console.log('Sub obj: ' + kind + ", " + JSON.stringify(obj));
 					if (kind === 'FacetAttributeSingleValue' || kind == 'FacetAttributeRange') {
 						// Set checked-property to same
 						obj.getViewElementFactory().setCheckBoxChecked(obj.checkboxItem, checked);

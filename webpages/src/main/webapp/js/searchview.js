@@ -47,7 +47,8 @@ function SearchView(
 
 			t._updateFacets(response.facets, onsuccess);
 
-			t._refreshGallery(response.items);
+			// Refresh gallery, will call back to galleryModel (ie. in this file) that were passed to Gallery constructor
+			t.gallery.refresh(response.items.length)
 		});
 	}
 
@@ -123,25 +124,33 @@ function SearchView(
 	
 	function _initGallery(searchView, galleryDivId) {
 		
-		return new Gallery(galleryDivId, 20, 20,
+		return new Gallery(
+				galleryDivId,
+				{
+					columnSpacing : 20,
+					rowSpacing : 20,
+					widthHint : 300,
+					heightHint : 300
+				},
 				// Create element
 				{ 
-					getImages : function (index, count, onsuccess) { searchView._getThumbnailImages(index, count, onsuccess); }
+					getProvisionalData 	: function (index, count, onsuccess) { searchView._getGalleryProvisionalData(index, count, onsuccess); },
+					getCompleteData 	: function (index, count, onsuccess) { searchView._getGalleryThumbnailImages(index, count, onsuccess); }
 				},
 				{
-					makeProvisionalHTMLElement : _makeGalleryProvisionalItem,
-					makeImageHTMLElement : _makeGalleryImageItem
+					makeProvisionalHTMLElement 	: _makeGalleryProvisionalItem,
+					makeCompleteHTMLElement 	: _makeGalleryImageItem
 				}
 		);
 	}
 
-	function _makeGalleryProvisionalItem(index, title, thumbWidth, thumbHeight) {
+	function _makeGalleryProvisionalItem(index, data, thumbWidth, thumbHeight) {
 		var div = document.createElement('div');
 
 		var provisionalImage = document.createElement('div');
 
-		provisionalImage.style.width = thumbWidth;
-		provisionalImage.style.height = thumbHeight;
+		provisionalImage.style.width = data.thumbWidth;
+		provisionalImage.style.height = data.thumbHeight;
 
 		div.append(provisionalImage);
 		
@@ -150,28 +159,32 @@ function SearchView(
 		// Add index as a text to the element
 		var textSpan = document.createElement('span');
 		
-		textSpan.innerHTML = title;
+		textSpan.innerHTML = 'asjdhf ijshfjhs fkhas fjkh sdkfhjas kfh klsfls fjlkjsfl jasfkljs lfkjskl aaabbbccc';
 
+		// Don't make text wider that thumb
+		textDiv.style.width = data.thumbWidth;
+		textDiv.style['text-align'] = 'center';
+			
 		textDiv.append(textSpan);
 
 		div.append(textDiv);
 
-		textDiv.setAttribute('style', 'text-align : center;');
+		//textDiv.setAttribute('style', 'text-align : center;');
 		
 		return div;
 	}
-
-	function _makeGalleryImageItem(title, imageData) {
+	
+	function _makeGalleryImageItem(provisionalData, imageData) {
 		var div = document.createElement('div');
-
+		
 		var image = document.createElement('img');
 		
-
+		
 		/*
 		provisionalImage.style.width = thumbWidth;
 		provisionalImage.style.height = thumbHeight;
-		*/
-
+		 */
+		
 		/*
 		var url = URL.createObjectURL(imageData);
 		image.src = url;
@@ -179,29 +192,36 @@ function SearchView(
 		image.onload = function() {
 			URL.revokeObjectURL(url);
 		}
-		*/
-
+		 */
+		
 		image.src = imageData;
-
+		
 		div.append(image);
 		
 		var textDiv = document.createElement('div');
-
+		
 		// Add index as a text to the element
 		var textSpan = document.createElement('span');
 		
-		textSpan.innerHTML = title;
+		textSpan.innerHTML = provisionalData.title;
+
+		textDiv.style.width = provisionalData.thumbWidth;
+		textDiv.style['text-align'] = 'center';
 
 		textDiv.append(textSpan);
-
+		
 		div.append(textDiv);
 
-		textDiv.setAttribute('style', 'text-align : center;');
-		
 		return div;
 	}
-
-	this._getThumbnailImages = function(index, count, onsuccess) {
+	
+	this._getGalleryProvisionalData = function(index, count, onsuccess) {
+		// Gallery was updated as a result of a query result and this.curResponse was updated,
+		// so just pass that back right away
+		onsuccess(this.curResponse.items);
+	}
+	
+	this._getGalleryThumbnailImages = function(index, count, onsuccess) {
 		var itemIds = "";
 		
 		for (var i = 0; i < count; ++ i) {
@@ -241,8 +261,6 @@ function SearchView(
 		
 		this._sendAjax(url, 'GET', 'arraybuffer', function(response) {
 
-			console.log('## Got images response: ' + response.byteLength);
-
 			var dataView = new DataView(response);
 			var offset = 0;
 			
@@ -265,13 +283,7 @@ function SearchView(
 					}
 				}
 
-				console.log('## ' + offset + ': got thumb of size ' + thumbSize + " with mime type '" + mimeType + "'");
-				
-				
 				if (thumbSize > 0) {
-					
-					//var buf = response.slice(offset, offset + thumbSize);
-
 					var base64 = base64_encode(dataView, offset, thumbSize);
 					
 					// console.log('## base 64: ' + base64.length + " from " + offset + ", size " + thumbSize + ' :\n' + base64);
@@ -279,7 +291,8 @@ function SearchView(
 					// Render thumb in view, create the 'data:' part of <img>
 					var data = 'data:' + mimeType + ';base64,' + base64;
 					
-			//		var data = new Blob([new Uint8Array(response, offset, thumbSize)]);
+					// var buf = response.slice(offset, offset + thumbSize);
+					// var data = new Blob([new Uint8Array(response, offset, thumbSize)]);
 					
 					images.push(data);
 				}

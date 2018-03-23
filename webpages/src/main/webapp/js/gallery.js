@@ -20,6 +20,18 @@
  *   - for a medium gallery, download all provisional information and cache it, download complete information as the user scrolls to a new part of gallery.
  *   - for a really large gallery, download both provisional and complete content while user scrolls. These can be run in parallel, provisional information aught to return faster. 
  *   
+ *   
+ *  Gallery has two ways to specify item size, hint and exact.
+ *  Width hint, gallery will use this for approximation.
+ *  Eg heightHint will allow it to compute approximate total size of gallery (scrollable) area.
+ *  
+ *  !! NOTE !! heightHint also has the effect of creating rows of different height, eg each row is as tall as the tallest element on this row.
+ *  Since heightHint is meant as an approximation, gallery must just use the height of every element on *that row* to figure out row height for *that row*.
+ *  It cannot look at height of all rows because it might not have that complete information available at any point in time, that is for galleries with too many elements to
+ *  have them all downloaded at the same time (for computing a common row height, max size for all items). The gallery might for large data sets, only keep in memory (and constructed as DOM elements), only this elements that are visible,
+ *  perhaps also some nearby ones so that if the user does slow scrolling (eg. with keyboard arrow keys), those DOM elements are ready to be scrolled into display.
+ *  However if user specifies and absolute height, this will be the height of rows (+ spacing between rows).
+ * 
  * 
  * API
  * 
@@ -104,15 +116,26 @@
  *  - onsuccess - function to be called back with an array of elements that represents the complete data (user specific), must be <count> length.
  */
 
-function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
-	
-	if (typeof columnSpacing != 'number') {
-		throw 'Columnspacing is not an int ' + typeof columnSpacing;
-	}
+function Gallery(divId, config, galleryModel, galleryView) {
 	
 	this.divId = divId;
-	this.columnSpacing = columnSpacing;
-	this.rowSpacing = rowSpacing;
+	
+	this.config = config;
+
+	if (typeof config.columnSpacing === 'undefined') {
+		this.columnSpacing = 20;
+	}
+	else {
+		this.columnSpacing = config.columnSpacing;
+	}
+	
+	if (typeof config.rowSpacing === 'undefined') {
+		this.rowSpacing = 20;
+	}
+	else {
+		this.rowSpacing = config.rowSpacing;
+	}
+
 	this.galleryModel = galleryModel;
 	this.galleryView = galleryView;
 	this.width = 800;
@@ -133,45 +156,58 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 	this.upperPlaceHolder = document.createElement('div');
 	
 	this.innerDiv.append(this.upperPlaceHolder);
-	
+
+	if (typeof config.width !== 'undefined') {
+		this.widthMode = new GalleryModeWidthSpecific();
+	}
+	else if (typeof config.widthHint !== 'undefined') {
+		this.widthMode = new GalleryModeWidthHint();
+	}
+	else {
+		throw "Neither width nor width hint specified in config, specify one of them";
+	}
+
+	if (typeof config.height !== 'undefined') {
+		this.heightMode = new GalleryModeHeightSpecific();
+	}
+	else if (typeof config.heightHint !== 'undefined') {
+		this.heightMode = new GalleryModeHeightHint();
+	}
+	else {
+		throw "Neither height nor height hint specified in config, specify one of them";
+	}
+
 	//document.getElementById(divId).append(innerDiv);
 	
 	/**
 	 * refresh with passing in function for getting titles and thumb sizes
 	 */
-	this.refresh = function(getTitlesAndThumbSizes) {
+	this.refresh = function(totalNumberOfItems) {
 
 		var level = 0;
 		
-		this.enter(level, 'refresh', []);
+		this.enter(level, 'refresh', ['totalNumberOfItems', totalNumberOfItems]);
+
+		this.totalNumberOfItems = totalNumberOfItems;
 
 		var t = this;
 
 		// get all information and update view accordingly
-		getTitlesAndThumbSizes(
-				
-				function (count) {
-					t.titles = new Array();
-					t.widths = new Array();
-					t.heights = new Array();
-				},
-				
-				function(title, width, height) {
-					t.titles.push(title);
-					t.widths.push(width);
-					t.heights.push(height);
-				},
-				
-				function () {
-					// completed metadata build, now compute and rerender
-					t._computeAndRender(level + 1);
-				}
-		);
+		// TODO for really large galleries, just get parts
+		galleryModel.getProvisionalData(0, totalNumberOfItems, function(provisionalDataArray) {
+			t.provisionalDataArray = provisionalDataArray;
+			// completed metadata build, now compute and rerender
+			t._computeAndRender(level + 1);
+		});
 
 		this.exit(level, 'refresh');
 	};
-	
-	this.getVisibleHeight = function() {
+
+	this._getVisibleWidth = function() {
+		return this._getInnerElement().clientWidth;
+	};
+
+	this._getVisibleHeight = function() {
 		return this._getInnerElement().clientHeight;
 	};
 
@@ -180,7 +216,7 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 		this.enter(level, 'computeAndRender', []);
 
 		// Get the width of element to compute how many elements there are room for
-		var itemsPerRow = this._computeItemsPerRow();
+		var itemsPerRow = this.widthMode.computeNumColumns(this.config, this.columnSpacing, this._getVisibleWidth());
 		
 		this.itemsPerRow = itemsPerRow;
 		
@@ -221,7 +257,7 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 		// Set the offset of each element to that, but what about sizes? Once we scroll an element out, we must add a new one
 		
 		// Start at the current ones
-		this._addDivs(level + 1, 0, 0, itemsPerRow, this.getVisibleHeight());
+		this._addDivs(level + 1, 0, 0, itemsPerRow, this._getVisibleHeight());
 		
 		// Add scroll listener
 		this._getOuterElement().addEventListener('scroll', function(e) {
@@ -250,57 +286,58 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 	}
 	
 	this._getImagesIfNotScrolled = function(level, timeoutStartY, curY, firstIndex, count) {
+		
+		this.enter(level, '_getImagesIfNotScrolled', [ 'timeoutStartY', timeoutStartY, 'curY', curY, 'firstIndex', firstIndex, 'count', count]);
+
 		if (timeoutStartY == curY) {
 			
 			// Not scrolled since timeout started, load images
-			console.log('Load images from ' + timeoutStartY);
 
 			var t = this;
-
+			
 			// Call external functions to load images
-			this.galleryModel.getImages(firstIndex, count, function(imageDataArray) {
-
+			this.galleryModel.getCompleteData(firstIndex, count, function(completeDataArray) {
+				
 				var rowNo = firstIndex / t.itemsPerRow;
 
 				var rowWidth = t._getRowWidth();
 				var numRows = t.rowDivs.length;
+				var numRowsTotal = ((t._getTotalNumberOfItems() - 1) / t.itemsPerRow) + 1;
 
-				for (var row = 0, i = 0; row < numRows && i < count; ++ row) {
+				for (var row = 0, i = firstIndex; row < numRows && i < count; ++ row) {
 					
-					// tallest item in row
-					var rowMaxHeight = t._findRowMaxItemHeight(row, t.itemsPerRow);
-					
-					// height of this row, eg first and last row may have additional spacing so items are taller
-					var rowHeight = t._getRowHeight(rowMaxHeight, row, numRows);
-
 					var rowDiv = t.rowDivs[row];
 					var itemsThisRow = rowDiv.childNodes.length;
 					
 					// Store new elements in array and then replace all at once
-					var newRowItems = [];
+					//var newRowItems = [];
 					
-					t._addRowItems(level + 1, rowDiv, i, itemsThisRow, rowWidth, rowHeight,
-							function (index, title, itemWidth, itemHeight) {
-
-								var imageData = imageDataArray[index];
+					t._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
+							function (index, provisionalData, itemWidth, itemHeight) {
+						
+								var completeData = completeDataArray[index];
 								var item;
 								
-								if (imageData == null) {
+								if (completeData == null) {
 									item = rowDiv.childNodes[index - i];
 								}
-								else if (typeof imageData === 'undefined') {
+								else if (typeof completeData === 'undefined') {
 									throw "Image data undefined at: " + index;
 								}
 								else {
-									item = t.galleryView.makeImageHTMLElement(title, imageData);
+									item = t.galleryView.makeCompleteHTMLElement(provisionalData, completeData);
 								}
 								
 								return item;
 							},
-							function (element) {
-								newRowItems.push(element);
+							function (element, rowIndex) {
+								rowDiv.replaceChild(element, rowDiv.childNodes[rowIndex]);
+
+	//							newRowItems.push(element);
 							});
-			
+					
+					i += itemsThisRow;
+			/*
 					for (var c = 0; c < itemsThisRow && i < count; ++ c) {
 						
 						var rowItem = rowDiv.childNodes[c];
@@ -314,9 +351,12 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 						
 						++ i;
 					}
+				*/
 				}
 			});
 		}
+		
+		this.exit(level, '_getImagesIfNotScrolled');
 	}
 	
 	this._updateOnScroll = function(curY) {
@@ -326,7 +366,7 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 		
 		this.enter(level, 'updateOnScroll', ['curY', curY], [ 'firstY',  this.firstY,  'lastY', this.lastY ]);
 
-		if (curY + this.getVisibleHeight() < this.firstY) {
+		if (curY + this._getVisibleHeight() < this.firstY) {
 			this.log(level, 'Scrolled to view completely above previous');
 
 			// We are scrolling upwards totally out of current area
@@ -343,14 +383,14 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 		}
 		else if (curY > this.lastY) {
 			// We are scrolling downwards totally out of visible area, just add items for the pos in question
-			this.log(level, 'Scrolled to completely below previous curY ' + curY + ' visibleHeight ' + this.getVisibleHeight() + ' > lastY ' + this.lastY);
+			this.log(level, 'Scrolled to completely below previous curY ' + curY + ' visibleHeight ' + this._getVisibleHeight() + ' > lastY ' + this.lastY);
 
 			this._redrawCompletelyAt(level + 1, curY);
 		}
-		else if (this.lastY - curY < this.getVisibleHeight()) {
+		else if (this.lastY - curY < this._getVisibleHeight()) {
 			// Scrolling down partly out of visible area
 			// First figure out how much visible space that must be added
-			var heightToAdd = this.getVisibleHeight() - (this.lastY - curY);
+			var heightToAdd = this._getVisibleHeight() - (this.lastY - curY);
 
 			this.log(level, 'Scrolled to view partly below previous, must add ' + heightToAdd);
 
@@ -371,7 +411,7 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 
 		this.enter(level, 'redrawCompletelyAt', [ 'curY', curY ]);
 		
-		var elem = this._findElementPos(curY);
+		var elem = this._findElementPos(level + 1, curY);
 		
 		this.log(level, 'Element start index: ' + elem.firstItemIndex + ', removing all rows: ' + this.rowDivs.length);
 
@@ -393,12 +433,15 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 		this.firstIndex = elem.firstItemIndex;
 		this.firstY = curY;
 
-		this._addDivs(level + 1, elem.firstItemIndex, elem.firstRowYPos, this.itemsPerRow, this.getVisibleHeight());
+		this._addDivs(level + 1, elem.firstItemIndex, elem.firstRowYPos, this.itemsPerRow, this._getVisibleHeight());
 		
 		this.exit(level, 'redrawCompletelyAt');
 	};
 	
-	this._findElementPos = function(yPos) {
+	this._findElementPos = function(level, yPos) {
+		
+		this.enter(level, 'findElementPos', [ 'yPos', yPos ])
+
 		// Go though heights list until we find the one that intersects with this y pos
 		var y = 0;
 		
@@ -422,24 +465,10 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 			
 			y = nextY;
 		}
+
+		this.exit(level, 'findElementPos', JSON.stringify(elem));
 		
 		return elem;
-	}
-	
-	this._findRowMaxItemHeight = function(rowFirstIndex, itemsPerRow) {
-
-		var rowMaxHeight = 0;
-
-		for (var j = 0; j < itemsPerRow && (rowFirstIndex + j) < this.heights.length; ++ j) {
-			var index = rowFirstIndex + j;
-			var itemHeight = this.heights[index];
-
-			if (itemHeight > rowMaxHeight) {
-				rowMaxHeight = itemHeight;
-			}
-		}
-		
-		return rowMaxHeight;
 	}
 	
 	/**
@@ -527,6 +556,7 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 		return this.width;
 	}
 
+	
 	this._addDivsWithAddFunc = function(level, startIndex, startPos, itemsPerRow, heightToAdd, downwards, addRowDiv) {
 
 		this.enter(level, 'addDivsWithAddFunc', [
@@ -544,37 +574,37 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 		
 		var y = startPos;
 		
-		var numRows = ((this.widths.length - 1) / itemsPerRow) + 1;
+		var numRows = ((this._getTotalNumberOfItems() - 1) / itemsPerRow) + 1;
 		var rowNo = startIndex / itemsPerRow;
 
 		var rowWidth = this._getRowWidth();
 
 		var lastRenderedElement = null;
 		
-		for (var i = startIndex; i < this.widths.length; i += (downwards ? itemsPerRow : -itemsPerRow)) {
+		for (var i = startIndex; i < this._getTotalNumberOfItems(); i += (downwards ? itemsPerRow : -itemsPerRow)) {
 
 			// Last row might not have a full number of items
-			var itemsThisRow = i + itemsPerRow >= this.widths.length
+			var itemsThisRow = i + itemsPerRow >= this._getTotalNumberOfItems()
 				? this.widths.length - i
 				: itemsPerRow; 
 			
 			var rowDiv = document.createElement('div');
-
-			// tallest item in row
-			var rowMaxHeight = this._findRowMaxItemHeight(i, itemsPerRow);
 			
-			// height of this row, eg first and last row may have additional spacing so items are taller
-			var rowHeight = this._getRowHeight(rowMaxHeight, rowNo, numRows);
+			rowDiv.setAttribute('class', 'gallery_row');
+
+			// Add before adding elements so that we can add hidden row items and compute their size
+			addRowDiv(rowDiv);
 
 			rowNo = rowNo + (downwards ? 1 : -1);
 
 			var t = this;
+
 			// Add row items to the row
-			this._addRowItems(level + 1, rowDiv, i, itemsThisRow, rowWidth, rowHeight,
-					function (index, title, itemWidth, itemHeight) {
-						return t.galleryView.makeProvisionalHTMLElement(index, title, itemWidth, itemHeight);
+			var rowHeight = this._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRows, rowWidth,
+					function (index, provisionalData, itemWidth, itemHeight) {
+						return t.galleryView.makeProvisionalHTMLElement(index, provisionalData, itemWidth, itemHeight);
 					},
-					function (element) {
+					function (element, indexInRow) {
 						rowDiv.append(element);
 					});
 			
@@ -590,7 +620,6 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 					'border : 1px solid black;' +
 					'background-color : yellow; ');
 
-			addRowDiv(rowDiv);
 
 			y += (downwards ? rowHeight : -rowHeight);
 			heightAdded += rowHeight;
@@ -609,6 +638,13 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 		return lastRenderedElement;
 	}
 	
+	
+	this._computeColumnSpacing = function(rowWidth, totalRowItemWidths, itemsThisRow) {
+		var spacing = (rowWidth - totalRowItemWidths) / (itemsThisRow + 1);
+
+		return spacing;
+	}
+	
 	this._getRowHeight = function(rowMaxHeight, rowNo, numRows) {
 		var rowHeigth;
 
@@ -621,121 +657,147 @@ function Gallery(divId, columnSpacing, rowSpacing, galleryModel, galleryView) {
 
 		return rowHeight;
 	}
-	
-	
+
 	/**
 	 * Helper to add the items in one gallery row
 	 */
-	this._addRowItems = function(level, rowDiv, firstItemIndex, itemsThisRow, rowWidth, rowHeight, makeElement, addElement) {
+	this._addRowItems = function(level, rowDiv, firstItemIndex, itemsThisRow, numRowsTotal, rowWidth, makeElement, addElement) {
+
+		var itemWidth = null;
+		var itemHeight = null;
+		
+		if (typeof this.config.width !== 'undefined') {
+			itemWidth = this.config.width;
+		}
+		
+		if (typeof config.height !== 'undefined') {
+			itemHeight = config.height;
+		}
+		
 		var x = 0;
 
-		var totalRowItemWidths = 0;
-		for (var j = 0; j < itemsThisRow; ++ j) {
-			var index = firstItemIndex + j;
-
-			totalRowItemWidths += this.widths[index];
+		var spacing = 0;
+		
+		if (itemWidth != null) {
+			var totalRowItemWidths = itemsThisRow * itemWidth;
+			
+			spacing = this._computeColumnSpacing(rowWidth, totalRowItemsWidth, itemsThisRow);
 		}
 
+		var mustComputeDimensions = itemWidth == null || itemHeight == null;
+		
+		// Do not show the item if must compute dimensions
+		var visible = !mustComputeDimensions;
+		
+		var rowHTMLElements = [];
+
+		// Loop though and add, might render with visibility : hidden if width or height not known
+		// since we then have to get these and adjust position and spacing accordingly
+
+		var rowHeight = null;
+		
+		if (itemHeight != null) {
+			// hardcoded height so row height same as item height
+			rowHeight = this._getRowHeight(itemHeight, index, numRowsTotal);
+		}
+		
+
 		for (var j = 0; j < itemsThisRow; ++ j) {
 			var index = firstItemIndex + j;
 
-			var itemWidth = this.widths[index];
-			var itemHeight = this.heights[index];
-
-			var itemElement = makeElement(index, this.titles[index], itemWidth, itemHeight);
+			var itemElement = makeElement(index, this.provisionalDataArray[index], itemWidth, itemHeight);
 
 			// Add to model at relative offsets
-			
-			var spacing = (rowWidth - totalRowItemWidths) / (itemsThisRow + 1);
-
 			// this.log(level, 'set spacing to ' + spacing + '/' + rowWidth + '/' + totalRowItemWidths + '/' + itemsThisRow);
 			
-			this._applyItemStyles(itemElement, rowHeight, itemWidth, itemHeight, spacing);
+			this._applyItemStyles(itemElement, rowHeight, itemWidth, itemHeight, spacing, visible);
 
-			addElement(itemElement);
+			addElement(itemElement, j);
+			
+			rowHTMLElements.push(itemElement);
 			
 			x += itemWidth;
 		}
-	}
-	
-	this._applyItemStyles = function(itemElement, rowHeight, itemWidth, itemHeight, spacing) {
-		itemElement.setAttribute('style',
-				'position : relative; ' +
-				/*
-				'display : inline-block; ' +
-				*/
-				'float : left; ' +
-				'margin-left : ' + spacing + 'px; ' +
-				'top : ' + (rowHeight - itemHeight) / 2 + 'px; ' +
-				'width : ' + itemWidth + '; ' +
-				'height : ' + itemHeight + '; ' +
-				'background-color : white; ');
 		
-	}
-
-	this._computeItemsPerRow = function() {
-		// Must look at all widths and find the most number of thumbs there are rooms for
-		// Start out with the initial ones and adjust
-
-		var width = this.width;
-		
-		// Start out with width
-		var itemsPerRow = width;
-		
-		var done;
-		
-		do {
-			var inRow = 0;
-			var pixForRow = 0;
+		if (mustComputeDimensions) {
 			
-			done = true;
+			var totalRowItemsWidth = 0;
+			var largestItemHeight = 0;
 			
-			for (var i = 0; i < this.widths.length; ++ i) {
-				pixForRow += this.columnSpacing; // initial spacing
-				pixForRow += this.widths[i];
+			// HTML elements are not visible but we might retrieve their dimensions
+			for (var i = 0; i < rowHTMLElements.length; ++ i) {
+				var elem = rowHTMLElements[i];
 				
-				if (pixForRow + this.columnSpacing > width) {
-					// Not room for any more
-					if (inRow < itemsPerRow) {
-						// Found to be space for less per row than previously found,
-						// we must compute all anew
-						itemsPerRow = inRow;
-						done = false;
-						break;
-					}
-				}
-				else {
-					++ inRow;
-					
-					if (inRow == itemsPerRow) {
-						// There was room for as many as we had previously reduced to,
-						// just continue on next row
-						inRow = 0;
-						pixForRow = 0;
-					}
+				// console.log('## computed client width: ' + elem.clientWidth + ', height:' + elem.clientHeight + ': ' + elem.parentNode + ', ' + elem.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode);
+				
+				totalRowItemsWidth += elem.clientWidth;
+				
+				if (elem.clientHeight > largestItemHeight) {
+					largestItemHeight = elem.clientHeight;
 				}
 			}
-		} while (!done);
-		
-		return itemsPerRow;
+			
+			rowHeight = this._getRowHeight(largestItemHeight, index, numRowsTotal);
+			
+			spacing = this._computeColumnSpacing(rowWidth, totalRowItemsWidth, itemsThisRow);
+
+			if (itemHeight == null) {
+				itemHeight = largestItemHeight;
+			}
+			
+			visible = true;
+
+			// Update style to show item with given width, height and spacing
+			for (var i = 0; i < rowHTMLElements.length; ++ i) {
+				var elem = rowHTMLElements[i];
+				
+				var width = itemWidth == null ? elem.clientWidth : itemWidth;
+				var height = largestItemHeight;
+				
+				this._applyItemStyles(elem, rowHeight, width, height, spacing, visible);
+			}
+			
+			visible = true;
+		}
+
+		return rowHeight;
 	}
 	
-	this._computeHeight = function(itemsPerRow) {
+	this._applyItemStyles = function(itemElement, rowHeight, itemWidth, itemHeight, spacing, visible) {
 		
-		var height = 0;
+		var styling = 'position : relative; ' +
+			/*
+			'display : inline-block; ' +
+			*/
+			'float : left; ' +
+			'margin-left : ' + spacing + 'px; ' +
+			'background-color : white; ';
 		
-		for (var i = 0; i < this.heights.length; i += 3) {
-			
-			height += this.rowSpacing; // before each row
-
-			var rowMaxHeight = this._findRowMaxItemHeight(i, itemsPerRow);
-			
-			height += rowMaxHeight;
+		if (itemHeight != null) {
+			styling += 'top : ' + (rowHeight - itemHeight) / 2 + 'px; ';
+			styling += 'height : ' + itemHeight + '; ';
 		}
 		
-		height += this.rowSpacing; // after last row
+		if (itemWidth != null) {
+			'width : ' + itemWidth + '; ';
+		}
 		
-		return height;
+		if (!visible) {
+			// set hidden if we need to find item size
+			styling += 'visibility: hidden; '
+		}
+			
+		itemElement.setAttribute('style', styling);
+	}
+	
+	this._getTotalNumberOfItems = function() {
+		// TODO do not download complete data array
+		return this.totalNumberOfItems;
+	}
+
+	
+	this._computeHeight = function(itemsPerRow) {
+		return this.heightMode.computeHeight(this.config, this.rowSpacing, itemsPerRow, this._getTotalNumberOfItems());
 	}
 	
 	this._getOuterElement = function() {

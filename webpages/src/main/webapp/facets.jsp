@@ -6,7 +6,14 @@
 <script src="js/facetview.js" type="text/javascript"></script>
 <script src="js/facetmodel.js" type="text/javascript"></script>
 <script src="js/facetcontroller.js" type="text/javascript"></script>
+
+<script src="js/gallery_mode_base.js" type="text/javascript"></script>
+<script src="js/gallery_mode_width_specific.js" type="text/javascript"></script>
+<script src="js/gallery_mode_width_hint.js" type="text/javascript"></script>
+<script src="js/gallery_mode_height_specific.js" type="text/javascript"></script>
+<script src="js/gallery_mode_height_hint.js" type="text/javascript"></script>
 <script src="js/gallery.js" type="text/javascript"></script>
+
 <script src="js/searchview.js" type="text/javascript"></script>
 </head>
 <body style='height: 100%'>
