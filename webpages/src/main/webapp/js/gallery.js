@@ -111,8 +111,8 @@
  * 
  * Get complete data asynchronously (suitable for Ajax calls)
  * getCompleteData(index, count, onsuccess) 
- *  - firstIndex - index into virtual array of images
- *  - count - number of items to get images for, starting at firstIndex
+ *  - firstCachedIndex - index into virtual array of images
+ *  - count - number of items to get images for, starting at firstCachedIndex
  *  - onsuccess - function to be called back with an array of elements that represents the complete data (user specific), must be <count> length.
  */
 
@@ -142,7 +142,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 
 	this.rowDivs = new Array();
 
-	this.firstIndex = 0; // index of first visible element
+	this.firstCachedIndex = 0; // index of first visible element
 	this.firstY = 0; // y position in virtual fiv of first visible element
 
 	// Store functions for later
@@ -274,7 +274,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 				t.scrollTimeoutSet = true;
 				
 				setTimeout(function() {
-						t._getImagesIfNotScrolled(level + 1, curFirstY, t.firstY, t.firstIndex, t.lastIndex - t.firstIndex + 1);
+						t._getImagesIfNotScrolled(level + 1, curFirstY, t.firstY, t.firstCachedIndex, t.lastCachedIndex - t.firstCachedIndex + 1);
 						t.scrollTimeoutSet = false;
 					},
 					100);
@@ -389,7 +389,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 			this.log(level, 'Scrolled to view partly above previous, must add ' + heightToAdd);
 
 			// Must add items before this one, so must be prepended to the divs already shown
-			this._prependDivs(level + 1, this.firstIndex - 1, this.firstY, this.numColumns, heightToAdd);
+			this._prependDivs(level + 1, this.firstCachedIndex - 1, this.firstY, this.numColumns, heightToAdd);
 		}
 		else if (curY > this.lastY) {
 			// We are scrolling downwards totally out of visible area, just add items for the pos in question
@@ -408,9 +408,9 @@ function Gallery(divId, config, galleryModel, galleryView) {
 			// just add new ones below current ones.
 
 			// Start-index to add is the one immediately after last-index
-			this._addDivs(level + 1, this.lastIndex + 1, this.lastY, this.numColumns, heightToAdd);
+			this._addDivs(level + 1, this.lastCachedIndex + 1, this.lastY, this.numColumns, heightToAdd);
 			
-			// Do not update this.firstIndex or this.firstY since we are appending
+			// Do not update this.firstCachedIndex or this.firstY since we are appending
 			// TODO perhaps remove rows that have scrolled out of sight
 		}
 		
@@ -440,7 +440,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 
 		this.rowDivs = new Array();
 
-		this.firstIndex = elem.firstItemIndex;
+		this.firstCachedIndex = elem.firstItemIndex;
 		this.firstY = curY;
 
 		this._addDivs(level + 1, elem.firstItemIndex, elem.firstRowYPos, this.numColumns, this._getVisibleHeight());
@@ -528,7 +528,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 			}
 		});
 
-		this.firstIndex = lastRendered.index; // last drawn element
+		this.firstCachedIndex = lastRendered.index; // last drawn element
 		this.firstY = lastRendered.yPos;
 
 		this.exit(level, 'prependDivs');
@@ -554,7 +554,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 			t.innerDiv.append(rowDiv);
 		});
 		
-		this.lastIndex = lastRendered.index; // last drawn element
+		this.lastCachedIndex = lastRendered.index; // last drawn element
 		this.lastY = lastRendered.yPos;
 
 		this.log(level, 'firstY set to ' + this.firstY + ' and not changed, set lastIndex to ' + lastRendered.index + ',lastY to ' + lastRendered.yPos);
