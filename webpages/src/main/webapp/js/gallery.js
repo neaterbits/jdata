@@ -140,7 +140,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 	this.galleryView = galleryView;
 	this.width = 800;
 
-	this.rowDivs = new Array();
+	this.cachedRowDivs = new Array();
 
 	this.firstCachedIndex = 0; // index of first visible element
 	this.firstY = 0; // y position in virtual fiv of first visible element
@@ -315,12 +315,12 @@ function Gallery(divId, config, galleryModel, galleryView) {
 				var rowNo = firstIndex / t.numColumns;
 
 				var rowWidth = t._getRowWidth();
-				var numRows = t.rowDivs.length;
+				var numRows = t.cachedRowDivs.length;
 				var numRowsTotal = ((t._getTotalNumberOfItems() - 1) / t.numColumns) + 1;
 
 				for (var row = 0, i = firstIndex; row < numRows && i < count; ++ row) {
 					
-					var rowDiv = t.rowDivs[row];
+					var rowDiv = t.cachedRowDivs[row];
 					var itemsThisRow = rowDiv.childNodes.length;
 					
 					// Store new elements in array and then replace all at once
@@ -423,22 +423,22 @@ function Gallery(divId, config, galleryModel, galleryView) {
 		
 		var elem = this._findElementPos(level + 1, curY);
 		
-		this.log(level, 'Element start index: ' + elem.firstItemIndex + ', removing all rows: ' + this.rowDivs.length);
+		this.log(level, 'Element start index: ' + elem.firstItemIndex + ', removing all rows: ' + this.cachedRowDivs.length);
 
 		this.upperPlaceHolder.setAttribute('style', 'height : '+ curY + ';');
 
 		// Remove all row elements since we will just generate them anew after the initial div
 		// used for making sure the rows show up at the right virtual y index
-		for (var i = 0; i < this.rowDivs.length; ++ i) {
+		for (var i = 0; i < this.cachedRowDivs.length; ++ i) {
 			
-			var toRemove = this.rowDivs[i];
+			var toRemove = this.cachedRowDivs[i];
 
 			this.log(level, 'Removing element ' + toRemove);
 
 			this._getInnerElement().removeChild(toRemove);
 		}
 
-		this.rowDivs = new Array();
+		this.cachedRowDivs = new Array();
 
 		this.firstCachedIndex = elem.firstItemIndex;
 		this.firstY = curY;
@@ -512,18 +512,18 @@ function Gallery(divId, config, galleryModel, galleryView) {
 		}
 
 		// item to add before
-		var firstRowDiv = this.rowDivs.length == 0
+		var firstRowDiv = this.cachedRowDivs.length == 0
 				? null
-				: this.rowDivs[0];
+				: this.cachedRowDivs[0];
 
 		var lastRendered = this._addDivsWithAddFunc(level + 1, firstItemOnRow, startPos, numColumns, heightToAdd, false, function (rowDiv) {
 			
 			if (firstRowDiv == null) {
-				t.rowDivs.push(rowDiv);
+				t.cachedRowDivs.push(rowDiv);
 				t.innerDiv.append(rowDiv);
 			}
 			else {
-				t.rowDivs.splice(0, 0, rowDiv); // insert at beginning of row
+				t.cachedRowDivs.splice(0, 0, rowDiv); // insert at beginning of row
 				t.innerDiv.insertBefore(rowDiv, firstRowDiv);
 			}
 		});
@@ -550,7 +550,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 		var t = this;
 
 		var lastRendered = this._addDivsWithAddFunc(level + 1, startIndex, startPos, numColumns, heightToAdd, true, function (rowDiv) {
-			t.rowDivs.push(rowDiv);
+			t.cachedRowDivs.push(rowDiv);
 			t.innerDiv.append(rowDiv);
 		});
 		
