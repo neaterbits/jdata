@@ -671,7 +671,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 	/**
 	 * Helper to add the items in one gallery row
 	 */
-	this._addRowItems = function(level, rowDiv, firstItemIndex, itemsThisRow, numRowsTotal, rowWidth, makeElement, addElement) {
+	this._addRowItems = function(level, rowDiv, indexOfFirstInRow, itemsThisRow, numRowsTotal, rowWidth, makeElement, addElement) {
 
 		var itemWidth = null;
 		var itemHeight = null;
@@ -713,7 +713,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 		
 
 		for (var j = 0; j < itemsThisRow; ++ j) {
-			var index = firstItemIndex + j;
+			var index = indexOfFirstInRow + j;
 
 			var itemElement = makeElement(index, this.provisionalDataArray[index], itemWidth, itemHeight);
 
