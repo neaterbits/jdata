@@ -696,6 +696,11 @@ public class LuceneItemIndex implements ItemIndex {
 			query = DoublePoint.newExactQuery(fieldName, ((BigDecimal)value).doubleValue());
 			break;
 			
+		case ENUM:
+			query = new TermQuery(new Term(fieldName, ((Enum<?>)value).name()));
+			break;
+			
+			
 		default:
 			throw new UnsupportedOperationException("Unknown attribute type: " + attributeType);
 		}
@@ -776,7 +781,6 @@ public class LuceneItemIndex implements ItemIndex {
 
 		}
 		else {
-
 			rangeQuery = IntPoint.newRangeQuery(fieldName, range.getLowerValue() + 1, range.getUpperValue() - 1);
 		
 		}
