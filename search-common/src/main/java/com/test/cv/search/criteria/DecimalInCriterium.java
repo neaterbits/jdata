@@ -6,7 +6,7 @@ import com.test.cv.model.ItemAttribute;
 
 public class DecimalInCriterium extends InCriterium<BigDecimal> {
 
-	public DecimalInCriterium(ItemAttribute attribute, BigDecimal[] values) {
-		super(attribute, values);
+	public DecimalInCriterium(ItemAttribute attribute, BigDecimal[] values, boolean includeItemsWithNoValue) {
+		super(attribute, values, includeItemsWithNoValue);
 	}
 }

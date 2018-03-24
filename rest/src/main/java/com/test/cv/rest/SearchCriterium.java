@@ -6,6 +6,8 @@ public class SearchCriterium {
 	
 	// either a values ranges
 	private SearchCriteriumValue [] values;
+	private Boolean otherSelected;
+	
 	private SearchRange [] ranges;
 	
 	public String getType() {
@@ -23,13 +25,21 @@ public class SearchCriterium {
 	public void setAttribute(String attribute) {
 		this.attribute = attribute;
 	}
-
+	
 	SearchCriteriumValue[] getValues() {
 		return values;
 	}
 
 	void setValues(SearchCriteriumValue[] values) {
 		this.values = values;
+	}
+
+	public Boolean getOtherSelected() {
+		return otherSelected;
+	}
+
+	public void setOtherSelected(Boolean otherSelected) {
+		this.otherSelected = otherSelected;
 	}
 
 	SearchRange[] getRanges() {

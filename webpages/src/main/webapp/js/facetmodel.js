@@ -68,8 +68,7 @@ function FacetModel(serviceUrl, allowCrossOrigin) {
 
 					if (typeof element.noAttributeValueCount !== 'undefined' && element.noAttributeValueCount > 0) {
 						// There are elements that have no value for this element, add an element for this too
-						// TODO send as criteria, may require new kind of element
-						onArrayElement('attributeValue', { value : 'Other', matchCount : element.noAttributeValueCount }, attrValueIdx, valuesArrayCur);
+						onArrayElement('attributeOther', { matchCount : element.noAttributeValueCount }, attrValueIdx, valuesArrayCur);
 					}
 				}
 				else if (typeof element.ranges !== 'undefined') {

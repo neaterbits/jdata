@@ -253,22 +253,26 @@ public class SearchService extends BaseService {
 		}
 		else if (searchCriterium.getValues() != null) {
 			
+			final boolean includeItemsWithNoValue = searchCriterium.getOtherSelected() != null
+					? searchCriterium.getOtherSelected()
+				: false;
+			
 			switch (attribute.getAttributeType()) {
 			case STRING:
-				criterium = new StringInCriterium(attribute, convertArray(searchCriterium.getValues(), length -> new String[length], o -> (String)o.getValue()));
+				criterium = new StringInCriterium(attribute, convertArray(searchCriterium.getValues(), length -> new String[length], o -> (String)o.getValue()), includeItemsWithNoValue);
 				break;
 
 			case INTEGER:
-				criterium = new IntegerInCriterium(attribute, convertArray(searchCriterium.getValues(), length -> new Integer[length], o -> (Integer)o.getValue()));
+				criterium = new IntegerInCriterium(attribute, convertArray(searchCriterium.getValues(), length -> new Integer[length], o -> (Integer)o.getValue()), includeItemsWithNoValue);
 				break;
 
 			case DECIMAL:
-				criterium = new DecimalInCriterium(attribute, convertArray(searchCriterium.getValues(), length -> new BigDecimal[length], o -> (BigDecimal)o.getValue()));
+				criterium = new DecimalInCriterium(attribute, convertArray(searchCriterium.getValues(), length -> new BigDecimal[length], o -> (BigDecimal)o.getValue()), includeItemsWithNoValue);
 				break;
 				
 			case ENUM:
 				// Find enum-class from attribute
-				criterium = makeEnumCriterium(attribute, searchCriterium);
+				criterium = makeEnumCriterium(attribute, searchCriterium, includeItemsWithNoValue);
 				break;
 
 			default:
@@ -283,10 +287,13 @@ public class SearchService extends BaseService {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static EnumInCriterium<?> makeEnumCriterium(ItemAttribute attribute, SearchCriterium searchCriterium) {
+	private static EnumInCriterium<?> makeEnumCriterium(ItemAttribute attribute, SearchCriterium searchCriterium, boolean includeItemsWithNoValue) {
 		final Class enumClass = attribute.getAttributeValueClass();
 
-		return new EnumInCriterium<>(attribute, convertArray(searchCriterium.getValues(), length -> new Enum[length], o -> (Enum)Enum.valueOf(enumClass, (String)o.getValue())));
+		return new EnumInCriterium<>(
+				attribute,
+				convertArray(searchCriterium.getValues(), length -> new Enum[length], o -> (Enum)Enum.valueOf(enumClass, (String)o.getValue())),
+				includeItemsWithNoValue);
 	}
 	
 	private static <T, R> R [] convertArray(T [] input, Function<Integer, R []> createArray, Function<T, R> convert) {

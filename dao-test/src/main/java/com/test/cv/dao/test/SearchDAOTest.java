@@ -164,7 +164,7 @@ public abstract class SearchDAOTest extends TestCase {
 			 
 			assertThat(widthAttribute).isNotNull();
 			 
-			DecimalInCriterium widthCriterium = new DecimalInCriterium(widthAttribute, new BigDecimal [] { new BigDecimal("30.4"), new BigDecimal("32.8") });
+			DecimalInCriterium widthCriterium = new DecimalInCriterium(widthAttribute, new BigDecimal [] { new BigDecimal("30.4"), new BigDecimal("32.8") }, false);
 			
 			ISearchCursor search = searchDAO.search(
 					Arrays.asList(Snowboard.class),
@@ -178,7 +178,7 @@ public abstract class SearchDAOTest extends TestCase {
 			assertThat(itemIds.contains(itemId2)).isTrue();
 			
 			// match only one
-			widthCriterium = new DecimalInCriterium(widthAttribute, new BigDecimal [] { new BigDecimal("32.4"), new BigDecimal("32.8") });
+			widthCriterium = new DecimalInCriterium(widthAttribute, new BigDecimal [] { new BigDecimal("32.4"), new BigDecimal("32.8") }, false);
 			
 			search = searchDAO.search(
 					Arrays.asList(Snowboard.class),

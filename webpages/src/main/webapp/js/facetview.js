@@ -111,6 +111,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 						
 						cur = t._addFacetAttributeRange(viewElementFactory, cur, element);
 					}
+					else if (kind === 'attributeOther') {
+
+						cur = t._addFacetOther(viewElementFactory, cur, element);
+					}
 					else {
 						throw "Neither type nor attribute: " + kind;
 					}
@@ -266,6 +270,30 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		viewElementFactory.setCheckboxOnClick(attributeValue.checkboxItem, onCheckboxClicked);
 	}
 
+	this._addFacetOther = function(viewElementFactory, cur, element, index) {
+		
+		// Attribute within a type in list of attributes
+		var attributeElement = viewElementFactory.createAttributeValueElement(
+				cur.getViewElement(),
+				'Other',
+				element.matchCount,
+				false,
+				true);
+		
+		var attributeValue = new FacetAttributeOther(
+								viewElementFactory,
+								cur.getModelType(),
+								cur.getAttributeId(),
+								attributeElement.listItem,
+								attributeElement.checkboxItem);
+		
+		this._setAttributeCheckboxListener(viewElementFactory, attributeValue, false);
+				
+		cur.addValue(attributeValue, index);
+
+		return attributeValue;
+	}
+	
 	/**
 	 * Refresh from a new model, removing adding new types or attributes, removing those no longer present.
 	 * We do that without rebuilding the whole thing, this way current selection state is maintained
@@ -553,6 +581,9 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 								}
 								
 								criterium.ranges.push(range);
+							}
+							else if (value.getClassName() == 'FacetAttributeOther') {
+								criterium.otherSelected = true;
 							}
 						}
 					}
@@ -1100,7 +1131,13 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	FacetAttributeRange.prototype.getModelRange = function() {
 		return this.modelRange;
 	}
-	
+
+	function FacetAttributeOther(viewElementFactory, modelType, attributeId, listItem, checkboxItem) {
+		FacetAttributeValue.call(this, 'FacetAttributeOther', viewElementFactory, modelType, attributeId, listItem, checkboxItem);
+	}
+
+	FacetAttributeOther.prototype = Object.create(FacetAttributeValue.prototype);
+
 	function isNotNull(obj) {
 		return typeof obj !== 'undefined' && obj != null;
 	}
