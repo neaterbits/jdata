@@ -21,6 +21,9 @@ import com.test.cv.model.Item;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.TypeInfo;
 import com.test.cv.rest.ItemService;
+import com.test.cv.rest.LoginService;
+import com.test.cv.rest.LoginService.CheckCodeResponse;
+import com.test.cv.rest.LoginService.LoginResponse;
 import com.test.cv.rest.SearchCriterium;
 import com.test.cv.rest.SearchResult;
 import com.test.cv.rest.SearchService;
@@ -211,6 +214,38 @@ public class JettyRunServlet {
 				} catch (ItemStorageException ex) {
 					throw new ServletException("Failed to store item", ex);
 				}
+			}
+		}
+	}
+	
+	public static class LoginServlet extends HttpServlet {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+			if (req.getPathInfo() != null && req.getPathInfo().contains("/checkphoneno")) {
+				// This is register or login scenario, check if user exist
+				final LoginService loginService = new LoginService();
+				
+				final LoginResponse response =  loginService.checkPhoneNo(req.getParameter("phoneNo"));
+
+				final ObjectMapper mapper = new ObjectMapper();
+				mapper.writeValue(resp.getOutputStream(), response);
+				
+			}
+			else if (req.getPathInfo() != null && req.getPathInfo().contains("/checkcode")) {
+				// This is register or login scenario, check if user exist
+				final LoginService loginService = new LoginService();
+				
+				final CheckCodeResponse response =  loginService.checkCode(req.getParameter("phoneNo"), req.getParameter("code"));
+
+				final ObjectMapper mapper = new ObjectMapper();
+				mapper.writeValue(resp.getOutputStream(), response);
+			}
+			else {
+				super.doPost(req, resp);
 			}
 		}
 	}
