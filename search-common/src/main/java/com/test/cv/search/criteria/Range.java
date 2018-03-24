@@ -28,4 +28,10 @@ public abstract class Range<T extends Comparable<T>> {
 	public boolean includeUpper() {
 		return includeUpper;
 	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + " [lowerValue=" + lowerValue + ", includeLower=" + includeLower + ", upperValue=" + upperValue
+				+ ", includeUpper=" + includeUpper + "]";
+	}
 }
