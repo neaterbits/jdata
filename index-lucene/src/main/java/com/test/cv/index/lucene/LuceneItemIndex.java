@@ -764,24 +764,47 @@ public class LuceneItemIndex implements ItemIndex {
 	private static Query createIntegerRangeQuery(String fieldName, IntegerRange range) {
 
 		final Query rangeQuery;
+
+		final int lowerValue;
+		final int upperValue;
+		final boolean includeLower;
+		final boolean includeUpper;
 		
-		if (range.includeLower() && range.includeUpper()) {
+		if (range.getLowerValue() == null) {
+			lowerValue = 0;
+			includeLower = true;
+		}
+		else {
+			lowerValue = range.getLowerValue();
+			includeLower = range.includeLower();
+		}
+		
+		if (range.getUpperValue() == null) {
+			upperValue = Integer.MAX_VALUE;
+			includeUpper = true;
+		}
+		else {
+			upperValue = range.getUpperValue();
+			includeUpper = range.includeUpper();
+		}
+		
+		if (includeLower && includeUpper) {
 
-			rangeQuery = IntPoint.newRangeQuery(fieldName, range.getLowerValue(), range.getUpperValue());
+			rangeQuery = IntPoint.newRangeQuery(fieldName, lowerValue, upperValue);
 			
 		}
-		else if (range.includeLower()) {
+		else if (includeLower) {
 			
-			rangeQuery = IntPoint.newRangeQuery(fieldName, range.getLowerValue(), range.getUpperValue() - 1);
+			rangeQuery = IntPoint.newRangeQuery(fieldName, lowerValue, upperValue - 1);
 
 		}
-		else if (range.includeUpper()) {
+		else if (includeUpper) {
 
-			rangeQuery = IntPoint.newRangeQuery(fieldName, range.getLowerValue() + 1, range.getUpperValue());
+			rangeQuery = IntPoint.newRangeQuery(fieldName, lowerValue + 1, upperValue);
 
 		}
 		else {
-			rangeQuery = IntPoint.newRangeQuery(fieldName, range.getLowerValue() + 1, range.getUpperValue() - 1);
+			rangeQuery = IntPoint.newRangeQuery(fieldName, lowerValue + 1, upperValue - 1);
 		
 		}
 
@@ -790,29 +813,53 @@ public class LuceneItemIndex implements ItemIndex {
 	
 	private static Query createDecimalRangeQuery(String fieldName, DecimalRange range) {
 		final Query rangeQuery;
+
+		final BigDecimal lowerValue;
+		final BigDecimal upperValue;
+		final boolean includeLower;
+		final boolean includeUpper;
 		
-		if (range.includeLower() && range.includeUpper()) {
+		if (range.getLowerValue() == null) {
+			lowerValue = BigDecimal.ZERO;
+			includeLower = true;
+		}
+		else {
+			lowerValue = range.getLowerValue();
+			includeLower = range.includeLower();
+		}
+		
+		if (range.getUpperValue() == null) {
+			// TODO better solution? Just set a large bigdecimal value
+			upperValue = new BigDecimal("99999999999999999999999");
+			includeUpper = true;
+		}
+		else {
+			upperValue = range.getUpperValue();
+			includeUpper = range.includeUpper();
+		}
+		
+		if (includeLower && includeUpper) {
 			rangeQuery = DoublePoint.newRangeQuery(
 					fieldName,
-					range.getLowerValue().doubleValue(),
-					range.getUpperValue().doubleValue());
+					lowerValue.doubleValue(),
+					upperValue.doubleValue());
 		}
-		else if (range.includeLower()) {
+		else if (includeLower) {
 			rangeQuery = new BooleanQuery.Builder()
 					.add(DoublePoint.newRangeQuery(
 						fieldName,
-						range.getLowerValue().doubleValue(),
-						range.getUpperValue().doubleValue()), Occur.MUST)
-					.add(DoublePoint.newExactQuery(fieldName, range.getUpperValue().doubleValue()), Occur.MUST_NOT)
+						lowerValue.doubleValue(),
+						upperValue.doubleValue()), Occur.MUST)
+					.add(DoublePoint.newExactQuery(fieldName, upperValue.doubleValue()), Occur.MUST_NOT)
 					.build();
 		}
-		else if (range.includeUpper()) {
+		else if (includeUpper) {
 			rangeQuery = new BooleanQuery.Builder()
 					.add(DoublePoint.newRangeQuery(
 						fieldName,
-						range.getLowerValue().doubleValue(),
-						range.getUpperValue().doubleValue()), Occur.MUST)
-					.add(DoublePoint.newExactQuery(fieldName, range.getLowerValue().doubleValue()), Occur.MUST_NOT)
+						lowerValue.doubleValue(),
+						upperValue.doubleValue()), Occur.MUST)
+					.add(DoublePoint.newExactQuery(fieldName, lowerValue.doubleValue()), Occur.MUST_NOT)
 					.build();
 			
 		}
@@ -820,10 +867,10 @@ public class LuceneItemIndex implements ItemIndex {
 			rangeQuery = new BooleanQuery.Builder()
 					.add(DoublePoint.newRangeQuery(
 						fieldName,
-						range.getLowerValue().doubleValue(),
-						range.getUpperValue().doubleValue()), Occur.MUST)
-					.add(DoublePoint.newExactQuery(fieldName, range.getLowerValue().doubleValue()), Occur.MUST_NOT)
-					.add(DoublePoint.newExactQuery(fieldName, range.getUpperValue().doubleValue()), Occur.MUST_NOT)
+						lowerValue.doubleValue(),
+						upperValue.doubleValue()), Occur.MUST)
+					.add(DoublePoint.newExactQuery(fieldName, lowerValue.doubleValue()), Occur.MUST_NOT)
+					.add(DoublePoint.newExactQuery(fieldName, upperValue.doubleValue()), Occur.MUST_NOT)
 					.build();
 			
 		}
