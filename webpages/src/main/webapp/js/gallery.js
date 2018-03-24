@@ -216,14 +216,14 @@ function Gallery(divId, config, galleryModel, galleryView) {
 		this.enter(level, 'computeAndRender', []);
 
 		// Get the width of element to compute how many elements there are room for
-		var itemsPerRow = this.widthMode.computeNumColumns(this.config, this.columnSpacing, this._getVisibleWidth());
+		var numColumns = this.widthMode.computeNumColumns(this.config, this.columnSpacing, this._getVisibleWidth());
 		
-		this.itemsPerRow = itemsPerRow;
+		this.numColumns = numColumns;
 		
-		this.log(level, 'Thumbs per row: ' + itemsPerRow);
+		this.log(level, 'Thumbs per row: ' + numColumns);
 		
 		// Have thumbs per row, now compute height
-		var height = this._computeHeight(itemsPerRow);
+		var height = this._computeHeight(numColumns);
 		
 		this.height = height;
 		
@@ -257,7 +257,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 		// Set the offset of each element to that, but what about sizes? Once we scroll an element out, we must add a new one
 		
 		// Start at the current ones
-		this._addDivs(level + 1, 0, 0, itemsPerRow, this._getVisibleHeight());
+		this._addDivs(level + 1, 0, 0, numColumns, this._getVisibleHeight());
 		
 		// Add scroll listener
 		this._getOuterElement().addEventListener('scroll', function(e) {
@@ -312,11 +312,11 @@ function Gallery(divId, config, galleryModel, galleryView) {
 			// Call external functions to load images
 			this.galleryModel.getCompleteData(firstIndex, count, function(completeDataArray) {
 				
-				var rowNo = firstIndex / t.itemsPerRow;
+				var rowNo = firstIndex / t.numColumns;
 
 				var rowWidth = t._getRowWidth();
 				var numRows = t.rowDivs.length;
-				var numRowsTotal = ((t._getTotalNumberOfItems() - 1) / t.itemsPerRow) + 1;
+				var numRowsTotal = ((t._getTotalNumberOfItems() - 1) / t.numColumns) + 1;
 
 				for (var row = 0, i = firstIndex; row < numRows && i < count; ++ row) {
 					
@@ -389,7 +389,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 			this.log(level, 'Scrolled to view partly above previous, must add ' + heightToAdd);
 
 			// Must add items before this one, so must be prepended to the divs already shown
-			this._prependDivs(level + 1, this.firstIndex - 1, this.firstY, this.itemsPerRow, heightToAdd);
+			this._prependDivs(level + 1, this.firstIndex - 1, this.firstY, this.numColumns, heightToAdd);
 		}
 		else if (curY > this.lastY) {
 			// We are scrolling downwards totally out of visible area, just add items for the pos in question
@@ -408,7 +408,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 			// just add new ones below current ones.
 
 			// Start-index to add is the one immediately after last-index
-			this._addDivs(level + 1, this.lastIndex + 1, this.lastY, this.itemsPerRow, heightToAdd);
+			this._addDivs(level + 1, this.lastIndex + 1, this.lastY, this.numColumns, heightToAdd);
 			
 			// Do not update this.firstIndex or this.firstY since we are appending
 			// TODO perhaps remove rows that have scrolled out of sight
@@ -443,7 +443,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 		this.firstIndex = elem.firstItemIndex;
 		this.firstY = curY;
 
-		this._addDivs(level + 1, elem.firstItemIndex, elem.firstRowYPos, this.itemsPerRow, this._getVisibleHeight());
+		this._addDivs(level + 1, elem.firstItemIndex, elem.firstRowYPos, this.numColumns, this._getVisibleHeight());
 		
 		this.exit(level, 'redrawCompletelyAt');
 	};
@@ -457,15 +457,15 @@ function Gallery(divId, config, galleryModel, galleryView) {
 		
 		var elem = null;
 		
-		for (var i = 0; i < this.widths.length; i += this.itemsPerRow) {
-			var itemsPerRow = i + this.itemsPerRow >= this.widths.length
+		for (var i = 0; i < this.widths.length; i += this.numColumns) {
+			var numColumns = i + this.numColumns >= this.widths.length
 				? this.widths.length - i
-				: this.itemsPerRow; 
+				: this.numColumns; 
 			
 			var nextY = y;
 			nextY += this.rowSpacing;
 			
-			var rowMaxHeight = this._findRowMaxItemHeight(i, itemsPerRow);
+			var rowMaxHeight = this._findRowMaxItemHeight(i, numColumns);
 			
 			nextY += rowMaxHeight;
 			
@@ -486,28 +486,28 @@ function Gallery(divId, config, galleryModel, galleryView) {
 	 * 
 	 * startIndex - element to start adding upwards
 	 * startPos - y position of where to start adding, eg bottom border of where to start add
-	 * itemsPerRow - items in a row
+	 * numColumns - items in a row
 	 * heightToAdd - height of items to add
 	 * 
 	 */
-	this._prependDivs = function(level, startIndex, startPos, itemsPerRow, heightToAdd) {
+	this._prependDivs = function(level, startIndex, startPos, numColumns, heightToAdd) {
 		
-		this.enter(level, 'prependDivs', [ 'startIndex', startIndex, 'startPos', startPos, 'itemsPerRow', itemsPerRow, 'heightToAdd', heightToAdd ])
+		this.enter(level, 'prependDivs', [ 'startIndex', startIndex, 'startPos', startPos, 'numColumns', numColumns, 'heightToAdd', heightToAdd ])
 		
 		// Reuse _addDivs by computing the height of rows we must add and then add from there 
 		var t = this;
 		
-		var startIndexPositionOnRow = startIndex % itemsPerRow;
+		var startIndexPositionOnRow = startIndex % numColumns;
 		
-		if (startIndexPositionOnRow != itemsPerRow - 1) {
-			throw "startIndex should be last item on a row: idx " + startIndexPositionOnRow + " / itemsPerRow " + itemsPerRow;
+		if (startIndexPositionOnRow != numColumns - 1) {
+			throw "startIndex should be last item on a row: idx " + startIndexPositionOnRow + " / numColumns " + numColumns;
 		}
 		
 		var rowItem = null;
 
-		var firstItemOnRow = startIndex - itemsPerRow + 1;
+		var firstItemOnRow = startIndex - numColumns + 1;
 		
-		if (firstItemOnRow % itemsPerRow != 0) {
+		if (firstItemOnRow % numColumns != 0) {
 			throw "Expected to be first item";
 		}
 
@@ -516,7 +516,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 				? null
 				: this.rowDivs[0];
 
-		var lastRendered = this._addDivsWithAddFunc(level + 1, firstItemOnRow, startPos, itemsPerRow, heightToAdd, false, function (rowDiv) {
+		var lastRendered = this._addDivsWithAddFunc(level + 1, firstItemOnRow, startPos, numColumns, heightToAdd, false, function (rowDiv) {
 			
 			if (firstRowDiv == null) {
 				t.rowDivs.push(rowDiv);
@@ -539,17 +539,17 @@ function Gallery(divId, config, galleryModel, galleryView) {
 	 * 
 	 * startIndex - index of element to start at
 	 * startPos - the y position we should start rendering element at
-	 * itemsPerRow - the number of items that are rendered per row
+	 * numColumns - the number of items that are rendered per row
 	 * visibleHeight - the height of visible area we shall update,
 	 *                 which might be less than the real visible area if we are just adding items to a partly updated area
 	 */
-	this._addDivs = function(level, startIndex, startPos, itemsPerRow, heightToAdd) {
+	this._addDivs = function(level, startIndex, startPos, numColumns, heightToAdd) {
 		
-		this.enter(level, 'addDivs', [ 'level',  level, 'startIndex', startIndex, 'startPos', startPos, 'itemsPerRow', itemsPerRow, 'heightToAdd', heightToAdd]);
+		this.enter(level, 'addDivs', [ 'level',  level, 'startIndex', startIndex, 'startPos', startPos, 'numColumns', numColumns, 'heightToAdd', heightToAdd]);
 	
 		var t = this;
 
-		var lastRendered = this._addDivsWithAddFunc(level + 1, startIndex, startPos, itemsPerRow, heightToAdd, true, function (rowDiv) {
+		var lastRendered = this._addDivsWithAddFunc(level + 1, startIndex, startPos, numColumns, heightToAdd, true, function (rowDiv) {
 			t.rowDivs.push(rowDiv);
 			t.innerDiv.append(rowDiv);
 		});
@@ -567,12 +567,12 @@ function Gallery(divId, config, galleryModel, galleryView) {
 	}
 
 	
-	this._addDivsWithAddFunc = function(level, startIndex, startPos, itemsPerRow, heightToAdd, downwards, addRowDiv) {
+	this._addDivsWithAddFunc = function(level, startIndex, startPos, numColumns, heightToAdd, downwards, addRowDiv) {
 
 		this.enter(level, 'addDivsWithAddFunc', [
 			'startIndex', startIndex,
 			'startPos', startPos,
-			'itemsPerRow', itemsPerRow,
+			'numColumns', numColumns,
 			'heightToAdd', heightToAdd,
 			'downwards', downwards ]);
 		
@@ -584,19 +584,19 @@ function Gallery(divId, config, galleryModel, galleryView) {
 		
 		var y = startPos;
 		
-		var numRows = ((this._getTotalNumberOfItems() - 1) / itemsPerRow) + 1;
-		var rowNo = startIndex / itemsPerRow;
+		var numRows = ((this._getTotalNumberOfItems() - 1) / numColumns) + 1;
+		var rowNo = startIndex / numColumns;
 
 		var rowWidth = this._getRowWidth();
 
 		var lastRenderedElement = null;
 		
-		for (var i = startIndex; i < this._getTotalNumberOfItems(); i += (downwards ? itemsPerRow : -itemsPerRow)) {
+		for (var i = startIndex; i < this._getTotalNumberOfItems(); i += (downwards ? numColumns : -numColumns)) {
 
 			// Last row might not have a full number of items
-			var itemsThisRow = i + itemsPerRow >= this._getTotalNumberOfItems()
+			var itemsThisRow = i + numColumns >= this._getTotalNumberOfItems()
 				? this.widths.length - i
-				: itemsPerRow; 
+				: numColumns; 
 			
 			var rowDiv = document.createElement('div');
 			
@@ -806,8 +806,8 @@ function Gallery(divId, config, galleryModel, galleryView) {
 	}
 
 	
-	this._computeHeight = function(itemsPerRow) {
-		return this.heightMode.computeHeight(this.config, this.rowSpacing, itemsPerRow, this._getTotalNumberOfItems());
+	this._computeHeight = function(numColumns) {
+		return this.heightMode.computeHeight(this.config, this.rowSpacing, numColumns, this._getTotalNumberOfItems());
 	}
 	
 	this._getOuterElement = function() {
