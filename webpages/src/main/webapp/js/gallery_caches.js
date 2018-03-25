@@ -49,7 +49,7 @@ function GalleryCacheBase(config, galleryModel, galleryView, initialTotalNumberO
 	else {
 		this.rowSpacing = config.rowSpacing;
 	}
-
+	
 	// Some common data for all these views
 
 	// The row divs (ie DOM div elements that each hold a row) that are currently
@@ -131,12 +131,21 @@ GalleryCacheBase.prototype._getVisibleWidth = function() {
 };
 
 GalleryCacheBase.prototype._getVisibleHeight = function() {
-	return this.renderDiv.clientHeight;
+	return this.outerDiv.clientHeight;
 };
 
 // Set the div that we are going to render into (ie. add row DOM elements to)
-GalleryCacheBase.prototype.setRenderDiv = function(renderDiv) {
+GalleryCacheBase.prototype.setGalleryDivs = function(outerDiv, renderDiv) {
+	this.outerDiv = outerDiv;
 	this.renderDiv = renderDiv;
+}
+
+GalleryCacheBase.prototype._getRenderDiv = function() {
+	return this.renderDiv;
+}
+
+GalleryCacheBase.prototype._setScrollableHeight = function(height) {
+	this.renderDiv.style.height = height + 'px';
 }
 
 GalleryCacheBase.prototype._makeProvisionalElement = function (index, itemWidth, itemHeight) {
@@ -227,7 +236,7 @@ GalleryCacheBase.prototype._prependDivs = function(level, startIndex, startPos, 
 				}
 				else {
 					t.cachedRowDivs.splice(0, 0, rowDiv); // insert at beginning of row
-					t.innerDiv.insertBefore(rowDiv, firstRowDiv);
+					t._renderDiv.insertBefore(rowDiv, firstRowDiv);
 				}
 			},
 			function(index, itemWidth, itemHeight) {
@@ -270,10 +279,14 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 	
 	// Add divs until there is not more room in display or there are no more items
 	
-	
 	var y = startPos;
 	
 	var numRows = ((this._getTotalNumberOfItems() - 1) / numColumns) + 1;
+
+	if (startIndex % numColumns != 0) {
+		throw "Start index not at start of column: " + startIndx + "/" + numColumns;
+	}
+
 	var rowNo = startIndex / numColumns;
 
 	var rowWidth = this._getRowWidth();
@@ -323,6 +336,7 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 		y += (downwards ? rowHeight : -rowHeight);
 		heightAdded += rowHeight;
 
+		console.log('_addDivsWith')
 		if (heightAdded >= heightToAdd) {
 
 			lastRenderedElement = { 'index' : i + itemsThisRow - 1, 'yPos' :  y };
@@ -368,11 +382,14 @@ GalleryCacheBase.prototype._computeColumnSpacing = function(rowWidth, totalRowIt
 GalleryCacheBase.prototype._getRowHeight = function(rowMaxHeight, rowNo, numRows) {
 	var rowHeigth;
 
-	if (rowNo == 0 || rowNo == numRows - 1) {
-		rowHeight = rowMaxHeight + this.rowSpacing + (this.rowSpacing / 2);
+	rowHeight = rowMaxHeight + this.rowSpacing;
+	
+	// TODO is this correct?
+	if (rowNo == 0) {
+		rowHeight += this.topSpacing;
 	}
-	else {
-		rowHeight = rowMaxHeight + this.rowSpacing;
+	else if (rowNo == numRows - 1) {
+		rowHeight += this.bottomSpacing;
 	}
 
 	return rowHeight;

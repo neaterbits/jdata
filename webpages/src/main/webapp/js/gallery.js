@@ -134,16 +134,12 @@ function Gallery(divId, config, galleryModel, galleryView) {
 	this.firstY = 0; // y position in virtual fiv of first visible element
 
 	// Store functions for later
-	var outerDiv = document.getElementById(divId);
-	outerDiv.setAttribute('style', 'overflow:scroll');
+	this.outerDiv = document.getElementById(divId);
+	this.outerDiv.setAttribute('style', 'overflow:scroll');
 
 	// Create inner scrollable area and add it to outer div
 	this.innerDiv = document.createElement('div');
 	document.getElementById(divId).append(this.innerDiv);
-
-	this.upperPlaceHolder = document.createElement('div');
-	
-	this.innerDiv.append(this.upperPlaceHolder);
 
 	if (typeof config.width !== 'undefined') {
 		this.widthMode = new GalleryModeWidthSpecific();
@@ -166,12 +162,10 @@ function Gallery(divId, config, galleryModel, galleryView) {
 	}
 
 	// Set inner and outer dimensions
-	var outerDiv = document.getElementById(this.divId);
-
-	outerDiv.style.width = '100%';
-	outerDiv.style.height = '100%';
-	outerDiv.style.overflow = 'auto';
-	outerDiv.style['background-color'] = 'blue';
+	this.outerDiv.style.width = '100%';
+	this.outerDiv.style.height = '100%';
+	this.outerDiv.style.overflow = 'auto';
+	this.outerDiv.style['background-color'] = 'blue';
 	
 	this.innerDiv.style.width = '100%';
 	this.innerDiv.style.height = '100%';
@@ -181,7 +175,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 
 	// Add scroll listener. cache may not have been created yet but ought to have been
 	// before user starts scrolling
-	outerDiv.addEventListener('scroll', function(e) {
+	this.outerDiv.addEventListener('scroll', function(e) {
 		// figure out how far we have scrolled into the div
 		var clientRects = t.innerDiv.getBoundingClientRect(); // innerDiv.getClientRects()[0];
 		var viewYPos = - (clientRects.top - t.innerDiv.offsetTop);
@@ -208,7 +202,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 			// Initial refresh
 			this.cache = new GalleryCacheAllProvisionalSomeComplete(this.config, this.galleryModel, this.galleryView, totalNumberOfItems);
 			
-			this.cache.setRenderDiv(this.innerDiv);
+			this.cache.setGalleryDivs(this.outerDiv, this.innerDiv);
 		}
 		else {
 			// Just refresh existing cache

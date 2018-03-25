@@ -15,6 +15,17 @@ GalleryCacheAllProvisionalSomeComplete.prototype = Object.create(GalleryCacheBas
 GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, totalNumberOfItems, widthMode, heightMode) {
 	var t = this;
 
+	// Placeholder div at the beginnig which we can use set the start
+	// of rendered divs without adding all divs from the beginning and down
+	// so with a million entries in the virtual data array and visible area in the middle of this,
+	// we just adjust height of placeholder to be up to visible area, then add gallery elements to view.
+	// As the user scrolls, we update this height and replace the elements to view
+	
+	if (typeof this.upperPlaceHolder === 'undefined') {
+		this.upperPlaceHolder = document.createElement('div');
+		this._getRenderDiv().append(this.upperPlaceHolder);
+	}
+
 	this.totalNumberOfItems = totalNumberOfItems;
 	
 	this.galleryModel.getProvisionalData(0, totalNumberOfItems, function(provisionalDataArray) {
@@ -36,7 +47,9 @@ GalleryCacheAllProvisionalSomeComplete.prototype.render = function(level, widthM
 	// Have thumbs per row, now compute height
 	var height = this._computeHeight(heightMode, numColumns);
 	
-	this.height = height;
+	// Set height of complete scrollable area, this might have to be adjusted as we scroll
+	// but must be set in order to have scrollbars appear correctly relative to number of elements in virtual array
+	this._setScrollableHeight(height);
 	
 	this.log(level, 'Height: ' + height);
 
@@ -51,8 +64,12 @@ GalleryCacheAllProvisionalSomeComplete.prototype.render = function(level, widthM
 	
 	// Set the offset of each element to that, but what about sizes? Once we scroll an element out, we must add a new one
 	
+	var visibleHeight = this._getVisibleHeight();
+	
+	this.log(level, 'Visible height: ' + visibleHeight);
+	
 	// Start at the current ones
-	this._addProvisionalDivs(level + 1, 0, 0, numColumns, this._getVisibleHeight());
+	this._addProvisionalDivs(level + 1, 0, 0, numColumns, visibleHeight);
 }
 
 
@@ -238,9 +255,9 @@ GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(
 
 	this.enter(level, 'redrawCompletelyAt', [ 'curY', curY ]);
 	
-	var elem = this._findElementPos(level + 1, curY);
+	var posAndIndex = this._findElementYPosAndItemIndex(level + 1, curY);
 	
-	this.log(level, 'Element start index: ' + elem.firstItemIndex + ', removing all rows: ' + this.cachedRowDivs.length);
+	this.log(level, 'Element start index: ' + posAndIndex.rowItemIndex + ', removing all rows: ' + this.cachedRowDivs.length);
 
 	this.upperPlaceHolder.setAttribute('style', 'height : '+ curY + ';');
 
@@ -252,46 +269,67 @@ GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(
 
 		this.log(level, 'Removing element ' + toRemove);
 
-		this._getInnerElement().removeChild(toRemove);
+		this._getRenderDiv().removeChild(toRemove);
 	}
 
 	this.cachedRowDivs = new Array();
 
-	this.firstCachedIndex = elem.firstItemIndex;
+	this.firstCachedIndex = posAndIndex.rowItemIndex;
 	this.firstY = curY;
 
-	this._addProvisionalDivs(level + 1, elem.firstItemIndex, elem.firstRowYPos, this.numColumns, this._getVisibleHeight());
+	this._addProvisionalDivs(level + 1, posAndIndex.rowItemIndex, posAndIndex.rowYPos, this.numColumns, this._getVisibleHeight());
 	
 	this.exit(level, 'redrawCompletelyAt');
 };
 
-GalleryCacheAllProvisionalSomeComplete.prototype._findElementPos = function(level, yPos) {
+
+GalleryCacheAllProvisionalSomeComplete.prototype._findElementYPosAndItemIndex = function(level, yPos) {
 	
 	this.enter(level, 'findElementPos', [ 'yPos', yPos ])
 
 	// Go though heights list until we find the one that intersects with this y pos
 	var y = 0;
-	
+
 	var elem = null;
 	
-	for (var i = 0; i < this.widths.length; i += this.numColumns) {
-		var numColumns = i + this.numColumns >= this.widths.length
-			? this.widths.length - i
+	// We do not know item heights, only an approximation in case of heightHint
+	// so just figure out by multiplying
+	
+	// TODO move this out, should be in modes or other place, maybe in config?
+	var heightOfOneElement = typeof this.config.widthHint !== 'undefined'
+				? this.config.widthHint
+				: this.config.width;
+
+	heightOfOneElement += this.rowSpacing;
+	
+	// Now we have can divide to find start
+	var itemIndex = Math.floor(yPos / heightOfOneElement);
+	var rowYPos = heightOfOneElement * itemIndex;
+	
+	elem = { 'rowYPos' : rowYPos, 'rowItemIndex' : itemIndex };
+
+	/*
+	var y = yPos
+
+	for (var i = 0; i < this.totalNumberOfItems; i += this.numColumns) {
+		var itemsThisRow = i + this.numColumns >= this.totalNumberOfItems
+			? this.totalNumberOfItems - i
 			: this.numColumns; 
 		
 		var nextY = y;
 		nextY += this.rowSpacing;
 		
-		var rowMaxHeight = this._findRowMaxItemHeight(i, numColumns);
+		var rowMaxHeight = this._findRowMaxItemHeight(i, itemsThisRow);
 		
 		nextY += rowMaxHeight;
 		
 		if (y <= yPos && nextY >= yPos) {
-			elem = { 'firstRowYPos' : y, 'firstItemIndex' : i };
+			elem = { 'rowYPos' : y, 'rowItemIndex' : i };
 		}
 		
 		y = nextY;
 	}
+	*/
 
 	this.exit(level, 'findElementPos', JSON.stringify(elem));
 	

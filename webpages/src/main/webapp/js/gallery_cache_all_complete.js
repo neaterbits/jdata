@@ -44,7 +44,7 @@ GalleryCacheAllComplete.prototype._render = function(level, provisionalDataArray
 	var startPos = 0;
 	var numColumns = widthMode.computeNumColumns(this.config, this.columnSpacing, this._getVisibleWidth());
 	var heightToAdd = this._computeHeight(heightMode, numColumns);
-	
+
 	var t = this;
 	
 	this._addDivs(level, startIndex, startPos, numColumns, heightToAdd, function(index, itemWidth, itemHeight) {

@@ -58,6 +58,6 @@ GalleryModeWidthBase.prototype._computeHeight = function(itemHeight, rowSpacing,
 	
 	var numRows = ((totalNumberOfItems - 1) / numColumns) + 1;
 	
-	return numRows * itemHeight + rowSpacing * (numRows + 1);
+	return numRows * (itemHeight + rowSpacing);
 }
 
