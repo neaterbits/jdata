@@ -201,7 +201,7 @@ function SearchView(
 		return div;
 	}
 	
-	function _makeGalleryImageItem(provisionalData, imageData) {
+	function _makeGalleryImageItem(index, provisionalData, imageData) {
 		var div = document.createElement('div');
 		
 		var image = document.createElement('img');

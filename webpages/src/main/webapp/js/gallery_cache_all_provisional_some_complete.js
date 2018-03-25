@@ -9,13 +9,14 @@ function GalleryCacheAllProvisionalSomeComplete(config, galleryModel, galleryVie
 	GalleryCacheBase.call(this, config, galleryModel, galleryView, initialTotalNumberOfItems);
 }
 
-
 GalleryCacheAllProvisionalSomeComplete.prototype = Object.create(GalleryCacheBase.prototype);
 
 //returns approximate complete size of view
 GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, totalNumberOfItems, widthMode, heightMode) {
 	var t = this;
 
+	this.totalNumberOfItems = totalNumberOfItems;
+	
 	this.galleryModel.getProvisionalData(0, totalNumberOfItems, function(provisionalDataArray) {
 		t.provisionalDataArray = provisionalDataArray;
 		// completed metadata build, now compute and rerender
@@ -51,7 +52,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype.render = function(level, widthM
 	// Set the offset of each element to that, but what about sizes? Once we scroll an element out, we must add a new one
 	
 	// Start at the current ones
-	this._addDivs(level + 1, 0, 0, numColumns, this._getVisibleHeight());
+	this._addProvisionalDivs(level + 1, 0, 0, numColumns, this._getVisibleHeight());
 }
 
 
@@ -127,7 +128,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY
 		// just add new ones below current ones.
 
 		// Start-index to add is the one immediately after last-index
-		this._addDivs(level + 1, this.lastCachedIndex + 1, this.lastY, this.numColumns, heightToAdd);
+		this._addProvisionalDivs(level + 1, this.lastCachedIndex + 1, this.lastY, this.numColumns, heightToAdd);
 		
 		// Do not update this.firstCachedIndex or this.firstY since we are appending
 		// TODO perhaps remove rows that have scrolled out of sight
@@ -180,7 +181,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._getImagesIfNotScrolled = funct
 				var rowWidthHeights = getRowItemDivs(rowDiv);
 				
 				t._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
-						function (index, provisionalData, itemWidth, itemHeight) {
+						function (index, itemWidth, itemHeight) {
 					
 							var completeData = completeDataArray[index];
 							var item;
@@ -192,7 +193,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._getImagesIfNotScrolled = funct
 								throw "Image data undefined at: " + index;
 							}
 							else {
-								item = t.galleryView.makeCompleteHTMLElement(provisionalData, completeData);
+								item = t.galleryView.makeCompleteHTMLElement(index, t.provisionalDataArray[index], completeData);
 							}
 							
 							return item;
@@ -249,7 +250,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(
 	this.firstCachedIndex = elem.firstItemIndex;
 	this.firstY = curY;
 
-	this._addDivs(level + 1, elem.firstItemIndex, elem.firstRowYPos, this.numColumns, this._getVisibleHeight());
+	this._addProvisionalDivs(level + 1, elem.firstItemIndex, elem.firstRowYPos, this.numColumns, this._getVisibleHeight());
 	
 	this.exit(level, 'redrawCompletelyAt');
 };

@@ -102,8 +102,8 @@ GalleryCacheBase.prototype.updateDimensions = function() {
 /**
  * Complete refresh, passing in new total number of items from datamodel
  */
-GalleryCacheBase.prototype.refresh = function(totalNumberOfItems) {
-	this.totalNumberOfItems = totalNumberOfItems;
+GalleryCacheBase.prototype.refresh = function(level, totalNumberOfItems, widthMode, heightMode) {
+	throw "Implement in subclass";
 }
 
 //Update y position within scrollable view, startYPos is offset into beginning of that view for first
@@ -139,6 +139,19 @@ GalleryCacheBase.prototype.setRenderDiv = function(renderDiv) {
 	this.renderDiv = renderDiv;
 }
 
+GalleryCacheBase.prototype._makeProvisionalElement = function (index, itemWidth, itemHeight) {
+	return this.galleryView.makeProvisionalHTMLElement(index, this.provisionalDataArray[index]);
+}
+
+GalleryCacheBase.prototype._addProvisionalDivs = function(level, startIndex, startPos, numColumns, heightToAdd) {
+	
+	var t = this;
+	
+	this._addDivs(level, startIndex, startPos, numColumns, heightToAdd, function(index, itemWidth, itemHeight) {
+		return t._makeProvisionalElement(index, itemWidth, itemHeight);
+	});
+}
+
 /**
  * Add divs from current pos downwards, updating this.lastCachedIndex and this.lastY
  * 
@@ -150,16 +163,18 @@ GalleryCacheBase.prototype.setRenderDiv = function(renderDiv) {
  * heightToAdd - the height of scrollable view area we should update
  *                 which might be less than the real visible area if we are just adding items to a partly updated area
  */
-GalleryCacheBase.prototype._addDivs = function(level, startIndex, startPos, numColumns, heightToAdd) {
+GalleryCacheBase.prototype._addDivs = function(level, startIndex, startPos, numColumns, heightToAdd, makeElement) {
 	
 	this.enter(level, 'addDivs', [ 'level',  level, 'startIndex', startIndex, 'startPos', startPos, 'numColumns', numColumns, 'heightToAdd', heightToAdd]);
 
 	var t = this;
-
-	var lastRendered = this._addDivsWithAddFunc(level + 1, startIndex, startPos, numColumns, heightToAdd, true, function (rowDiv) {
+	
+	var addRowDiv = function (rowDiv) {
 		t.cachedRowDivs.push(rowDiv);
 		t.renderDiv.append(rowDiv);
-	});
+	};
+
+	var lastRendered = this._addDivsWithAddFunc(level + 1, startIndex, startPos, numColumns, heightToAdd, true, addRowDiv, makeElement);
 	
 	this.lastCachedIndex = lastRendered.index; // last drawn element
 	this.lastY = lastRendered.yPos;
@@ -204,17 +219,20 @@ GalleryCacheBase.prototype._prependDivs = function(level, startIndex, startPos, 
 			? null
 			: this.cachedRowDivs[0];
 
-	var lastRendered = this._addDivsWithAddFunc(level + 1, firstItemOnRow, startPos, numColumns, heightToAdd, false, function (rowDiv) {
-		
-		if (firstRowDiv == null) {
-			t.cachedRowDivs.push(rowDiv);
-			t.innerDiv.append(rowDiv);
-		}
-		else {
-			t.cachedRowDivs.splice(0, 0, rowDiv); // insert at beginning of row
-			t.innerDiv.insertBefore(rowDiv, firstRowDiv);
-		}
-	});
+	var lastRendered = this._addDivsWithAddFunc(level + 1, firstItemOnRow, startPos, numColumns, heightToAdd, false,
+			function (rowDiv) {
+				if (firstRowDiv == null) {
+					t.cachedRowDivs.push(rowDiv);
+					t.innerDiv.append(rowDiv);
+				}
+				else {
+					t.cachedRowDivs.splice(0, 0, rowDiv); // insert at beginning of row
+					t.innerDiv.insertBefore(rowDiv, firstRowDiv);
+				}
+			},
+			function(index, itemWidth, itemHeight) {
+				return t._makeProvisionalElement(index, itemWidth, itemHeight);
+			});
 
 	this.firstCachedIndex = lastRendered.index; // last drawn element
 	this.firstY = lastRendered.yPos;
@@ -238,7 +256,7 @@ GalleryCacheBase.prototype._prependDivs = function(level, startIndex, startPos, 
  *  - addRowDiv - function(rowDiv) for adding the newly created row <div> element to the DOM 
  */
 
-GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, startPos, numColumns, heightToAdd, downwards, addRowDiv) {
+GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, startPos, numColumns, heightToAdd, downwards, addRowDiv, makeElement) {
 
 	this.enter(level, 'addDivsWithAddFunc', [
 		'startIndex', startIndex,
@@ -266,7 +284,7 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 
 		// Last row might not have a full number of items
 		var itemsThisRow = i + numColumns >= this._getTotalNumberOfItems()
-			? this.widths.length - i
+			? this.totalNumberOfItems - i
 			: numColumns; 
 		
 		var rowDiv = document.createElement('div');
@@ -282,8 +300,8 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 
 		// Add row items to the row
 		var rowHeight = this._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRows, rowWidth,
-				function (index, provisionalData, itemWidth, itemHeight) {
-					return t.galleryView.makeProvisionalHTMLElement(index, provisionalData);
+				function (index, itemWidth, itemHeight) {
+					return makeElement(index, itemWidth, itemHeight);
 				},
 				function (element, indexInRow) {
 					rowDiv.append(element);
@@ -410,7 +428,7 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 	for (var j = 0; j < itemsThisRow; ++ j) {
 		var index = indexOfFirstInRow + j;
 
-		var itemElement = makeElement(index, this.provisionalDataArray[index], itemWidth, itemHeight);
+		var itemElement = makeElement(index, itemWidth, itemHeight);
 
 		// Add to model at relative offsets
 		// this.log(level, 'set spacing to ' + spacing + '/' + rowWidth + '/' + totalRowItemWidths + '/' + itemsThisRow);

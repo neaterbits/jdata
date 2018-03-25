@@ -11,23 +11,57 @@
  *
  */
 
-function GalleryCacheAllComplete(visibleHeight) {
-	GalleryCacheBase.call(this, visibleHeight);
+function GalleryCacheAllComplete(config, galleryModel, galleryView, initialTotalNumberOfItems) {
+	GalleryCacheBase.call(this, config, galleryModel, galleryView, initialTotalNumberOfItems);
 }
 
 GalleryCacheAllComplete.prototype = Object.create(GalleryCacheBase.prototype);
 
-GalleryCacheAllComplete.prototype.updateVisibleHeigth = function(visibleHeight) {
-	// Nothing to do here since we download all data at once and
-	// does not have to add or remove from cache, method here for doc purposes
-	
-	Object.getProtoTypeOf(GalleryCacheAllComplete.prototype).updateVisibleHeigt.call(this, visibleHeight);
-}
 
 // Refresh from data, startYPos in y pos in complete scrollable view
 // returns approximate complete size of view
-GalleryCacheAllComplete.prototype.refresh = function(startYPos) {
+GalleryCacheAllComplete.prototype.refresh = function(level, totalNumberOfItems, widthMode, heightMode) {
 	
+	this.totalNumberOfItems = totalNumberOfItems;
+
+	var t = this;
+
+	this.galleryModel.getProvisionalData(0, totalNumberOfItems, function(provisionalDataArray) {
+
+		// Just read complete data for all elements while we are at it
+		
+		t.galleryModel.getCompleteData(0, totalNumberOfItems, function(completeDataArray) {
+			
+			t._render(level + 1, provisionalDataArray, completeDataArray, widthMode, heightMode);
+		});
+	});
+}
+
+GalleryCacheAllComplete.prototype._render = function(level, provisionalDataArray, completeDataArray, widthMode, heightMode) {
+
+	// Just append all divs straight away
+	var startIndex = 0;
+	var startPos = 0;
+	var numColumns = widthMode.computeNumColumns(this.config, this.columnSpacing, this._getVisibleWidth());
+	var heightToAdd = this._computeHeight(heightMode, numColumns);
+	
+	var t = this;
+	
+	this._addDivs(level, startIndex, startPos, numColumns, heightToAdd, function(index, itemWidth, itemHeight) {
+		var element;
+		
+		var provisionalData = provisionalDataArray[index];
+		var completeData = completeDataArray[index];
+
+		if (completeData == null) {
+			element = t.galleryView.makeProvisionalHTMLElement(index, provisionalData);
+		}
+		else {
+			element = t.galleryView.makeCompleteHTMLElement(index, provisionalData, completeData);
+		}
+		
+		return element;
+	});
 }
 
 // Update y position within scrollable view, startYPos is offset into beginning of that view for first
