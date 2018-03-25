@@ -17,6 +17,18 @@ GalleryModeWidthBase.prototype = Object.create(GalleryModeBase.prototype);
 
 GalleryModeWidthBase.prototype._computeNumberOfColumns = function(itemWidth, columnSpacing, displayAreaWidth) {
 
+	if (typeof itemWidth === 'undefined') {
+		throw "itemWidth is undefined";
+	}
+
+	if (typeof columnSpacing === 'undefined') {
+		throw "columnSpacing is undefined";
+	}
+	
+	if (typeof displayAreaWidth === 'undefined') {
+		throw "Display area width is undefined";
+	}
+	
 	var found = -1;
 	
 	if (itemWidth <= 0) {

@@ -7,6 +7,10 @@
 <script src="js/facetmodel.js" type="text/javascript"></script>
 <script src="js/facetcontroller.js" type="text/javascript"></script>
 
+
+<script src="js/gallery_base.js" type="text/javascript"></script>
+<script src="js/gallery_caches.js" type="text/javascript"></script>
+<script src="js/gallery_cache_all_provisional_some_complete.js" type="text/javascript"></script>
 <script src="js/gallery_mode_base.js" type="text/javascript"></script>
 <script src="js/gallery_mode_width_specific.js" type="text/javascript"></script>
 <script src="js/gallery_mode_width_hint.js" type="text/javascript"></script>

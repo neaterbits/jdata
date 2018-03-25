@@ -59,3 +59,4 @@ GalleryBase.prototype.indent = function(level) {
 	
 	return s;
 }
+

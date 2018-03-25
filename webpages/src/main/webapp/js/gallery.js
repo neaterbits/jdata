@@ -121,25 +121,13 @@ function Gallery(divId, config, galleryModel, galleryView) {
 	this.divId = divId;
 	
 	this.config = config;
-
-	if (typeof config.columnSpacing === 'undefined') {
-		this.columnSpacing = 20;
-	}
-	else {
-		this.columnSpacing = config.columnSpacing;
-	}
 	
-	if (typeof config.rowSpacing === 'undefined') {
-		this.rowSpacing = 20;
-	}
-	else {
-		this.rowSpacing = config.rowSpacing;
-	}
+	// Start out by setting cache to null since we will
+	// create this upon initial refresh with total number of items
 
 	this.galleryModel = galleryModel;
 	this.galleryView = galleryView;
-	this.width = 800;
-
+	
 	this.cachedRowDivs = new Array();
 
 	this.firstCachedIndex = 0; // index of first visible element
@@ -177,646 +165,60 @@ function Gallery(divId, config, galleryModel, galleryView) {
 		throw "Neither height nor height hint specified in config, specify one of them";
 	}
 
-	//document.getElementById(divId).append(innerDiv);
+	// Set inner and outer dimensions
+	var outerDiv = document.getElementById(this.divId);
+
+	outerDiv.style.width = '100%';
+	outerDiv.style.height = '100%';
+	outerDiv.style.overflow = 'auto';
+	outerDiv.style['background-color'] = 'blue';
+	
+	this.innerDiv.style.width = '100%';
+	this.innerDiv.style.height = '100%';
+	this.innerDiv.style.display = 'block';
+	
+	var t = this;
+
+	// Add scroll listener. cache may not have been created yet but ought to have been
+	// before user starts scrolling
+	outerDiv.addEventListener('scroll', function(e) {
+		// figure out how far we have scrolled into the div
+		var clientRects = t.innerDiv.getBoundingClientRect(); // innerDiv.getClientRects()[0];
+		var viewYPos = - (clientRects.top - t.innerDiv.offsetTop);
+		
+		t.cache.updateOnScroll(0, viewYPos);
+	});
+
 	
 	/**
-	 * refresh with passing in function for getting titles and thumb sizes
-	 */
+	 * Refresh gallery, typically when some search criteria has changed.
+	 * Since caches may apply different download strategies (some download all provisional and complete data, others only partially)
+	 * we will let the cache retrieve data from model.
+	 * 
+	 */ 
+	// Since 
 	this.refresh = function(totalNumberOfItems) {
 
 		var level = 0;
 		
 		this.enter(level, 'refresh', ['totalNumberOfItems', totalNumberOfItems]);
 
-		this.totalNumberOfItems = totalNumberOfItems;
-
-		var t = this;
-
-		// get all information and update view accordingly
-		// TODO for really large galleries, just get parts
-		galleryModel.getProvisionalData(0, totalNumberOfItems, function(provisionalDataArray) {
-			t.provisionalDataArray = provisionalDataArray;
-			// completed metadata build, now compute and rerender
-			t._computeAndRender(level + 1);
-		});
+		// TODO here we could choose cache implementations, eg if showing far fewer or far more items
+		if (this.cache == null) {
+			// Initial refresh
+			this.cache = new GalleryCacheAllProvisionalSomeComplete(this.config, this.galleryModel, this.galleryView, totalNumberOfItems);
+			
+			this.cache.setRenderDiv(this.innerDiv);
+		}
+		else {
+			// Just refresh existing cache
+		}
+		
+		// Refresh, passing in a function for retrieving provisional items
+		this.cache.refresh(level + 1, totalNumberOfItems, this.widthMode, this.heightMode);
 
 		this.exit(level, 'refresh');
 	};
-
-	this._getVisibleWidth = function() {
-		return this._getInnerElement().clientWidth;
-	};
-
-	this._getVisibleHeight = function() {
-		return this._getInnerElement().clientHeight;
-	};
-
-	this._computeAndRender = function (level) {
-		
-		this.enter(level, 'computeAndRender', []);
-
-		// Get the width of element to compute how many elements there are room for
-		var numColumns = this.widthMode.computeNumColumns(this.config, this.columnSpacing, this._getVisibleWidth());
-		
-		this.numColumns = numColumns;
-		
-		this.log(level, 'Thumbs per row: ' + numColumns);
-		
-		// Have thumbs per row, now compute height
-		var height = this._computeHeight(numColumns);
-		
-		this.height = height;
-		
-		this.log(level, 'Height: ' + height);
-		
-		// Must set element height
-		// TODO use jQuery?
-		var outerDiv = this._getOuterElement();
-		var innerDiv = this._getInnerElement();
-
-		outerDiv.style.width = this.width;
-		outerDiv.style.height = '100%';
-		outerDiv.style.overflow = 'auto';
-		outerDiv.style['background-color'] = 'blue';
-		
-		innerDiv.style.width = this.width;
-		innerDiv.style.height = '100%';
-		innerDiv.style.display = 'block';
-		
-		var t = this;
-
-		// We can now render within the visible area by adding divs and displaying them as we scroll
-		// at a relative position to the display area
-		
-		// or use a canvas, but that would require backing area for the gallery, so rather just use number of divs for which we update relative area
-
-		// Compute the starting point of every element
-		
-		// What is the current start offset of scrolling?
-		
-		// Set the offset of each element to that, but what about sizes? Once we scroll an element out, we must add a new one
-		
-		// Start at the current ones
-		this._addDivs(level + 1, 0, 0, numColumns, this._getVisibleHeight());
-		
-		// Add scroll listener
-		this._getOuterElement().addEventListener('scroll', function(e) {
-			// figure out how far we have scrolled into the div
-			var clientRects = innerDiv.getBoundingClientRect(); // innerDiv.getClientRects()[0];
-			var viewYPos = - (clientRects.top - innerDiv.offsetTop);
-			
-			t._updateOnScroll(viewYPos);
-			
-			var curFirstY = t.firstY;
-			
-			if (!t.scrollTimeoutSet) { // avoid having multiple timeouts
-			
-				t.scrollTimeoutSet = true;
-				
-				setTimeout(function() {
-						t._getImagesIfNotScrolled(level + 1, curFirstY, t.firstY, t.firstCachedIndex, t.lastCachedIndex - t.firstCachedIndex + 1);
-						t.scrollTimeoutSet = false;
-					},
-					100);
-			}
-			
-		});
-
-		this.exit(level, 'computeAndRender');
-	}
-	
-	this._getImagesIfNotScrolled = function(level, timeoutStartY, curY, firstIndex, count) {
-		
-		function getRowItemDivs(rowDiv) {
-			var itemsThisRow = rowDiv.childNodes.length;
-			
-			// Store new elements in array and then replace all at once
-			var rowWidthHeights = [];
-			for (var j = 0; j < itemsThisRow; ++ j) {
-				var itemElement = rowDiv.childNodes[j];
-
-				rowWidthHeights.push({ width : itemElement.clientWidth})
-			}
-			
-			return rowWidthHeights;
-		}
-		
-		this.enter(level, '_getImagesIfNotScrolled', [ 'timeoutStartY', timeoutStartY, 'curY', curY, 'firstIndex', firstIndex, 'count', count]);
-
-		if (timeoutStartY == curY) {
-			
-			// Not scrolled since timeout started, load images
-
-			var t = this;
-			
-			// Call external functions to load images
-			this.galleryModel.getCompleteData(firstIndex, count, function(completeDataArray) {
-				
-				var rowNo = firstIndex / t.numColumns;
-
-				var rowWidth = t._getRowWidth();
-				var numRows = t.cachedRowDivs.length;
-				var numRowsTotal = ((t._getTotalNumberOfItems() - 1) / t.numColumns) + 1;
-
-				for (var row = 0, i = firstIndex; row < numRows && i < count; ++ row) {
-					
-					var rowDiv = t.cachedRowDivs[row];
-					var itemsThisRow = rowDiv.childNodes.length;
-					
-					// Store new elements in array and then replace all at once
-					var rowWidthHeights = getRowItemDivs(rowDiv);
-					
-					t._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
-							function (index, provisionalData, itemWidth, itemHeight) {
-						
-								var completeData = completeDataArray[index];
-								var item;
-								
-								if (completeData == null) {
-									item = rowDiv.childNodes[index - i];
-								}
-								else if (typeof completeData === 'undefined') {
-									throw "Image data undefined at: " + index;
-								}
-								else {
-									item = t.galleryView.makeCompleteHTMLElement(provisionalData, completeData);
-								}
-								
-								return item;
-							},
-							function (element, rowIndex) {
-								rowDiv.replaceChild(element, rowDiv.childNodes[rowIndex]);
-
-	//							newRowItems.push(element);
-							});
-					
-					i += itemsThisRow;
-
-					var updatedRowWidthHeights = getRowItemDivs(rowDiv);
-
-					for (var j = 0; j < itemsThisRow; ++ j) {
-						var prevDim = rowWidthHeights[j];
-						var curDim  = updatedRowWidthHeights[j];
-
-						if (prevDim.width !== curDim.width || prevDim.height !== curDim.height) {
-							throw "Gallery item dimensions changed between provisional and updated";
-						}
-					}
-				}
-			});
-		}
-		
-		this.exit(level, '_getImagesIfNotScrolled');
-	}
-	
-	this._updateOnScroll = function(curY) {
-		// See if we have something that was not visible earlier scrolled into view
-		
-		var level = 0;
-		
-		this.enter(level, 'updateOnScroll', ['curY', curY], [ 'firstY',  this.firstY,  'lastY', this.lastY ]);
-
-		if (curY + this._getVisibleHeight() < this.firstY) {
-			this.log(level, 'Scrolled to view completely above previous');
-
-			// We are scrolling upwards totally out of current area
-			this._redrawCompletelyAt(level + 1, curY);
-		}
-		else if (curY < this.firstY) {
-			// Scrolling partly above visible area
-			var heightToAdd = this.firstY - curY;
-
-			this.log(level, 'Scrolled to view partly above previous, must add ' + heightToAdd);
-
-			// Must add items before this one, so must be prepended to the divs already shown
-			this._prependDivs(level + 1, this.firstCachedIndex - 1, this.firstY, this.numColumns, heightToAdd);
-		}
-		else if (curY > this.lastY) {
-			// We are scrolling downwards totally out of visible area, just add items for the pos in question
-			this.log(level, 'Scrolled to completely below previous curY ' + curY + ' visibleHeight ' + this._getVisibleHeight() + ' > lastY ' + this.lastY);
-
-			this._redrawCompletelyAt(level + 1, curY);
-		}
-		else if (this.lastY - curY < this._getVisibleHeight()) {
-			// Scrolling down partly out of visible area
-			// First figure out how much visible space that must be added
-			var heightToAdd = this._getVisibleHeight() - (this.lastY - curY);
-
-			this.log(level, 'Scrolled to view partly below previous, must add ' + heightToAdd);
-
-			// Do we need to add one or more rows? Should do so without removing existing rows,
-			// just add new ones below current ones.
-
-			// Start-index to add is the one immediately after last-index
-			this._addDivs(level + 1, this.lastCachedIndex + 1, this.lastY, this.numColumns, heightToAdd);
-			
-			// Do not update this.firstCachedIndex or this.firstY since we are appending
-			// TODO perhaps remove rows that have scrolled out of sight
-		}
-		
-		this.exit(level, 'updateOnScroll');
-	};
-	
-	this._redrawCompletelyAt = function(level, curY) {
-
-		this.enter(level, 'redrawCompletelyAt', [ 'curY', curY ]);
-		
-		var elem = this._findElementPos(level + 1, curY);
-		
-		this.log(level, 'Element start index: ' + elem.firstItemIndex + ', removing all rows: ' + this.cachedRowDivs.length);
-
-		this.upperPlaceHolder.setAttribute('style', 'height : '+ curY + ';');
-
-		// Remove all row elements since we will just generate them anew after the initial div
-		// used for making sure the rows show up at the right virtual y index
-		for (var i = 0; i < this.cachedRowDivs.length; ++ i) {
-			
-			var toRemove = this.cachedRowDivs[i];
-
-			this.log(level, 'Removing element ' + toRemove);
-
-			this._getInnerElement().removeChild(toRemove);
-		}
-
-		this.cachedRowDivs = new Array();
-
-		this.firstCachedIndex = elem.firstItemIndex;
-		this.firstY = curY;
-
-		this._addDivs(level + 1, elem.firstItemIndex, elem.firstRowYPos, this.numColumns, this._getVisibleHeight());
-		
-		this.exit(level, 'redrawCompletelyAt');
-	};
-	
-	this._findElementPos = function(level, yPos) {
-		
-		this.enter(level, 'findElementPos', [ 'yPos', yPos ])
-
-		// Go though heights list until we find the one that intersects with this y pos
-		var y = 0;
-		
-		var elem = null;
-		
-		for (var i = 0; i < this.widths.length; i += this.numColumns) {
-			var numColumns = i + this.numColumns >= this.widths.length
-				? this.widths.length - i
-				: this.numColumns; 
-			
-			var nextY = y;
-			nextY += this.rowSpacing;
-			
-			var rowMaxHeight = this._findRowMaxItemHeight(i, numColumns);
-			
-			nextY += rowMaxHeight;
-			
-			if (y <= yPos && nextY >= yPos) {
-				elem = { 'firstRowYPos' : y, 'firstItemIndex' : i };
-			}
-			
-			y = nextY;
-		}
-
-		this.exit(level, 'findElementPos', JSON.stringify(elem));
-		
-		return elem;
-	}
-	
-	/**
-	 * Adding divs before the currently visible ones
-	 * 
-	 * startIndex - element to start adding upwards
-	 * startPos - y position of where to start adding, eg bottom border of where to start add
-	 * numColumns - items in a row
-	 * heightToAdd - height of items to add
-	 * 
-	 */
-	this._prependDivs = function(level, startIndex, startPos, numColumns, heightToAdd) {
-		
-		this.enter(level, 'prependDivs', [ 'startIndex', startIndex, 'startPos', startPos, 'numColumns', numColumns, 'heightToAdd', heightToAdd ])
-		
-		// Reuse _addDivs by computing the height of rows we must add and then add from there 
-		var t = this;
-		
-		var startIndexPositionOnRow = startIndex % numColumns;
-		
-		if (startIndexPositionOnRow != numColumns - 1) {
-			throw "startIndex should be last item on a row: idx " + startIndexPositionOnRow + " / numColumns " + numColumns;
-		}
-		
-		var rowItem = null;
-
-		var firstItemOnRow = startIndex - numColumns + 1;
-		
-		if (firstItemOnRow % numColumns != 0) {
-			throw "Expected to be first item";
-		}
-
-		// item to add before
-		var firstRowDiv = this.cachedRowDivs.length == 0
-				? null
-				: this.cachedRowDivs[0];
-
-		var lastRendered = this._addDivsWithAddFunc(level + 1, firstItemOnRow, startPos, numColumns, heightToAdd, false, function (rowDiv) {
-			
-			if (firstRowDiv == null) {
-				t.cachedRowDivs.push(rowDiv);
-				t.innerDiv.append(rowDiv);
-			}
-			else {
-				t.cachedRowDivs.splice(0, 0, rowDiv); // insert at beginning of row
-				t.innerDiv.insertBefore(rowDiv, firstRowDiv);
-			}
-		});
-
-		this.firstCachedIndex = lastRendered.index; // last drawn element
-		this.firstY = lastRendered.yPos;
-
-		this.exit(level, 'prependDivs');
-	};
-	
-	/**
-	 * Add divs for current pos
-	 * 
-	 * startIndex - index of element to start at
-	 * startPos - the y position we should start rendering element at
-	 * numColumns - the number of items that are rendered per row
-	 * visibleHeight - the height of visible area we shall update,
-	 *                 which might be less than the real visible area if we are just adding items to a partly updated area
-	 */
-	this._addDivs = function(level, startIndex, startPos, numColumns, heightToAdd) {
-		
-		this.enter(level, 'addDivs', [ 'level',  level, 'startIndex', startIndex, 'startPos', startPos, 'numColumns', numColumns, 'heightToAdd', heightToAdd]);
-	
-		var t = this;
-
-		var lastRendered = this._addDivsWithAddFunc(level + 1, startIndex, startPos, numColumns, heightToAdd, true, function (rowDiv) {
-			t.cachedRowDivs.push(rowDiv);
-			t.innerDiv.append(rowDiv);
-		});
-		
-		this.lastCachedIndex = lastRendered.index; // last drawn element
-		this.lastY = lastRendered.yPos;
-
-		this.log(level, 'firstY set to ' + this.firstY + ' and not changed, set lastIndex to ' + lastRendered.index + ',lastY to ' + lastRendered.yPos);
-
-		this.exit(level, 'addDivs');
-	}
-	
-	this._getRowWidth = function() {
-		return this.width;
-	}
-
-	
-	this._addDivsWithAddFunc = function(level, startIndex, startPos, numColumns, heightToAdd, downwards, addRowDiv) {
-
-		this.enter(level, 'addDivsWithAddFunc', [
-			'startIndex', startIndex,
-			'startPos', startPos,
-			'numColumns', numColumns,
-			'heightToAdd', heightToAdd,
-			'downwards', downwards ]);
-		
-		var rowsAdded = 0;
-		var heightAdded = 0;
-		
-		// Add divs until there is not more room in display or there are no more items
-		
-		
-		var y = startPos;
-		
-		var numRows = ((this._getTotalNumberOfItems() - 1) / numColumns) + 1;
-		var rowNo = startIndex / numColumns;
-
-		var rowWidth = this._getRowWidth();
-
-		var lastRenderedElement = null;
-		
-		for (var i = startIndex; i < this._getTotalNumberOfItems(); i += (downwards ? numColumns : -numColumns)) {
-
-			// Last row might not have a full number of items
-			var itemsThisRow = i + numColumns >= this._getTotalNumberOfItems()
-				? this.widths.length - i
-				: numColumns; 
-			
-			var rowDiv = document.createElement('div');
-			
-			rowDiv.setAttribute('class', 'gallery_row');
-
-			// Add before adding elements so that we can add hidden row items and compute their size
-			addRowDiv(rowDiv);
-
-			rowNo = rowNo + (downwards ? 1 : -1);
-
-			var t = this;
-
-			// Add row items to the row
-			var rowHeight = this._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRows, rowWidth,
-					function (index, provisionalData, itemWidth, itemHeight) {
-						return t.galleryView.makeProvisionalHTMLElement(index, provisionalData);
-					},
-					function (element, indexInRow) {
-						rowDiv.append(element);
-					});
-			
-			this.log(level, 'Adding row no ' + rowNo + ', first elem ' + i + ' at y pos ' + y + ' of height ' + rowHeight);
-			
-			++ rowsAdded;
-
-			rowDiv.setAttribute('style',
-					//'position : relative; ' +
-					'top :  ' + y + '; ' +
-					'width : ' + this.width + '; ' +
-					'height : ' + rowHeight + '; ' +
-					'border : 1px solid black;' +
-					'background-color : yellow; ');
-
-
-			y += (downwards ? rowHeight : -rowHeight);
-			heightAdded += rowHeight;
-
-			if (heightAdded >= heightToAdd) {
-
-				lastRenderedElement = { 'index' : i + itemsThisRow - 1, 'yPos' :  y };
-				break;
-			}
-		}
-
-		this.log(level, 'addDivsWithAddFunc added ' + rowsAdded + ' rows');
-
-		this.exit(level, 'addDivsWithAddFunc', lastRenderedElement);
-
-		return lastRenderedElement;
-	}
-	
-	
-	this._computeColumnSpacing = function(rowWidth, totalRowItemWidths, itemsThisRow) {
-		var spacing = (rowWidth - totalRowItemWidths) / (itemsThisRow + 1);
-
-		return spacing;
-	}
-	
-	this._getRowHeight = function(rowMaxHeight, rowNo, numRows) {
-		var rowHeigth;
-
-		if (rowNo == 0 || rowNo == numRows - 1) {
-			rowHeight = rowMaxHeight + this.rowSpacing + (this.rowSpacing / 2);
-		}
-		else {
-			rowHeight = rowMaxHeight + this.rowSpacing;
-		}
-
-		return rowHeight;
-	}
-
-	/**
-	 * Helper to add the items in one gallery row
-	 */
-	this._addRowItems = function(level, rowDiv, indexOfFirstInRow, itemsThisRow, numRowsTotal, rowWidth, makeElement, addElement) {
-
-		var itemWidth = null;
-		var itemHeight = null;
-		
-		if (typeof this.config.width !== 'undefined') {
-			itemWidth = this.config.width;
-		}
-		
-		if (typeof config.height !== 'undefined') {
-			itemHeight = config.height;
-		}
-		
-		var x = 0;
-
-		var spacing = 0;
-		
-		if (itemWidth != null) {
-			var totalRowItemWidths = itemsThisRow * itemWidth;
-			
-			spacing = this._computeColumnSpacing(rowWidth, totalRowItemsWidth, itemsThisRow);
-		}
-
-		var mustComputeDimensions = itemWidth == null || itemHeight == null;
-		
-		// Do not show the item if must compute dimensions
-		var visible = !mustComputeDimensions;
-		
-		var rowHTMLElements = [];
-
-		// Loop though and add, might render with visibility : hidden if width or height not known
-		// since we then have to get these and adjust position and spacing accordingly
-
-		var rowHeight = null;
-		
-		if (itemHeight != null) {
-			// hardcoded height so row height same as item height
-			rowHeight = this._getRowHeight(itemHeight, index, numRowsTotal);
-		}
-		
-
-		for (var j = 0; j < itemsThisRow; ++ j) {
-			var index = indexOfFirstInRow + j;
-
-			var itemElement = makeElement(index, this.provisionalDataArray[index], itemWidth, itemHeight);
-
-			// Add to model at relative offsets
-			// this.log(level, 'set spacing to ' + spacing + '/' + rowWidth + '/' + totalRowItemWidths + '/' + itemsThisRow);
-			
-			this._applyItemStyles(itemElement, rowHeight, itemWidth, itemHeight, spacing, visible);
-
-			addElement(itemElement, j);
-			
-			rowHTMLElements.push(itemElement);
-			
-			x += itemWidth;
-		}
-		
-		if (mustComputeDimensions) {
-			
-			var totalRowItemsWidth = 0;
-			var largestItemHeight = 0;
-			
-			// HTML elements are not visible but we might retrieve their dimensions
-			for (var i = 0; i < rowHTMLElements.length; ++ i) {
-				var elem = rowHTMLElements[i];
-				
-				// console.log('## computed client width: ' + elem.clientWidth + ', height:' + elem.clientHeight + ': ' + elem.parentNode + ', ' + elem.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode);
-				
-				totalRowItemsWidth += elem.clientWidth;
-				
-				if (elem.clientHeight > largestItemHeight) {
-					largestItemHeight = elem.clientHeight;
-				}
-			}
-			
-			rowHeight = this._getRowHeight(largestItemHeight, index, numRowsTotal);
-			
-			spacing = this._computeColumnSpacing(rowWidth, totalRowItemsWidth, itemsThisRow);
-
-			if (itemHeight == null) {
-				itemHeight = largestItemHeight;
-			}
-			
-			visible = true;
-
-			// Update style to show item with given width, height and spacing
-			for (var i = 0; i < rowHTMLElements.length; ++ i) {
-				var elem = rowHTMLElements[i];
-				
-				var width = itemWidth == null ? elem.clientWidth : itemWidth;
-				var height = largestItemHeight;
-				
-				this._applyItemStyles(elem, rowHeight, width, height, spacing, visible);
-			}
-			
-			visible = true;
-		}
-
-		return rowHeight;
-	}
-	
-	this._applyItemStyles = function(itemElement, rowHeight, itemWidth, itemHeight, spacing, visible) {
-		
-		var styling = 'position : relative; ' +
-			/*
-			'display : inline-block; ' +
-			*/
-			'float : left; ' +
-			'margin-left : ' + spacing + 'px; ' +
-			'background-color : white; ';
-		
-		if (itemHeight != null) {
-			styling += 'top : ' + (rowHeight - itemHeight) / 2 + 'px; ';
-			styling += 'height : ' + itemHeight + '; ';
-		}
-		
-		if (itemWidth != null) {
-			'width : ' + itemWidth + '; ';
-		}
-		
-		if (!visible) {
-			// set hidden if we need to find item size
-			styling += 'visibility: hidden; '
-		}
-			
-		itemElement.setAttribute('style', styling);
-	}
-	
-	this._getTotalNumberOfItems = function() {
-		// TODO do not download complete data array
-		return this.totalNumberOfItems;
-	}
-
-	
-	this._computeHeight = function(numColumns) {
-		return this.heightMode.computeHeight(this.config, this.rowSpacing, numColumns, this._getTotalNumberOfItems());
-	}
-	
-	this._getOuterElement = function() {
-		return document.getElementById(this.divId);
-	}
-
-	this._getInnerElement = function() {
-		return this.innerDiv;
-	}
 }
 
 
