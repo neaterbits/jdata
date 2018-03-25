@@ -70,7 +70,3 @@ GalleryCacheAllComplete.prototype.updateOnScroll = function(curY) {
 	// Nothing to do since we have added all elements to the DOM already,
 	// the browser will render the scrolling
 }
-
-
-
-

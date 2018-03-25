@@ -78,12 +78,16 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 		var t = this;
 		
 		setTimeout(function() {
-				t._getImagesIfNotScrolled(level + 1, curFirstY, t.firstY, t.firstCachedIndex, t.lastCachedIndex - t.firstCachedIndex + 1);
+				if (curFirstY === t.firstY) {
+					// Show complete-version since not scrolled ( t.firstY was not updated by _updateOnScroll() )
+					t._showComplete(level + 1, t.firstCachedIndex, t.lastCachedIndex - t.firstCachedIndex + 1);
+				}
+
 				t.scrollTimeoutSet = false;
-			},
-			100);
+		},
+		100);
 	}
-	
+
 	this.exit(level, 'updateOnScroll');
 }
 
@@ -138,8 +142,16 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY
 };
 
 
+/**
+ * Download and show complete items in a certain model range, provisional items
+ * for this range must have been downloaded already.
+ * 
+ *  - level - debug log indentation level
+ *  - firstModelItemIndex - index into model virtual array where to start
+ *  - itemCount number of items to update
+ */
 
-GalleryCacheAllProvisionalSomeComplete.prototype._getImagesIfNotScrolled = function(level, timeoutStartY, curY, firstIndex, count) {
+GalleryCacheAllProvisionalSomeComplete.prototype._showComplete = function(level, firstModelItemIndex, itemCount) {
 	
 	function getRowItemDivs(rowDiv) {
 		var itemsThisRow = rowDiv.childNodes.length;
@@ -155,72 +167,70 @@ GalleryCacheAllProvisionalSomeComplete.prototype._getImagesIfNotScrolled = funct
 		return rowWidthHeights;
 	}
 	
-	this.enter(level, '_getImagesIfNotScrolled', [ 'timeoutStartY', timeoutStartY, 'curY', curY, 'firstIndex', firstIndex, 'count', count]);
+	this.enter(level, '_showComplete', [ 'firstModelItemIndex', firstModelItemIndex, 'itemCount', itemCount]);
 
-	if (timeoutStartY == curY) {
 		
-		// Not scrolled since timeout started, load images
+	// Not scrolled since timeout started, load images
 
-		var t = this;
+	var t = this;
+	
+	// Call external functions to load images
+	this.galleryModel.getCompleteData(firstModelItemIndex, itemCount, function(completeDataArray) {
 		
-		// Call external functions to load images
-		this.galleryModel.getCompleteData(firstIndex, count, function(completeDataArray) {
+		var rowNo = firstModelItemIndex / t.numColumns;
+
+		var rowWidth = t._getRowWidth();
+		var numRows = t.cachedRowDivs.length;
+		var numRowsTotal = ((t._getTotalNumberOfItems() - 1) / t.numColumns) + 1;
+
+		for (var row = 0, i = firstModelItemIndex; row < numRows && i < itemCount; ++ row) {
 			
-			var rowNo = firstIndex / t.numColumns;
-
-			var rowWidth = t._getRowWidth();
-			var numRows = t.cachedRowDivs.length;
-			var numRowsTotal = ((t._getTotalNumberOfItems() - 1) / t.numColumns) + 1;
-
-			for (var row = 0, i = firstIndex; row < numRows && i < count; ++ row) {
+			var rowDiv = t.cachedRowDivs[row];
+			var itemsThisRow = rowDiv.childNodes.length;
+			
+			// Store new elements in array and then replace all at once
+			var rowWidthHeights = getRowItemDivs(rowDiv);
+			
+			t._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
+					function (index, itemWidth, itemHeight) {
 				
-				var rowDiv = t.cachedRowDivs[row];
-				var itemsThisRow = rowDiv.childNodes.length;
-				
-				// Store new elements in array and then replace all at once
-				var rowWidthHeights = getRowItemDivs(rowDiv);
-				
-				t._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
-						function (index, itemWidth, itemHeight) {
-					
-							var completeData = completeDataArray[index];
-							var item;
-							
-							if (completeData == null) {
-								item = rowDiv.childNodes[index - i];
-							}
-							else if (typeof completeData === 'undefined') {
-								throw "Image data undefined at: " + index;
-							}
-							else {
-								item = t.galleryView.makeCompleteHTMLElement(index, t.provisionalDataArray[index], completeData);
-							}
-							
-							return item;
-						},
-						function (element, rowIndex) {
-							rowDiv.replaceChild(element, rowDiv.childNodes[rowIndex]);
+						var completeData = completeDataArray[index];
+						var item;
+						
+						if (completeData == null) {
+							item = rowDiv.childNodes[index - i];
+						}
+						else if (typeof completeData === 'undefined') {
+							throw "Image data undefined at: " + index;
+						}
+						else {
+							item = t.galleryView.makeCompleteHTMLElement(index, t.provisionalDataArray[index], completeData);
+						}
+						
+						return item;
+					},
+					function (element, rowIndex) {
+						rowDiv.replaceChild(element, rowDiv.childNodes[rowIndex]);
 
 //							newRowItems.push(element);
-						});
-				
-				i += itemsThisRow;
+					});
+			
+			i += itemsThisRow;
 
-				var updatedRowWidthHeights = getRowItemDivs(rowDiv);
+			var updatedRowWidthHeights = getRowItemDivs(rowDiv);
 
-				for (var j = 0; j < itemsThisRow; ++ j) {
-					var prevDim = rowWidthHeights[j];
-					var curDim  = updatedRowWidthHeights[j];
+			for (var j = 0; j < itemsThisRow; ++ j) {
+				var prevDim = rowWidthHeights[j];
+				var curDim  = updatedRowWidthHeights[j];
 
-					if (prevDim.width !== curDim.width || prevDim.height !== curDim.height) {
-						throw "Gallery item dimensions changed between provisional and updated";
-					}
+				if (prevDim.width !== curDim.width || prevDim.height !== curDim.height) {
+					throw "Gallery item dimensions changed between provisional and updated";
 				}
 			}
-		});
-	}
+		}
+	});
 	
-	this.exit(level, '_getImagesIfNotScrolled');
+	this.exit(level, '_showComplete');
 }
 
 
