@@ -26,7 +26,7 @@
  */
 
 /**
- * Constuctor
+ * Constructor
  *  - cacheBeforeAndAfter - cache this number before and after visible area, ie if == 20, then we will download in total 40 elements for outside visible area.
  *  
  */
@@ -41,9 +41,9 @@ function GalleryCacheItems(cacheBeforeAndAfter, modelDownloadItems) {
 
 	this.updateSequenceNo = 0;
 
-	var arraySize = cachedBeforeAndAfter + this.curVisibleCount;
+	var arraySize = cacheBeforeAndAfter + this.curVisibleCount;
 	
-	this.cachedItems = new Array(arraySize);
+	this.cachedData = new Array(arraySize);
 	this._clear(arraySize);
 
 	// Queue of downloads to be scheduled
@@ -56,8 +56,8 @@ function GalleryCacheItems(cacheBeforeAndAfter, modelDownloadItems) {
 }
 
 GalleryCacheItems.prototype._clear = function(arrayIndex, count) {
-	for (var i = 0; i < count: ++ i) {
-		this.cachedItems[arrayIndex + i] = null;
+	for (var i = 0; i < count; ++ i) {
+		this.cachedData[arrayIndex + i] = null;
 	}
 }
 
@@ -112,8 +112,10 @@ GalleryCacheItems.prototype.updateVisibleArea = function(firstVisibleIndex, visi
 	var curFirstCachedIndex = this._getFirstIndexInCache();
 	var curLastCachedIndex = this._getLastIndexInCache();
 
-	if (cachedItems.length !== curLastCachedIndex - curFirstCachedIndex + 1) {
-		throw "lastCaches - firstCache does not match cached items array";
+	var curCached = curLastCachedIndex - curFirstCachedIndex + 1;
+	
+	if (this.cachedData.length !== curCached) {
+		throw "lastCached - firstCache does not match cached data array: " + this.cachedData.length + "/" + curCached;
 	}
 
 	var lastVisibleIndex = firstVisibleIndex + visibleCount - 1;
@@ -169,7 +171,7 @@ GalleryCacheItems.prototype.updateVisibleArea = function(firstVisibleIndex, visi
 		var srcFirstOverlapping = overlapFirstIndex - curFirstCachedIndex;
 		
 		for (var i = 0; i < numOverlapping; ++ i) {
-			newArray[dstFirstOverlapping + i] + this.
+			newArray[dstFirstOverlapping + i] + this.cacheArray[srcFirstOverlapping + i];
 		}
 		
 		// null value for remaining items
@@ -337,7 +339,7 @@ GalleryCacheItems.prototype._downloadItems = function(cacheIndex, itemIndex, ite
 	
 	for (var i = 0; i < itemCount; ++ i) {
 
-		var cached = this.cachedItems[cacheIndex + i];
+		var cached = this.cachedData[cacheIndex + i];
 		
 		var downloadedOrDownloading;
 			
@@ -457,7 +459,7 @@ GalleryCacheItems.prototype._addDownloadedDataToCacheIfStillOverlaps = function(
 		
 		var dstOffset = index - firstIndexInCache;
 		
-		for (var i = 0, i < count; ++ i) {
+		for (var i = 0; i < count; ++ i) {
 			var dstIndex = firstIndexInCache + dstOffset + i;
 				
 			if (dstIndex > lastIndexInCache) {
@@ -470,7 +472,7 @@ GalleryCacheItems.prototype._addDownloadedDataToCacheIfStillOverlaps = function(
 	else if (index < firstIndexInCache) {
 		var srcOffset = firstIndexInCache - index;
 		
-		for (var i = 0, i < count; ++ i) {
+		for (var i = 0; i < count; ++ i) {
 			var srcIndex = index + srcOffset + i;
 				
 			if (srcIndex < firstIndexInCache) {
@@ -501,7 +503,7 @@ GalleryCacheItems.prototype._scheduleFromDownloadQueue = function() {
 		
 		var t = this;
 		
-		startModelDownloadAndRemoveFromDownloadQueueWhenDone(downloadRequest, function (downloadRequest, downloadedData)) {
+		startModelDownloadAndRemoveFromDownloadQueueWhenDone(downloadRequest, function (downloadRequest, downloadedData) {
 			t._scheduleFromDownloadQueue();
 			
 			downloadRequest.onDownloaded(downloadRequest, downloadedData);

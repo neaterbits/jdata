@@ -152,11 +152,18 @@ GalleryCacheBase.prototype._makeProvisionalElement = function (index, itemWidth,
 	return this.galleryView.makeProvisionalHTMLElement(index, this.provisionalDataArray[index]);
 }
 
+/**
+ * return {
+ * 		index, - index of last element rendered
+ *  	yPos - yPos of below last element rendered, ie. start of next row
+ * }
+ */
+
 GalleryCacheBase.prototype._addProvisionalDivs = function(level, startIndex, startPos, numColumns, heightToAdd) {
 	
 	var t = this;
 	
-	this._addDivs(level, startIndex, startPos, numColumns, heightToAdd, function(index, itemWidth, itemHeight) {
+	return this._addDivs(level, startIndex, startPos, numColumns, heightToAdd, function(index, itemWidth, itemHeight) {
 		return t._makeProvisionalElement(index, itemWidth, itemHeight);
 	});
 }
@@ -171,6 +178,12 @@ GalleryCacheBase.prototype._addProvisionalDivs = function(level, startIndex, sta
  * numColumns - the number of items that are rendered per row
  * heightToAdd - the height of scrollable view area we should update
  *                 which might be less than the real visible area if we are just adding items to a partly updated area
+ *                 
+ * return {
+ * 		index, - index of last element rendered
+ *  	yPos - yPos of below last element rendered, ie. start of next row
+ * }
+ * 
  */
 GalleryCacheBase.prototype._addDivs = function(level, startIndex, startPos, numColumns, heightToAdd, makeElement) {
 	
@@ -184,13 +197,10 @@ GalleryCacheBase.prototype._addDivs = function(level, startIndex, startPos, numC
 	};
 
 	var lastRendered = this._addDivsWithAddFunc(level + 1, startIndex, startPos, numColumns, heightToAdd, true, addRowDiv, makeElement);
-	
-	this.lastCachedIndex = lastRendered.index; // last drawn element
-	this.lastY = lastRendered.yPos;
 
-	this.log(level, 'firstY set to ' + this.firstY + ' and not changed, set lastIndex to ' + lastRendered.index + ',lastY to ' + lastRendered.yPos);
+	this.exit(level, 'addDivs', JSON.stringify(lastRendered));
 
-	this.exit(level, 'addDivs');
+	return lastRendered;
 }
 
 /**
@@ -201,6 +211,10 @@ GalleryCacheBase.prototype._addDivs = function(level, startIndex, startPos, numC
  * numColumns - items in a row
  * heightToAdd - height of items to add, may add outside of currently visible area
  * 
+ * return {
+ * 		index, - index of last element rendered, ie most towards start since we are prepending upwards
+ *  	yPos - yPos of above last element rendered, ie. most towards start sine we are prepending upwards
+ * }
  */
 GalleryCacheBase.prototype._prependDivs = function(level, startIndex, startPos, numColumns, heightToAdd) {
 	
@@ -243,10 +257,9 @@ GalleryCacheBase.prototype._prependDivs = function(level, startIndex, startPos, 
 				return t._makeProvisionalElement(index, itemWidth, itemHeight);
 			});
 
-	this.firstCachedIndex = lastRendered.index; // last drawn element
-	this.firstY = lastRendered.yPos;
+	this.exit(level, 'prependDivs', JSON.stringify(lastRendered));
 
-	this.exit(level, 'prependDivs');
+	return lastRendered;
 };
 
 /**
@@ -336,9 +349,7 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 		y += (downwards ? rowHeight : -rowHeight);
 		heightAdded += rowHeight;
 
-		console.log('_addDivsWith')
 		if (heightAdded >= heightToAdd) {
-
 			lastRenderedElement = { 'index' : i + itemsThisRow - 1, 'yPos' :  y };
 			break;
 		}

@@ -13,6 +13,14 @@ GalleryCacheAllProvisionalSomeComplete.prototype = Object.create(GalleryCacheBas
 
 //returns approximate complete size of view
 GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, totalNumberOfItems, widthMode, heightMode) {
+	
+	var t = this;
+	
+	// Mechanism for downloading complete-data on the fly as user scrolls
+	this.cacheItems = new GalleryCacheItems(20, function(index, count, onDownloaded) {
+		t.galleryModel.getCompleteData(index, count, onDownloaded);
+	});
+	
 	var t = this;
 
 	// Placeholder div at the beginnig which we can use set the start
@@ -81,13 +89,24 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 	
 	var curFirstY = this.firstY;
 	
-	this._updateOnScroll(yPos);
+	if (this.visibleElements == null) {
+		this.visibleElements = {
+			firstVisibleY : 0,
+			firstVisibleIndex : 0,
+			lastVisibleY : 0,
+			lastVisibleIndex : 0
+		};
+	}
+	
+	// Updates first and last cached item index base on y position
+	this.visibleElements = this._updateOnScroll(yPos, this.visibleElements);
 	
 	// Start a timer to check whether user has stopped scrolling,
 	// we are not going to update the DOM as longs as user is scrolling as
 	// for large number of items we will not be able to update fast enough and
 	// it will make scrolling less smooth
 	
+	/*
 	if (!this.scrollTimeoutSet) { // avoid having multiple timeouts
 	
 		this.scrollTimeoutSet = true;
@@ -104,44 +123,100 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 		},
 		100);
 	}
+	*/
+	
+	// Update cache view to point to new display area, it will also preload elements around display area
+	
+	var visibleCount = this.visibleElements.lastVisibleIndex - this.visibleElements.firstVisibleIndex + 1;
+
+	var visibleElements = this.visibleElements;
+	
+	// TODO also add callback for preload data since we would want to precreate divs? Test whether is good enough without
+	this.cacheItems.updateVisibleArea(
+			this.visibleElements.firstVisibleIndex,
+			visibleCount,
+			this.totalNumberOfItems,
+			
+			function (index, count, downloadedData) {
+				
+				// Only called when haven't scrolled (eg no other call to updateVisibleArea)
+				if (index !== visibleElements.firstVisibleIndex) {
+					throw "Index mismatch";
+				}
+				if (count !== visibleCount) {
+					throw "Count mismatch";
+				}
+				if (downloadedData.length !== visibleCount) {
+					throw "Number of items mismatch count";
+				}
+
+				// Can now update rows from data
+				_showCompleteForRows(index, count, downloadedData);
+			});
 
 	this.exit(level, 'updateOnScroll');
 }
 
 
 // Helper method for update on scroll
-GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY) {
+GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY, prevDisplayed) {
 	// See if we have something that was not visible earlier scrolled into view
+
+	var firstVisibleY;
+	var lastVisibleY;
+	var firstVisibleIndex;
+	var lastVisibleIndex;
 	
 	var level = 0;
 	
 	this.enter(level, 'updateOnScroll', ['curY', curY], [ 'firstY',  this.firstY,  'lastY', this.lastY ]);
 
-	if (curY + this._getVisibleHeight() < this.firstY) {
+	var posAndIndex = this._findElementYPosAndItemIndex(level + 1, curY);
+	
+	var lastRendered;
+	
+	if (curY + this._getVisibleHeight() < prevDisplayed.firstVisibleY) {
 		this.log(level, 'Scrolled to view completely above previous');
 
 		// We are scrolling upwards totally out of current area
-		this._redrawCompletelyAt(level + 1, curY);
+		lastRendered = this._redrawCompletelyAt(level + 1, curY, posAndIndex);
+		
+		firstVisibleY = posAndIndex.rowYPos;
+		lastVisibleY = lastRendered.yPos;
+		firstVisibleIndex = posAndIndex.rowItemIndex;
+		lastVisibleIndex = lastRendered.index;
 	}
-	else if (curY < this.firstY) {
+	else if (curY < prevDisplayed.firstVisibleY) {
 		// Scrolling partly above visible area
-		var heightToAdd = this.firstY - curY;
+		var heightToAdd = prevDisplayed.firstVisibleY - curY;
 
 		this.log(level, 'Scrolled to view partly above previous, must add ' + heightToAdd);
 
 		// Must add items before this one, so must be prepended to the divs already shown
-		this._prependDivs(level + 1, this.firstCachedIndex - 1, this.firstY, this.numColumns, heightToAdd);
+		lastRendered = this._prependDivs(level + 1, prevDisplayed.firstVisibleIndex - 1, prevDisplayed.firstVisibleY, this.numColumns, heightToAdd);
+
+		firstVisibleY = lastRendered.rowYPos;
+		firstVisibleIndex = lastRendered.rowItemIndex;
+
+		throw "TODO figure out last rendered after prepending"
+		lastVisibleY = lastRendered.yPos;
+		lastVisibleIndex = lastRendered.index;
 	}
-	else if (curY > this.lastY) {
+	else if (curY > prevDisplayed.lastVisibleY) {
 		// We are scrolling downwards totally out of visible area, just add items for the pos in question
 		this.log(level, 'Scrolled to completely below previous curY ' + curY + ' visibleHeight ' + this._getVisibleHeight() + ' > lastY ' + this.lastY);
 
-		this._redrawCompletelyAt(level + 1, curY);
+		lastRendered = this._redrawCompletelyAt(level + 1, curY, posAndIndex);
+
+		firstVisibleY = posAndIndex.rowYPos;
+		lastVisibleY = lastRendered.yPos;
+		firstVisibleIndex = posAndIndex.rowItemIndex;
+		lastVisibleIndex = lastRendered.index;
 	}
-	else if (this.lastY - curY < this._getVisibleHeight()) {
+	else if (prevDisplayed.lastVisibleY - curY < this._getVisibleHeight()) {
 		// Scrolling down partly out of visible area
 		// First figure out how much visible space that must be added
-		var heightToAdd = this._getVisibleHeight() - (this.lastY - curY);
+		var heightToAdd = this._getVisibleHeight() - (prevDisplayed.lastVisibleY - curY);
 
 		this.log(level, 'Scrolled to view partly below previous, must add ' + heightToAdd);
 
@@ -149,13 +224,24 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY
 		// just add new ones below current ones.
 
 		// Start-index to add is the one immediately after last-index
-		this._addProvisionalDivs(level + 1, this.lastCachedIndex + 1, this.lastY, this.numColumns, heightToAdd);
-		
-		// Do not update this.firstCachedIndex or this.firstY since we are appending
-		// TODO perhaps remove rows that have scrolled out of sight
+		lastRendered = this._addProvisionalDivs(level + 1, prevDisplayed.lastVisibleIndex + 1, prevDisplayed.lastVisibleY, this.numColumns, heightToAdd);
+
+		firstVisibleY = posAndIndex.rowYPos;
+		lastVisibleY = lastRendered.yPos;
+		firstVisibleIndex = posAndIndex.rowItemIndex;
+		lastVisibleIndex = lastRendered.index;
 	}
 	
-	this.exit(level, 'updateOnScroll');
+	var displayed = {
+		firstVisibleY : firstVisibleY,
+		firstVisibleIndex : firstVisibleIndex,
+		lastVisibleY : lastVisibleY,
+		lastVisibleIndex : lastVisibleIndex
+	};
+
+	this.exit(level, '_updateOnScroll', JSON.stringify(displayed));
+
+	return displayed;
 };
 
 
@@ -168,21 +254,23 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY
  *  - itemCount number of items to update
  */
 
+GalleryCacheAllProvisionalSomeComplete.prototype._getRowItemDivHeights = function(rowDiv) {
+	var itemsThisRow = rowDiv.childNodes.length;
+	
+	// Store new elements in array and then replace all at once
+	var rowWidthHeights = [];
+	for (var j = 0; j < itemsThisRow; ++ j) {
+		var itemElement = rowDiv.childNodes[j];
+
+		rowWidthHeights.push({ width : itemElement.clientWidth})
+	}
+	
+	return rowWidthHeights;
+}
+
+/*
 GalleryCacheAllProvisionalSomeComplete.prototype._showComplete = function(level, firstModelItemIndex, itemCount) {
 	
-	function getRowItemDivs(rowDiv) {
-		var itemsThisRow = rowDiv.childNodes.length;
-		
-		// Store new elements in array and then replace all at once
-		var rowWidthHeights = [];
-		for (var j = 0; j < itemsThisRow; ++ j) {
-			var itemElement = rowDiv.childNodes[j];
-
-			rowWidthHeights.push({ width : itemElement.clientWidth})
-		}
-		
-		return rowWidthHeights;
-	}
 	
 	this.enter(level, '_showComplete', [ 'firstModelItemIndex', firstModelItemIndex, 'itemCount', itemCount]);
 
@@ -192,70 +280,86 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showComplete = function(level,
 	var t = this;
 	
 	// Call external functions to load images
-	this.galleryModel.getCompleteData(firstModelItemIndex, itemCount, function(completeDataArray) {
-		
-		var rowNo = firstModelItemIndex / t.numColumns;
 
-		var rowWidth = t._getRowWidth();
-		var numRows = t.cachedRowDivs.length;
-		var numRowsTotal = ((t._getTotalNumberOfItems() - 1) / t.numColumns) + 1;
-
-		for (var row = 0, i = firstModelItemIndex; row < numRows && i < itemCount; ++ row) {
+	//	this.galleryModel.getCompleteData(firstModelItemIndex, itemCount, function(completeDataArray) {
+	this.cacheView.getCompleteData(firstModelItemIndex, itemCount, function(completeDataArray) {
 			
-			var rowDiv = t.cachedRowDivs[row];
-			var itemsThisRow = rowDiv.childNodes.length;
-			
-			// Store new elements in array and then replace all at once
-			var rowWidthHeights = getRowItemDivs(rowDiv);
-			
-			t._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
-					function (index, itemWidth, itemHeight) {
-				
-						var completeData = completeDataArray[index];
-						var item;
-						
-						if (completeData == null) {
-							item = rowDiv.childNodes[index - i];
-						}
-						else if (typeof completeData === 'undefined') {
-							throw "Image data undefined at: " + index;
-						}
-						else {
-							item = t.galleryView.makeCompleteHTMLElement(index, t.provisionalDataArray[index], completeData);
-						}
-						
-						return item;
-					},
-					function (element, rowIndex) {
-						rowDiv.replaceChild(element, rowDiv.childNodes[rowIndex]);
-
-//							newRowItems.push(element);
-					});
-			
-			i += itemsThisRow;
-
-			var updatedRowWidthHeights = getRowItemDivs(rowDiv);
-
-			for (var j = 0; j < itemsThisRow; ++ j) {
-				var prevDim = rowWidthHeights[j];
-				var curDim  = updatedRowWidthHeights[j];
-
-				if (prevDim.width !== curDim.width || prevDim.height !== curDim.height) {
-					throw "Gallery item dimensions changed between provisional and updated";
-				}
-			}
-		}
 	});
 	
 	this.exit(level, '_showComplete');
 }
+*/
 
 
-GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(level, curY) {
+/**
+ * Update to complete-items for rows, given indices and data to display
+ * 
+ * - firstModelItemIndex - index of first element into virtual array
+ * - itemCount - number of items to update
+ * - completeDataArray - array of complete-data for items, contains only itemCount entries 
+ * 
+ */
+GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function(firstModelItemIndex, itemCount, completeDataArray) {
+	
+	if (completeDataArray.length !== itemCount) {
+		throw "Expected itemCount entries";
+	}
+
+	var rowWidth = t._getRowWidth();
+	var numRows = t.cachedRowDivs.length;
+	var numRowsTotal = ((t._getTotalNumberOfItems() - 1) / t.numColumns) + 1;
+	
+	for (var row = 0, i = firstModelItemIndex; row < numRows && i < itemCount; ++ row) {
+		
+		var rowDiv = t.cachedRowDivs[row];
+		var itemsThisRow = rowDiv.childNodes.length;
+
+		// Store new elements in array and then replace all at once
+		var rowWidthHeights = this._getRowItemDivHeights(rowDiv);
+
+		// Replace row items
+		t._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
+				function (index, itemWidth, itemHeight) {
+			
+					var completeData = completeDataArray[index - firstModelItemIndex];
+					var item;
+					
+					if (completeData == null) {
+						item = rowDiv.childNodes[index - i];
+					}
+					else if (typeof completeData === 'undefined') {
+						throw "Image data undefined at: " + index;
+					}
+					else {
+						item = t.galleryView.makeCompleteHTMLElement(index, t.provisionalDataArray[index], completeData);
+					}
+					
+					return item;
+				},
+				function (element, rowIndex) {
+					rowDiv.replaceChild(element, rowDiv.childNodes[rowIndex]);
+	
+	//					newRowItems.push(element);
+				});
+		
+		i += itemsThisRow;
+	
+		var updatedRowWidthHeights = getRowItemDivs(rowDiv);
+	
+		for (var j = 0; j < itemsThisRow; ++ j) {
+			var prevDim = rowWidthHeights[j];
+			var curDim  = updatedRowWidthHeights[j];
+	
+			if (prevDim.width !== curDim.width || prevDim.height !== curDim.height) {
+				throw "Gallery item dimensions changed between provisional and updated";
+			}
+		}
+	}
+}
+
+GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(level, curY, posAndIndex) {
 
 	this.enter(level, 'redrawCompletelyAt', [ 'curY', curY ]);
-	
-	var posAndIndex = this._findElementYPosAndItemIndex(level + 1, curY);
 	
 	this.log(level, 'Element start index: ' + posAndIndex.rowItemIndex + ', removing all rows: ' + this.cachedRowDivs.length);
 
@@ -277,9 +381,11 @@ GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(
 	this.firstCachedIndex = posAndIndex.rowItemIndex;
 	this.firstY = curY;
 
-	this._addProvisionalDivs(level + 1, posAndIndex.rowItemIndex, posAndIndex.rowYPos, this.numColumns, this._getVisibleHeight());
+	var lastRendered = this._addProvisionalDivs(level + 1, posAndIndex.rowItemIndex, posAndIndex.rowYPos, this.numColumns, this._getVisibleHeight());
 	
-	this.exit(level, 'redrawCompletelyAt');
+	this.exit(level, 'redrawCompletelyAt', JSON.stringify(lastRendered));
+	
+	return lastRendered;
 };
 
 
