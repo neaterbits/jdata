@@ -4,8 +4,6 @@ import java.io.File;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.assertj.core.internal.cglib.core.Local;
-
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.xml.XMLItemDAO;
 import com.test.cv.index.ItemIndex;
@@ -13,7 +11,6 @@ import com.test.cv.integrationtest.IntegrationTestHelper;
 import com.test.cv.model.Item;
 import com.test.cv.model.cv.Language;
 import com.test.cv.model.items.ItemTypes;
-import com.test.cv.xmlstorage.api.IItemStorage;
 import com.test.cv.xmlstorage.local.LocalXmlStorage;
 
 public abstract class BaseService {
