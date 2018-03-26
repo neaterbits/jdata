@@ -16,7 +16,6 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 
 import com.test.cv.common.IOUtil;
-import com.test.cv.common.ItemId;
 import com.test.cv.dao.IFoundItem;
 import com.test.cv.dao.IFoundItemPhotoThumbnail;
 import com.test.cv.dao.IItemDAO;
