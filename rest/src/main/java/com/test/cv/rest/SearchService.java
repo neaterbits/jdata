@@ -292,7 +292,7 @@ public class SearchService extends BaseService {
 
 		return new EnumInCriterium<>(
 				attribute,
-				convertArray(searchCriterium.getValues(), length -> new Enum[length], o -> (Enum)Enum.valueOf(enumClass, (String)o.getValue())),
+				(Enum[])convertArray(searchCriterium.getValues(), length -> new Enum[length], o -> (Enum)Enum.valueOf(enumClass, (String)o.getValue())),
 				includeItemsWithNoValue);
 	}
 	
