@@ -27,24 +27,19 @@
 
 /**
  * Constructor
- *  - cacheBeforeAndAfter - cache this number before and after visible area, ie if == 20, then we will download in total 40 elements for outside visible area.
+ *  - cachedBeforeAndAfter - cache this number before and after visible area, ie if == 20, then we will download in total 40 elements for outside visible area.
  *  
  */
 
-function GalleryCacheItems(cacheBeforeAndAfter, modelDownloadItems) {
+function GalleryCacheItems(cachedBeforeAndAfter, modelDownloadItems) {
 	this.totalNumberOfItems = 0;
 	
-	this.cacheBeforeAndAfter = cacheBeforeAndAfter;
+	this.cachedBeforeAndAfter = cachedBeforeAndAfter;
 	
 	this.curVisibleIndex = 0;
 	this.curVisibleCount = 0;
 
 	this.updateSequenceNo = 0;
-
-	var arraySize = cacheBeforeAndAfter + this.curVisibleCount;
-	
-	this.cachedData = new Array(arraySize);
-	this._clear(arraySize);
 
 	// Queue of downloads to be scheduled
 	this.downloadQueue = [];
@@ -55,9 +50,12 @@ function GalleryCacheItems(cacheBeforeAndAfter, modelDownloadItems) {
 	this.modelDownloadItems = modelDownloadItems;
 }
 
-GalleryCacheItems.prototype._clear = function(arrayIndex, count) {
+
+GalleryCacheItems.prototype = Object.create(GalleryBase.prototype);
+
+GalleryCacheItems.prototype._clear = function(array, arrayIndex, count) {
 	for (var i = 0; i < count; ++ i) {
-		this.cachedData[arrayIndex + i] = null;
+		array[arrayIndex + i] = null;
 	}
 }
 
@@ -88,8 +86,12 @@ GalleryCacheItems.prototype._clear = function(arrayIndex, count) {
  */
 
 
-GalleryCacheItems.prototype._getFirstIndexInCache = function() {
-	var firstCachedIndex = this.curVisibleIndex - this.cachedBeforeAndAfter;
+GalleryCacheItems.prototype._getFirstIndexInCache = function(level, visibleIndex) {
+	
+	var firstCachedIndex;
+	
+	firstCachedIndex = this.curVisibleIndex - this.cachedBeforeAndAfter;
+	
 	if (firstCachedIndex < 0) {
 		firstCachedIndex = 0;
 	}
@@ -97,34 +99,123 @@ GalleryCacheItems.prototype._getFirstIndexInCache = function() {
 	return firstCachedIndex;
 }
 
-GalleryCacheItems.prototype._getLastIndexInCache = function() {
-	var lastCachedIndex = this.curVisibleIndex + this.curVisibleCount + this.cachedBeforeAndAfter - 1;
-	if (lastCachedIndex >= this.totalNumberOfItems) {
-		lastCachedIndex = this.totalNumberOfItems - 1;
+GalleryCacheItems.prototype._getLastIndexInCache = function(level, visibleIndex, visibleCount, totalNumberOfItems) {
+	
+	this.enter(level, '_getLastIndexInCache', [
+		'visibleIndex', visibleIndex,
+		'visibleCount', visibleCount,
+		'totalNumberOfItems', this.totalNumberOfItems
+	],
+	[ 'this.cachedBeforeAndAfter', this.cachedBeforeAndAfter ]
+	);
+	
+	var lastCachedIndex;
+	
+	if (totalNumberOfItems === 0) {
+		throw "No cached items";
 	}
+	else {
+		lastCachedIndex = this.curVisibleIndex + this.curVisibleCount + this.cachedBeforeAndAfter - 1;
+	
+		if (lastCachedIndex >= this.totalNumberOfItems) {
+			lastCachedIndex = this.totalNumberOfItems - 1;
+		}
+	}
+	
+	this.exit(level, '_getLastIndexInCache', lastCachedIndex);
 	
 	return lastCachedIndex;
 }
 
-GalleryCacheItems.prototype.updateVisibleArea = function(firstVisibleIndex, visibleCount, totalNumberOfItems, onAllVisibleDownloaded) {
-	
-	// First see if there is any overlap with current visible area and then figure what to download
-	var curFirstCachedIndex = this._getFirstIndexInCache();
-	var curLastCachedIndex = this._getLastIndexInCache();
+GalleryCacheItems.prototype.updateVisibleArea = function(level, firstVisibleIndex, visibleCount, totalNumberOfItems, onAllVisibleDownloaded) {
+
+
+	this.enter(level, 'updateVisibleArea',
+			['firstVisibleIndex', firstVisibleIndex, 'visibleCount', visibleCount, 'totalNumberOfItems', totalNumberOfItems],
+			['this.curVisibleIndex', this.curVisibleIndex, 'this.curVisibleCount', this.curVisbleCount]);
+
+
 
 	var curCached = curLastCachedIndex - curFirstCachedIndex + 1;
-	
-	if (this.cachedData.length !== curCached) {
-		throw "lastCached - firstCache does not match cached data array: " + this.cachedData.length + "/" + curCached;
-	}
 
+	if (this.cachedData == null) {
+		if (this.totalNumberOfItems !== 0) {
+			throw "Expected 0 nuber of items for initial invocation";
+		}
+		
+		if (totalNumberOfItems === 0) {
+			throw "TODO: handle total number";
+		}
+
+		this.cachedData = this._allocateCacheArray(level, firstVisibleIndex, visibleCount, totalNumberOfItems);
+	}
+	else {
+		if (this.cachedData.length !== curCached) {
+			throw "lastCached - firstCached does not match cached data array: " + this.cachedData.length + "/" + curCached;
+		}
+	}
+	
 	var lastVisibleIndex = firstVisibleIndex + visibleCount - 1;
 
-	var layout = this._computeNewCacheArrayLayout(firstVisibleIndex, visibleCount);
+	var layout = this._computeNewCacheArrayLayout(level + 1, firstVisibleIndex, visibleCount);
 
+	// Check for overlap can only be overlap if we had any items at all in the galery
+	if (this.totalNumberOfItems > 0) {
+		// First see if there is any overlap with current visible area and then figure what to download
+		var curFirstCachedIndex = this._getFirstIndexInCache(level, this.visibleIndex);
+		var curLastCachedIndex = this._getLastIndexInCache(level + 1, this.visibleIndex, this.visibleCount, this.totalNumberOfItems);
+
+		// There are items already so might be overlap between old and new array of cached items
+		this.log(level, "Look for overlapping area after scroll: firstVisibleIndex=" + firstVisibleIndex +
+				", curFirstCachedIndex=" + curFirstCachedIndex + ", lastVisibleIndex=" + lastVisibleIndex + ", curLastCachedIndex=" + curLastCachedIndex);
+
+		this._copyOverAnyOverlapping(layout, firstVisibleIndex, curLastCachedIndex, lastVisibleIndex, curLastCachedIndex);
+
+		this._downloadForVisibleAndPreloadAreas(level, layout, firstVisibleIndex, visibleCount, totalNumberOfItems, onAllVisibleDownloaded);
+	}
+	else {
+		
+		// No items were downloaded so no overlap
+		if (totalNumberOfItems == 0) {
+			// No items download so nothing to cache
+			throw "TODO: handle empty gallery";
+		}
+		else {
+
+			// Just swap array for a new one since none of the previously cached ones apply since gallery is empty
+			this.cachedData = this._allocateCacheArray(level, firstVisibleIndex, visibleCount, totalNumberOfItems);
+
+			// Download for visible area and preload
+			this._downloadForVisibleAndPreloadAreas(level, layout, firstVisibleIndex, visibleCount, totalNumberOfItems, onAllVisibleDownloaded);
+		}
+	}
+	
+
+	// Update visibility and total
+	this.curVisibleIndex = firstVisibleIndex;
+	this.curVisibleCount = visibleCount;
+	this.totalNumberOfItems = totalNumberOfItems;
+	
+	this.exit(level, ['updateVisibleArea']);
+}
+
+GalleryCacheItems.prototype._allocateCacheArray = function(level, firstVisibleIndex, visibleCount, totalNumberOfItems) {
+	var nextFirstCachedIndex = this._getFirstIndexInCache(level, firstVisibleIndex);
+	var nextLastCachedIndex = this._getLastIndexInCache(level + 1, firstVisibleIndex, visibleCount, totalNumberOfItems);
+	
+	var arraySize = nextLastCachedIndex - nextFirstCachedIndex + 1;
+	
+	var array = new Array(arraySize);
+	this._clear(array, 0, arraySize);
+
+	return array;
+}
+
+GalleryCacheItems.prototype._copyOverAnyOverlapping = function(layout, firstVisibleIndex, curLastCachedIndex, lastVisibleIndex, curLastCachedIndex) {
+	
 	var overlapFirstIndex;
 	var overlapLastIndex;
-	
+
 	if (firstVisibleIndex >= curLastCachedIndex && lastVisibleIndex <= curLastCachedIndex) {
 		overlapFirstIndex = firstVisibleIndex;
 		overlapLastIndex = lastVisibleIndex;
@@ -144,11 +235,6 @@ GalleryCacheItems.prototype.updateVisibleArea = function(firstVisibleIndex, visi
 		throw "Unhandled area state";
 	}
 
-	
-	// We need to move items from one cache array to a new one if there is overlap, ie. reuse what can be reused
-	// if there is an overlapping in scrolling.
-	// Easiest is just to find the overlapping area
-	
 	var newArrayLength = layout.lastCachedIndex - layout.firstCachedIndex + 1;
 
 	if (overlapFirstIndex != -1 && overlapLastIndex != -1) {
@@ -194,6 +280,14 @@ GalleryCacheItems.prototype.updateVisibleArea = function(firstVisibleIndex, visi
 			this.cacheArray[i] = null;
 		}
 	}
+}
+
+GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level, layout, firstVisibleIndex, visibleCount, totalNumberOfItems, onAllVisibleDownloaded) {
+
+	// We need to move items from one cache array to a new one if there is overlap, ie. reuse what can be reused
+	// if there is an overlapping in scrolling.
+	// Easiest is just to find the overlapping area
+	
 
 	// Download cached items above and below.
 	// If already in cache (as is likely), nothing will be downloaded
@@ -212,7 +306,9 @@ GalleryCacheItems.prototype.updateVisibleArea = function(firstVisibleIndex, visi
 	var updateSequenceNoAtStartOfDownload = this.updateSequenceNo;
 	var t = this;
 	
-	this._downloadItems(nextVisibleIndexInCacheArray, firstVisibleIndex, visibleCount, true, function (data) {
+	var indexIntoCacheArray = firstVisibleIndex - layout.firstCachedIndex;
+	
+	this._downloadItems(level + 1, indexIntoCacheArray, firstVisibleIndex, visibleCount, true, function (data) {
 		if (updateSequenceNoAtStartOfDownload < t.updateSequenceNo) {
 			// We can ignore this invocation since outdated
 		}
@@ -224,21 +320,19 @@ GalleryCacheItems.prototype.updateVisibleArea = function(firstVisibleIndex, visi
 	});
 
 	this._downloadItems(
+			level + 1,
 			0,
 			layout.firstCachedIndex,
 			layout.numBeforeVisible,
 			false);
 	
 	this._downloadItems(
+			level + 1,
 			layout.numBeforeVisible + visibleCount,
 			layout.lastCachedIndex,
 			layout.numAfterVisible,
 			false);
 	
-	
-	// Update visibility
-	this.curVisibleIndex = firstVisibleIndex;
-	this.curVisibleCount = visibleCount;
 }
 
 /**
@@ -251,7 +345,9 @@ GalleryCacheItems.prototype.updateVisibleArea = function(firstVisibleIndex, visi
  * - visibleCount - number of visible items
  * 
  */
-GalleryCacheItems.prototype._computeNewCacheArrayLayout = function(firstVisibleIndex, visibleCount) {
+GalleryCacheItems.prototype._computeNewCacheArrayLayout = function(level, firstVisibleIndex, visibleCount, totalNumberOfItems) {
+	
+	this.enter(level, '_computeNewCacheArrayLayout', ['firstVisibleIndex', firstVisibleIndex, 'visibleCount', visibleCount]);
 
 	var firstCachedIndex = firstVisibleIndex - this.cachedBeforeAndAfter;
 	if (firstCachedIndex < 0) {
@@ -264,11 +360,11 @@ GalleryCacheItems.prototype._computeNewCacheArrayLayout = function(firstVisibleI
 		
 	// Items after
 	var nextIndexAfter = firstVisibleIndex + visibleCount;
-	if (nextIndexAfter >= this.totalNumberOfItems) {
-		throw "After total number of items"
+	if (nextIndexAfter >= totalNumberOfItems) {
+		throw "After total number of items: nextIndexAfter=" + nextIndexAfter + ", totalNumberOfItems=" + totalNumberOfItems;
 	}
 	
-	var remaining = this.totalNumberOfItems - nextIndexAfter - 1;
+	var remaining = totalNumberOfItems - nextIndexAfter - 1;
 		
 	if (remaining < this.cachedBeforeAndAfter) {
 		// At the end of scrollview, can only download remaining
@@ -279,13 +375,17 @@ GalleryCacheItems.prototype._computeNewCacheArrayLayout = function(firstVisibleI
 		numAfterVisible = this.cachedBeforeAndAfter;
 	}
 	
-	return {
+	var result = {
 		firstCachedIndex : firstCachedIndex,
 		numBeforeVisible : numBeforeVisible,
 		
-		lastCachedIndex : lastCachedIndex,
+		lastCachedIndex : firstCachedIndex + numBeforeVisible + visibleCount + numAfterVisible - 1,
 		numAfterVisible : numAfterVisible
 	};
+
+	this.exit(level, '_computeNewCacheArrayLayout', JSON.stringify(result));
+	
+	return result;
 }
 
 /**
@@ -300,8 +400,10 @@ GalleryCacheItems.prototype._computeNewCacheArrayLayout = function(firstVisibleI
  */
 
 
-GalleryCacheItems.prototype._downloadItems = function(cacheIndex, itemIndex, itemCount, fetchImmediately, onDownloaded) {
+GalleryCacheItems.prototype._downloadItems = function(level, cacheIndex, itemIndex, itemCount, fetchImmediately, onDownloaded) {
 
+	this.enter(level, '_downloadItems' ['cacheIndex', cacheIndex, 'itemIndex', itemIndex, 'itemCount', itemCount, 'fetchImmediately', fetchImmediately]);
+	
 	var fetchFunction;
 	
 	if (fetchImmediately) {
@@ -390,6 +492,8 @@ GalleryCacheItems.prototype._downloadItems = function(cacheIndex, itemIndex, ite
 			fetchFunction(itemIndx + firstNotDownloaded, i - firstNotDownloaded);
 		}
 	}
+	
+	this.exit(level, '_downloadItems');
 }
 
 GalleryCacheItems.prototype._startModelDownloadAndRemoveFromDownloadQueueWhenDone = function(downloadRequest, onDownloaded) {

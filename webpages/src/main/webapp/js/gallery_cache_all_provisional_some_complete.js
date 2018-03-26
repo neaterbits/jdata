@@ -7,6 +7,8 @@
 
 function GalleryCacheAllProvisionalSomeComplete(config, galleryModel, galleryView, initialTotalNumberOfItems) {
 	GalleryCacheBase.call(this, config, galleryModel, galleryView, initialTotalNumberOfItems);
+	
+	this.visibleElements = null;
 }
 
 GalleryCacheAllProvisionalSomeComplete.prototype = Object.create(GalleryCacheBase.prototype);
@@ -89,13 +91,19 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 	
 	var curFirstY = this.firstY;
 	
+	console.log('## visible elements: ' + this.visibleElements);
+	
 	if (this.visibleElements == null) {
 		this.visibleElements = {
 			firstVisibleY : 0,
+			firstRenderedY : 0, // renders a bit outside of display since adding complete rows
 			firstVisibleIndex : 0,
 			lastVisibleY : 0,
+			lastRenderedY : 0, // renders a bit outside of display since adding complete rows
 			lastVisibleIndex : 0
 		};
+
+		console.log('## set visible elements: ' + JSON.stringify(this.visibleElements));
 	}
 	
 	// Updates first and last cached item index base on y position
@@ -133,6 +141,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 	
 	// TODO also add callback for preload data since we would want to precreate divs? Test whether is good enough without
 	this.cacheItems.updateVisibleArea(
+			level + 1,
 			this.visibleElements.firstVisibleIndex,
 			visibleCount,
 			this.totalNumberOfItems,
@@ -162,14 +171,16 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY, prevDisplayed) {
 	// See if we have something that was not visible earlier scrolled into view
 
-	var firstVisibleY;
-	var lastVisibleY;
+	var firstRenderedY;
+	var lastRenderedY;
 	var firstVisibleIndex;
 	var lastVisibleIndex;
 	
 	var level = 0;
 	
-	this.enter(level, 'updateOnScroll', ['curY', curY], [ 'firstY',  this.firstY,  'lastY', this.lastY ]);
+	this.enter(level, '_updateOnScroll',
+			[ 'curY', curY, 'prevDisplayed', JSON.stringify(prevDisplayed)],
+			[ 'firstY',  this.firstY,  'lastY', this.lastY, '_geVisibleHeigt()', this._getVisibleHeight() ],);
 
 	var posAndIndex = this._findElementYPosAndItemIndex(level + 1, curY);
 	
@@ -181,8 +192,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY
 		// We are scrolling upwards totally out of current area
 		lastRendered = this._redrawCompletelyAt(level + 1, curY, posAndIndex);
 		
-		firstVisibleY = posAndIndex.rowYPos;
-		lastVisibleY = lastRendered.yPos;
+		firstRenderedY = posAndIndex.rowYPos;
+		lastRenderedY = lastRendered.yPos;
 		firstVisibleIndex = posAndIndex.rowItemIndex;
 		lastVisibleIndex = lastRendered.index;
 	}
@@ -195,11 +206,11 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY
 		// Must add items before this one, so must be prepended to the divs already shown
 		lastRendered = this._prependDivs(level + 1, prevDisplayed.firstVisibleIndex - 1, prevDisplayed.firstVisibleY, this.numColumns, heightToAdd);
 
-		firstVisibleY = lastRendered.rowYPos;
+		firstRenderedY = lastRendered.rowYPos;
 		firstVisibleIndex = lastRendered.rowItemIndex;
 
 		throw "TODO figure out last rendered after prepending"
-		lastVisibleY = lastRendered.yPos;
+		lastRenderedY = lastRendered.yPos;
 		lastVisibleIndex = lastRendered.index;
 	}
 	else if (curY > prevDisplayed.lastVisibleY) {
@@ -208,8 +219,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY
 
 		lastRendered = this._redrawCompletelyAt(level + 1, curY, posAndIndex);
 
-		firstVisibleY = posAndIndex.rowYPos;
-		lastVisibleY = lastRendered.yPos;
+		firstRenderedY = posAndIndex.rowYPos;
+		lastRenderedY = lastRendered.yPos;
 		firstVisibleIndex = posAndIndex.rowItemIndex;
 		lastVisibleIndex = lastRendered.index;
 	}
@@ -226,17 +237,22 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY
 		// Start-index to add is the one immediately after last-index
 		lastRendered = this._addProvisionalDivs(level + 1, prevDisplayed.lastVisibleIndex + 1, prevDisplayed.lastVisibleY, this.numColumns, heightToAdd);
 
-		firstVisibleY = posAndIndex.rowYPos;
-		lastVisibleY = lastRendered.yPos;
+		firstRenderedY = posAndIndex.rowYPos;
+		lastRenderedY = lastRendered.yPos;
 		firstVisibleIndex = posAndIndex.rowItemIndex;
 		lastVisibleIndex = lastRendered.index;
 	}
+	else {
+		this.log(level, 'Did not match any test');
+	}
 	
 	var displayed = {
-		firstVisibleY : firstVisibleY,
-		firstVisibleIndex : firstVisibleIndex,
-		lastVisibleY : lastVisibleY,
-		lastVisibleIndex : lastVisibleIndex
+		'firstVisibleY' : curY,
+		'firstRenderedY' : firstRenderedY,
+		'firstVisibleIndex' : firstVisibleIndex,
+		'lastVisibleY' : curY + this._getVisibleHeight() - 1,
+		'lastRenderedY' : lastRenderedY,
+		'lastVisibleIndex' : lastVisibleIndex
 	};
 
 	this.exit(level, '_updateOnScroll', JSON.stringify(displayed));
