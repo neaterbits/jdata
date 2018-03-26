@@ -7,31 +7,43 @@ function GalleryBase() {
 	
 }
 
-GalleryBase.prototype.enter = function(level, functionName, args) {
+GalleryBase.prototype.enter = function(level, functionName, args, states) {
 	var argsString;
 	
 	if (typeof args === 'undefined') {
 		argsString = '';
 	}
 	else {
-		argsString = '';
-	
-		if (args.length % 2 != 0) {
-			throw 'Number of arguments to ' + functionName + ' not an even number: ' + args.length;
-		}
-		
-		for (var i = 0; i < args.length; i += 2) {
-			if (i > 0) {
-				argsString += ', ';
-			}
-
-			argsString += args[i] + '=' + args[i + 1];
-		}
+		argsString = this._arrayToString(args);
 	}
 	
+	var logString = 'ENTER ' + functionName + '(' + argsString + ')';
 	
-	this._log(level, 'ENTER ' + functionName + '(' + argsString + ')');
+	if (typeof states !== 'undefined') {
+		logString += ' state=[' + this._arrayToString(states) + ']';
+	}
+	
+	this._log(level, logString);
 };
+
+GalleryBase.prototype._arrayToString = function(array) {
+	arrayString = '';
+	
+	if (array.length % 2 != 0) {
+		throw 'Number of arguments to ' + functionName + ' not an even number: ' + array.length;
+	}
+	
+	for (var i = 0; i < array.length; i += 2) {
+		if (i > 0) {
+			arrayString += ', ';
+		}
+
+		arrayString += array[i] + '=' + array[i + 1];
+	}
+	
+	return arrayString;
+}
+
 
 GalleryBase.prototype.exit = function(level, functionName, returnValue) {
 	

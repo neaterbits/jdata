@@ -181,7 +181,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 		var clientRects = t.innerDiv.getBoundingClientRect(); // innerDiv.getClientRects()[0];
 		var viewYPos = - (clientRects.top - t.innerDiv.offsetTop);
 		
-		t.cache.updateOnScroll(0, viewYPos);
+		t.cache.updateOnScroll(0, Math.floor(viewYPos));
 	});
 
 	
