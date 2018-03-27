@@ -24,6 +24,7 @@ Hvis dette er første innlogging vil telefonnummer bli manuelt sjekket mot telef
 <span>SMS telefonnummer:</span><input id="sms_input" type="text"/><input id="login_button" type="button" value="Registrer/Logg inn" onclick="postLogin();"></input>
 </div>
 <div id="login_status_text">
+<br/>
 <span id="login_status_must_approve" class="login_status">
 Ukjent telefonnummer, du vil motta en SMS når telefonnummer er manuelt godkjent
 </span>
@@ -52,24 +53,26 @@ Skriv inn din kode under
 	var baseUrl = "http://localhost:8080/login";
 
 	function postLogin() {
-		alert('postLogin!')	;	
 		
 		var value = document.getElementById('sms_input').value;
 
-		postAjax(baseUrl + '/login?phoneNo=' + value, function(response) {
+		postAjax(baseUrl + '/checkphoneno?phoneNo=' + value, function(response) {
+			
+			console.log('## got response'  +response);
+
 			switch (response.status) {
 			case 'UNKNOWN_PHONENO':
-				document.getElementById('#login_status_must_approve').display = "inline";
+				document.getElementById('login_status_must_approve').style.display = "inline";
 				break;
 
 			case 'APPROVING':
-				document.getElementById('#login_status_approving').display = "inline";
+				document.getElementById('login_status_approving').style.display = "inline";
 				break;
 
 			case 'APPROVED':
 				// Show generated-code text and input
-				document.getElementById('#login_status_approved').display = "inline";
-				document.getElementById('#code_inut').display = "inline";
+				document.getElementById('login_status_approved').style.display = "inline";
+				document.getElementById('code_input').style.display = "inline";
 				break;
 
 			default:
@@ -78,7 +81,7 @@ Skriv inn din kode under
 		});
 	}
 		
-	function postAjax(url, onsucces) {
+	function postAjax(url, onsuccess) {
 		
 		// Post this using Ajax to server URL and get response on whether is logged in or not
 		var request = new XMLHttpRequest(url);
@@ -87,11 +90,8 @@ Skriv inn din kode under
 		
 		request.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200) {
-				// Look at response
-				if (this.response.validationNecessary) {
-					// Must show message about validation
-					onsuccess(response);
-				}
+				// Must show message about validation
+				onsuccess(this.response);
 			}
 		};
 	

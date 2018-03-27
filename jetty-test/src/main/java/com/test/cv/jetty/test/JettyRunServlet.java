@@ -49,6 +49,7 @@ public class JettyRunServlet {
 		
 		contextHandler.addServlet(SearchServlet.class, "/search/*");
 		contextHandler.addServlet(ItemServlet.class, "/items/*");
+		contextHandler.addServlet(LoginServlet.class, "/login/*");
 		//contextHandler.addServletWithMapping(SearchServlet.class, "/search/*");
 		
 		try {
@@ -222,6 +223,10 @@ public class JettyRunServlet {
 
 		@Override
 		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+			if (isTest()) {
+				resp.setHeader("Access-Control-Allow-Origin", "*");
+			}
 
 			if (req.getPathInfo() != null && req.getPathInfo().contains("/checkphoneno")) {
 				// This is register or login scenario, check if user exist

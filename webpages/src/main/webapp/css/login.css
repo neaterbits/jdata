@@ -22,17 +22,19 @@ html, body {
 #login_row {
 	display : table-row;
 	position: relative;
+	
+	height: 100%;
 }
 
 #login_cell {
 	display : table-cell;
 	vertical-align : middle;
-	
+	height: 100%;
 }
 
 #login_box {
 	width : 40%;
-	height : 40%;
+	height : 50%;
 	
 	margin-left : auto;
 	margin-right : auto;
@@ -44,7 +46,6 @@ html, body {
 
 	padding-left : 2em;
 	padding-right : 2em;
-
 }
 
 #login_explanation {
@@ -78,3 +79,5 @@ html, body {
 	display : none;
 }
 
+#login_status_text {
+}

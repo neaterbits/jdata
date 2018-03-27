@@ -11,6 +11,7 @@ import javax.ws.rs.QueryParam;
 import com.test.cv.dao.LoginCode;
 import com.test.cv.dao.LoginDAO;
 import com.test.cv.dao.jpa.JPALoginDAO;
+import com.test.cv.dao.jpa.JPANames;
 import com.test.cv.model.login.CodeStatus;
 import com.test.cv.model.login.LoginStatus;
 import com.test.cv.notifications.aws.AWSSMSSender;
@@ -45,7 +46,7 @@ public class LoginService {
 	}
 
 	private LoginDAO getDAO() {
-		return new JPALoginDAO("sdsd");
+		return new JPALoginDAO(JPANames.PERSISTENCE_UNIT_DERBY);
 	}
 	
 	@Path("checkphoneno")
@@ -146,10 +147,12 @@ public class LoginService {
 		
 		final String approvalPhoneNo = System.getenv("ELTODO_APPROVAL_NOTIFICATION_PHONENUMBER");
 
+		/*
 		if (approvalPhoneNo == null || approvalPhoneNo.trim().isEmpty()) {
 			throw new IllegalStateException("No approval notification phone number");
 		}
 		sendSMS(approvalPhoneNo.trim(), "Nytt telefonnummer må godkjennes: \"" + phoneNo + "\"");
+		*/
 	}
 	
 	private void sendSMS(String phoneNo, String message) {
