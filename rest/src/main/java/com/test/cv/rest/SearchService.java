@@ -86,7 +86,7 @@ public class SearchService extends BaseService {
 		}
 
 		final SearchResult result;
-		if (testdata) {
+		if (testdata != null && testdata && isTest()) {
 			// Return a hardcoded testresult for simple local testing
 			result = makeTestResult();
 		}

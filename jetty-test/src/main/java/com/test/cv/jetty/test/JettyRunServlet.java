@@ -20,6 +20,7 @@ import com.test.cv.dao.ItemStorageException;
 import com.test.cv.model.Item;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.TypeInfo;
+import com.test.cv.rest.BaseService;
 import com.test.cv.rest.ItemService;
 import com.test.cv.rest.LoginService;
 import com.test.cv.rest.LoginService.CheckCodeResponse;
@@ -29,6 +30,11 @@ import com.test.cv.rest.SearchResult;
 import com.test.cv.rest.SearchService;
 
 public class JettyRunServlet {
+
+	private static boolean isTest() {
+		return BaseService.isTest();
+	}
+	
 
 	public static void main(String [] args) throws Exception {
 		
@@ -58,19 +64,11 @@ public class JettyRunServlet {
 
 		private static final long serialVersionUID = 1L;
 
-		private static boolean isTest(HttpServletRequest req) {
-			final String testParam = req.getParameter("test");
-			
-			boolean test = "true".equals(testParam);
-
-			return test;
-		}
-		
 		@Override
 		protected void doOptions(HttpServletRequest req, HttpServletResponse resp)
 				throws ServletException, IOException {
 
-			if (isTest(req)) {
+			if (isTest()) {
 				resp.setHeader("Access-Control-Allow-Origin", "*");
 				resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
 			}
@@ -128,7 +126,7 @@ public class JettyRunServlet {
 					testdata,
 					req);
 
-			if (isTest(req)) {
+			if (isTest()) {
 				resp.setHeader("Access-Control-Allow-Origin", "*");
 			}
 
@@ -140,7 +138,7 @@ public class JettyRunServlet {
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			
-			if (isTest(req)) {
+			if (isTest()) {
 				resp.setHeader("Access-Control-Allow-Origin", "*");
 			}
 

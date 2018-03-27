@@ -17,6 +17,12 @@ public abstract class BaseService {
 	
 	protected static final int THUMBNAIL_MAX_SIZE = 240;
 	
+	public static boolean isTest() {
+		final String test = System.getenv("ELTODO_LOCALHOST_TEST");
+
+		return "true".equals(test);
+	}
+
 	enum Storage {
 		JPA_RELATIONAL, // standard relational database
 		AMAZON_S3_ES, // S3 and ElasticSearch in AWS
