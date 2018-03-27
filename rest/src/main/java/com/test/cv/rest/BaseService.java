@@ -4,6 +4,7 @@ import java.io.File;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.test.cv.common.EnvVariables;
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.xml.XMLItemDAO;
 import com.test.cv.index.ItemIndex;
@@ -18,7 +19,7 @@ public abstract class BaseService {
 	protected static final int THUMBNAIL_MAX_SIZE = 240;
 	
 	public static boolean isTest() {
-		final String test = System.getenv("ELTODO_LOCALHOST_TEST");
+		final String test = System.getenv(EnvVariables.ELTODO_LOCALHOST_TEST);
 
 		return "true".equals(test);
 	}

@@ -2,12 +2,15 @@ package com.test.cv.rest;
 
 import java.security.SecureRandom;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
+import com.test.cv.common.EnvVariables;
 import com.test.cv.dao.LoginCode;
 import com.test.cv.dao.LoginDAO;
 import com.test.cv.dao.jpa.JPALoginDAO;
@@ -46,7 +49,23 @@ public class LoginService {
 	}
 
 	private LoginDAO getDAO() {
-		return new JPALoginDAO(JPANames.PERSISTENCE_UNIT_DERBY);
+		
+		final String dbUsername = System.getenv(EnvVariables.ELTODO_JPA_USERNAME);
+		if (dbUsername == null || dbUsername.trim().isEmpty()) {
+			throw new IllegalStateException("No DB username env variable");
+		}
+		
+		final String dbPassword = System.getenv(EnvVariables.ELTODO_JPA_PASSWORD);
+		if (dbPassword == null || dbPassword.trim().isEmpty()) {
+			throw new IllegalStateException("No DB username env variable");
+		}
+
+		final Map<String, String> properties = new HashMap<>();
+		
+		properties.put("javax.persistence.jdbc.user", dbUsername.trim());
+		properties.put("javax.persistence.jdbc.password", dbPassword);
+		
+		return new JPALoginDAO(JPANames.PERSISTENCE_UNIT_PSQL, properties);
 	}
 	
 	@Path("checkphoneno")
@@ -145,14 +164,12 @@ public class LoginService {
 	
 	private void sendApproveNotification(String phoneNo) {
 		
-		final String approvalPhoneNo = System.getenv("ELTODO_APPROVAL_NOTIFICATION_PHONENUMBER");
+		final String approvalPhoneNo = System.getenv(EnvVariables.ELTODO_APPROVAL_NOTIFICATION_PHONENUMBER);
 
-		/*
 		if (approvalPhoneNo == null || approvalPhoneNo.trim().isEmpty()) {
 			throw new IllegalStateException("No approval notification phone number");
 		}
 		sendSMS(approvalPhoneNo.trim(), "Nytt telefonnummer må godkjennes: \"" + phoneNo + "\"");
-		*/
 	}
 	
 	private void sendSMS(String phoneNo, String message) {
