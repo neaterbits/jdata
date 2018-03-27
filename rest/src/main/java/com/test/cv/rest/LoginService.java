@@ -13,6 +13,7 @@ import com.test.cv.dao.LoginDAO;
 import com.test.cv.dao.jpa.JPALoginDAO;
 import com.test.cv.model.login.CodeStatus;
 import com.test.cv.model.login.LoginStatus;
+import com.test.cv.notifications.aws.AWSSMSSender;
 
 @Path("/login")
 public class LoginService {
@@ -142,10 +143,16 @@ public class LoginService {
 	}
 	
 	private void sendApproveNotification(String phoneNo) {
-		sendSMS("+4793645359", "Nytt telefonnummer må godkjennes: \"" + phoneNo + "\"");
+		
+		final String approvalPhoneNo = System.getenv("ELTODO_APPROVAL_NOTIFICATION_PHONENUMBER");
+
+		if (approvalPhoneNo == null || approvalPhoneNo.trim().isEmpty()) {
+			throw new IllegalStateException("No approval notification phone number");
+		}
+		sendSMS(approvalPhoneNo.trim(), "Nytt telefonnummer må godkjennes: \"" + phoneNo + "\"");
 	}
 	
 	private void sendSMS(String phoneNo, String message) {
-		throw new UnsupportedOperationException("TODO");
+		new AWSSMSSender().sendSMS("ElTodo", phoneNo, message);
 	}
 }

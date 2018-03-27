@@ -25,6 +25,8 @@
 	    <module>dao-jpa</module>
 	    <module>dao-xml</module>
 	    <module>dao-test</module>
+	    <module>notifications</module>
+	    <module>notifications-aws</module>
 	    <module>xml</module>
 	    <module>search-common</module>
 	    <module>webpages</module>
