@@ -32,7 +32,7 @@ Ukjent telefonnummer, du vil motta en SMS når telefonnummer er manuelt godkjent
 Telefonnummer venter på manuell godkjenning, du vil motta en SMS når godkjent
 </span>
 <span id="login_status_approved" class="login_status">
-Skriv inn din kode under
+Skriv inn din kode i feltet under
 </span>
 
 </div>
@@ -62,15 +62,18 @@ Skriv inn din kode under
 
 			switch (response.status) {
 			case 'UNKNOWN_PHONENO':
+				hideAll();
 				document.getElementById('login_status_must_approve').style.display = "inline";
 				break;
 
 			case 'APPROVING':
+				hideAll();
 				document.getElementById('login_status_approving').style.display = "inline";
 				break;
 
 			case 'APPROVED':
 				// Show generated-code text and input
+				hideAll();
 				document.getElementById('login_status_approved').style.display = "inline";
 				document.getElementById('code_input').style.display = "inline";
 				break;
@@ -79,6 +82,13 @@ Skriv inn din kode under
 				throw "Unknown login status code: " + response.status;
 			}
 		});
+	}
+	
+	function hideAll() {
+		document.getElementById('login_status_must_approve').style.display = "none";
+		document.getElementById('login_status_approving').style.display = "none";
+		document.getElementById('login_status_approved').style.display = "none";
+		document.getElementById('code_input').style.display = "none";
 	}
 		
 	function postAjax(url, onsuccess) {

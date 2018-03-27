@@ -55,6 +55,10 @@ html, body {
 	text-align : center;
 }
 
+#login_inputs {
+	text-align: center;
+}
+
 #sms_input {
 	margin-left : 0.3em;
 }
