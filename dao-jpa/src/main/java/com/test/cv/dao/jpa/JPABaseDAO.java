@@ -1,5 +1,7 @@
 package com.test.cv.dao.jpa;
 
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -13,11 +15,15 @@ public abstract class JPABaseDAO implements AutoCloseable {
 	JPABaseDAO(String persistenceUnitName) {
 		this(Persistence.createEntityManagerFactory(persistenceUnitName), true);
 	}
+
+	JPABaseDAO(String persistenceUnitName, Map<String, String> properties) {
+		this(Persistence.createEntityManagerFactory(persistenceUnitName, properties), true);
+	}
 	
 	JPABaseDAO(EntityManagerFactory entityManagerFactory) {
 		this(entityManagerFactory, false);
 	}
-
+	
 	private JPABaseDAO(EntityManagerFactory entityManagerFactory, boolean openedInConstructor) {
 		this.entityManagerFactory = entityManagerFactory;
 		this.entityManager = entityManagerFactory.createEntityManager();

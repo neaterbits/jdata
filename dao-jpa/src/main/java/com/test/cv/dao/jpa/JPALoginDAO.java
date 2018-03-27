@@ -1,6 +1,7 @@
 package com.test.cv.dao.jpa;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import javax.persistence.EntityManagerFactory;
@@ -21,6 +22,10 @@ public class JPALoginDAO extends JPABaseDAO implements LoginDAO {
 		super(persistenceUnitName);
 	}
 	
+	public JPALoginDAO(String persistenceUnitName, Map<String, String> properties) {
+		super(persistenceUnitName, properties);
+	}
+
 	private User getUser(String phoneNo) {
 		
 		User user = null;
