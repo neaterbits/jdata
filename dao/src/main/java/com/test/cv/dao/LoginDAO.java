@@ -11,11 +11,18 @@ public interface LoginDAO extends AutoCloseable {
 	 * If user does not exist, add within same transaction
 	 * so that setting can be done in same transaction
 	 * @param phoneNo
+	 * @param initialStatus
 	 * @return
 	 */
-	LoginStatus getOrAddUser(String phoneNo);
+	LoginStatus getOrAddUser(String phoneNo, LoginStatus initialStatus);
 	
 	LoginStatus getLoginStatus(String phoneNo);
+	
+	public default void approveUser(String phoneNo) {
+		updateLoginStatus(phoneNo, LoginStatus.APPROVED);
+	}
+	
+	void deleteUser(String phoneNo);
 	
 	void updateLoginStatus(String phoneNo, LoginStatus status);
 	

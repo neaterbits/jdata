@@ -10,6 +10,9 @@
         
                 <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 
+				<class>com.test.cv.model.login.User</class>
+
+<!--
 				<class>com.test.cv.model.Item</class>
 				<class>com.test.cv.model.ItemPhotoThumbnail</class>
 				<class>com.test.cv.model.ItemPhoto</class>
@@ -20,7 +23,10 @@
 				<class>com.test.cv.model.items.PhysicalItem</class>
 				<class>com.test.cv.model.items.SportsItem</class>
 				<class>com.test.cv.model.items.Snowboard</class>
+				<class>com.test.cv.model.items.Car</class>
+				<class>com.test.cv.model.items.RentalApartment</class>
 
+ -->
                 <exclude-unlisted-classes>false</exclude-unlisted-classes>
                 
                 <properties>

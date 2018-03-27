@@ -55,7 +55,7 @@ public class LoginService {
 		
 		final LoginDAO loginDAO = getDAO();
 		
-		final LoginStatus loginStatus = loginDAO.getOrAddUser(phoneNo);
+		final LoginStatus loginStatus = loginDAO.getOrAddUser(phoneNo, LoginStatus.APPROVING);
 		
 		switch (loginStatus) {
 		case APPROVED:

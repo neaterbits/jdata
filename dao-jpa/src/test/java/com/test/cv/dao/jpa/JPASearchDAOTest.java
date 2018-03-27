@@ -8,7 +8,7 @@ import com.test.cv.dao.ISearchDAO;
 import com.test.cv.dao.test.SearchDAOTest;
 
 public class JPASearchDAOTest extends SearchDAOTest {
-	private final EntityManagerFactory emf = Persistence.createEntityManagerFactory("jpa-derby");
+	private final EntityManagerFactory emf = Persistence.createEntityManagerFactory(JPANames.PERSISTENCE_UNIT_DERBY);
 	
 	@Override
 	protected IItemDAO getItemDAO() {

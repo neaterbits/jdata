@@ -1,8 +1,10 @@
 package com.test.cv.dao.jpa;
 
 import java.util.Date;
+import java.util.function.Supplier;
 
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 
 import com.test.cv.dao.LoginCode;
 import com.test.cv.dao.LoginDAO;
@@ -20,23 +22,54 @@ public class JPALoginDAO extends JPABaseDAO implements LoginDAO {
 	}
 	
 	private User getUser(String phoneNo) {
-		return entityManager.find(User.class, phoneNo);
+		
+		User user = null;
+		
+		try {
+			user = entityManager.createQuery("from User user where user.phoneNo = :phoneNo", User.class)
+				.setParameter("phoneNo", phoneNo)
+				.getSingleResult();
+		}
+		catch (NoResultException ex) {
+			
+		}
+
+		return user;
 	}
 
-	
-	@Override
-	public LoginStatus getOrAddUser(String phoneNo) {
-
-		final LoginStatus status;
+	private <R> R performInTransaction(Supplier<R> s) {
+		final R result;
 		entityManager.getTransaction().begin();
 		
 		boolean ok = false;
 		try {
+			result = s.get();
+			entityManager.getTransaction().commit();
+			ok = true;
+		}
+		finally {
+			if (!ok) {
+				if (entityManager.getTransaction().isActive()) {
+					entityManager.getTransaction().rollback();
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	@Override
+	public LoginStatus getOrAddUser(String phoneNo, LoginStatus initialStatus) {
+
+		return performInTransaction(() -> {
+			final LoginStatus status;
+			
 			User user = getUser(phoneNo);
 
 			if (user == null) {
 				user = new User();
 				
+				user.setStatus(initialStatus);
 				user.setPhoneNo(phoneNo);
 
 				entityManager.persist(user);
@@ -46,15 +79,20 @@ public class JPALoginDAO extends JPABaseDAO implements LoginDAO {
 			else {
 				status = user.getStatus();
 			}
-			entityManager.getTransaction().commit();
-			ok = true;
-		}
-		finally {
-			if (!ok) {
-				entityManager.getTransaction().rollback();
-			}
-		}
-		return status;
+
+			return status;
+		});
+	}
+
+	@Override
+	public void deleteUser(String phoneNo) {
+		performInTransaction(() -> {
+			entityManager.createQuery("delete from User user where user.phoneNo = :phoneNo")
+				.setParameter("phoneNo", phoneNo)
+				.executeUpdate();
+			
+			return null;
+		});
 	}
 
 	@Override
@@ -81,19 +119,11 @@ public class JPALoginDAO extends JPABaseDAO implements LoginDAO {
 
 		user.setStatus(status);
 		
-		entityManager.getTransaction().begin();
-		
-		boolean ok = false;
-		try {
+		performInTransaction(() -> {
 			entityManager.persist(user);
-			entityManager.getTransaction().commit();
-			ok = true;
-		}
-		finally {
-			if (!ok) {
-				entityManager.getTransaction().rollback();
-			}
-		}
+			
+			return null;
+		});
 	}
 
 	@Override
@@ -111,24 +141,17 @@ public class JPALoginDAO extends JPABaseDAO implements LoginDAO {
 			throw new IllegalArgumentException("generatedTime == null");
 		}
 
-		entityManager.getTransaction().begin();
 		
-		boolean ok = false;
-		try {
+		performInTransaction(() -> {
 			final User user = getUser(phoneNo);
 
 			user.setCode(code);
 			user.setCodeGeneratedTime(generatedTime);
 
 			entityManager.persist(user);
-			entityManager.getTransaction().commit();
-			ok = true;
-		}
-		finally {
-			if (!ok) {
-				entityManager.getTransaction().rollback();
-			}
-		}
+
+			return null;
+		});
 	}
 
 	@Override
