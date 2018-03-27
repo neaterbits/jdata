@@ -68,11 +68,41 @@ public class LoginService {
 		return new JPALoginDAO(JPANames.PERSISTENCE_UNIT_PSQL, properties);
 	}
 	
+	private void verifyPhoneNo(String phoneNo) {
+		final String trimmed = phoneNo.replace(" ", "");
+
+		if (trimmed.isEmpty()) {
+			throw new IllegalArgumentException("Empty phoneNo");
+		}
+		
+		final boolean valid = 
+				(
+						trimmed.startsWith("+") && areDigits(trimmed, 1, trimmed.length())
+				|| 		(trimmed.length() == 8 && areDigits(trimmed, 0, trimmed.length()))
+			);
+		
+		if (!valid) {
+			throw new IllegalArgumentException("phoneNo not valid");
+		}
+	}
+	
+	private static boolean areDigits(String s, int startIndex, int endIndex) {
+		for (int i = startIndex; i < endIndex; ++ i) {
+			if (!Character.isDigit(s.charAt(i))) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
 	@Path("checkphoneno")
 	@Produces("application/json")
 	@POST
 	public LoginResponse checkPhoneNo(@QueryParam("phoneNo") String phoneNo) {
-		
+
+		verifyPhoneNo(phoneNo);
+
 		final LoginDAO loginDAO = getDAO();
 		
 		final LoginStatus loginStatus = loginDAO.getOrAddUser(phoneNo, LoginStatus.APPROVING);
@@ -114,17 +144,19 @@ public class LoginService {
 		// Store code in DB for later
 		loginDAO.storeCode(phoneNo, code, new Date(System.currentTimeMillis()));
 
-		sendSMS(phoneNo, "Her er din innloggins-kode: " + code);
+		sendSMS(phoneNo, "Her er din innloggings-kode: " + code);
 	}
 	
 
 	// Send whenever user presses button to send a code
-	@Path("sendcode")
+	@Path("checkcode")
 	@POST
 	@Produces("application/json")
 	public CheckCodeResponse checkCode(@QueryParam("phoneNo") String phoneNo, @QueryParam("code") String code) {
 		// Compare code to what is in database
-		
+
+		verifyPhoneNo(phoneNo);
+
 		final LoginDAO loginDAO = getDAO();
 		
 		final LoginCode loginCode = loginDAO.getLoginStatusAndCode(phoneNo);

@@ -48,6 +48,11 @@ html, body {
 	padding-right : 2em;
 }
 
+#login_status_invalid_phoneno, #login_status_invalid_code {
+	color: red;
+	display: none;
+}
+
 #login_explanation {
 }
 
@@ -79,8 +84,17 @@ html, body {
 	display : none;	
 }
 
+#code_input_div {
+	text-align: center;
+	display: none;
+}
+
 #code_input {
-	display : none;
+	margin-left: 0.3em;
+}
+
+#send_code_button {
+	margin-left: 1em;
 }
 
 #login_status_text {
