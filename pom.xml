@@ -9,6 +9,7 @@
   <url>http://maven.apache.org</url>
 
   <properties>
+	<jacksonVersion>2.9.3</jacksonVersion>
    
 	<outputsRoot>${project.basedir}</outputsRoot>
 
