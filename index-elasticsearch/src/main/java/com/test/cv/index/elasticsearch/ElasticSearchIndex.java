@@ -2,6 +2,7 @@ package com.test.cv.index.elasticsearch;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -17,11 +18,11 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 
 import com.test.cv.common.ItemId;
 import com.test.cv.index.IndexSearchCursor;
@@ -171,7 +172,9 @@ public class ElasticSearchIndex implements ItemIndex {
 	private ThumbSizes getThumbs(String itemId, String itemType) throws ItemIndexException {
 		final GetRequest request = new GetRequest(INDEX_NAME, itemType, itemId);
 		
-		request.storedFields(FIELD_THUMBS);
+		final FetchSourceContext sourceContext = new FetchSourceContext(true, new String[] { FIELD_THUMBS }, null);
+		
+		request.fetchSourceContext(sourceContext);
 		
 		final GetResponse response;
 		try {
@@ -180,17 +183,19 @@ public class ElasticSearchIndex implements ItemIndex {
 			throw new ItemIndexException("Failed to get item with ID " + itemId, ex);
 		}
 		
-		// Encoded width/height as longs
-		final DocumentField thumbsField = response.getField(FIELD_THUMBS);
+		// Encoded width/height as integers
+		
+		final Map<String, Object> source = response.getSourceAsMap();
+
+		@SuppressWarnings("unchecked")
+		final ArrayList<Integer> thumbSizes = (ArrayList<Integer>) source.get(FIELD_THUMBS);
 		
 		final Integer [] integers;
 		
-		if (thumbsField != null) {
-			int [] thumbSizes = thumbsField.getValue();
-	
-			integers = new Integer[thumbSizes.length];
-			for (int i = 0; i < thumbSizes.length; ++ i) {
-				integers[i] = thumbSizes[i];
+		if (thumbSizes != null) {
+			integers = new Integer[thumbSizes.size()];
+			for (int i = 0; i < thumbSizes.size(); ++ i) {
+				integers[i] = thumbSizes.get(i);
 			}
 		}
 		else {
@@ -245,7 +250,7 @@ public class ElasticSearchIndex implements ItemIndex {
 		
 		final Integer[] moved = moveThumbnail(existing.sizes, existing.sizes[photoNo], photoNo, toIndex, length -> new Integer[length]);
 		
-		updateThumbs(itemId, null, moved);
+		updateThumbs(itemId, ItemTypes.getTypeName(type), moved);
 	}
 
 	@Override
@@ -261,9 +266,9 @@ public class ElasticSearchIndex implements ItemIndex {
  		
 		final SearchSourceBuilder sourceBuilder = request.source();
 		
-		sourceBuilder.fetchSource(new String [] { "*." + FIELD_USER_ID }, null);
+		sourceBuilder.fetchSource(new String [] { FIELD_USER_ID }, null);
 
-		sourceBuilder.query(QueryBuilders.idsQuery().addIds(itemIds));
+		sourceBuilder.query(QueryBuilders.idsQuery().addIds(itemIds)).fetchSource();
 
 		SearchResponse response;
 		try {
@@ -282,7 +287,7 @@ public class ElasticSearchIndex implements ItemIndex {
 		
 		for (SearchHit hit : hits) {
 			final String id = hit.getId();
-			final String userId = hit.field(FIELD_USER_ID).getValue();
+			final String userId = (String)hit.getSourceAsMap().get(FIELD_USER_ID);
 			
 			final int index = idToIndex.get(id);
 			
@@ -293,7 +298,7 @@ public class ElasticSearchIndex implements ItemIndex {
 			result[index] = new ItemId(userId, id);
 		}
 
-		return null;
+		return result;
 	}
 
 	@Override
