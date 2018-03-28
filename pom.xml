@@ -10,6 +10,7 @@
 
   <properties>
 	<jacksonVersion>2.9.3</jacksonVersion>
+	<derbyVersion>10.12.1.1</derbyVersion>
    
 	<outputsRoot>${project.basedir}</outputsRoot>
 
