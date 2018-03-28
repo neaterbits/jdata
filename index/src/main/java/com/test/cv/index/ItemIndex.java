@@ -46,6 +46,8 @@ public interface ItemIndex extends AutoCloseable {
 	 */
 	IndexSearchCursor search(String freeText, List<Criterium> criteria, Set<ItemAttribute> facetAttributes) throws ItemIndexException;
 	
+	void deleteItem(String itemId, Class<? extends Item> type) throws ItemIndexException;
+	
 	public default boolean isIdAttribute(ItemAttribute attribute) {
 		return attribute.getName().equals("id");
 	}

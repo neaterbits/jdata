@@ -325,10 +325,16 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	}
 
 	@Override
-	public void deleteItem(String userId, String itemId) throws ItemStorageException {
+	public void deleteItem(String userId, String itemId, Class<? extends Item> type) throws ItemStorageException {
 
 		final Lock lock = obtainLock(userId, itemId);
 
+		try {
+			index.deleteItem(itemId, type);
+		}
+		catch (ItemIndexException ex) {
+			System.err.println("## failed to delete from index: " + ex);
+		}
 		try {
 			xmlStorage.deleteAllItemFiles(userId, itemId);
 		} catch (StorageException ex) {

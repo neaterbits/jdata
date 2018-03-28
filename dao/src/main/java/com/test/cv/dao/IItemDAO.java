@@ -58,7 +58,7 @@ public interface IItemDAO extends AutoCloseable {
 	
 	void deletePhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, int photoNo) throws ItemStorageException;
 	
-	void deleteItem(String userId, String itemId) throws ItemStorageException;
+	void deleteItem(String userId, String itemId, Class<? extends Item> type) throws ItemStorageException;
 	
 	/**
 	 * Retrieve thumbnails and concatenate them into one stream for fast retrieval of

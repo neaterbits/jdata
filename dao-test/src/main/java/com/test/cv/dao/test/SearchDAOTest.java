@@ -281,8 +281,8 @@ public abstract class SearchDAOTest extends TestCase {
 				 
 			 }
 
-			 itemDAO.deleteItem(userId, itemId1);
-			 itemDAO.deleteItem(userId, itemId2);
+			 itemDAO.deleteItem(userId, itemId1, Snowboard.class);
+			 itemDAO.deleteItem(userId, itemId2, Snowboard.class);
 		}
 	}
 	

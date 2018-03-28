@@ -70,7 +70,7 @@ public abstract class ItemDAOTest extends TestCase {
 				assertThat(s.getLength().compareTo(new BigDecimal("164.5"))).isEqualTo(0);
 			}
 			finally {
-				itemDAO.deleteItem(userId, itemId);
+				itemDAO.deleteItem(userId, itemId, Snowboard.class);
 			}
 		}
 	}
@@ -113,7 +113,7 @@ public abstract class ItemDAOTest extends TestCase {
 				 assertThat(photo.getData()).containsExactly("photo".getBytes());
 			 }
 			 finally {
-				 itemDAO.deleteItem(userId, itemId);
+				 itemDAO.deleteItem(userId, itemId, Snowboard.class);
 			 }
 		}
 	}
@@ -253,7 +253,7 @@ public abstract class ItemDAOTest extends TestCase {
 				 assertThat(itemDAO.getNumPhotos(userId, itemId)).isEqualTo(4);
 			 }
 			 finally {
-				 itemDAO.deleteItem(userId, itemId);
+				 itemDAO.deleteItem(userId, itemId, Snowboard.class);
 			 }
 		}
 	}
@@ -320,15 +320,15 @@ public abstract class ItemDAOTest extends TestCase {
 			}
 			finally {
 				if (itemId1 != null) {
-				 itemDAO.deleteItem(user1Id, itemId1);
+				 itemDAO.deleteItem(user1Id, itemId1, Snowboard.class);
 				}
 				
 				if (itemId2 != null) {
-				 itemDAO.deleteItem(user2Id, itemId2);
+				 itemDAO.deleteItem(user2Id, itemId2, Snowboard.class);
 				}
 				
 				if (itemId3 != null) {
-				 itemDAO.deleteItem(user2Id, itemId3);
+				 itemDAO.deleteItem(user2Id, itemId3, Snowboard.class);
 				}
 			}
 		}
@@ -436,7 +436,7 @@ public abstract class ItemDAOTest extends TestCase {
 			 addPhotoAndThumbnail(itemDAO, userId, itemId, Snowboard.class, "thumbnail3".getBytes(), "photo3".getBytes());
 			 addPhotoAndThumbnail(itemDAO, userId, itemId, Snowboard.class, "thumbnail4".getBytes(), "photo4".getBytes());
 
-			 itemDAO.deleteItem(userId, itemId);
+			 itemDAO.deleteItem(userId, itemId, Snowboard.class);
 			 
 			 assertThat(itemDAO.getPhotoThumbnails(userId, itemId).isEmpty()).isTrue();
 			 assertThat(itemDAO.getNumThumbnails(userId, itemId)).isEqualTo(0);

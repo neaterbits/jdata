@@ -383,7 +383,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	}
 
 	@Override
-	public void deleteItem(String userId, String itemId) {
+	public void deleteItem(String userId, String itemId, Class<? extends Item> type) {
 		final Item item = getItem(userId, itemId).getItem();
 		
 		final EntityTransaction tx = entityManager.getTransaction();

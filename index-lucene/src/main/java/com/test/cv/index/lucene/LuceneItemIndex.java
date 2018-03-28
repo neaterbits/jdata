@@ -210,6 +210,17 @@ public class LuceneItemIndex implements ItemIndex {
 	}
 	
 	
+	
+	@Override
+	public void deleteItem(String itemId, Class<? extends Item> type) throws ItemIndexException {
+		try {
+			writer.deleteDocuments(new Term("id", itemId));
+			writer.commit();
+		} catch (IOException ex) {
+			throw new ItemIndexException("Failed to delete document for item", ex);
+		}
+	}
+
 	private IndexReader refreshReader() throws ItemIndexException {
 		try {
 			final DirectoryReader newReader = DirectoryReader.openIfChanged(this.reader, this.writer);

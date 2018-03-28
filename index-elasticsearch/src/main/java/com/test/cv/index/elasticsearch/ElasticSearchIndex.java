@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.http.HttpHost;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -133,6 +134,18 @@ public class ElasticSearchIndex implements ItemIndex {
 			client.index(request);
 		} catch (IOException ex) {
 			throw new ItemIndexException("Failed to index", ex);
+		}
+	}
+	
+	@Override
+	public void deleteItem(String itemId, Class<? extends Item> type) throws ItemIndexException {
+		
+		final DeleteRequest request = new DeleteRequest(INDEX_NAME, ItemTypes.getTypeName(type), itemId);
+
+		try {
+			client.delete(request);
+		} catch (IOException ex) {
+			throw new ItemIndexException("Exception while deleting", ex);
 		}
 	}
 
