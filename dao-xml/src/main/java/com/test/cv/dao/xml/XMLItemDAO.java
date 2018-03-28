@@ -234,9 +234,24 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		item.setIdString(itemId);
 		
 		try {
-			store(userId, itemId, item, ItemTypes.getType(item), ClassAttributes.getValues(item));
-		} catch (XMLStorageException ex) {
-			throw new ItemStorageException("Failed to store item", ex);
+			lockProvider.createLock(userId, itemId);
+		} catch (LockException ex) {
+			throw new ItemStorageException("Failed to create lock for " + itemId, ex);
+		}
+		
+		// Also lock during creation ? Ought not be necessary since not returned itemId
+		// so no other caller can access it yet. but perhaps useful as a test that locking works for this item
+		final Lock lock = obtainLock(userId, itemId);
+		
+		try {
+			try {
+				store(userId, itemId, item, ItemTypes.getType(item), ClassAttributes.getValues(item));
+			} catch (XMLStorageException ex) {
+				throw new ItemStorageException("Failed to store item", ex);
+			}
+		}
+		finally {
+			releaseLock(lock);
 		}
 		
 		return itemId;
@@ -318,6 +333,12 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		}
 		finally {
 			releaseLock(lock);
+		}
+		
+		try {
+			lockProvider.deleteLock(userId, itemId);
+		} catch (LockException ex) {
+			throw new ItemStorageException("Failed to delete lock for " + itemId, ex);
 		}
 	}
 

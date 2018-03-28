@@ -19,6 +19,15 @@ public interface LockProvider {
 	}
 	
 	/**
+	 * Create a lock for later use, eg. a lock file or a row in database
+	 * @param userId
+	 * @param itemId
+	 */
+	
+	void createLock(String userId, String itemId) throws LockException;
+	
+	
+	/**
 	 * Lock files for this user and this item by creating a lock file or object
 	 * This might block for a while if there are other ongoing operations for this userId/itemId combination
 	 * @param userId
@@ -33,4 +42,13 @@ public interface LockProvider {
 	 * @param itemId
 	 */
 	void releaseLock(Lock lock);
+	
+	/**
+	 * Delete a previously created lock
+	 * @param userId
+	 * @param itemId
+	 */
+	
+	void deleteLock(String userId, String itemId) throws LockException;
+	
 }

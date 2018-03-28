@@ -49,7 +49,7 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage, Loc
 	}
 
 	private File getLockFile(String userId, String itemId) {
-		return new File(itemDir(userId, itemId), "lockfile");
+		return new File(userDir(userId), itemId + ".lockfile");
 	}
 
 	@Override
@@ -117,7 +117,39 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage, Loc
 
 		return inputStream;
 	}
+	
+	@Override
+	public void createLock(String userId, String itemId) throws LockException {
+		// Write a lockfile for later use
+		final File lockFile = getLockFile(userId, itemId);
 
+		final File dir = lockFile.getParentFile();
+		if (!dir.exists()) {
+			if (!dir.mkdirs()) {
+				throw new LockException("Failed to create item directory");
+			}
+		}
+		
+		try {
+			writeAndCloseOutput(new ByteArrayInputStream(new byte [0]), new FileOutputStream(lockFile));
+		} catch (FileNotFoundException ex) {
+			throw new LockException("Failed to write lock file to " + lockFile, ex);
+		}
+		catch (StorageException ex) {
+			throw new LockException("Failed to create lock", ex);
+		}
+	}
+
+	@Override
+	public void deleteLock(String userId, String itemId) throws LockException {
+
+		final boolean deleted = getLockFile(userId, itemId).delete();
+		
+		if (!deleted) {
+			throw new LockException("Could not delete lock for " + itemId);
+		}
+	}
+	
 	@Override
 	public void storeXMLForItem(String userId, String itemId, InputStream inputStream) throws StorageException {
 
@@ -138,28 +170,11 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage, Loc
 				throw new StorageException("Could not create storage directory " + itemFileDir);
 			}
 		}
-		
-		// Write a lockfile for later use
-		final File lockFile = getLockFile(userId, itemId);
-		try {
-			writeAndCloseOutput(new ByteArrayInputStream(new byte [0]), new FileOutputStream(lockFile));
-		} catch (FileNotFoundException ex) {
-			throw new StorageException("Failed to write lock file to " + lockFile, ex);
-		}
 
-		boolean ok = false;
-		
 		try {
 			writeAndCloseOutput(inputStream, new FileOutputStream(xmlFile));
-			
-			ok = true;
 		} catch (FileNotFoundException ex) {
 			throw new StorageException("Failed to open output stream " + xmlFile, ex);
-		}
-		finally {
-			if (!ok) {
-				lockFile.delete();
-			}
 		}
 	}
 	
