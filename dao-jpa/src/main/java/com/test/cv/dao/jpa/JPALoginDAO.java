@@ -2,7 +2,6 @@ package com.test.cv.dao.jpa;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
@@ -40,27 +39,6 @@ public class JPALoginDAO extends JPABaseDAO implements LoginDAO {
 		}
 
 		return user;
-	}
-
-	private <R> R performInTransaction(Supplier<R> s) {
-		final R result;
-		entityManager.getTransaction().begin();
-		
-		boolean ok = false;
-		try {
-			result = s.get();
-			entityManager.getTransaction().commit();
-			ok = true;
-		}
-		finally {
-			if (!ok) {
-				if (entityManager.getTransaction().isActive()) {
-					entityManager.getTransaction().rollback();
-				}
-			}
-		}
-		
-		return result;
 	}
 	
 	@Override

@@ -1,6 +1,7 @@
 package com.test.cv.dao.jpa;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -38,5 +39,26 @@ public abstract class JPABaseDAO implements AutoCloseable {
 		if (openedInConstructor) {
 			entityManagerFactory.close();
 		}
+	}
+
+	final <R> R performInTransaction(Supplier<R> s) {
+		final R result;
+		entityManager.getTransaction().begin();
+		
+		boolean ok = false;
+		try {
+			result = s.get();
+			entityManager.getTransaction().commit();
+			ok = true;
+		}
+		finally {
+			if (!ok) {
+				if (entityManager.getTransaction().isActive()) {
+					entityManager.getTransaction().rollback();
+				}
+			}
+		}
+		
+		return result;
 	}
 }
