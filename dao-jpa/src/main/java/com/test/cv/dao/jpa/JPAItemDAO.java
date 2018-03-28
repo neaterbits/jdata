@@ -129,8 +129,9 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	}
 	
 	@Override
-	public void addPhotoAndThumbnailForItem(String userId, String itemId, InputStream thumbnailInputStream,
-			String thumbnailMimeType, int thumbWidth, int thumbHeight, InputStream photoInputStream, String photoMimeType) throws ItemStorageException {
+	public void addPhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type,
+			InputStream thumbnailInputStream, String thumbnailMimeType, Integer thumbLength, int thumbWidth, int thumbHeight,
+			InputStream photoInputStream, String photoMimeType, Integer photoLength) throws ItemStorageException {
 
 		final EntityTransaction tx = entityManager.getTransaction();
 		
@@ -209,7 +210,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	
 
 	@Override
-	public void movePhotoAndThumbnailForItem(String userId, String itemId, int photoNo, int toIndex)
+	public void movePhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, int photoNo, int toIndex)
 			throws ItemStorageException {
 		final EntityTransaction tx = entityManager.getTransaction();
 
@@ -313,7 +314,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	}
 
 	@Override
-	public void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws ItemStorageException {
+	public void deletePhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, int photoNo) throws ItemStorageException {
 
 		// Must move all indices if this is not the last one
 		

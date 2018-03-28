@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -294,7 +293,7 @@ public class LuceneItemIndex implements ItemIndex {
 	}
 
 	@Override
-	public void indexThumbnailSize(String itemId, int index, int thumbWidth, int thumbHeight) throws ItemIndexException {
+	public void indexThumbnailSize(String itemId, Class<? extends Item> type, int index, int thumbWidth, int thumbHeight) throws ItemIndexException {
 		final Document doc = refreshReaderGetDoc(itemId);
 		
 		// Get all value
@@ -333,7 +332,7 @@ public class LuceneItemIndex implements ItemIndex {
 	
 
 	@Override
-	public void deletePhotoAndThumbnailForItem(String itemId, int photoNo) throws ItemIndexException {
+	public void deletePhotoAndThumbnailForItem(String itemId, Class<? extends Item> type, int photoNo) throws ItemIndexException {
 		final Document doc = refreshReaderGetDoc(itemId);
 		final IndexableField field = doc.getField(THUMBS_FIELD);
 		final Long [] sizes = bytesToLongs(field.binaryValue().bytes);
@@ -344,7 +343,7 @@ public class LuceneItemIndex implements ItemIndex {
 	}
 
 	@Override
-	public void movePhotoAndThumbnailForItem(String itemId, int photoNo, int toIndex) throws ItemIndexException {
+	public void movePhotoAndThumbnailForItem(String itemId, Class<? extends Item> type, int photoNo, int toIndex) throws ItemIndexException {
 		final Document doc = refreshReaderGetDoc(itemId);
 		final IndexableField field = doc.getField(THUMBS_FIELD);
 		final Long [] sizes = bytesToLongs(field.binaryValue().bytes);

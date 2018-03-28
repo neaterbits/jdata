@@ -3,7 +3,6 @@ package com.test.cv.dao;
 import java.io.InputStream;
 import java.util.List;
 
-import com.test.cv.common.ItemId;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemPhoto;
 
@@ -49,15 +48,15 @@ public interface IItemDAO extends AutoCloseable {
 	 */
 	void updateItem(String userId, Item item) throws ItemStorageException;
 	
-	void addPhotoAndThumbnailForItem(String userId, String itemId,
-			InputStream thumbnailInputStream, String thumbnailMimeType, int thumbWidth, int thumbHeight, 
-			InputStream photoInputStream, String photoMimeType) throws ItemStorageException;
+	void addPhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type,
+			InputStream thumbnailInputStream, String thumbnailMimeType, Integer thumbLength, int thumbWidth, int thumbHeight, 
+			InputStream photoInputStream, String photoMimeType, Integer photoLength) throws ItemStorageException;
 
 	// move thumbnail indices to change priority, ie update order
 	// toIndex must be in the range 0 to num - 1
-	void movePhotoAndThumbnailForItem(String userId, String itemId, int photoNo, int toIndex) throws ItemStorageException;
+	void movePhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, int photoNo, int toIndex) throws ItemStorageException;
 	
-	void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws ItemStorageException;
+	void deletePhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, int photoNo) throws ItemStorageException;
 	
 	void deleteItem(String userId, String itemId) throws ItemStorageException;
 	

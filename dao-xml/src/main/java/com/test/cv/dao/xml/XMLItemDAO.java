@@ -264,16 +264,19 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	
 
 	@Override
-	public void addPhotoAndThumbnailForItem(String userId, String itemId, InputStream thumbnailInputStream,
-			String thumbnailMimeType, int thumbWidth, int thumbHeight,
-			InputStream photoInputStream, String photoMimeType) throws ItemStorageException {
+	public void addPhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, InputStream thumbnailInputStream,
+			String thumbnailMimeType, Integer thumbLength, int thumbWidth, int thumbHeight,
+			InputStream photoInputStream, String photoMimeType, Integer photoLength) throws ItemStorageException {
 
 		final Lock lock = obtainLock(userId, itemId);
 		
 		try {
-			final int photoNo = xmlStorage.addPhotoAndThumbnailForItem(userId, itemId, thumbnailInputStream, thumbnailMimeType, photoInputStream, photoMimeType);
+			final int photoNo = xmlStorage.addPhotoAndThumbnailForItem(
+					userId, itemId,
+					thumbnailInputStream, thumbnailMimeType, thumbLength,
+					photoInputStream, photoMimeType, photoLength);
 
-			index.indexThumbnailSize(itemId, photoNo, thumbWidth, thumbHeight);
+			index.indexThumbnailSize(itemId, type, photoNo, thumbWidth, thumbHeight);
 		} catch (StorageException ex) {
 			throw new ItemStorageException("Failed to store thumbnail", ex);
 		} catch (ItemIndexException ex) {
@@ -285,14 +288,14 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	}
 
 	@Override
-	public void movePhotoAndThumbnailForItem(String userId, String itemId, int photoNo, int toIndex)
+	public void movePhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, int photoNo, int toIndex)
 			throws ItemStorageException {
 		
 		final Lock lock = obtainLock(userId, itemId);
 		
 		try {
 			xmlStorage.movePhotoAndThumbnailForItem(userId, itemId, photoNo, toIndex);
-			index.movePhotoAndThumbnailForItem(itemId, photoNo, toIndex);
+			index.movePhotoAndThumbnailForItem(itemId, type, photoNo, toIndex);
 		} catch (StorageException ex) {
 			throw new ItemStorageException("Failed to move item", ex);
 		} catch (ItemIndexException ex) {
@@ -304,13 +307,13 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	}
 
 	@Override
-	public void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws ItemStorageException {
+	public void deletePhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, int photoNo) throws ItemStorageException {
 
 		final Lock lock = obtainLock(userId, itemId);
 		
 		try {
 			xmlStorage.deletePhotoAndThumbnailForItem(userId, itemId, photoNo);
-			index.deletePhotoAndThumbnailForItem(itemId, photoNo);
+			index.deletePhotoAndThumbnailForItem(itemId, type, photoNo);
 		} catch (StorageException ex) {
 			throw new ItemStorageException("Failed to delete photo and thumbnail", ex);
 		} catch (ItemIndexException ex) {

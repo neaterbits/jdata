@@ -175,9 +175,9 @@ public class LuceneItemIndexTest extends TestCase {
 	
 			index.indexItemAttributes(userId, Snowboard.class, ItemTypes.getTypeName(Snowboard.class), Arrays.asList(idAttributeValue, makeAttributeValue));
 			
-			index.indexThumbnailSize(itemId, 0, 320, 240);
-			index.indexThumbnailSize(itemId, 1, 300, 250);
-			index.indexThumbnailSize(itemId, 2, 290, 340);
+			index.indexThumbnailSize(itemId, Snowboard.class, 0, 320, 240);
+			index.indexThumbnailSize(itemId, Snowboard.class, 1, 300, 250);
+			index.indexThumbnailSize(itemId, Snowboard.class, 2, 290, 340);
 
 			final IndexSearchCursor searchCursor = index.search(
 					null,

@@ -28,15 +28,16 @@ public interface ItemIndex extends AutoCloseable {
 	
 	/**
 	 * @param itemId item ID
-	 * @param index index of thumbnail, from 0 to n
+	 * @param type ElasticSearch implementation requires type
+	 * @param photoNo index of thumbnail, from 0 to n
 	 * @param thumbWidth width of thumb as stored
 	 * @param thumbHeight height of thumb as stored
 	 */
-	void indexThumbnailSize(String itemId, int photoNo, int thumbWidth, int thumbHeight) throws ItemIndexException;
+	void indexThumbnailSize(String itemId, Class<? extends Item> type, int photoNo, int thumbWidth, int thumbHeight) throws ItemIndexException;
 
-	void deletePhotoAndThumbnailForItem(String itemId, int photoNo) throws ItemIndexException;
+	void deletePhotoAndThumbnailForItem(String itemId, Class<? extends Item> type, int photoNo) throws ItemIndexException;
 
-	void movePhotoAndThumbnailForItem(String itemId, int photoNo, int toIndex) throws ItemIndexException;
+	void movePhotoAndThumbnailForItem(String itemId, Class<? extends Item> type, int photoNo, int toIndex) throws ItemIndexException;
 
 	ItemId [] expandToItemIdUserId(String [] itemIds) throws ItemIndexException;
 
@@ -70,7 +71,7 @@ public interface ItemIndex extends AutoCloseable {
 		else {
 			sizes = allocateArray.apply(index + 1);
 
-			Arrays.fill(sizes, 0L);
+			Arrays.fill(sizes, defaultValue);
 		}
 		
 		sizes[index] = encodeSize.apply(thumbWidth, thumbHeight);

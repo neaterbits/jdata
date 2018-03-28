@@ -151,7 +151,7 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage, Loc
 	}
 	
 	@Override
-	public void storeXMLForItem(String userId, String itemId, InputStream inputStream) throws StorageException {
+	public void storeXMLForItem(String userId, String itemId, InputStream inputStream, Integer contentLength) throws StorageException {
 
 		final File xmlFile = getXMLFile(userId, itemId);
 
@@ -194,7 +194,7 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage, Loc
 	}
 	
 	@Override
-	protected void storeImageListForItem(String userId, String itemId, String fileName, InputStream inputStream)
+	protected void storeImageListForItem(String userId, String itemId, String fileName, InputStream inputStream, Integer contentLength)
 			throws StorageException {
 		
 		final File file = new File(itemDir(userId, itemId), fileName);
@@ -235,8 +235,8 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage, Loc
 
 	@Override
 	public int addPhotoAndThumbnailForItem(String userId, String itemId,
-			InputStream thumbnailInputStream, String thumbnailMimeType,
-			InputStream photoInputStream, String photoMimeType) throws StorageException {
+			InputStream thumbnailInputStream, String thumbnailMimeType, Integer thumbLength,
+			InputStream photoInputStream, String photoMimeType, Integer photoLength) throws StorageException {
 		
 		final int index;
 
