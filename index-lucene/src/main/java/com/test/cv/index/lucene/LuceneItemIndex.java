@@ -121,7 +121,7 @@ public class LuceneItemIndex implements ItemIndex {
 			
 			final ItemAttribute attribute = attributeValue.getAttribute();
 			
-			if (attribute.getName().equals("id")) {
+			if (isIdAttribute(attribute)) {
 				idFound = true;
 			}
 			
@@ -300,26 +300,11 @@ public class LuceneItemIndex implements ItemIndex {
 		// Get all value
 		final IndexableField field = doc.getField(THUMBS_FIELD);
 
-		Long [] sizes;
-		
-		if (field != null) {
-			sizes = bytesToLongs(field.binaryValue().bytes);
-			
-			final int len = sizes.length;
-			if (index >= len) {
-				final int newLen = index + 1;
-				sizes = Arrays.copyOf(sizes, newLen);
-				Arrays.fill(sizes, len, newLen, 0L);
-			}
-		}
-		else {
-			sizes = new Long[index + 1];
+		final Long [] sizes = updateThumbnailSizeArray(field, index, thumbWidth, thumbHeight, 0L,
+				f -> bytesToLongs(f.binaryValue().bytes),
+				length -> new Long[length],
+				(tw, th) -> encodeSize(tw, th));
 
-			Arrays.fill(sizes, 0L);
-		}
-		
-		sizes[index] = encodeSize(thumbWidth, thumbHeight);
-		
 		updateThumbnailSizes(doc, itemId, sizes);
 	}
 	
@@ -352,13 +337,10 @@ public class LuceneItemIndex implements ItemIndex {
 		final Document doc = refreshReaderGetDoc(itemId);
 		final IndexableField field = doc.getField(THUMBS_FIELD);
 		final Long [] sizes = bytesToLongs(field.binaryValue().bytes);
-		
-		// Use list methods for simplicity
-		final List<Long> sizeList = Arrays.stream(sizes).collect(Collectors.toList());
 
-		sizeList.remove(photoNo);
+		final Long [] updated = deleteThumbnail(sizes, photoNo, length -> new Long[length]);
 
-		updateThumbnailSizes(doc, itemId, sizeList.toArray(new Long[sizeList.size()]));
+		updateThumbnailSizes(doc, itemId, updated);
 	}
 
 	@Override
@@ -369,15 +351,9 @@ public class LuceneItemIndex implements ItemIndex {
 
 		final Long toMove = sizes[photoNo];
 		
-		// Use list methods for simplicity
-		final List<Long> sizeList = Arrays.stream(sizes).collect(Collectors.toList());
+		final Long [] moved = moveThumbnail(sizes, toMove, photoNo, toIndex, length -> new Long[length]);
 
-		sizeList.remove(photoNo);
-
-		// Add at to-index
-		sizeList.add(toIndex, toMove);
-
-		updateThumbnailSizes(doc, itemId, sizeList.toArray(new Long[sizeList.size()]));
+		updateThumbnailSizes(doc, itemId, moved);
 	}
 
 	@Override
@@ -723,7 +699,7 @@ public class LuceneItemIndex implements ItemIndex {
 			else {
 				// Nest in should-query
 				final BooleanQuery.Builder rangeBooleanQuery = new BooleanQuery.Builder();
-				
+                
 				for (IntegerRange range : ranges) {
 					rangeBooleanQuery.add(createIntegerRangeQuery(fieldName, range), Occur.SHOULD);
 				}
