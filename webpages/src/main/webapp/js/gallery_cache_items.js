@@ -150,7 +150,7 @@ GalleryCacheItems.prototype.updateVisibleArea = function(level, firstVisibleInde
 			throw "TODO: handle total number";
 		}
 
-		this.cachedData = this._allocateCacheArray(level, firstVisibleIndex, visibleCount, totalNumberOfItems);
+		this.cachedData = this._allocateCacheArray(level + 1, firstVisibleIndex, visibleCount, totalNumberOfItems);
 	}
 	
 	var lastVisibleIndex = firstVisibleIndex + visibleCount - 1;
@@ -214,7 +214,7 @@ GalleryCacheItems.prototype._allocateCacheArray = function(level, firstVisibleIn
 		'totalNumberOfItems', totalNumberOfItems
 	]);
 	
-	var nextFirstCachedIndex = this._getFirstIndexInCache(level, firstVisibleIndex);
+	var nextFirstCachedIndex = this._getFirstIndexInCache(level + 1, firstVisibleIndex);
 	var nextLastCachedIndex = this._getLastIndexInCache(level + 1, firstVisibleIndex, visibleCount, totalNumberOfItems);
 	
 	var arraySize = nextLastCachedIndex - nextFirstCachedIndex + 1;
@@ -487,6 +487,10 @@ GalleryCacheItems.prototype._downloadItems = function(level, cacheIndex, itemInd
 		throw "Cached data is undefined";
 	}
 	
+	if (cacheIndex + itemCount > this.cachedData.length) {
+		throw "Cached index and itemcount out of bounds for cache length " + this.cachedData.length;
+	}
+	
 	var fetchFunction;
 	
 	var t = this;
@@ -531,7 +535,7 @@ GalleryCacheItems.prototype._downloadItems = function(level, cacheIndex, itemInd
 		var downloadedOrDownloading;
 	
 		if (typeof cached === 'undefined') {
-			throw "Undefined item at index " + (cacheIndex + i);
+			throw "Undefined cached item at index " + (cacheIndex + i) + " out of " + this.cachedData.length + ": " + printArray(this.cachedData);
 		}
 	
 		if (cached == null) {
@@ -866,10 +870,10 @@ function printArray(a) {
 		
 		for (var i = 0; i < a.length; ++ i) {
 			if (i > 0) {
-				s+= ',';
-				
-				s += '' + a[i]; 
+				s += ',';
 			}
+
+			s += '' + a[i]; 
 		}
 	}
 	
