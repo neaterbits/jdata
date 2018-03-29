@@ -254,7 +254,9 @@ function SearchView(
 		for (var i = 0; i < count; ++ i) {
 			var itemId = this.curResponse.items[index + i].id;
 
-			itemIds += "&itemId=";
+			itemIds += i == 0 ? "?" : "&";
+			
+			itemIds += "itemId=";
 			itemIds += itemId;
 		}
 

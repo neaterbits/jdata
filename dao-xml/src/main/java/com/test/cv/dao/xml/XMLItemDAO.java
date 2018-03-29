@@ -234,9 +234,24 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		item.setIdString(itemId);
 		
 		try {
-			store(userId, itemId, item, ItemTypes.getType(item), ClassAttributes.getValues(item));
-		} catch (XMLStorageException ex) {
-			throw new ItemStorageException("Failed to store item", ex);
+			lockProvider.createLock(userId, itemId);
+		} catch (LockException ex) {
+			throw new ItemStorageException("Failed to create lock for " + itemId, ex);
+		}
+		
+		// Also lock during creation ? Ought not be necessary since not returned itemId
+		// so no other caller can access it yet. but perhaps useful as a test that locking works for this item
+		final Lock lock = obtainLock(userId, itemId);
+		
+		try {
+			try {
+				store(userId, itemId, item, ItemTypes.getType(item), ClassAttributes.getValues(item));
+			} catch (XMLStorageException ex) {
+				throw new ItemStorageException("Failed to store item", ex);
+			}
+		}
+		finally {
+			releaseLock(lock);
 		}
 		
 		return itemId;
@@ -249,16 +264,19 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	
 
 	@Override
-	public void addPhotoAndThumbnailForItem(String userId, String itemId, InputStream thumbnailInputStream,
-			String thumbnailMimeType, int thumbWidth, int thumbHeight,
-			InputStream photoInputStream, String photoMimeType) throws ItemStorageException {
+	public void addPhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, InputStream thumbnailInputStream,
+			String thumbnailMimeType, Integer thumbLength, int thumbWidth, int thumbHeight,
+			InputStream photoInputStream, String photoMimeType, Integer photoLength) throws ItemStorageException {
 
 		final Lock lock = obtainLock(userId, itemId);
 		
 		try {
-			final int photoNo = xmlStorage.addPhotoAndThumbnailForItem(userId, itemId, thumbnailInputStream, thumbnailMimeType, photoInputStream, photoMimeType);
+			final int photoNo = xmlStorage.addPhotoAndThumbnailForItem(
+					userId, itemId,
+					thumbnailInputStream, thumbnailMimeType, thumbLength,
+					photoInputStream, photoMimeType, photoLength);
 
-			index.indexThumbnailSize(itemId, photoNo, thumbWidth, thumbHeight);
+			index.indexThumbnailSize(itemId, type, photoNo, thumbWidth, thumbHeight);
 		} catch (StorageException ex) {
 			throw new ItemStorageException("Failed to store thumbnail", ex);
 		} catch (ItemIndexException ex) {
@@ -270,14 +288,14 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	}
 
 	@Override
-	public void movePhotoAndThumbnailForItem(String userId, String itemId, int photoNo, int toIndex)
+	public void movePhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, int photoNo, int toIndex)
 			throws ItemStorageException {
 		
 		final Lock lock = obtainLock(userId, itemId);
 		
 		try {
 			xmlStorage.movePhotoAndThumbnailForItem(userId, itemId, photoNo, toIndex);
-			index.movePhotoAndThumbnailForItem(itemId, photoNo, toIndex);
+			index.movePhotoAndThumbnailForItem(itemId, type, photoNo, toIndex);
 		} catch (StorageException ex) {
 			throw new ItemStorageException("Failed to move item", ex);
 		} catch (ItemIndexException ex) {
@@ -289,13 +307,13 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	}
 
 	@Override
-	public void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws ItemStorageException {
+	public void deletePhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, int photoNo) throws ItemStorageException {
 
 		final Lock lock = obtainLock(userId, itemId);
 		
 		try {
 			xmlStorage.deletePhotoAndThumbnailForItem(userId, itemId, photoNo);
-			index.deletePhotoAndThumbnailForItem(itemId, photoNo);
+			index.deletePhotoAndThumbnailForItem(itemId, type, photoNo);
 		} catch (StorageException ex) {
 			throw new ItemStorageException("Failed to delete photo and thumbnail", ex);
 		} catch (ItemIndexException ex) {
@@ -307,10 +325,16 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	}
 
 	@Override
-	public void deleteItem(String userId, String itemId) throws ItemStorageException {
+	public void deleteItem(String userId, String itemId, Class<? extends Item> type) throws ItemStorageException {
 
 		final Lock lock = obtainLock(userId, itemId);
 
+		try {
+			index.deleteItem(itemId, type);
+		}
+		catch (ItemIndexException ex) {
+			System.err.println("## failed to delete from index: " + ex);
+		}
 		try {
 			xmlStorage.deleteAllItemFiles(userId, itemId);
 		} catch (StorageException ex) {
@@ -318,6 +342,12 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		}
 		finally {
 			releaseLock(lock);
+		}
+		
+		try {
+			lockProvider.deleteLock(userId, itemId);
+		} catch (LockException ex) {
+			throw new ItemStorageException("Failed to delete lock for " + itemId, ex);
 		}
 	}
 

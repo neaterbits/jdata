@@ -114,7 +114,11 @@ public final class ItemAttribute {
 	public boolean isSingleValue() {
 		return integerRanges == null && decimalRanges == null;
 	}
-	
+
+	public boolean isRange() {
+		return !isSingleValue();
+	}
+
 	public Object getObjectValue(Item item) {
 		final Object value;
 		try {
@@ -221,6 +225,17 @@ public final class ItemAttribute {
 		return falseString;
 	}
 
+	public int getRangeCount() {
+		
+		if (!isRange()) {
+			throw new UnsupportedOperationException("Not a range attribute");
+		}
+		
+		return getIntegerRanges() != null
+					? getIntegerRanges().length
+					: getDecimalRanges().length;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

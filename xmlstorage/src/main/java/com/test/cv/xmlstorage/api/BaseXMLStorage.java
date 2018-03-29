@@ -25,7 +25,9 @@ public abstract class BaseXMLStorage implements IItemStorage {
 
 	// TODO we cannot really store this as a file in S3 since does no read-after=write consistency on update
 	// would have to pass in former order on move operation
-	private static final String IMAGE_LIST_FILENAME = "images.xml";
+	static final String IMAGE_LIST_FILENAME = "images.xml";
+	
+	private static final char FILE_NAME_SEPARATOR = '.';
 
 	private static final JAXBContext imagesContext;
 	
@@ -48,7 +50,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	private int [] listFileIndicesSorted(String userId, String itemId, ItemFileType itemFileType) {
 		final String [] files = listFiles(userId, itemId, itemFileType);
 		
-		// file names are number#mime_type#itemId
+		// file names are number.mime_type.itemId
 		final int [] result = getIndicesUnsorted(files);
 
 		Arrays.sort(result);
@@ -69,9 +71,36 @@ public abstract class BaseXMLStorage implements IItemStorage {
 
 		return result;
 	}
+
+	static String [] split(String s, char splitChar) {
+		
+		int lastSplit = -1;
+		final List<String> strings = new ArrayList<>();
+		
+		for (int i = 0; i < s.length(); ++ i) {
+			final char c = s.charAt(i);
+			
+			if (c == splitChar) {
+				if (i != 0 && lastSplit < i - 1) {
+					strings.add(s.substring(lastSplit + 1, i));
+					lastSplit = i;
+				}
+			}
+		}
+		
+		if (lastSplit == -1) {
+			strings.add(s);
+		}
+		else if (lastSplit < s.length() - 1) {
+			strings.add(s.substring(lastSplit + 1, s.length()));
+		}
+		
+		return strings.toArray(new String[strings.size()]);
+	}
 	
 	private String [] getFileNameParts(String fileName) {
-		return fileName.split("#");
+		// Cannot split with String.split() since FILE_NAME_SEPARATOR might be regex reserved char
+		return split(fileName, FILE_NAME_SEPARATOR);
 	}
 	
 	protected final String allocateFileName(String userId, String itemId, ItemFileType itemFileType, String mimeType) {
@@ -79,7 +108,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		
 		final int allocatedId = indices.length == 0 ? 1 : indices[indices.length - 1] + 1;
 		
-		return String.valueOf(allocatedId) + '#' + mimeType.replace('/', '_') + '#' + itemId;
+		return String.valueOf(allocatedId) + FILE_NAME_SEPARATOR + mimeType.replace('/', '_') + FILE_NAME_SEPARATOR + itemId;
 	}
 
 	protected final ImageData getImageData(Images images, int fileNo, ItemFileType itemFileType) {
@@ -113,7 +142,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	}
 
 	protected final String getMimeTypeFromFileName(String fileName) {
-		// Get mime-type by splitting on '#'
+		// Get mime-type by splitting on '.'
 		final String mimeType = getFileNameParts(fileName)[1].replace("_", "/");
 		
 		return mimeType;
@@ -180,10 +209,12 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 				mashaller.marshal(images, baos);
+				
+				final byte [] bytes = baos.toByteArray();
 	
-				final ByteArrayInputStream inputStream = new ByteArrayInputStream(baos.toByteArray());
+				final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
 	
-				storeImageListForItem(userId, itemId, IMAGE_LIST_FILENAME, inputStream);
+				storeImageListForItem(userId, itemId, IMAGE_LIST_FILENAME, inputStream, bytes.length);
 			} catch (JAXBException ex) {
 			throw new StorageException("Failed to marshal image list file", ex);
 		} catch (IOException ex) {
@@ -280,7 +311,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 
 	protected abstract InputStream getImageListInputForItem(String userId, String itemId, String fileName) throws StorageException;
 
-	protected abstract void storeImageListForItem(String userId, String itemId, String fileName, InputStream inputStream) throws StorageException;
+	protected abstract void storeImageListForItem(String userId, String itemId, String fileName, InputStream inputStream, Integer contentLength) throws StorageException;
 
 	protected abstract ImageResult getImageFileForItem(String userId, String itemId, ItemFileType itemFileType, String fileName) throws StorageException;
 	

@@ -20,6 +20,7 @@ import com.test.cv.dao.ItemStorageException;
 import com.test.cv.model.Item;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.TypeInfo;
+import com.test.cv.rest.BaseService;
 import com.test.cv.rest.ItemService;
 import com.test.cv.rest.LoginService;
 import com.test.cv.rest.LoginService.CheckCodeResponse;
@@ -29,6 +30,11 @@ import com.test.cv.rest.SearchResult;
 import com.test.cv.rest.SearchService;
 
 public class JettyRunServlet {
+
+	private static boolean isTest() {
+		return BaseService.isTest();
+	}
+	
 
 	public static void main(String [] args) throws Exception {
 		
@@ -43,6 +49,7 @@ public class JettyRunServlet {
 		
 		contextHandler.addServlet(SearchServlet.class, "/search/*");
 		contextHandler.addServlet(ItemServlet.class, "/items/*");
+		contextHandler.addServlet(LoginServlet.class, "/login/*");
 		//contextHandler.addServletWithMapping(SearchServlet.class, "/search/*");
 		
 		try {
@@ -58,19 +65,11 @@ public class JettyRunServlet {
 
 		private static final long serialVersionUID = 1L;
 
-		private static boolean isTest(HttpServletRequest req) {
-			final String testParam = req.getParameter("test");
-			
-			boolean test = "true".equals(testParam);
-
-			return test;
-		}
-		
 		@Override
 		protected void doOptions(HttpServletRequest req, HttpServletResponse resp)
 				throws ServletException, IOException {
 
-			if (isTest(req)) {
+			if (isTest()) {
 				resp.setHeader("Access-Control-Allow-Origin", "*");
 				resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
 			}
@@ -128,7 +127,7 @@ public class JettyRunServlet {
 					testdata,
 					req);
 
-			if (isTest(req)) {
+			if (isTest()) {
 				resp.setHeader("Access-Control-Allow-Origin", "*");
 			}
 
@@ -140,7 +139,7 @@ public class JettyRunServlet {
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			
-			if (isTest(req)) {
+			if (isTest()) {
 				resp.setHeader("Access-Control-Allow-Origin", "*");
 			}
 
@@ -148,6 +147,10 @@ public class JettyRunServlet {
 
 				// Retrieve thumbnails as a stream
 				final String [] itemIds = req.getParameterValues("itemId");
+				
+				if (itemIds == null) {
+					throw new IllegalArgumentException("No itemIds");
+				}
 				
 				final SearchService searchService = new SearchService();
 
@@ -177,8 +180,10 @@ public class JettyRunServlet {
 				// Posting image
 				final String itemId = req.getPathInfo().split("/")[1];
 				
+				final String itemType = req.getParameter("itemType");
+				
 				try {
-					itemService.storeImage(userId, itemId, index, IOUtil.readAll(req.getInputStream()), req);
+					itemService.storeImage(userId, itemId, itemType, index, IOUtil.readAll(req.getInputStream()), req);
 				} catch (ItemStorageException ex) {
 					throw new ServletException("Failed to store image", ex);
 				}
@@ -224,6 +229,10 @@ public class JettyRunServlet {
 
 		@Override
 		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+			if (isTest()) {
+				resp.setHeader("Access-Control-Allow-Origin", "*");
+			}
 
 			if (req.getPathInfo() != null && req.getPathInfo().contains("/checkphoneno")) {
 				// This is register or login scenario, check if user exist

@@ -15,12 +15,12 @@ import com.test.cv.index.lucene.LuceneItemIndex;
 import com.test.cv.integrationtest.IntegrationTestHelper;
 import com.test.cv.xmlstorage.local.LocalXmlStorage;
 
-public class IndexSearchDAOTest extends SearchDAOTest {
+public class LuceneIndexSearchDAOTest extends SearchDAOTest {
 
 	private final File baseDir;
 	private final ItemIndex index;
 	
-	public IndexSearchDAOTest() {
+	public LuceneIndexSearchDAOTest() {
 		baseDir = IntegrationTestHelper.makeBaseDir();
 		try {
 			final Directory luceneDirectory = FSDirectory.open(baseDir.toPath());
@@ -40,6 +40,6 @@ public class IndexSearchDAOTest extends SearchDAOTest {
 
 	@Override
 	protected ISearchDAO getSearchDAO() {
-		return new IndexSearchDAO(index, true);
+		return new IndexSearchDAO(index, false);
 	}
 }

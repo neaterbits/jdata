@@ -51,10 +51,39 @@
 
   	<dependency>
 	  	<groupId>${project.groupId}</groupId>
+	  	<artifactId>xmlstorage-s3</artifactId>
+	  	<version>${project.version}</version>
+	  	<scope>test</scope>
+  	</dependency>
+
+	<!-- For lock provider -->
+  	<dependency>
+	  	<groupId>${project.groupId}</groupId>
+	  	<artifactId>dao-jpa</artifactId>
+	  	<version>${project.version}</version>
+	  	<scope>test</scope>
+  	</dependency>
+
+  	<dependency>
+	  	<groupId>${project.groupId}</groupId>
+	  	<artifactId>index-elasticsearch-aws</artifactId>
+	  	<version>${project.version}</version>
+	  	<scope>test</scope>
+  	</dependency>
+
+  	<dependency>
+	  	<groupId>${project.groupId}</groupId>
 	  	<artifactId>integrationtest</artifactId>
 	  	<version>${project.version}</version>
 	  	<scope>test</scope>
   	</dependency>
+
+    <dependency>
+		<groupId>org.apache.derby</groupId>
+		<artifactId>derby</artifactId>
+		<version>${derbyVersion}</version>
+		<scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>junit</groupId>

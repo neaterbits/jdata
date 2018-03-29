@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -121,7 +120,7 @@ public class LuceneItemIndex implements ItemIndex {
 			
 			final ItemAttribute attribute = attributeValue.getAttribute();
 			
-			if (attribute.getName().equals("id")) {
+			if (isIdAttribute(attribute)) {
 				idFound = true;
 			}
 			
@@ -211,6 +210,17 @@ public class LuceneItemIndex implements ItemIndex {
 	}
 	
 	
+	
+	@Override
+	public void deleteItem(String itemId, Class<? extends Item> type) throws ItemIndexException {
+		try {
+			writer.deleteDocuments(new Term("id", itemId));
+			writer.commit();
+		} catch (IOException ex) {
+			throw new ItemIndexException("Failed to delete document for item", ex);
+		}
+	}
+
 	private IndexReader refreshReader() throws ItemIndexException {
 		try {
 			final DirectoryReader newReader = DirectoryReader.openIfChanged(this.reader, this.writer);
@@ -294,32 +304,17 @@ public class LuceneItemIndex implements ItemIndex {
 	}
 
 	@Override
-	public void indexThumbnailSize(String itemId, int index, int thumbWidth, int thumbHeight) throws ItemIndexException {
+	public void indexThumbnailSize(String itemId, Class<? extends Item> type, int index, int thumbWidth, int thumbHeight) throws ItemIndexException {
 		final Document doc = refreshReaderGetDoc(itemId);
 		
 		// Get all value
 		final IndexableField field = doc.getField(THUMBS_FIELD);
 
-		Long [] sizes;
-		
-		if (field != null) {
-			sizes = bytesToLongs(field.binaryValue().bytes);
-			
-			final int len = sizes.length;
-			if (index >= len) {
-				final int newLen = index + 1;
-				sizes = Arrays.copyOf(sizes, newLen);
-				Arrays.fill(sizes, len, newLen, 0L);
-			}
-		}
-		else {
-			sizes = new Long[index + 1];
+		final Long [] sizes = updateThumbnailSizeArray(field, index, thumbWidth, thumbHeight, 0L,
+				f -> bytesToLongs(f.binaryValue().bytes),
+				length -> new Long[length],
+				(tw, th) -> encodeSize(tw, th));
 
-			Arrays.fill(sizes, 0L);
-		}
-		
-		sizes[index] = encodeSize(thumbWidth, thumbHeight);
-		
 		updateThumbnailSizes(doc, itemId, sizes);
 	}
 	
@@ -348,36 +343,27 @@ public class LuceneItemIndex implements ItemIndex {
 	
 
 	@Override
-	public void deletePhotoAndThumbnailForItem(String itemId, int photoNo) throws ItemIndexException {
+	public void deletePhotoAndThumbnailForItem(String itemId, Class<? extends Item> type, int photoNo) throws ItemIndexException {
 		final Document doc = refreshReaderGetDoc(itemId);
 		final IndexableField field = doc.getField(THUMBS_FIELD);
 		final Long [] sizes = bytesToLongs(field.binaryValue().bytes);
-		
-		// Use list methods for simplicity
-		final List<Long> sizeList = Arrays.stream(sizes).collect(Collectors.toList());
 
-		sizeList.remove(photoNo);
+		final Long [] updated = deleteThumbnail(sizes, photoNo, length -> new Long[length]);
 
-		updateThumbnailSizes(doc, itemId, sizeList.toArray(new Long[sizeList.size()]));
+		updateThumbnailSizes(doc, itemId, updated);
 	}
 
 	@Override
-	public void movePhotoAndThumbnailForItem(String itemId, int photoNo, int toIndex) throws ItemIndexException {
+	public void movePhotoAndThumbnailForItem(String itemId, Class<? extends Item> type, int photoNo, int toIndex) throws ItemIndexException {
 		final Document doc = refreshReaderGetDoc(itemId);
 		final IndexableField field = doc.getField(THUMBS_FIELD);
 		final Long [] sizes = bytesToLongs(field.binaryValue().bytes);
 
 		final Long toMove = sizes[photoNo];
 		
-		// Use list methods for simplicity
-		final List<Long> sizeList = Arrays.stream(sizes).collect(Collectors.toList());
+		final Long [] moved = moveThumbnail(sizes, toMove, photoNo, toIndex, length -> new Long[length]);
 
-		sizeList.remove(photoNo);
-
-		// Add at to-index
-		sizeList.add(toIndex, toMove);
-
-		updateThumbnailSizes(doc, itemId, sizeList.toArray(new Long[sizeList.size()]));
+		updateThumbnailSizes(doc, itemId, moved);
 	}
 
 	@Override
@@ -723,7 +709,7 @@ public class LuceneItemIndex implements ItemIndex {
 			else {
 				// Nest in should-query
 				final BooleanQuery.Builder rangeBooleanQuery = new BooleanQuery.Builder();
-				
+                
 				for (IntegerRange range : ranges) {
 					rangeBooleanQuery.add(createIntegerRangeQuery(fieldName, range), Occur.SHOULD);
 				}

@@ -37,8 +37,9 @@ public class ItemTypes {
 		typeNames = types.stream().map(t -> getTypeName(t)).collect(Collectors.toList());
 	}
 	
-	public static Class<?> [] getTypeClasses() {
-		return types.toArray(new Class<?>[types.size()]);
+	@SuppressWarnings("unchecked")
+	public static Class<? extends Item> [] getTypeClasses() {
+		return types.toArray(new Class[types.size()]);
 	}
 
 	public static String [] getTypeNames() {

@@ -24,6 +24,10 @@ Hvis dette er første innlogging vil telefonnummer bli manuelt sjekket mot telef
 <span>SMS telefonnummer:</span><input id="sms_input" type="text"/><input id="login_button" type="button" value="Registrer/Logg inn" onclick="postLogin();"></input>
 </div>
 <div id="login_status_text">
+<br/>
+<span id="login_status_invalid_phoneno" class="login_phoneno_invalid">
+Ikke et gyldig telefonnummer. Enten et 8-siffers, eller et som starter med '+'
+</span>
 <span id="login_status_must_approve" class="login_status">
 Ukjent telefonnummer, du vil motta en SMS når telefonnummer er manuelt godkjent
 </span>
@@ -31,12 +35,18 @@ Ukjent telefonnummer, du vil motta en SMS når telefonnummer er manuelt godkjent
 Telefonnummer venter på manuell godkjenning, du vil motta en SMS når godkjent
 </span>
 <span id="login_status_approved" class="login_status">
-Skriv inn din kode under
+En SMS med kode er send til din telefon, skriv inn koden i feltet under og trykk Send kode
 </span>
 
 </div>
-<div id="code_input">
-<span>Kode:</span><input id="code_input" type="text"><input id="send_code_button" type="button" value="Send kode" onclick="postCode()"/>
+<div id="code_input_div">
+<br/>
+<span>Kode:</span><input id="code_input" type="text"/><input id="send_code_button" type="button" value="Send kode" onclick="postCode()"/>
+<br/>
+<br/>
+<span id="login_status_invalid_code" class="login_code_invalid">
+</span>
+
 </div>
 
 </div>
@@ -52,33 +62,127 @@ Skriv inn din kode under
 	var baseUrl = "http://localhost:8080/login";
 
 	function postLogin() {
-		alert('postLogin!')	;	
+
+		var smsInput = document.getElementById('sms_input').value;
 		
-		var value = document.getElementById('sms_input').value;
+		var value = trimPhoneNo(smsInput);
 
-		postAjax(baseUrl + '/login?phoneNo=' + value, function(response) {
-			switch (response.status) {
-			case 'UNKNOWN_PHONENO':
-				document.getElementById('#login_status_must_approve').display = "inline";
-				break;
-
-			case 'APPROVING':
-				document.getElementById('#login_status_approving').display = "inline";
-				break;
-
-			case 'APPROVED':
-				// Show generated-code text and input
-				document.getElementById('#login_status_approved').display = "inline";
-				document.getElementById('#code_inut').display = "inline";
-				break;
-
-			default:
-				throw "Unknown login status code: " + response.status;
-			}
-		});
+		if (!isValidPhoneNo(value)) {
+			document.getElementById('login_status_invalid_phoneno').style.display = "inline";
+		}
+		else {
+			postAjax(baseUrl + '/checkphoneno?phoneNo=' + encodeURIComponent(value), function(response) {
+				
+				console.log('## got response'  +response);
+	
+				switch (response.status) {
+				case 'UNKNOWN_PHONENO':
+					hideAllMessages();
+					document.getElementById('login_status_must_approve').style.display = "inline";
+					break;
+	
+				case 'APPROVING':
+					hideAllMessages();
+					document.getElementById('login_status_approving').style.display = "inline";
+					break;
+	
+				case 'APPROVED':
+					// Show generated-code text and input
+					hideAllMessages();
+					document.getElementById('login_status_approved').style.display = "inline";
+					document.getElementById('code_input_div').style.display = "inline";
+					break;
+	
+				default:
+					throw "Unknown login status code: " + response.status;
+				}
+			});
+		}
 	}
+
+	function postCode() {
+
+		var smsInput = document.getElementById('sms_input').value;
 		
-	function postAjax(url, onsucces) {
+		var value = trimPhoneNo(smsInput);
+
+		if (!isValidPhoneNo(value)) {
+			hideAllMessages();
+			document.getElementById('login_status_invalid_phoneno').style.display = "inline";
+		}
+		else {
+			var codeInput = document.getElementById('code_input').value;
+
+			if (codeInput.length !== 6 || !areDigits(codeInput, 0, 6)) {
+				document.getElementById('login_status_invalid_code').style.display = "inline";
+				document.getElementById('login_status_invalid_code').innerHTML = "Ugyldig kode, må være 6 siffer";
+			}
+			else {
+				postAjax(baseUrl + '/checkcode?phoneNo=' + encodeURIComponent(value) + '&code=' + codeInput, function(response) {
+	
+					hideAllMessages();
+	
+					switch (response.status) {
+					case 'VERIFIED':
+						alert('Code verified! (redirect to other URL here by setting window URL)');
+						break;
+		
+					case 'EXPIRED':
+						document.getElementById('login_status_invalid_code').style.display = "inline";
+						document.getElementById('login_status_invalid_code').innerHTML = 'Koden er foreldet, logg inn på nytt for ny kode';
+						break;
+		
+					case 'NONMATCHING':
+						// Show generated-code text and input
+						document.getElementById('login_status_invalid_code').style.display = "inline";
+						document.getElementById('login_status_invalid_code').innerHTML = 'Feil kode, verifiser kode eller trykk innlogging på nytt for ny kode tilsendt';
+						break;
+		
+					default:
+						throw "Unknown code status code: " + response.status;
+					}
+				});
+			}	
+		}
+	}
+
+	function hideAllMessages() {
+		document.getElementById('login_status_invalid_phoneno').style.display = "none";
+		document.getElementById('login_status_must_approve').style.display = "none";
+		document.getElementById('login_status_approving').style.display = "none";
+		document.getElementById('login_status_approved').style.display = "none";
+		document.getElementById('login_status_invalid_code').style.display = "none";
+	}
+	
+	function trimPhoneNo(phoneNo) {
+		return phoneNo.split(' ').join('');
+	}
+
+	function isValidPhoneNo(phoneNo) {
+		
+		var valid;
+		
+		valid = phoneNo.length > 0
+		  && (
+			  	 (phoneNo[0] === '+' && areDigits(phoneNo, 1, phoneNo.length))
+			  || (phoneNo.length == 8 && areDigits(phoneNo, 0, phoneNo.length))
+			 );
+		
+		return valid;
+	}
+	
+	function areDigits(string, startIndex, endIndex) {
+		
+		for (var i = startIndex; i < endIndex; ++ i) {
+			if (string[i] < '0' || string[i] > '9') {
+				return false;
+			}
+		}
+
+		return true;
+	}
+	
+	function postAjax(url, onsuccess) {
 		
 		// Post this using Ajax to server URL and get response on whether is logged in or not
 		var request = new XMLHttpRequest(url);
@@ -87,18 +191,14 @@ Skriv inn din kode under
 		
 		request.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200) {
-				// Look at response
-				if (this.response.validationNecessary) {
-					// Must show message about validation
-					onsuccess(response);
-				}
+				// Must show message about validation
+				onsuccess(this.response);
 			}
 		};
 	
 		request.open('POST', url, true);
 		
 		request.send();
-		
 	};
 </script>
 

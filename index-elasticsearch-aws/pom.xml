@@ -5,18 +5,28 @@
     <artifactId>root</artifactId>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>index-elastisearch-aws</artifactId>
+  <artifactId>index-elasticsearch-aws</artifactId>
   <name>Elasticsearch index AWS integration</name>
   <packaging>jar</packaging>
   <dependencies>
 
-<!--  
+	<dependency>
+		<groupId>${project.groupId}</groupId>
+		<artifactId>index</artifactId>
+		<version>${project.version}</version>
+	</dependency>
+
+	<dependency>
+		<groupId>${project.groupId}</groupId>
+		<artifactId>index-elasticsearch</artifactId>
+		<version>${project.version}</version>
+	</dependency>
+
 	<dependency>
 		<groupId>com.amazonaws</groupId>
-		<artifactId>aws-java-sdk</artifactId>
-		<version>1.11.285</version>
+		<artifactId>aws-java-sdk-elasticsearch</artifactId>
+		<version>1.11.303</version>
 	</dependency>
--->
 
 	<!-- test dependencies --> 
 

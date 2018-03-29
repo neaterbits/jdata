@@ -22,17 +22,19 @@ html, body {
 #login_row {
 	display : table-row;
 	position: relative;
+	
+	height: 100%;
 }
 
 #login_cell {
 	display : table-cell;
 	vertical-align : middle;
-	
+	height: 100%;
 }
 
 #login_box {
 	width : 40%;
-	height : 40%;
+	height : 50%;
 	
 	margin-left : auto;
 	margin-right : auto;
@@ -44,7 +46,11 @@ html, body {
 
 	padding-left : 2em;
 	padding-right : 2em;
+}
 
+#login_status_invalid_phoneno, #login_status_invalid_code {
+	color: red;
+	display: none;
 }
 
 #login_explanation {
@@ -52,6 +58,10 @@ html, body {
 
 #login_title {
 	text-align : center;
+}
+
+#login_inputs {
+	text-align: center;
 }
 
 #sms_input {
@@ -74,7 +84,18 @@ html, body {
 	display : none;	
 }
 
-#code_input {
-	display : none;
+#code_input_div {
+	text-align: center;
+	display: none;
 }
 
+#code_input {
+	margin-left: 0.3em;
+}
+
+#send_code_button {
+	margin-left: 1em;
+}
+
+#login_status_text {
+}

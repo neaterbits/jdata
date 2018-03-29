@@ -8,12 +8,12 @@ import com.test.cv.index.ItemIndex;
 import com.test.cv.integrationtest.IntegrationTestHelper;
 import com.test.cv.xmlstorage.local.LocalXmlStorage;
 
-public class XMLItemDAOTest extends ItemDAOTest {
+public class LocalFileAndLuceneXMLItemDAOTest extends ItemDAOTest {
 
 	private final File baseDir;
 	private final ItemIndex index;
 	
-	public XMLItemDAOTest() {
+	public LocalFileAndLuceneXMLItemDAOTest() {
 		baseDir = IntegrationTestHelper.makeBaseDir();
 		index = IntegrationTestHelper.makeIndex(baseDir);
 	}

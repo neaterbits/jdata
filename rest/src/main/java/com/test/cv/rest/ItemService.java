@@ -19,6 +19,7 @@ import javax.ws.rs.QueryParam;
 
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.model.Item;
+import com.test.cv.model.items.ItemTypes;
 
 @Path("/")
 public class ItemService extends BaseService {
@@ -38,11 +39,15 @@ public class ItemService extends BaseService {
 	@POST
 	@Path("items/{itemId}/image")
 	@Consumes({ "image/jpeg", "image/png" })
-	public void storeImage(@QueryParam("userId") String userId, @PathParam("itemId") String itemId, @QueryParam("index") int index, byte [] imageData, HttpServletRequest request) throws IOException, ItemStorageException {
+	public void storeImage(@QueryParam("userId") String userId, @PathParam("itemId") String itemId, @QueryParam("itemType") String itemType, @QueryParam("index") int index, byte [] imageData, HttpServletRequest request) throws IOException, ItemStorageException {
 		// Received an item as JSon, store it
 		
 		if (userId == null || userId.trim().isEmpty()) {
 			throw new IllegalArgumentException("No userId");
+		}
+		
+		if (itemType == null || itemType.trim().isEmpty()) {
+			throw new IllegalArgumentException("No item type");
 		}
 		
 		final ByteArrayInputStream photoInputStream1 = new ByteArrayInputStream(imageData);
@@ -63,11 +68,15 @@ public class ItemService extends BaseService {
 		final int width = image.getWidth();
 		final int height = image.getHeight();
 		
+		final int thumbDataLength;
+		
 		if (width <= bb && height <= bb) {
 			thumbnailInputStream = new ByteArrayInputStream(imageData);
 			
 			thumbWidth = width;
 			thumbHeight = height;
+			
+			thumbDataLength = imageData.length;
 		}
 		else {
 			
@@ -99,13 +108,20 @@ public class ItemService extends BaseService {
 			
 			ImageIO.write(imageToRenderedImage(thumb), formatName, baos);
 			
-			thumbnailInputStream = new ByteArrayInputStream(baos.toByteArray());
+			final byte [] thumbData = baos.toByteArray();
+			
+			thumbnailInputStream = new ByteArrayInputStream(thumbData);
+			
+			thumbDataLength = thumbData.length;
 		}
 				
 		// Must create a thumbnail from photo
 		// Some JPEGs may have thumbnails already
 		
-		getItemDAO(request).addPhotoAndThumbnailForItem(userId, itemId, thumbnailInputStream, thumbnailMimeType, thumbWidth, thumbHeight, photoInputStream1, photoMimeType);
+		getItemDAO(request).addPhotoAndThumbnailForItem(
+				userId, itemId, ItemTypes.getTypeByName(itemType).getType(),
+				thumbnailInputStream, thumbnailMimeType, thumbWidth, thumbHeight, thumbDataLength,
+				photoInputStream1, photoMimeType, imageData.length);
 	}
 	
 	

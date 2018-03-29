@@ -7,6 +7,8 @@
 
 function GalleryCacheAllProvisionalSomeComplete(config, galleryModel, galleryView, initialTotalNumberOfItems) {
 	GalleryCacheBase.call(this, config, galleryModel, galleryView, initialTotalNumberOfItems);
+	
+	this.visibleElements = null;
 }
 
 GalleryCacheAllProvisionalSomeComplete.prototype = Object.create(GalleryCacheBase.prototype);
@@ -92,14 +94,16 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 	if (this.visibleElements == null) {
 		this.visibleElements = {
 			firstVisibleY : 0,
+			firstRenderedY : 0, // renders a bit outside of display since adding complete rows
 			firstVisibleIndex : 0,
 			lastVisibleY : 0,
+			lastRenderedY : 0, // renders a bit outside of display since adding complete rows
 			lastVisibleIndex : 0
 		};
 	}
 	
 	// Updates first and last cached item index base on y position
-	this.visibleElements = this._updateOnScroll(yPos, this.visibleElements);
+	this.visibleElements = this._updateOnScroll(level + 1, yPos, this.visibleElements);
 	
 	// Start a timer to check whether user has stopped scrolling,
 	// we are not going to update the DOM as longs as user is scrolling as
@@ -131,8 +135,11 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 
 	var visibleElements = this.visibleElements;
 	
+	var t = this;
+	
 	// TODO also add callback for preload data since we would want to precreate divs? Test whether is good enough without
 	this.cacheItems.updateVisibleArea(
+			level + 1,
 			this.visibleElements.firstVisibleIndex,
 			visibleCount,
 			this.totalNumberOfItems,
@@ -141,17 +148,17 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 				
 				// Only called when haven't scrolled (eg no other call to updateVisibleArea)
 				if (index !== visibleElements.firstVisibleIndex) {
-					throw "Index mismatch";
+					throw "Index mismatch: requested=" + visibleElements.firstVisibleIndex + ", retrieved: " + index;
 				}
 				if (count !== visibleCount) {
 					throw "Count mismatch";
 				}
 				if (downloadedData.length !== visibleCount) {
-					throw "Number of items mismatch count";
+					throw "Number of items mismatch count, expected " + visibleCount + ", got " + downloadedData.length;
 				}
 
 				// Can now update rows from data
-				_showCompleteForRows(index, count, downloadedData);
+				t._showCompleteForRows(0, index, count, downloadedData);
 			});
 
 	this.exit(level, 'updateOnScroll');
@@ -159,18 +166,19 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 
 
 // Helper method for update on scroll
-GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY, prevDisplayed) {
+GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(level, curY, prevDisplayed) {
+
+	this.enter(level, '_updateOnScroll',
+			[ 'curY', curY, 'prevDisplayed', JSON.stringify(prevDisplayed)],
+			[ 'firstY',  this.firstY,  'lastY', this.lastY, '_getVisibleHeigt()', this._getVisibleHeight() ],);
+	
 	// See if we have something that was not visible earlier scrolled into view
 
-	var firstVisibleY;
-	var lastVisibleY;
+	var firstRenderedY;
+	var lastRenderedY;
 	var firstVisibleIndex;
 	var lastVisibleIndex;
 	
-	var level = 0;
-	
-	this.enter(level, 'updateOnScroll', ['curY', curY], [ 'firstY',  this.firstY,  'lastY', this.lastY ]);
-
 	var posAndIndex = this._findElementYPosAndItemIndex(level + 1, curY);
 	
 	var lastRendered;
@@ -181,8 +189,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY
 		// We are scrolling upwards totally out of current area
 		lastRendered = this._redrawCompletelyAt(level + 1, curY, posAndIndex);
 		
-		firstVisibleY = posAndIndex.rowYPos;
-		lastVisibleY = lastRendered.yPos;
+		firstRenderedY = posAndIndex.rowYPos;
+		lastRenderedY = lastRendered.yPos;
 		firstVisibleIndex = posAndIndex.rowItemIndex;
 		lastVisibleIndex = lastRendered.index;
 	}
@@ -195,11 +203,11 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY
 		// Must add items before this one, so must be prepended to the divs already shown
 		lastRendered = this._prependDivs(level + 1, prevDisplayed.firstVisibleIndex - 1, prevDisplayed.firstVisibleY, this.numColumns, heightToAdd);
 
-		firstVisibleY = lastRendered.rowYPos;
+		firstRenderedY = lastRendered.rowYPos;
 		firstVisibleIndex = lastRendered.rowItemIndex;
 
 		throw "TODO figure out last rendered after prepending"
-		lastVisibleY = lastRendered.yPos;
+		lastRenderedY = lastRendered.yPos;
 		lastVisibleIndex = lastRendered.index;
 	}
 	else if (curY > prevDisplayed.lastVisibleY) {
@@ -208,8 +216,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY
 
 		lastRendered = this._redrawCompletelyAt(level + 1, curY, posAndIndex);
 
-		firstVisibleY = posAndIndex.rowYPos;
-		lastVisibleY = lastRendered.yPos;
+		firstRenderedY = posAndIndex.rowYPos;
+		lastRenderedY = lastRendered.yPos;
 		firstVisibleIndex = posAndIndex.rowItemIndex;
 		lastVisibleIndex = lastRendered.index;
 	}
@@ -226,21 +234,26 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(curY
 		// Start-index to add is the one immediately after last-index
 		lastRendered = this._addProvisionalDivs(level + 1, prevDisplayed.lastVisibleIndex + 1, prevDisplayed.lastVisibleY, this.numColumns, heightToAdd);
 
-		firstVisibleY = posAndIndex.rowYPos;
-		lastVisibleY = lastRendered.yPos;
+		firstRenderedY = posAndIndex.rowYPos;
+		lastRenderedY = lastRendered.yPos;
 		firstVisibleIndex = posAndIndex.rowItemIndex;
 		lastVisibleIndex = lastRendered.index;
 	}
+	else {
+		this.log(level, 'Did not match any test');
+	}
 	
 	var displayed = {
-		firstVisibleY : firstVisibleY,
-		firstVisibleIndex : firstVisibleIndex,
-		lastVisibleY : lastVisibleY,
-		lastVisibleIndex : lastVisibleIndex
+		'firstVisibleY' : curY,
+		'firstRenderedY' : firstRenderedY,
+		'firstVisibleIndex' : firstVisibleIndex,
+		'lastVisibleY' : curY + this._getVisibleHeight() - 1,
+		'lastRenderedY' : lastRenderedY,
+		'lastVisibleIndex' : lastVisibleIndex
 	};
 
 	this.exit(level, '_updateOnScroll', JSON.stringify(displayed));
-
+	
 	return displayed;
 };
 
@@ -299,26 +312,28 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showComplete = function(level,
  * - completeDataArray - array of complete-data for items, contains only itemCount entries 
  * 
  */
-GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function(firstModelItemIndex, itemCount, completeDataArray) {
+GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function(level, firstModelItemIndex, itemCount, completeDataArray) {
 	
 	if (completeDataArray.length !== itemCount) {
 		throw "Expected itemCount entries";
 	}
 
-	var rowWidth = t._getRowWidth();
-	var numRows = t.cachedRowDivs.length;
-	var numRowsTotal = ((t._getTotalNumberOfItems() - 1) / t.numColumns) + 1;
+	var rowWidth = this._getRowWidth();
+	var numRows = this.cachedRowDivs.length;
+	var numRowsTotal = ((this._getTotalNumberOfItems() - 1) / this.numColumns) + 1;
 	
 	for (var row = 0, i = firstModelItemIndex; row < numRows && i < itemCount; ++ row) {
 		
-		var rowDiv = t.cachedRowDivs[row];
+		var rowDiv = this.cachedRowDivs[row];
 		var itemsThisRow = rowDiv.childNodes.length;
 
 		// Store new elements in array and then replace all at once
 		var rowWidthHeights = this._getRowItemDivHeights(rowDiv);
 
+		var t = this;
+
 		// Replace row items
-		t._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
+		this._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
 				function (index, itemWidth, itemHeight) {
 			
 					var completeData = completeDataArray[index - firstModelItemIndex];
@@ -344,7 +359,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 		
 		i += itemsThisRow;
 	
-		var updatedRowWidthHeights = getRowItemDivs(rowDiv);
+		var updatedRowWidthHeights = this._getRowItemDivHeights(rowDiv);
 	
 		for (var j = 0; j < itemsThisRow; ++ j) {
 			var prevDim = rowWidthHeights[j];

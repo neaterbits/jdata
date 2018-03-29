@@ -64,20 +64,20 @@
 	
 	
 	function getSearchUrl(testdata) {
-		var url = "http://localhost:8080/search?test=true";
+		var url = "http://localhost:8080/search";
 
 		if (testdata) {
-			url += "&testdata=" + testdata;
+			url += "?testdata=" + testdata;
 		}
 
 		return url;
 	}
 
 	function getThumbsUrl(testdata) {
-		var url = "http://localhost:8080/search/thumbnails?test=true";
+		var url = "http://localhost:8080/search/thumbnails";
 
 		if (testdata) {
-			url += "&testdata=" + testdata;
+			url += "?testdata=" + testdata;
 		}
 
 		return url;

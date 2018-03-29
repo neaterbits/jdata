@@ -43,7 +43,7 @@ public interface IItemStorage {
 
 	InputStream getXMLForItem(String userId, String itemId) throws StorageException;
 
-	void storeXMLForItem(String userId, String itemId, InputStream inputStream) throws StorageException;
+	void storeXMLForItem(String userId, String itemId, InputStream inputStream, Integer contentLength) throws StorageException;
 
 	// If we delete XML, we will also delete photos and thumbnails
 	void deleteAllItemFiles(String userId, String itemId) throws StorageException;
@@ -60,8 +60,8 @@ public interface IItemStorage {
 	ImageResult getPhotoForItem(String userId, String itemId, int photoNo) throws StorageException;
 
 	int addPhotoAndThumbnailForItem(String userId, String itemId,
-			InputStream thumbnailInputStream, String thumbnailMimeType,
-			InputStream photoInputStream, String photoMimeType) throws StorageException;
+			InputStream thumbnailInputStream, String thumbnailMimeType, Integer thumbLength,
+			InputStream photoInputStream, String photoMimeType, Integer photoLength) throws StorageException;
 	
 	void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException;
 

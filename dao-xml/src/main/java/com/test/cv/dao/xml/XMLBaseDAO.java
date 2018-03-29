@@ -56,7 +56,9 @@ abstract class XMLBaseDAO {
 		}
 		
 		try {
-			xmlStorage.storeXMLForItem(userId, itemId, new ByteArrayInputStream(baos.toByteArray()));
+			
+			final byte [] bytes = baos.toByteArray();
+			xmlStorage.storeXMLForItem(userId, itemId, new ByteArrayInputStream(bytes), bytes.length);
 		} catch (StorageException ex) {
 			throw new XMLStorageException("Failed to store to XML storage", ex);
 		}
