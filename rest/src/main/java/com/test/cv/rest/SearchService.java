@@ -45,6 +45,8 @@ import com.test.cv.search.facets.IndexSingleValueFacetedAttributeResult;
 import com.test.cv.search.facets.ItemsFacets;
 import com.test.cv.search.facets.TypeFacets;
 
+import static com.test.cv.common.ArrayUtil.convertArray;
+
 @Path("/search")
 public class SearchService extends BaseService {
 	
@@ -296,15 +298,6 @@ public class SearchService extends BaseService {
 				includeItemsWithNoValue);
 	}
 	
-	private static <T, R> R [] convertArray(T [] input, Function<Integer, R []> createArray, Function<T, R> convert) {
-		final R []output = createArray.apply(input.length);
-		
-		for (int i = 0; i < input.length; ++ i) {
-			output[i] = convert.apply(input[i]);
-		}
-
-		return output;
-	}
 	
 	private static SearchFacetsResult convertFacets(ItemsFacets facets) {
 		final SearchFacetsResult result = new SearchFacetsResult();
