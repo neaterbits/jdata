@@ -155,7 +155,7 @@ GalleryCacheItems.prototype.updateVisibleArea = function(level, firstVisibleInde
 	
 	var lastVisibleIndex = firstVisibleIndex + visibleCount - 1;
 
-	var layout = this._computeNewCacheArrayLayout(level + 1, firstVisibleIndex, visibleCount);
+	var layout = this._computeNewCacheArrayLayout(level + 1, firstVisibleIndex, visibleCount, totalNumberOfItems);
 
 	// Check for overlap can only be overlap if we had any items at all in the galery
 	if (this.totalNumberOfItems > 0) {
@@ -422,38 +422,26 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 GalleryCacheItems.prototype._computeNewCacheArrayLayout = function(level, firstVisibleIndex, visibleCount, totalNumberOfItems) {
 	
 	this.enter(level, '_computeNewCacheArrayLayout', ['firstVisibleIndex', firstVisibleIndex, 'visibleCount', visibleCount]);
-
-	var firstCachedIndex = firstVisibleIndex - this.cachedBeforeAndAfter;
-	if (firstCachedIndex < 0) {
-		firstCachedIndex = 0;
-		numBeforeVisible = firstVisibleIndex;
-	}
-	else {
-		numBeforeVisible = this.cachedBeforeAndAfter;
-	}
-		
-	// Items after
-	var nextIndexAfter = firstVisibleIndex + visibleCount;
-	if (nextIndexAfter >= totalNumberOfItems) {
-		throw "After total number of items: nextIndexAfter=" + nextIndexAfter + ", totalNumberOfItems=" + totalNumberOfItems;
+	
+	var firstCachedIndex = this._getFirstIndexInCache(level + 1, firstVisibleIndex);
+	var lastIndexInCache = this._getLastIndexInCache(level + 1, firstVisibleIndex, visibleCount, totalNumberOfItems);
+	
+	var numBeforeVisible = firstVisibleIndex - firstCachedIndex;
+	var numAfterVisible = (lastIndexInCache - firstCachedIndex + 1) - visibleCount - numBeforeVisible;
+	
+	if (numBeforeVisible < 0) {
+		throw "numBeforeVisible < 0";
 	}
 	
-	var remaining = totalNumberOfItems - nextIndexAfter - 1;
-		
-	if (remaining < this.cachedBeforeAndAfter) {
-		// At the end of scrollview, can only download remaining
-		numAfterVisible = remaining;
-	}
-	else {
-		// Can download complete set of entries after
-		numAfterVisible = this.cachedBeforeAndAfter;
+	if (numAfterVisible < 0) {
+		throw "numAfterVisible < 0";
 	}
 	
 	var result = {
 		firstCachedIndex : firstCachedIndex,
 		numBeforeVisible : numBeforeVisible,
 		
-		lastCachedIndex : firstCachedIndex + numBeforeVisible + visibleCount + numAfterVisible - 1,
+		lastCachedIndex : lastIndexInCache,
 		numAfterVisible : numAfterVisible
 	};
 
