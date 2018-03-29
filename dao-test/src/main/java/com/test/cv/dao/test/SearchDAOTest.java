@@ -268,23 +268,27 @@ public abstract class SearchDAOTest extends TestCase {
 		final Snowboard snowboard1 = makeSnowboard1();
 		final Snowboard snowboard2 = makeSnowboard2();
 		
-		final String itemId1;
-		final String itemId2;
+		String itemId1 = null;
+		String itemId2 = null;
 		
 		try (IItemDAO itemDAO = getItemDAO()) {
-			 itemId1 = itemDAO.addItem(userId, snowboard1);
-			 itemId2 = itemDAO.addItem(userId, snowboard2);
-		
-			 try (ISearchDAO searchDAO = getSearchDAO()) {
-				 
-				 check.check(searchDAO, itemId1, itemId2);
-				 
-			 }
+			try {
+				itemId1 = itemDAO.addItem(userId, snowboard1);
+				itemId2 = itemDAO.addItem(userId, snowboard2);
+				
+				try (ISearchDAO searchDAO = getSearchDAO()) {
+					 check.check(searchDAO, itemId1, itemId2);
+				}
+			}
+			finally {
+				if (itemId1 != null) {
+					 itemDAO.deleteItem(userId, itemId1, Snowboard.class);
+				}
 
-			 itemDAO.deleteItem(userId, itemId1, Snowboard.class);
-			 itemDAO.deleteItem(userId, itemId2, Snowboard.class);
+				if (itemId2 != null) {
+					itemDAO.deleteItem(userId, itemId2, Snowboard.class);
+				}
+			}
 		}
 	}
-	
-	
 }
