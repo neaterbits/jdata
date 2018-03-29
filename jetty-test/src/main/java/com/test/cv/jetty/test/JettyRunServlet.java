@@ -148,6 +148,10 @@ public class JettyRunServlet {
 				// Retrieve thumbnails as a stream
 				final String [] itemIds = req.getParameterValues("itemId");
 				
+				if (itemIds == null) {
+					throw new IllegalArgumentException("No itemIds");
+				}
+				
 				final SearchService searchService = new SearchService();
 
 				final byte [] data = searchService.getThumbnails(itemIds, req);
