@@ -218,21 +218,8 @@ public class FacetUtils {
 					final IndexSingleValueFacetedAttributeResult singleValueResult = assureSingleResult(attribute, attributeResults);
 					
 					final Object value = functions.getObjectValue(attribute, field);
-					
-					if (value == null) {
-						throw new IllegalStateException("Expected field value when field is present");
-					}
-					IndexSingleValueFacet valueFacet = singleValueResult.getForValue(value);
-					
-					if (valueFacet == null) {
-						final Object displayValue = getAttributeDisplayValue(attribute, value);
-						
-						valueFacet = new IndexSingleValueFacet(value, displayValue, null);
-						
-						singleValueResult.putForValue(value, valueFacet);
-					}
-					
-					valueFacet.increaseMatchCount();
+				
+					addSingleValueFacet(attribute, singleValueResult, value);
 				}
 			}
 		}
@@ -244,17 +231,39 @@ public class FacetUtils {
 		}
 	}
 	
+	public static void addSingleValueFacet(ItemAttribute attribute, IndexSingleValueFacetedAttributeResult singleValueResult, Object value) {
+		if (value == null) {
+			throw new IllegalStateException("Expected field value when field is present");
+		}
+		
+		IndexSingleValueFacet valueFacet = singleValueResult.getForValue(value);
+		
+		if (valueFacet == null) {
+			final Object displayValue = getAttributeDisplayValue(attribute, value);
+			
+			valueFacet = new IndexSingleValueFacet(value, displayValue, null);
+			
+			singleValueResult.putForValue(value, valueFacet);
+		}
+		
+		valueFacet.increaseMatchCount();
+	}
+	
 	private static IndexSingleValueFacetedAttributeResult assureSingleResult(ItemAttribute attribute, Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults) {
 		IndexSingleValueFacetedAttributeResult singleValueResult = (IndexSingleValueFacetedAttributeResult)attributeResults.get(attribute);
 		
 		// TODO avoid instantiation?
 		if (singleValueResult == null) {
 			
-			singleValueResult = new IndexSingleValueFacetedAttributeResult(attribute, new TreeMap<>(ATTRIBUTE_VALUE_COMPARATOR));
+			singleValueResult = createSingleValueFacetedAttributeResult(attribute);
 			attributeResults.put(attribute, singleValueResult);
 		}
 		
 		return singleValueResult;
+	}
+	
+	public static IndexSingleValueFacetedAttributeResult createSingleValueFacetedAttributeResult(ItemAttribute attribute) {
+		return new IndexSingleValueFacetedAttributeResult(attribute, new TreeMap<>(ATTRIBUTE_VALUE_COMPARATOR));
 	}
 	
 	private static Object getAttributeDisplayValue(ItemAttribute attribute, Object value) {

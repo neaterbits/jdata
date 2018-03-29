@@ -3,13 +3,19 @@ package com.test.cv.index.elasticsearch;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.http.HttpHost;
+import org.elasticsearch.ElasticsearchStatusException;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
@@ -19,12 +25,25 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.ToXContent;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
+import org.elasticsearch.search.aggregations.bucket.SingleBucketAggregation;
+import org.elasticsearch.search.aggregations.bucket.range.Range;
+import org.elasticsearch.search.aggregations.bucket.range.Range.Bucket;
+import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 
@@ -36,7 +55,11 @@ import com.test.cv.index.ItemIndexException;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.ItemAttributeValue;
+import com.test.cv.model.attributes.AttributeType;
+import com.test.cv.model.attributes.facets.FacetedAttributeDecimalRange;
+import com.test.cv.model.attributes.facets.FacetedAttributeIntegerRange;
 import com.test.cv.model.items.ItemTypes;
+import com.test.cv.model.items.TypeInfo;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonCriterium;
 import com.test.cv.search.criteria.ComparisonOperator;
@@ -45,9 +68,17 @@ import com.test.cv.search.criteria.DecimalCriterium;
 import com.test.cv.search.criteria.InCriterium;
 import com.test.cv.search.criteria.IntegerCriterium;
 import com.test.cv.search.criteria.StringCriterium;
+import com.test.cv.search.facets.FacetUtils;
+import com.test.cv.search.facets.IndexFacetedAttributeResult;
+import com.test.cv.search.facets.IndexRangeFacetedAttributeResult;
+import com.test.cv.search.facets.IndexSingleValueFacetedAttributeResult;
 import com.test.cv.search.facets.ItemsFacets;
+import com.test.cv.search.facets.TypeFacets;
 
 import static com.test.cv.common.ArrayUtil.convertArray;
+
+// TODO use multiple indices, one per type? instead of merging all into one index. Multiple types per index is obsleted in >= 6.x
+// See https://www.elastic.co/guide/en/elasticsearch/reference/5.3/general-recommendations.html#sparsity
 
 
 public class ElasticSearchIndex implements ItemIndex {
@@ -63,7 +94,9 @@ public class ElasticSearchIndex implements ItemIndex {
 	// Name of field to represent title
 	private final ItemAttribute titleAttribute;
 	
-	public ElasticSearchIndex(String endpointUrl, ItemAttribute titleAttribute) {
+	private static final ESTypeHandling TYPE_HANDLING = new ESTypeHandlingOneTypePerIndexCustomTypeField();
+	
+	public ElasticSearchIndex(String endpointUrl, ItemAttribute titleAttribute) throws ItemIndexException {
 
 		if (titleAttribute == null) {
 			throw new IllegalArgumentException("titleAttribute == null");
@@ -72,6 +105,8 @@ public class ElasticSearchIndex implements ItemIndex {
 		this.titleAttribute = titleAttribute;
 
 		this.client = new RestHighLevelClient(RestClient.builder(new HttpHost(endpointUrl)));
+		
+		createIndexIfNotExists();
 	}
 	
 	@Override
@@ -83,7 +118,7 @@ public class ElasticSearchIndex implements ItemIndex {
 	public void indexItemAttributes(String userId, Class<? extends Item> itemType, String typeName,
 			List<ItemAttributeValue<?>> attributeValues) throws ItemIndexException {
 
-		final String type = ItemTypes.getTypeName(itemType);
+		final String type = getTypeName(itemType);
 		
 		String id = null;
 		
@@ -103,6 +138,31 @@ public class ElasticSearchIndex implements ItemIndex {
 		final StringBuilder sb = new StringBuilder("{\n");
 
 		sb.append("  ").append('"').append(FIELD_USER_ID).append('"').append(" : ").append('"').append(userId).append('"');
+		
+		final Map<String, Object> customFields = TYPE_HANDLING.indexCustomFields(itemType);
+		
+		if (customFields != null) {
+			for (Map.Entry<String, Object> entry : customFields.entrySet()) {
+				sb.append(",\n");
+				
+				sb.append("  ").append('"').append(entry.getKey()).append('"').append(" : ");
+
+				final Object v = entry.getValue();
+				
+				if (v instanceof Enum<?>) {
+					sb.append('"').append(((Enum<?>)v).name()).append('"');
+				}
+				else if (v instanceof String) {
+					sb.append('"').append((String)v).append('"');
+				}
+				else if (v instanceof Integer || v instanceof Long) {
+					sb.append(v.toString());
+				}
+				else {
+					throw new UnsupportedOperationException("Unknown value: " + v.getClass());
+				}
+			}
+		}
 
 		for (ItemAttributeValue<?> value : attributeValues) {
 
@@ -165,7 +225,7 @@ public class ElasticSearchIndex implements ItemIndex {
 	@Override
 	public void deleteItem(String itemId, Class<? extends Item> type) throws ItemIndexException {
 		
-		final DeleteRequest request = new DeleteRequest(INDEX_NAME, ItemTypes.getTypeName(type), itemId);
+		final DeleteRequest request = new DeleteRequest(INDEX_NAME, getTypeName(type), itemId);
 
 		try {
 			client.delete(request);
@@ -186,7 +246,7 @@ public class ElasticSearchIndex implements ItemIndex {
 				(tw, th) -> tw << 16 | th);
 		
 		// Update
-		updateThumbs(itemId, ItemTypes.getTypeName(type), sizes);
+		updateThumbs(itemId, getTypeName(type), sizes);
 	}
 	
 	private static class ThumbSizes {
@@ -204,7 +264,7 @@ public class ElasticSearchIndex implements ItemIndex {
 	}
 
 	private ThumbSizes getThumbs(String itemId, Class<? extends Item> itemType) throws ItemIndexException {
-		return getThumbs(itemId, ItemTypes.getTypeName(itemType));
+		return getThumbs(itemId, getTypeName(itemType));
 	}
 	
 	private ThumbSizes getThumbs(String itemId, String itemType) throws ItemIndexException {
@@ -348,9 +408,6 @@ public class ElasticSearchIndex implements ItemIndex {
 
 		final SearchSourceBuilder sourceBuilder = request.source();
 		
-		sourceBuilder.fetchSource(new String [] { titleAttribute.getName(), FIELD_THUMBS }, null);
-
-		
 		final QueryBuilder queryBuilder;
 		
 		if (criteria == null) {
@@ -361,6 +418,23 @@ public class ElasticSearchIndex implements ItemIndex {
 		}
 
 		sourceBuilder.query(queryBuilder);
+		
+		if (facetAttributes != null && !facetAttributes.isEmpty()) {
+			addAggregations(sourceBuilder, facetAttributes);
+		}
+
+		if (false) {
+			try {
+				final XContentBuilder content = JsonXContent.contentBuilder();
+				
+				sourceBuilder.toXContent(content, null);
+				
+				System.out.println("## request: " + content.string());
+			}
+			catch (IOException ex) {
+				throw new IllegalStateException("Failed to create content builder", ex);
+			}
+		}
 
 		final SearchResponse response;
 		try {
@@ -414,9 +488,8 @@ public class ElasticSearchIndex implements ItemIndex {
 						thumbWidth = null;
 						thumbHeight = null;
 					}
-					
+
 					items.add(new IndexSearchItem(hit.getId(), title, thumbWidth, thumbHeight));
-					
 				}
 				
 				return items;
@@ -435,9 +508,120 @@ public class ElasticSearchIndex implements ItemIndex {
 
 			@Override
 			public ItemsFacets getFacets() {
-				throw new UnsupportedOperationException("TODO");
+				return makeFacets(response.getAggregations());
 			}
 		};
+	}
+	
+	private static ItemsFacets makeFacets(Aggregations aggregations) {
+		
+
+		// Issue: not able to differentiate on type here with only one ES type per index
+		// How to handle?
+		// - insert our own type field and filter on that
+		// - split in multiple indices? May have to do anyways because of index sparsity, ie avoid unused fields 
+
+		// Loop over all aggregations and figure type
+
+		final List<TypeFacets> types = new ArrayList<>();
+		
+		for (Aggregation typeAggregation : aggregations.asList()) {
+
+			final String typeName = splitAggregationName(typeAggregation.getName());
+			
+			final TypeInfo typeInfo = ItemTypes.getTypeByName(typeName);
+			if (typeInfo == null) {
+				throw new IllegalStateException("No type info for " + typeName);
+			}
+			
+			final SingleBucketAggregation sb = (SingleBucketAggregation)typeAggregation;
+			
+			final List<IndexFacetedAttributeResult> attributes = new ArrayList<>();
+			
+			for (Aggregation subAggregation : sb.getAggregations().asList()) {
+				final MultiBucketsAggregation sub = (MultiBucketsAggregation)subAggregation;
+				
+				final String attributeName = splitAggregationName(sub.getName());
+				
+				final ItemAttribute attribute = typeInfo.getAttributes().getByName(attributeName);
+				
+				if (attribute == null) {
+					throw new IllegalStateException("No attribute with name " + attributeName);
+				}
+
+				final IndexFacetedAttributeResult attributeResult;
+				
+				if (sub instanceof Range) {
+					
+					final Range range = (Range)sub;
+
+					final int expectedCounts = attribute.getIntegerRanges() != null
+							? attribute.getIntegerRanges().length
+							: attribute.getDecimalRanges().length;
+					
+					final int [] matchCounts = new int[expectedCounts];
+					
+					// For simplicity EleasticSearch returns ranges in same order as query
+					if (range.getBuckets().size() != expectedCounts) {
+						throw new IllegalStateException("Different number or rages in return");
+					}
+							
+					for (int i = 0; i < expectedCounts; ++ i) {
+						final Bucket bucket = range.getBuckets().get(i);
+
+						if (bucket.getDocCount() > Integer.MAX_VALUE) {
+							throw new IllegalStateException("bucket.getDocCount() > Integer.MAX_VALUE");
+						}
+
+						matchCounts[i] = (int)bucket.getDocCount();
+					}
+
+					attributeResult = new IndexRangeFacetedAttributeResult(attribute, matchCounts);
+				}
+				else if (sub instanceof Terms) {
+					final Terms terms = (Terms)sub;
+					
+					final IndexSingleValueFacetedAttributeResult singleValueFacetedAttributeResult = FacetUtils.createSingleValueFacetedAttributeResult(attribute);
+					attributeResult = singleValueFacetedAttributeResult;
+
+					terms.getBuckets().forEach(b -> {
+						if (b.getDocCount() > Integer.MAX_VALUE) {
+							throw new IllegalStateException("b.getDocCount() > Integer.MAX_VALUE");
+						}
+						
+						final Object value = b.getKey();
+						
+						FacetUtils.addSingleValueFacet(attribute, singleValueFacetedAttributeResult, value);
+					});
+					
+				}
+				else {
+					throw new UnsupportedOperationException("Unknown aggregation type: " + sub.getClass());
+				}
+				
+				attributes.add(attributeResult);
+			}
+			
+			final TypeFacets typeFacets = new TypeFacets(typeInfo.getType(), attributes);
+			
+			types.add(typeFacets);
+		}
+		
+		return new ItemsFacets(types);
+	}
+	
+	private static String splitAggregationName(String name) {
+		final String [] s = name.split("_");
+		
+		if (s.length != 2) {
+			throw new IllegalStateException("Aggregation name not two parts: " + Arrays.toString(s));
+		}
+		
+		if (!s[1].equals("agg")) {
+			throw new IllegalStateException("Aggregation name not ending in .agg");
+		}
+
+		return s[0];
 	}
 
 	private static QueryBuilder buildQuery(List<Criterium> criteria) {
@@ -524,7 +708,6 @@ public class ElasticSearchIndex implements ItemIndex {
 			this.query = query;
 			this.occur = occur;
 		}
-		
 	}
 
 	private static ESQueryAndOccur createComparisonQuery(Criterium criterium, String fieldName) {
@@ -622,4 +805,281 @@ public class ElasticSearchIndex implements ItemIndex {
 		return new ESQueryAndOccur(query, occur);
 	}
 
+	private static void addAggregations(SearchSourceBuilder sourceBuilder, Set<ItemAttribute> facets) {
+		// Create a bucket aggregation for each attribute and then a count metric-aggregation within each
+		
+		final Set<Class<? extends Item>> distinctTypes = facets.stream()
+				.filter(f -> f.isFaceted())
+				.map(f -> f.getItemType())
+				.collect(Collectors.toSet());
+
+		// Make aggregations for all attributes of a particular type
+		for (Class<? extends Item> type : distinctTypes) {
+			
+			final Consumer<AggregationBuilder> addAddAttributeAggregation;
+			final AggregationBuilder typeFilter;
+			if (TYPE_HANDLING.hasTypeFilter()) {
+				typeFilter = TYPE_HANDLING.createTypeFilter(type);
+
+				addAddAttributeAggregation = a -> typeFilter.subAggregation(a);
+			}
+			else {
+				typeFilter = null;
+				
+				addAddAttributeAggregation = a -> sourceBuilder.aggregation(a);
+			}
+
+			for (ItemAttribute facet : facets) {
+				
+				if (!facet.getItemType().equals(type)) {
+					continue;
+				}
+				
+				if (!facet.isFaceted()) {
+					continue;
+				}
+				
+				
+				final String fieldName = facet.getName();
+				final String aggregationName = fieldName + "_agg";
+				
+				if (facet.isSingleValue()) {
+					addAddAttributeAggregation.accept(AggregationBuilders.terms(aggregationName).field(fieldName).size(Integer.MAX_VALUE));
+				}
+				else if (facet.isRange()) {
+					
+					final RangeAggregationBuilder rangeAggregation = AggregationBuilders.range(aggregationName).field(fieldName);
+					
+					if (facet.getIntegerRanges() != null) {
+						
+						for (int i = 0; i < facet.getIntegerRanges().length; ++ i) {
+							
+							final FacetedAttributeIntegerRange range = facet.getIntegerRanges()[i];
+							final String key = String.valueOf(i);
+
+							if (range.getLower() == null) {
+								rangeAggregation.addUnboundedTo(key, range.getUpper());
+							}
+							else if (range.getUpper() == null) {
+								rangeAggregation.addUnboundedFrom(key, range.getLower());
+							}
+							else {
+								rangeAggregation.addRange(key,  range.getLower(), range.getUpper());
+							}
+						}
+					}
+					else if (facet.getDecimalRanges() != null) {
+						for (int i = 0; i < facet.getDecimalRanges().length; ++ i) {
+							
+							final FacetedAttributeDecimalRange range = facet.getDecimalRanges()[i];
+							final String key = String.valueOf(i);
+
+							if (range.getLower() == null) {
+								rangeAggregation.addUnboundedTo(key, range.getUpper().doubleValue());
+							}
+							else if (range.getUpper() == null) {
+								rangeAggregation.addUnboundedFrom(key, range.getLower().doubleValue());
+							}
+							else {
+								rangeAggregation.addRange(key,  range.getLower().doubleValue(), range.getUpper().doubleValue());
+							}
+						}
+					}
+					else {
+						throw new IllegalStateException("Neither integer nor decimal ranges: " + facet.getName());
+					}
+					
+					addAddAttributeAggregation.accept(rangeAggregation);
+				}
+				else {
+					throw new IllegalStateException("Neither single value nor range: " + facet.getName());
+				}
+			}
+
+			if (TYPE_HANDLING.hasTypeFilter()) {
+				sourceBuilder.aggregation(typeFilter);
+			}
+		}
+	}
+	
+	private void createIndexIfNotExists() throws ItemIndexException {
+		
+		final GetIndexRequest getIndex = new GetIndexRequest();
+		
+		getIndex.indices(INDEX_NAME);
+		
+		final CreateIndexRequest create = new CreateIndexRequest(INDEX_NAME);
+		
+		// Add all field types
+		final Map<String, String> fieldTypes = new HashMap<>();
+		
+		final StringBuilder sb = new StringBuilder();
+		
+		sb.append("{ ").append('"').append("mappings").append('"').append(" : {");
+
+		boolean firstType = true;
+
+		for (String typeName : TYPE_HANDLING.getCreateIndexTypes(ItemTypes.getTypeClasses())) {
+			if (firstType) {
+				firstType = false;
+			}
+			else {
+				sb.append(", ");
+			}
+
+			TYPE_HANDLING.getCreateIndexAttributes(typeName).forEach(attribute -> {
+				final String esFieldType = getESFieldType(attribute.getAttributeType());
+				
+				fieldTypes.put(attribute.getName(), esFieldType);
+			});
+			
+			final Map<String, String> custom = TYPE_HANDLING.createIndexCustomFields(typeName);
+			
+			if (custom != null) {
+				fieldTypes.putAll(custom);
+			}
+
+			sb.append('"').append(typeName).append('"').append(" : { ");
+			sb.append('"').append("properties").append('"').append(" : { ");
+			
+			boolean firstAttribute = true;
+
+			for (Map.Entry<String, String> fieldType : fieldTypes.entrySet()) {
+				
+				final String fieldName = fieldType.getKey();
+
+				if (firstAttribute) {
+					firstAttribute = false;
+				}
+				else {
+					sb.append(", ");
+				}
+				
+				sb.append('"').append(fieldName).append('"').append(" : { ")
+					.append('"').append("type").append('"').append(" : ").append('"').append(fieldType.getValue()).append('"')
+					.append(" }");
+			}
+			
+			
+			sb.append(" }");
+			sb.append(" }");
+			
+			/*
+			final Map<String, Object> properties = new HashMap<>();
+			properties.put("properties", new HashMap<>(fieldTypes));
+			
+			create.mapping(typeName, new Hash);
+			
+			fieldTypes.clear(); // reuse map for next type
+			*/
+		}
+
+		sb.append(" }");
+
+		sb.append(" }");
+
+		final String json = sb.toString();
+
+		create.source(json, XContentType.JSON);
+		
+		if (false) {
+			try {
+				final XContentBuilder content = JsonXContent.contentBuilder();
+				
+				create.settings(new HashMap<>());
+				
+				create.toXContent(content, params);
+				
+				System.out.println("## create request: " + content.string());
+			}
+			catch (IOException ex) {
+				throw new IllegalStateException("Faield to create content builder", ex);
+			}
+		}
+		
+
+		
+		try {
+			client.indices().create(create);
+		} catch (ElasticsearchStatusException ex) {
+			if (	ex.getRootCause() != null
+				 && ex.getRootCause().getMessage() != null
+				 && ex.getRootCause().getMessage().contains("resource_already_exists_exception")) {
+
+				// Already exists, do nothing
+			}
+			else {
+				throw ex;
+			}
+		} catch (IOException ex) {
+			throw new ItemIndexException("Failed to create index", ex);
+		}
+	}
+	
+	private static String getESFieldType(AttributeType attributeType) {
+		final String esFieldType;
+		
+		switch (attributeType) {
+		case STRING:
+		case ENUM:
+			esFieldType = "keyword";
+			break;
+		
+		case INTEGER:
+			esFieldType = "integer";
+			break;
+			
+		case LONG:
+			esFieldType = "long";
+			break;
+			
+		case DECIMAL:
+			esFieldType = "double";
+			break;
+			
+		case DATE:
+			esFieldType = "date";
+			break;
+			
+		case BOOLEAN:
+			esFieldType = "boolean";
+			break;
+			
+		default:
+			throw new UnsupportedOperationException("Unknown attribute type " + attributeType);
+		}
+
+		return esFieldType;
+	}
+	
+	private static final ToXContent.Params params = new ToXContent.Params() {
+		
+		@Override
+		public Boolean paramAsBoolean(String key, Boolean defaultValue) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+		@Override
+		public boolean paramAsBoolean(String key, boolean defaultValue) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+		
+		@Override
+		public String param(String key, String defaultValue) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+		@Override
+		public String param(String key) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+	};
+	
+	private static String getTypeName(Class<? extends Item> type) {
+		return TYPE_HANDLING.getESTypeName(type);
+	}
 }

@@ -8,6 +8,7 @@ import com.amazonaws.services.elasticsearch.AWSElasticsearchClientBuilder;
 import com.amazonaws.services.elasticsearch.model.DescribeElasticsearchDomainRequest;
 import com.amazonaws.services.elasticsearch.model.DescribeElasticsearchDomainResult;
 import com.test.cv.index.ItemIndex;
+import com.test.cv.index.ItemIndexException;
 import com.test.cv.index.elasticsearch.ElasticSearchIndex;
 import com.test.cv.model.ItemAttribute;
 
@@ -31,7 +32,7 @@ public class AWSElasticseachIndex extends ElasticSearchIndex implements ItemInde
 		return endpoint;
 	}
 
-	public AWSElasticseachIndex(AWSCredentialsProvider credentialsProvider, Regions region, String esDomain, ItemAttribute titleAttribute) {
+	public AWSElasticseachIndex(AWSCredentialsProvider credentialsProvider, Regions region, String esDomain, ItemAttribute titleAttribute) throws ItemIndexException {
 		super(getEndpointURL(credentialsProvider, region, esDomain), titleAttribute);
 	}
 }

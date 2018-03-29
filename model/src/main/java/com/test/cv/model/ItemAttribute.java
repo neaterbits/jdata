@@ -114,7 +114,11 @@ public final class ItemAttribute {
 	public boolean isSingleValue() {
 		return integerRanges == null && decimalRanges == null;
 	}
-	
+
+	public boolean isRange() {
+		return !isSingleValue();
+	}
+
 	public Object getObjectValue(Item item) {
 		final Object value;
 		try {
