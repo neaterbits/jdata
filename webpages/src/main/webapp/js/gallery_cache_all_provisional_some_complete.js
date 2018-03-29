@@ -275,7 +275,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._getRowItemDivHeights = functio
 	for (var j = 0; j < itemsThisRow; ++ j) {
 		var itemElement = rowDiv.childNodes[j];
 
-		rowWidthHeights.push({ width : itemElement.clientWidth})
+		rowWidthHeights.push({ width : itemElement.clientWidth, height : itemElement.clientHeight })
 	}
 	
 	return rowWidthHeights;
@@ -366,7 +366,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 			var curDim  = updatedRowWidthHeights[j];
 	
 			if (prevDim.width !== curDim.width || prevDim.height !== curDim.height) {
-				throw "Gallery item dimensions changed between provisional and updated";
+				throw "Gallery item dimensions changed between provisional and updated: prev=" + JSON.stringify(prevDim) + ", cur=" + JSON.stringify(curDim);
 			}
 		}
 	}
