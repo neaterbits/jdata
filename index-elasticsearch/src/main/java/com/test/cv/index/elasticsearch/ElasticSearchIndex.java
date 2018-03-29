@@ -20,20 +20,35 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 
 import com.test.cv.common.ItemId;
 import com.test.cv.index.IndexSearchCursor;
+import com.test.cv.index.IndexSearchItem;
 import com.test.cv.index.ItemIndex;
 import com.test.cv.index.ItemIndexException;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.ItemAttributeValue;
 import com.test.cv.model.items.ItemTypes;
+import com.test.cv.search.SearchItem;
+import com.test.cv.search.criteria.ComparisonCriterium;
+import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.Criterium;
+import com.test.cv.search.criteria.DecimalCriterium;
+import com.test.cv.search.criteria.InCriterium;
+import com.test.cv.search.criteria.IntegerCriterium;
+import com.test.cv.search.criteria.StringCriterium;
+import com.test.cv.search.facets.ItemsFacets;
+
+import static com.test.cv.common.ArrayUtil.convertArray;
+
 
 public class ElasticSearchIndex implements ItemIndex {
 
@@ -45,7 +60,17 @@ public class ElasticSearchIndex implements ItemIndex {
 	private static final String FIELD_USER_ID = "userId";
 	private static final String FIELD_THUMBS = "thumbs";
 	
-	public ElasticSearchIndex(String endpointUrl) {
+	// Name of field to represent title
+	private final ItemAttribute titleAttribute;
+	
+	public ElasticSearchIndex(String endpointUrl, ItemAttribute titleAttribute) {
+
+		if (titleAttribute == null) {
+			throw new IllegalArgumentException("titleAttribute == null");
+		}
+
+		this.titleAttribute = titleAttribute;
+
 		this.client = new RestHighLevelClient(RestClient.builder(new HttpHost(endpointUrl)));
 	}
 	
@@ -318,6 +343,283 @@ public class ElasticSearchIndex implements ItemIndex {
 	public IndexSearchCursor search(String freeText, List<Criterium> criteria, Set<ItemAttribute> facetAttributes)
 			throws ItemIndexException {
 
-		throw new UnsupportedOperationException("TODO - search");
+		// Must add both query and also aggregations if necessary
+		final SearchRequest request = new SearchRequest(INDEX_NAME);
+
+		final SearchSourceBuilder sourceBuilder = request.source();
+		
+		sourceBuilder.fetchSource(new String [] { titleAttribute.getName(), FIELD_THUMBS }, null);
+
+		
+		final QueryBuilder queryBuilder;
+		
+		if (criteria == null) {
+			queryBuilder = QueryBuilders.matchAllQuery();
+		}
+		else {
+			queryBuilder = buildQuery(criteria);
+		}
+
+		sourceBuilder.query(queryBuilder);
+
+		final SearchResponse response;
+		try {
+			response = client.search(request);
+		} catch (IOException ex) {
+			throw new ItemIndexException("Failed to read index result", ex);
+		}
+		
+		final SearchHits searchHits = response.getHits();
+		
+		final SearchHit [] hits = searchHits.getHits();
+		
+		// TODO use ES paging? For now optimized to get all data
+		
+		return new IndexSearchCursor() {
+			
+			@Override
+			public int getTotalMatchCount() {
+				
+				if (searchHits.totalHits > Integer.MAX_VALUE) {
+					throw new IllegalStateException("More than Integer.MAX_VALUE hits");
+				}
+
+				return (int)searchHits.totalHits;
+			}
+			
+			@Override
+			public List<SearchItem> getItemIDsAndTitles(int initialIdx, int count) {
+
+				final List<SearchItem> items = new ArrayList<>(Math.min(hits.length, count));
+				
+				for (int i = 0; i < count && (initialIdx + i) < hits.length; ++ i) {
+
+					final SearchHit hit = hits[initialIdx + i];
+					
+					final Map<String, Object> sourceMap = hit.getSourceAsMap();
+					final String title = (String)sourceMap.get(titleAttribute.getName());
+
+					@SuppressWarnings("unchecked")
+					final List<Integer> thumbs = (List<Integer>)sourceMap.get(FIELD_THUMBS);
+					
+					final Integer thumbWidth;
+					final Integer thumbHeight;
+					if (thumbs != null && !thumbs.isEmpty()) {
+						final int thumbEncoded = thumbs.get(0);
+						
+						thumbWidth = thumbEncoded >> 16;
+						thumbHeight = thumbEncoded & 0x0000FFFF;
+					}
+					else {
+						thumbWidth = null;
+						thumbHeight = null;
+					}
+					
+					items.add(new IndexSearchItem(hit.getId(), title, thumbWidth, thumbHeight));
+					
+				}
+				
+				return items;
+			}
+			
+			@Override
+			public List<String> getItemIDs(int initialIdx, int count) {
+				final List<String> ids = new ArrayList<>(Math.min(hits.length, count));
+				
+				for (int i = 0; i < count && (initialIdx + i) < hits.length; ++ i) {
+					ids.add(hits[initialIdx + i].getId());
+				}
+
+				return ids;
+			}
+
+			@Override
+			public ItemsFacets getFacets() {
+				throw new UnsupportedOperationException("TODO");
+			}
+		};
 	}
+
+	private static QueryBuilder buildQuery(List<Criterium> criteria) {
+		
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+	
+		for (Criterium criterium : criteria) {
+			final ItemAttribute attribute = criterium.getAttribute();
+			final String fieldName = attribute.getName();
+
+			if (criterium instanceof ComparisonCriterium<?>) {
+				final ESQueryAndOccur queryAndOccur = createComparisonQuery(criterium, fieldName);
+				
+				switch (queryAndOccur.occur) {
+				case MUST:
+					queryBuilder.must(queryAndOccur.query);
+					break;
+					
+				case MUST_NOT:
+					queryBuilder.mustNot(queryAndOccur.query);
+					break;
+					
+				default:
+					throw new UnsupportedOperationException("Unsupported occur: " + queryAndOccur.occur);
+				}
+			}
+			else if (criterium instanceof InCriterium<?>) {
+				final InCriterium<?> inCriterium = (InCriterium<?>)criterium;
+
+				final QueryBuilder inQueryBuilder;
+				
+				switch (attribute.getAttributeType()) {
+				case BOOLEAN:
+				case STRING:
+				case INTEGER:
+				case LONG:
+				case DATE:
+					inQueryBuilder = QueryBuilders.termsQuery(fieldName, inCriterium.getValues());
+					break;
+					
+				case DECIMAL:
+					// Must convert to double
+					final Object [] doubles = convertArray(
+							inCriterium.getValues(),
+							length -> new Object[length],
+							o -> ((BigDecimal)o).doubleValue());
+					inQueryBuilder = QueryBuilders.termsQuery(fieldName, doubles);
+					break;
+
+				case ENUM:
+					final Object [] enums = convertArray(
+							inCriterium.getValues(),
+							length -> new Object[length],
+							o -> ((Enum<?>)o).name());
+					inQueryBuilder = QueryBuilders.termsQuery(fieldName, enums);
+					break;
+					
+				
+				default:
+					throw new UnsupportedOperationException("Unknown attribute type " + attribute.getAttributeType());
+				}
+				
+				queryBuilder.must(inQueryBuilder);
+			}
+			else {
+				throw new UnsupportedOperationException("Unknown criteria type " + criterium.getClass());
+			}
+		}
+
+		return queryBuilder;
+	}
+	
+	
+	enum ESOccur {
+		MUST,
+		MUST_NOT
+	};
+
+	private static class ESQueryAndOccur {
+		private final QueryBuilder query;
+		private final ESOccur occur;
+		
+		ESQueryAndOccur(QueryBuilder query, ESOccur occur) {
+			this.query = query;
+			this.occur = occur;
+		}
+		
+	}
+
+	private static ESQueryAndOccur createComparisonQuery(Criterium criterium, String fieldName) {
+		final QueryBuilder query;
+		final ESOccur occur;
+
+		final ComparisonOperator comparisonOperator = ((ComparisonCriterium<?>) criterium).getComparisonOperator();
+		
+		if (criterium instanceof StringCriterium) {
+			final String value = ((StringCriterium)criterium).getValue();
+			
+			query = QueryBuilders.termQuery(fieldName, value);
+			occur = ESOccur.MUST;
+		}
+		else if (criterium instanceof IntegerCriterium) {
+			final Integer value = ((IntegerCriterium)criterium).getValue();
+
+			switch (comparisonOperator) {
+			case EQUALS:
+				query = QueryBuilders.termQuery(fieldName, value);
+				occur = ESOccur.MUST;
+				break;
+				
+			case NOT_EQUALS:
+				query = QueryBuilders.termQuery(fieldName, value);
+				occur = ESOccur.MUST_NOT;
+				break;
+			
+			case LESS_THAN:
+				query = QueryBuilders.rangeQuery(fieldName).from(null).to(value, false);
+				occur = ESOccur.MUST;
+				break;
+				
+			case LESS_THAN_OR_EQUALS:
+				query = QueryBuilders.rangeQuery(fieldName).from(null).to(value, false);
+				occur = ESOccur.MUST;
+				break;
+				
+			case GREATER_THAN:
+				query = QueryBuilders.rangeQuery(fieldName).from(value, false).to(null);
+				occur = ESOccur.MUST;
+				break;
+			
+			case GREATER_THAN_OR_EQUALS:
+				query = QueryBuilders.rangeQuery(fieldName).from(value, true).to(null);
+				occur = ESOccur.MUST;
+				break;
+				
+			default:
+				throw new UnsupportedOperationException("Unknown comparison operator: " + comparisonOperator);
+			}
+		}
+		else if (criterium instanceof DecimalCriterium) {
+			final BigDecimal value = ((DecimalCriterium)criterium).getValue();
+			
+			switch (comparisonOperator) {
+			case EQUALS:
+				query = QueryBuilders.termQuery(fieldName, value.doubleValue());
+				occur = ESOccur.MUST;
+				break;
+				
+			case NOT_EQUALS:
+				query = QueryBuilders.termQuery(fieldName, value.doubleValue());
+				occur = ESOccur.MUST_NOT;
+				break;
+			
+			case LESS_THAN:
+				query = QueryBuilders.rangeQuery(fieldName).from(null).to(value.doubleValue(), false);
+				occur = ESOccur.MUST;
+				break;
+				
+			case LESS_THAN_OR_EQUALS:
+				query = QueryBuilders.rangeQuery(fieldName).from(null).to(value.doubleValue(), false);
+				occur = ESOccur.MUST;
+				break;
+				
+			case GREATER_THAN:
+				query = QueryBuilders.rangeQuery(fieldName).from(value.doubleValue(), false).to(null);
+				occur = ESOccur.MUST;
+				break;
+			
+			case GREATER_THAN_OR_EQUALS:
+				query = QueryBuilders.rangeQuery(fieldName).from(value.doubleValue(), true).to(null);
+				occur = ESOccur.MUST;
+				break;
+				
+			default:
+				throw new UnsupportedOperationException("Unknown comparison operator: " + comparisonOperator);
+			}
+		}
+		else {
+			throw new UnsupportedOperationException("Unknown criterium");
+		}
+
+		return new ESQueryAndOccur(query, occur);
+	}
+
 }

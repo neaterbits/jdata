@@ -9,6 +9,7 @@ import com.amazonaws.services.elasticsearch.model.DescribeElasticsearchDomainReq
 import com.amazonaws.services.elasticsearch.model.DescribeElasticsearchDomainResult;
 import com.test.cv.index.ItemIndex;
 import com.test.cv.index.elasticsearch.ElasticSearchIndex;
+import com.test.cv.model.ItemAttribute;
 
 public class AWSElasticseachIndex extends ElasticSearchIndex implements ItemIndex {
 	
@@ -30,7 +31,7 @@ public class AWSElasticseachIndex extends ElasticSearchIndex implements ItemInde
 		return endpoint;
 	}
 
-	public AWSElasticseachIndex(AWSCredentialsProvider credentialsProvider, Regions region, String esDomain) {
-		super(getEndpointURL(credentialsProvider, region, esDomain));
+	public AWSElasticseachIndex(AWSCredentialsProvider credentialsProvider, Regions region, String esDomain, ItemAttribute titleAttribute) {
+		super(getEndpointURL(credentialsProvider, region, esDomain), titleAttribute);
 	}
 }

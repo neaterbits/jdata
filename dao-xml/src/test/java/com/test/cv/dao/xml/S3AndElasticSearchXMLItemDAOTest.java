@@ -8,7 +8,10 @@ import com.test.cv.dao.LockDAO;
 import com.test.cv.dao.jpa.JPALockDAO;
 import com.test.cv.dao.jpa.JPANames;
 import com.test.cv.dao.test.ItemDAOTest;
+import com.test.cv.index.elasticsearch.ElasticSearchIndex;
 import com.test.cv.index.elasticsearch.aws.AWSElasticseachIndex;
+import com.test.cv.model.Item;
+import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.xmlstorage.S3XMLStorage;
 import com.test.cv.xmlstorage.api.LockProvider;
 
@@ -18,9 +21,19 @@ import com.test.cv.xmlstorage.api.LockProvider;
 
 public class S3AndElasticSearchXMLItemDAOTest extends ItemDAOTest {
 
-	@Override
-	protected IItemDAO getItemDAO() {
+	static ElasticSearchIndex makeIndex() {
+		final AWSCredentialsProvider awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
 
+		final AWSElasticseachIndex index = new AWSElasticseachIndex(
+				awsCredentialsProvider,
+				Regions.EU_WEST_2,
+				"eltodo-es-test",
+				ClassAttributes.getFromClass(Item.class).getByName("title"));
+
+		return index;
+	}
+	
+	static XMLItemDAO makeItemDAO() {
 		final AWSCredentialsProvider awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
 
 		final S3XMLStorage itemStorage = new S3XMLStorage(
@@ -32,8 +45,11 @@ public class S3AndElasticSearchXMLItemDAOTest extends ItemDAOTest {
 		final LockDAO lockDAO = new JPALockDAO(JPANames.PERSISTENCE_UNIT_DERBY);
 		final LockProvider lockProvider = new DAOLockProvider(lockDAO);
 		
-		final AWSElasticseachIndex index = new AWSElasticseachIndex(awsCredentialsProvider, Regions.EU_WEST_2, "eltodo-es-test");
-		
-		return new XMLItemDAO(itemStorage, index, lockProvider);
+		return new XMLItemDAO(itemStorage, makeIndex(), lockProvider);
+	}
+	
+	@Override
+	protected IItemDAO getItemDAO() {
+		return makeItemDAO();
 	}
 }
