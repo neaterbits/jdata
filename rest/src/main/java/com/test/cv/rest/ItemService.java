@@ -39,7 +39,7 @@ public class ItemService extends BaseService {
 	@POST
 	@Path("items/{itemId}/image")
 	@Consumes({ "image/jpeg", "image/png" })
-	public void storeImage(@QueryParam("userId") String userId, @PathParam("itemId") String itemId, @QueryParam("type") String itemType, @QueryParam("index") int index, byte [] imageData, HttpServletRequest request) throws IOException, ItemStorageException {
+	public void storeImage(@QueryParam("userId") String userId, @PathParam("itemId") String itemId, @QueryParam("itemType") String itemType, @QueryParam("index") int index, byte [] imageData, HttpServletRequest request) throws IOException, ItemStorageException {
 		// Received an item as JSon, store it
 		
 		if (userId == null || userId.trim().isEmpty()) {
