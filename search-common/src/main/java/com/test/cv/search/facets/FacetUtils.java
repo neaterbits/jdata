@@ -225,9 +225,7 @@ public class FacetUtils {
 		}
 		else {
 			// No value so add to no-value count
-			if (attribute.isSingleValue()) {
-				assureSingleResult(attribute, attributeResults).addToNoAttributeValueCount();
-			}
+			assureResult(attribute, attributeResults).addToNoAttributeValueCount();
 		}
 	}
 	
@@ -261,7 +259,23 @@ public class FacetUtils {
 		
 		return singleValueResult;
 	}
-	
+
+	public static IndexFacetedAttributeResult assureResult(ItemAttribute attribute, Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults) {
+		
+		final IndexFacetedAttributeResult result;
+		if (attribute.isSingleValue()) {
+			result = assureSingleResult(attribute, attributeResults);
+		}
+		else if (attribute.isRange()) {
+			result = getOrAddRange(attributeResults, attribute, attribute.getRangeCount());
+		}
+		else {
+			throw new IllegalStateException("Neither single value nor range attribute");
+		}
+		
+		return result;
+	}
+
 	public static IndexSingleValueFacetedAttributeResult createSingleValueFacetedAttributeResult(ItemAttribute attribute) {
 		return new IndexSingleValueFacetedAttributeResult(attribute, new TreeMap<>(ATTRIBUTE_VALUE_COMPARATOR));
 	}

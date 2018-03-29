@@ -40,6 +40,6 @@ public class LuceneIndexSearchDAOTest extends SearchDAOTest {
 
 	@Override
 	protected ISearchDAO getSearchDAO() {
-		return new IndexSearchDAO(index, true);
+		return new IndexSearchDAO(index, false);
 	}
 }

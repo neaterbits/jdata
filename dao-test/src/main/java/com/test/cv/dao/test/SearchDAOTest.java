@@ -65,7 +65,7 @@ public abstract class SearchDAOTest extends TestCase {
 
 	public void testSearchNoCriteria() throws Exception {
 
-		checkSnowboard((searchDAO, itemId1, itemId2) -> {
+		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {
 			final ISearchCursor search = searchDAO.search(
 					Arrays.asList(Snowboard.class),
 					null,
@@ -83,7 +83,7 @@ public abstract class SearchDAOTest extends TestCase {
 
 	public void testSearchItemsNoCriteria() throws Exception {
 
-		checkSnowboard((searchDAO, itemId1, itemId2) -> {
+		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {
 			final ISearchCursor search = searchDAO.search(
 					Arrays.asList(Snowboard.class),
 					null,
@@ -115,7 +115,7 @@ public abstract class SearchDAOTest extends TestCase {
 	}
 
 	public void testSnowboardCriteriaGreaterThan() throws Exception {
-		checkSnowboard((searchDAO, itemId1, itemId2) -> {
+		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {
 			final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
 
 			final ItemAttribute widthAttribute = snowboardAttributes.getByName("width");
@@ -136,7 +136,7 @@ public abstract class SearchDAOTest extends TestCase {
 	}
 
 	public void testSnowboardCriteriaNotEquals() throws Exception {
-		checkSnowboard((searchDAO, itemId1, itemId2) -> {
+		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {
 			final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
 
 			final ItemAttribute widthAttribute = snowboardAttributes.getByName("width");
@@ -157,7 +157,7 @@ public abstract class SearchDAOTest extends TestCase {
 	}
 	
 	public void testSnowboardIn() throws Exception {
-		checkSnowboard((searchDAO, itemId1, itemId2) -> {
+		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {
 			final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
 
 			final ItemAttribute widthAttribute = snowboardAttributes.getByName("width");
@@ -202,64 +202,83 @@ public abstract class SearchDAOTest extends TestCase {
 
 		final Set<ItemAttribute> facetedAttributes = new HashSet<>(Arrays.asList(widthAttribute, makeAttribute));
 		
-		checkSnowboard((searchDAO, itemId1, itemId2) -> {
-
-			final ISearchCursor search = searchDAO.search(
-					Arrays.asList(Snowboard.class),
-					null,
-					facetedAttributes);
+		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {
 			
-			final ItemsFacets facets = search.getFacets();
-			
-			assertThat(facets).isNotNull();
-			assertThat(facets.getTypes().size()).isEqualTo(1);
+			// Add one more snowboard with no make nor width
+			final Snowboard snowboard3 = new Snowboard();
+			String itemId3 = null;
 
-			final TypeFacets typeFacets = facets.getTypes().get(0);
-			
-			assertThat(typeFacets.getType()).isEqualTo(Snowboard.class);
+			try {
+				itemId3 = itemDAO.addItem(userId, snowboard3);
 
-			// System.out.println("Attributes: " + typeFacets.getAttributes());
-			assertThat(typeFacets.getAttributes().size()).isEqualTo(2);
+				final ISearchCursor search = searchDAO.search(
+						Arrays.asList(Snowboard.class),
+						null,
+						facetedAttributes);
+				
+				final ItemsFacets facets = search.getFacets();
+				
+				assertThat(facets).isNotNull();
+				assertThat(facets.getTypes().size()).isEqualTo(1);
+	
+				final TypeFacets typeFacets = facets.getTypes().get(0);
+				
+				assertThat(typeFacets.getType()).isEqualTo(Snowboard.class);
+	
+				System.out.println("Attributes: " + typeFacets.getAttributes());
+				assertThat(typeFacets.getAttributes().size()).isEqualTo(2);
+	
+				final IndexSingleValueFacetedAttributeResult makeFacet =
+						(IndexSingleValueFacetedAttributeResult) find(
+								typeFacets.getAttributes(),
+								attribute -> attribute.getAttribute().getName().equals("make"));
+				
+				assertThat(makeFacet).isNotNull();
+				assertThat(makeFacet.getAttribute()).isEqualTo(makeAttribute);
+				assertThat(makeFacet.getValues().size()).isEqualTo(2);
+				
+				assertThat(makeFacet.getValues().get(0).getMatchCount()).isEqualTo(1);
+				assertThat(makeFacet.getValues().get(1).getMatchCount()).isEqualTo(1);
+				
+				// Should have one item that is missing this value
+				assertThat(makeFacet.getNoAttributeValueCount()).isEqualTo(1);
+	
+				final IndexSingleValueFacet burton = find(makeFacet.getValues(), f -> f.getValue().equals("Burton"));
+				assertThat(burton).isNotNull();
+	
+				final IndexSingleValueFacet jones = find(makeFacet.getValues(), f -> f.getValue().equals("Jones"));
+				assertThat(jones).isNotNull();
+	
+				final IndexRangeFacetedAttributeResult widthFacet =
+						(IndexRangeFacetedAttributeResult) find(
+								typeFacets.getAttributes(),
+								attribute -> attribute.getAttribute().getName().equals("width"));
+	
+				assertThat(widthFacet).isNotNull();
+				assertThat(widthFacet.getAttribute()).isEqualTo(widthAttribute);
+				assertThat(widthFacet.getMatchCounts()).isNotNull();
+				assertThat(widthFacet.getMatchCounts().length).isEqualTo(widthAttribute.getDecimalRanges().length);
+				assertThat(widthFacet.getMatchCounts()[0]).isEqualTo(0);
+				assertThat(widthFacet.getMatchCounts()[1]).isEqualTo(0);
+				assertThat(widthFacet.getMatchCounts()[2]).isEqualTo(1);
+				assertThat(widthFacet.getMatchCounts()[3]).isEqualTo(1);
+				assertThat(widthFacet.getMatchCounts()[4]).isEqualTo(0);
 
-			final IndexSingleValueFacetedAttributeResult makeFacet =
-					(IndexSingleValueFacetedAttributeResult) find(
-							typeFacets.getAttributes(),
-							attribute -> attribute.getAttribute().getName().equals("make"));
-			
-			assertThat(makeFacet).isNotNull();
-			assertThat(makeFacet.getAttribute()).isEqualTo(makeAttribute);
-			assertThat(makeFacet.getValues().size()).isEqualTo(2);
-			
-			assertThat(makeFacet.getValues().get(0).getMatchCount()).isEqualTo(1);
-			assertThat(makeFacet.getValues().get(0).getMatchCount()).isEqualTo(1);
-
-			final IndexSingleValueFacet burton = find(makeFacet.getValues(), f -> f.getValue().equals("Burton"));
-			assertThat(burton).isNotNull();
-
-			final IndexSingleValueFacet jones = find(makeFacet.getValues(), f -> f.getValue().equals("Jones"));
-			assertThat(jones).isNotNull();
-
-			final IndexRangeFacetedAttributeResult widthFacet =
-					(IndexRangeFacetedAttributeResult) find(
-							typeFacets.getAttributes(),
-							attribute -> attribute.getAttribute().getName().equals("width"));
-
-			assertThat(widthFacet).isNotNull();
-			assertThat(widthFacet.getAttribute()).isEqualTo(widthAttribute);
-			assertThat(widthFacet.getMatchCounts()).isNotNull();
-			assertThat(widthFacet.getMatchCounts().length).isEqualTo(widthAttribute.getDecimalRanges().length);
-			assertThat(widthFacet.getMatchCounts()[0]).isEqualTo(0);
-			assertThat(widthFacet.getMatchCounts()[1]).isEqualTo(0);
-			assertThat(widthFacet.getMatchCounts()[2]).isEqualTo(1);
-			assertThat(widthFacet.getMatchCounts()[3]).isEqualTo(1);
-			assertThat(widthFacet.getMatchCounts()[4]).isEqualTo(0);
+				// Should have one item that is missing this value
+				assertThat(widthFacet.getNoAttributeValueCount()).isEqualTo(1);
+}
+			finally {
+				if (itemId3 != null) {
+					itemDAO.deleteItem(userId, itemId3, Snowboard.class);
+				}
+			}
 			
 		});
 	}
 	
 	@FunctionalInterface
 	public interface CheckSnowboard {
-		void check(ISearchDAO searchDAO, String itemId1, String itemId2) throws SearchException;
+		void check(String userId, IItemDAO itemDAO,  ISearchDAO searchDAO, String itemId1, String itemId2) throws SearchException, Exception;
 	}
 	
 	private void checkSnowboard(CheckSnowboard check) throws Exception {
@@ -271,24 +290,26 @@ public abstract class SearchDAOTest extends TestCase {
 		String itemId1 = null;
 		String itemId2 = null;
 		
-		try (IItemDAO itemDAO = getItemDAO()) {
-			try {
-				itemId1 = itemDAO.addItem(userId, snowboard1);
-				itemId2 = itemDAO.addItem(userId, snowboard2);
-				
-				try (ISearchDAO searchDAO = getSearchDAO()) {
-					 check.check(searchDAO, itemId1, itemId2);
-				}
+		final IItemDAO itemDAO = getItemDAO();
+	
+		try {
+			itemId1 = itemDAO.addItem(userId, snowboard1);
+			itemId2 = itemDAO.addItem(userId, snowboard2);
+			
+			try (ISearchDAO searchDAO = getSearchDAO()) {
+				 check.check(userId, itemDAO, searchDAO, itemId1, itemId2);
 			}
-			finally {
-				if (itemId1 != null) {
-					 itemDAO.deleteItem(userId, itemId1, Snowboard.class);
-				}
+		}
+		finally {
+			if (itemId1 != null) {
+				 itemDAO.deleteItem(userId, itemId1, Snowboard.class);
+			}
 
-				if (itemId2 != null) {
-					itemDAO.deleteItem(userId, itemId2, Snowboard.class);
-				}
+			if (itemId2 != null) {
+				itemDAO.deleteItem(userId, itemId2, Snowboard.class);
 			}
+			
+			itemDAO.close();
 		}
 	}
 }
