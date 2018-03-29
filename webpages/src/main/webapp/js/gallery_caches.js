@@ -297,7 +297,7 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 	var numRows = ((this._getTotalNumberOfItems() - 1) / numColumns) + 1;
 
 	if (startIndex % numColumns != 0) {
-		throw "Start index not at start of column: " + startIndx + "/" + numColumns;
+		throw "Start index not at start of column: " + startIndex + "/" + numColumns;
 	}
 
 	var rowNo = startIndex / numColumns;
