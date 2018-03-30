@@ -34,9 +34,8 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 
 		return scriptDir;
 	}
-
-	public void testScript() throws IOException {
-
+	
+	private JSRuntime prepareRuntime(List<DownloadInvocation> downloadRequests) throws IOException {
 		final File scriptDir = getScriptDir();
 
 		final String baseScript1 = IOUtil.readFileToString(new File(scriptDir, "gallery_base.js"));
@@ -61,8 +60,6 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 		final Map<String, Object> bindings = new HashMap<>();
 
 		
-		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
-		
 		final Function<Object [], Object> modelDownloadItems = (params) -> {
 				System.out.println("modelDownloadItems: Got params " + Arrays.toString(params));
 
@@ -81,10 +78,13 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 		bindings.put("modelDownloadItems", registerJSFunctionCallback(modelDownloadItems));
 		bindings.put("console", new Console());
 
-		
-		// List for tracking updated items
-		final List<UpdateCompletion> completedUpdates = new ArrayList<>();
-		
+		// Evaluate any vars
+		final JSRuntime jsRuntime = jsScript.eval(bindings);
+
+		return jsRuntime;
+	}
+	
+	private Object prepareUpdateVisibleAreaCallback(List<UpdateCompletion> completedUpdates) {
 		// The function that is called back when completed download of all items
 		final Function<Object[], Object> updateVisibleAreaComplete = (params) -> {
 			
@@ -101,11 +101,20 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 		};
 		
 		final Object updateVisibleAreaCompleteCallback = registerJSFunctionCallback(updateVisibleAreaComplete);
+
+		return updateVisibleAreaCompleteCallback;
+	}
+
+	public void testScript() throws IOException {
+
+		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
+
+		final JSRuntime jsRuntime = prepareRuntime(downloadRequests);
 		
-		// Evaluate any vars
-		final JSRuntime jsRuntime = jsScript.eval(bindings);
-
-
+		// List for tracking updated items
+		final List<UpdateCompletion> completedUpdates = new ArrayList<>();
+		final Object updateVisibleAreaCompleteCallback = prepareUpdateVisibleAreaCallback(completedUpdates);
+	
 		// Create cache loader
 		final Object galleryCacheItems = jsRuntime.invokeFunction("createGalleryCacheItems");
 		
