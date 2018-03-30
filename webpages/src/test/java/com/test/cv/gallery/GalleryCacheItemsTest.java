@@ -81,22 +81,37 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 		bindings.put("modelDownloadItems", registerJSFunctionCallback(modelDownloadItems));
 		bindings.put("console", new Console());
 
+		
+		// List for tracking updated items
+		final List<UpdateCompletion> completedUpdates = new ArrayList<>();
+		
+		// The function that is called back when completed download of all items
+		final Function<Object[], Object> updateVisibleAreaComplete = (params) -> {
+			
+			System.out.println("## updateVisibleAreaComplete");
+
+			final int startIndexDouble = (Integer)params[0];
+			final int countDouble = (Integer)params[1];
+
+			final UpdateCompletion update = new UpdateCompletion(startIndexDouble, countDouble, (Object[])params[2]);
+
+			completedUpdates.add(update);
+
+			return null;
+		};
+		
+		final Object updateVisibleAreaCompleteCallback = registerJSFunctionCallback(updateVisibleAreaComplete);
+		
 		// Evaluate any vars
 		final JSRuntime jsRuntime = jsScript.eval(bindings);
 
-		/*
-		final JSScript s2 = compileJS("function xyz() { };");
-		s2.run().invokeFunction("xyz");
-		*/
-		
-		
+
+		// Create cache loader
 		final Object galleryCacheItems = jsRuntime.invokeFunction("createGalleryCacheItems");
 		
-
 		// No download requests until item downloaded
 		assertThat(downloadRequests.size()).isEqualTo(0);
 
-		
 		final int debugIndentLevel = 0;
 		final int firstVisibleIndex = 0;
 		final int visibleCount = 4;
@@ -106,13 +121,38 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 				debugIndentLevel,
 				firstVisibleIndex,
 				visibleCount,
-				totalNumberOfItems);
+				totalNumberOfItems,
+				updateVisibleAreaCompleteCallback);
 
+		
 		// Should now have one download request
 		assertThat(downloadRequests.size()).isEqualTo(1);
-		assertThat(downloadRequests.get(0).startIndex).isEqualTo(0);
-		assertThat(downloadRequests.get(0).count).isEqualTo(4);
+
+		final DownloadInvocation downloadRequest = downloadRequests.get(0);
+		assertThat(downloadRequest.startIndex).isEqualTo(0);
+		assertThat(downloadRequest.count).isEqualTo(4);
 		
+
+		assertThat(completedUpdates.size()).isEqualTo(0);
+		// Trigger downloaded (it. response from Ajax download)
+		downloadRequest.onDownloaded();
+		
+		// This ought to now have triggered complete display to be downloade
+		assertThat(completedUpdates.size()).isEqualTo(1);
+		
+		final UpdateCompletion completedUpdate = completedUpdates.get(0);
+		
+		assertThat(completedUpdate.startIndex).isEqualTo(0);
+		assertThat(completedUpdate.visibleCount).isEqualTo(4);
+		assertThat(completedUpdate.data.length).isEqualTo(4);
+		assertThat(completedUpdate.data[0]).isEqualTo(dataString(0, 4, 0));
+		assertThat(completedUpdate.data[1]).isEqualTo(dataString(0, 4, 1));
+		assertThat(completedUpdate.data[2]).isEqualTo(dataString(0, 4, 2));
+		assertThat(completedUpdate.data[3]).isEqualTo(dataString(0, 4, 3));
+	}
+
+	private static final String dataString(int startIndex, int count, int arrayIndex) {
+		 return "Downloaded-item at index" + (startIndex + arrayIndex) + " / " + arrayIndex + " out of " + count;
 	}
 	
 	private static class DownloadInvocation {
@@ -132,10 +172,22 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 			final String [] result = new String[count];
 			
 			for (int i = 0; i < result.length; ++ i) {
-				result[i] = String.valueOf("Downloaded-item at index" + (startIndex + i) + " / " + i + " out of " + count);
+				result[i] = dataString(startIndex, count, i);
 			}
 			
-			callback.call(result);
+			callback.callWithArray(result);
+		}
+	}
+	
+	private static class UpdateCompletion {
+		private final int startIndex;
+		private final int visibleCount;
+		private final Object [] data; // Data that has been downloaded
+		
+		UpdateCompletion(int startIndex, int visibleCount, Object[] data) {
+			this.startIndex = startIndex;
+			this.visibleCount = visibleCount;
+			this.data = data;
 		}
 	}
 	

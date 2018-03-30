@@ -78,6 +78,15 @@ public class BaseJSTest extends TestCase {
 						if (objectMirror.isFunction()) {
 							dst = new JSFunction(objectMirror);
 						}
+						else if (objectMirror.isArray()) {
+							final Object [] javaArray = new Object[objectMirror.size()];
+							
+							for (int arrayIndex = 0; arrayIndex < objectMirror.size(); ++ arrayIndex) {
+								javaArray[arrayIndex] = objectMirror.getSlot(arrayIndex);
+							}
+							
+							dst = javaArray;
+						}
 						else {
 							dst = arg;
 						}
@@ -168,8 +177,6 @@ public class BaseJSTest extends TestCase {
 			final Object result;
 			
 			final JSObject jsObj = (JSObject)obj;
-
-			System.out.println("## obj: " + obj + "/" + jsObj.keySet());
 
 			if (true) {
 				final JSObject m = (JSObject)jsObj.getMember(method);	
@@ -315,10 +322,13 @@ public class BaseJSTest extends TestCase {
 			this.delegate = delegate;
 		}
 
-
-
 		Object call(Object ... params) {
 			return delegate.call(null, params);
+		}
+
+		// In case calling with a param that is in fact an array
+		Object callWithArray(Object [] params) {
+			return delegate.call(null, (Object)params);
 		}
 	}
 }
