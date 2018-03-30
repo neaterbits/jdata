@@ -362,7 +362,9 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 	
 	var indexIntoCacheArray = firstVisibleIndex - layout.firstCachedIndex;
 	
-	this._downloadItems(level + 1, indexIntoCacheArray, firstVisibleIndex, visibleCount, true, function (index, count, data) {
+	this.log(level, 'Scheduling download with sequence no ' + updateSequenceNoAtStartOfDownload + ' for index ' + firstVisibleIndex + ', count=' + visibleCount)
+	
+	this._downloadItems(level + 1, updateSequenceNoAtStartOfDownload, indexIntoCacheArray, firstVisibleIndex, visibleCount, true, function (index, count, data) {
 		if (updateSequenceNoAtStartOfDownload < t.updateSequenceNo) {
 			// We can ignore this invocation since outdated
 			t.log(level, '!! items downloaded but sequence number does not match !! ' + updateSequenceNoAtStartOfDownload + '/' + t.updateSequenceNo);
@@ -390,6 +392,7 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 
 	this._downloadItems(
 			level + 1,
+			updateSequenceNoAtStartOfDownload,
 			0,
 			layout.firstCachedIndex,
 			layout.numBeforeVisible,
@@ -401,6 +404,7 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 	
 	this._downloadItems(
 			level + 1,
+			updateSequenceNoAtStartOfDownload,
 			layout.numBeforeVisible + visibleCount,
 			layout.lastCachedIndex - layout.numAfterVisible + 1,
 			layout.numAfterVisible,
@@ -462,7 +466,7 @@ GalleryCacheItems.prototype._computeNewCacheArrayLayout = function(level, firstV
  */
 
 
-GalleryCacheItems.prototype._downloadItems = function(level, cacheIndex, itemIndex, itemCount, fetchImmediately, onDownloaded) {
+GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIndex, itemIndex, itemCount, fetchImmediately, onDownloaded) {
 
 	this.enter(level, '_downloadItems', [
 		'cacheIndex', cacheIndex,
@@ -564,7 +568,7 @@ GalleryCacheItems.prototype._downloadItems = function(level, cacheIndex, itemInd
 				var subIndex = itemIndex + firstNotDownloaded;
 				var subCount = i - firstNotDownloaded;
 				
-				var downloadRequest = new GalleryCacheDownloadRequest(itemIndex, itemCount, subIndex, subCount, onDownloaded);
+				var downloadRequest = new GalleryCacheDownloadRequest(sequenceNo, itemIndex, itemCount, subIndex, subCount, onDownloaded);
 				
 				fetchFunction(downloadRequest);
 			}
@@ -584,7 +588,7 @@ GalleryCacheItems.prototype._downloadItems = function(level, cacheIndex, itemInd
 
 //		console.log('### download rest (' + subCount +') from ' + firstNotDownloaded + '/' + itemIndex);
 
-		var downloadRequest = new GalleryCacheDownloadRequest(itemIndex, itemCount, subIndex, subCount, onDownloaded);
+		var downloadRequest = new GalleryCacheDownloadRequest(sequenceNo, itemIndex, itemCount, subIndex, subCount, onDownloaded);
 
 		fetchFunction(downloadRequest);
 	}
@@ -617,11 +621,11 @@ GalleryCacheItems.prototype._startModelDownloadAndRemoveFromDownloadQueueWhenDon
 		'downloadRequest', JSON.stringify(downloadRequest)
 	]);
 	
-	if (this.downloadQueue.includes(downloadRequest)) {
+	if (arrayIncludes(this.downloadQueue, downloadRequest)) {
 		throw "Scheduled download request that is still in download queue";
 	}
 	
-	if (this.ongoingDownloads.includes(downloadRequest)) {
+	if (arrayIncludes(this.ongoingDownloads, downloadRequest)) {
 		throw "Already scheduled download request " + JSON.stringify(downloadRequest) + ": " + JSON.stringify(this.ongoingDownloads); 
 	}
 
@@ -711,6 +715,10 @@ GalleryCacheItems.prototype._processDownloadResponse = function(level, downloadR
 			totalDownloadedArray[i] = cached.data;
 		}
 	}
+	
+	// track all outstanding request, when total is downloaded for some, must re-check completed downloads and add the newest one
+	// remove all others, eg just sort by sequence no
+	this.log(level, '_processDownloadResponse', '!! All downloaded for ' + downloadRequest + ' : ' + allDownloaded);
 	
 	if (allDownloaded) {
 		// no null-entries in initially downloaded range, run callback on all data
@@ -827,7 +835,8 @@ GalleryCacheItems.prototype._scheduleFromDownloadQueue = function(level) {
  *  - onDownloaded - callback for this particular chunk, will be called with this request as first parameter and data (an array of subCount elements)
  */
 
-function GalleryCacheDownloadRequest(totalIndex, totalCount, subIndex, subCount, onDownloaded) {
+function GalleryCacheDownloadRequest(sequenceNo, totalIndex, totalCount, subIndex, subCount, onDownloaded) {
+	this.sequenceNo = sequenceNo;
 	this.totalIndex = totalIndex;
 	this.totalCount = totalCount;
 	this.subIndex = subIndex; 
@@ -866,4 +875,8 @@ function printArray(a) {
 	}
 	
 	return s;
+}
+
+function arrayIncludes(array, element) {
+	return array.indexOf(element) >= 0;
 }
