@@ -40,6 +40,7 @@ function GalleryCacheItems(cachedBeforeAndAfter, modelDownloadItems) {
 	this.curVisibleCount = 0;
 
 	this.updateSequenceNo = 0;
+	this.updateRequests = []; // Incoming in-progress update requests
 
 	// Queue of downloads to be scheduled
 	this.downloadQueue = [];
@@ -274,9 +275,9 @@ GalleryCacheItems.prototype._copyOverAnyOverlapping = function(level, layout, fi
 
 		var numOverlapping = overlapLastIndex - overlapFirstIndex + 1;
 		
+		// First cache array index of overlapping
 		this.log(level, 'Found number of overlapping ' + numOverlapping + ' from ' + overlapFirstIndex + ' to ' + overlapLastIndex);
 		
-		// First cache array index of overlapping
 		var dstFirstOverlapping = overlapFirstIndex - layout.firstCachedIndex;
 		
 		// null value for all up to overlap
@@ -357,7 +358,12 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 	
 	++ this.updateSequenceNo;
 	
+	
 	var updateSequenceNoAtStartOfDownload = this.updateSequenceNo;
+	var updateRequest = new GalleryCacheUpdateRequest(updateSequenceNoAtStartOfDownload, firstVisibleIndex, visibleCount);
+
+	this.updateRequests.push(updateRequest);
+
 	var t = this;
 	
 	var indexIntoCacheArray = firstVisibleIndex - layout.firstCachedIndex;
@@ -365,6 +371,53 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 	this.log(level, 'Scheduling download with sequence no ' + updateSequenceNoAtStartOfDownload + ' for index ' + firstVisibleIndex + ', count=' + visibleCount)
 	
 	this._downloadItems(level + 1, updateSequenceNoAtStartOfDownload, indexIntoCacheArray, firstVisibleIndex, visibleCount, true, function (index, count, data) {
+		
+		// If this can trigger the last entry in the update-request queue, then run it. Otherwise wait.
+		if (t.updateRequests.length == 0) {
+			throw "Empty update request queue";
+		}
+		
+		var newestUpdateRequest = t.updateRequests[t.updateRequests.length - 1];
+		
+		// Collect data in case we can perform callback
+		var completeData = new Array(newestUpdateRequest.count);
+		
+		var allDownloaded = true;
+
+		var firstCachedIndex = t._getFirstIndexInCache(level + 1, t.curVisibleIndex);
+		
+		for (var i = 0; i < newestUpdateRequest.count; ++ i) {
+			var cacheIndex = newestUpdateRequest.firstIndex - firstCachedIndex + i;
+			
+			var cached = t.cachedData[cacheIndex].data;
+			
+			if (cached == null) {
+				allDownloaded = false;
+				break;
+			}
+			completeData[i] = cached;
+		}
+		
+		
+		if (allDownloaded) {
+			// We have all items for the newest request, call back
+			onAllVisibleDownloaded(
+					newestUpdateRequest.firstIndex,
+					newestUpdateRequest.count,
+					completeData);
+			
+			// We have responded to the newest request, just clear queue
+			t.updateRequests = [];
+		}
+		
+
+		/* This did not work if download responses switched order on network,
+		 * ie. 
+		 *  1) trigger download 0-3
+		 *  2) trigger download 2-5 which means a REST call for 4-5 since 0-3 already sent
+		 *  3) response for 4-5 but cannot call back since does not have 2-3 (from first dowload) yet
+		 *  4) response for 0-4 but does not trigger due to test below
+		 *
 		if (updateSequenceNoAtStartOfDownload < t.updateSequenceNo) {
 			// We can ignore this invocation since outdated
 			t.log(level, '!! items downloaded but sequence number does not match !! ' + updateSequenceNoAtStartOfDownload + '/' + t.updateSequenceNo);
@@ -388,6 +441,7 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 			// call back to user so can update screen elements
 			onAllVisibleDownloaded(index, count, data);
 		}
+		*/
 	});
 
 	this._downloadItems(
@@ -633,6 +687,7 @@ GalleryCacheItems.prototype._startModelDownloadAndRemoveFromDownloadQueueWhenDon
 	
 	var t = this;
 	
+	// Call user-supplied model download function
 	this.modelDownloadItems(downloadRequest.subIndex, downloadRequest.subCount, function(data) {
 
 		var level = 0;
@@ -842,6 +897,24 @@ function GalleryCacheDownloadRequest(sequenceNo, totalIndex, totalCount, subInde
 	this.subIndex = subIndex; 
 	this.subCount = subCount;
 	this.onTotalDownloaded = onDownloaded;
+}
+
+/**
+ * An update request, as called to updateVisibleArea().
+ * 
+ * Since we might schedule multiple scattered download request via the model for one update request
+ * and responses might occur out of order even as new calls are made to updateVisibleArea(), we must track all
+ * these and only call back o the latest complete updateVisibleArea(), no point in calling back
+ * to earlier calls which area is already scrolled out of display.
+ * 
+ * We maintain sequenceno as well to keep track of requests
+ * 
+ */
+
+function GalleryCacheUpdateRequest(sequenceNo, firstIndex, count) {
+	this.sequenceNo = sequenceNo;
+	this.firstIndex = firstIndex;
+	this.count = count;
 }
 
 /**
