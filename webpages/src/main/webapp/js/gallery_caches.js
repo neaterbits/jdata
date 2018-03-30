@@ -339,9 +339,9 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 
 		rowDiv.setAttribute('style',
 				//'position : relative; ' +
-				'top :  ' + y + '; ' +
-				'width : ' + this.width + '; ' +
-				'height : ' + rowHeight + '; ' +
+				'top :  ' + y + 'px; ' +
+				'width : ' + this.width + 'px; ' +
+				'height : ' + rowHeight + 'px; ' +
 				'border : 1px solid black;' +
 				'background-color : yellow; ');
 
@@ -528,11 +528,11 @@ GalleryCacheBase.prototype._applyItemStyles = function(itemElement, rowHeight, i
 	
 	if (itemHeight != null) {
 		styling += 'top : ' + (rowHeight - itemHeight) / 2 + 'px; ';
-		styling += 'height : ' + itemHeight + '; ';
+		styling += 'height : ' + itemHeight + 'px; ';
 	}
 	
 	if (itemWidth != null) {
-		'width : ' + itemWidth + '; ';
+		'width : ' + itemWidth + 'px; ';
 	}
 	
 	if (!visible) {
