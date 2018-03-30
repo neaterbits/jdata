@@ -294,13 +294,13 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 	
 	var y = startPos;
 	
-	var numRows = ((this._getTotalNumberOfItems() - 1) / numColumns) + 1;
+	var numRows = Math.floor((this._getTotalNumberOfItems() - 1) / numColumns) + 1;
 
 	if (startIndex % numColumns != 0) {
 		throw "Start index not at start of column: " + startIndex + "/" + numColumns;
 	}
 
-	var rowNo = startIndex / numColumns;
+	var rowNo = Math.floor(startIndex / numColumns);
 
 	var rowWidth = this._getRowWidth();
 
@@ -524,6 +524,7 @@ GalleryCacheBase.prototype._applyItemStyles = function(itemElement, rowHeight, i
 		'float : left; ' +
 		'margin-left : ' + spacing + 'px; ' +
 		'background-color : white; ';
+	
 	
 	if (itemHeight != null) {
 		styling += 'top : ' + (rowHeight - itemHeight) / 2 + 'px; ';
