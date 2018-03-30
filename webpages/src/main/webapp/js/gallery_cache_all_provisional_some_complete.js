@@ -366,7 +366,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 			var curDim  = updatedRowWidthHeights[j];
 	
 			if (prevDim.width !== curDim.width || prevDim.height !== curDim.height) {
-				throw "Gallery item dimensions changed between provisional and updated: prev=" + JSON.stringify(prevDim) + ", cur=" + JSON.stringify(curDim);
+				throw "Gallery item dimensions changed between provisional and updated for " + (i + j)
+					+ " : prev=" + JSON.stringify(prevDim) + ", cur=" + JSON.stringify(curDim);
 			}
 		}
 	}
