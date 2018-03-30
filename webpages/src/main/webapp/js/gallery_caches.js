@@ -333,7 +333,7 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 					rowDiv.append(element);
 				});
 		
-		this.log(level, 'Adding row no ' + rowNo + ', first elem ' + i + ' at y pos ' + y + ' of height ' + rowHeight);
+		this.log(level, 'Added row no ' + rowNo + ', first elem ' + i + ' at y pos ' + y + ' of height ' + rowHeight);
 		
 		++ rowsAdded;
 
@@ -394,14 +394,6 @@ GalleryCacheBase.prototype._getRowHeight = function(rowMaxHeight, rowNo, numRows
 	var rowHeigth;
 
 	rowHeight = rowMaxHeight + this.rowSpacing;
-	
-	// TODO is this correct?
-	if (rowNo == 0) {
-		rowHeight += this.topSpacing;
-	}
-	else if (rowNo == numRows - 1) {
-		rowHeight += this.bottomSpacing;
-	}
 
 	return rowHeight;
 }
@@ -414,6 +406,14 @@ GalleryCacheBase.prototype._getRowHeight = function(rowMaxHeight, rowNo, numRows
  */
 GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstInRow, itemsThisRow, numRowsTotal, rowWidth, makeElement, addElement) {
 
+	/*
+	this.enter(level, "_addRowItems", [
+		'indexOfFirstInRow', indexOfFirstInRow,
+		'itemsThisRow', itemsThisRow,
+		'numRowsTotal', numRowsTotal,
+		'rowWidth', rowWidth])
+	*/
+	
 	var itemWidth = null;
 	var itemHeight = null;
 	
@@ -469,7 +469,9 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 		
 		x += itemWidth;
 	}
-	
+
+	this.log(level, 'mustComputeDimensions: ' + mustComputeDimensions + ', rowHeight: ' + rowHeight);
+
 	if (mustComputeDimensions) {
 		
 		var totalRowItemsWidth = 0;
@@ -489,7 +491,9 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 		}
 		
 		rowHeight = this._getRowHeight(largestItemHeight, index, numRowsTotal);
-		
+
+		// console.log('## row height from largestItemHeight=' + largestItemHeight + ', index=' + index + ', numRowsTotal=' + numRowsTotal + ' : '  + rowHeight);
+
 		spacing = this._computeColumnSpacing(rowWidth, totalRowItemsWidth, itemsThisRow);
 
 		if (itemHeight == null) {
@@ -510,6 +514,8 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 		
 		visible = true;
 	}
+	
+	// this.exit(level, '_addRowItems', rowHeight);
 
 	return rowHeight;
 }
