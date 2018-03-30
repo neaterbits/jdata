@@ -1,7 +1,9 @@
 package com.test.cv.common;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -48,5 +50,15 @@ public class IOUtil {
 		copyStreams(inputStream, baos);
 
 		return baos.toByteArray();
+	}
+	
+	public static String readFileToString(File file) throws IOException {
+		final byte [] data;
+		
+		try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
+			data = IOUtil.readAll(inputStream);
+		}
+		
+		return new String(data);
 	}
 }

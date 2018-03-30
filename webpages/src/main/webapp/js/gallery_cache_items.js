@@ -40,6 +40,7 @@ function GalleryCacheItems(cachedBeforeAndAfter, modelDownloadItems) {
 	this.curVisibleCount = 0;
 
 	this.updateSequenceNo = 0;
+	this.updateRequests = []; // Incoming in-progress update requests
 
 	// Queue of downloads to be scheduled
 	this.downloadQueue = [];
@@ -150,12 +151,12 @@ GalleryCacheItems.prototype.updateVisibleArea = function(level, firstVisibleInde
 			throw "TODO: handle total number";
 		}
 
-		this.cachedData = this._allocateCacheArray(level, firstVisibleIndex, visibleCount, totalNumberOfItems);
+		this.cachedData = this._allocateCacheArray(level + 1, firstVisibleIndex, visibleCount, totalNumberOfItems);
 	}
 	
 	var lastVisibleIndex = firstVisibleIndex + visibleCount - 1;
 
-	var layout = this._computeNewCacheArrayLayout(level + 1, firstVisibleIndex, visibleCount);
+	var layout = this._computeNewCacheArrayLayout(level + 1, firstVisibleIndex, visibleCount, totalNumberOfItems);
 
 	// Check for overlap can only be overlap if we had any items at all in the galery
 	if (this.totalNumberOfItems > 0) {
@@ -214,7 +215,7 @@ GalleryCacheItems.prototype._allocateCacheArray = function(level, firstVisibleIn
 		'totalNumberOfItems', totalNumberOfItems
 	]);
 	
-	var nextFirstCachedIndex = this._getFirstIndexInCache(level, firstVisibleIndex);
+	var nextFirstCachedIndex = this._getFirstIndexInCache(level + 1, firstVisibleIndex);
 	var nextLastCachedIndex = this._getLastIndexInCache(level + 1, firstVisibleIndex, visibleCount, totalNumberOfItems);
 	
 	var arraySize = nextLastCachedIndex - nextFirstCachedIndex + 1;
@@ -274,9 +275,9 @@ GalleryCacheItems.prototype._copyOverAnyOverlapping = function(level, layout, fi
 
 		var numOverlapping = overlapLastIndex - overlapFirstIndex + 1;
 		
+		// First cache array index of overlapping
 		this.log(level, 'Found number of overlapping ' + numOverlapping + ' from ' + overlapFirstIndex + ' to ' + overlapLastIndex);
 		
-		// First cache array index of overlapping
 		var dstFirstOverlapping = overlapFirstIndex - layout.firstCachedIndex;
 		
 		// null value for all up to overlap
@@ -357,12 +358,66 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 	
 	++ this.updateSequenceNo;
 	
+	
 	var updateSequenceNoAtStartOfDownload = this.updateSequenceNo;
+	var updateRequest = new GalleryCacheUpdateRequest(updateSequenceNoAtStartOfDownload, firstVisibleIndex, visibleCount);
+
+	this.updateRequests.push(updateRequest);
+
 	var t = this;
 	
 	var indexIntoCacheArray = firstVisibleIndex - layout.firstCachedIndex;
 	
-	this._downloadItems(level + 1, indexIntoCacheArray, firstVisibleIndex, visibleCount, true, function (index, count, data) {
+	this.log(level, 'Scheduling download with sequence no ' + updateSequenceNoAtStartOfDownload + ' for index ' + firstVisibleIndex + ', count=' + visibleCount)
+	
+	this._downloadItems(level + 1, updateSequenceNoAtStartOfDownload, indexIntoCacheArray, firstVisibleIndex, visibleCount, true, function (index, count, data) {
+		
+		// If this can trigger the last entry in the update-request queue, then run it. Otherwise wait.
+		if (t.updateRequests.length == 0) {
+			throw "Empty update request queue";
+		}
+		
+		var newestUpdateRequest = t.updateRequests[t.updateRequests.length - 1];
+		
+		// Collect data in case we can perform callback
+		var completeData = new Array(newestUpdateRequest.count);
+		
+		var allDownloaded = true;
+
+		var firstCachedIndex = t._getFirstIndexInCache(level + 1, t.curVisibleIndex);
+		
+		for (var i = 0; i < newestUpdateRequest.count; ++ i) {
+			var cacheIndex = newestUpdateRequest.firstIndex - firstCachedIndex + i;
+			
+			var cached = t.cachedData[cacheIndex].data;
+			
+			if (cached == null) {
+				allDownloaded = false;
+				break;
+			}
+			completeData[i] = cached;
+		}
+		
+		
+		if (allDownloaded) {
+			// We have all items for the newest request, call back
+			onAllVisibleDownloaded(
+					newestUpdateRequest.firstIndex,
+					newestUpdateRequest.count,
+					completeData);
+			
+			// We have responded to the newest request, just clear queue
+			t.updateRequests = [];
+		}
+		
+
+		/* This did not work if download responses switched order on network,
+		 * ie. 
+		 *  1) trigger download 0-3
+		 *  2) trigger download 2-5 which means a REST call for 4-5 since 0-3 already sent
+		 *  3) response for 4-5 but cannot call back since does not have 2-3 (from first dowload) yet
+		 *  4) response for 0-4 but does not trigger due to test below
+		 *
 		if (updateSequenceNoAtStartOfDownload < t.updateSequenceNo) {
 			// We can ignore this invocation since outdated
 			t.log(level, '!! items downloaded but sequence number does not match !! ' + updateSequenceNoAtStartOfDownload + '/' + t.updateSequenceNo);
@@ -386,10 +441,12 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 			// call back to user so can update screen elements
 			onAllVisibleDownloaded(index, count, data);
 		}
+		*/
 	});
 
 	this._downloadItems(
 			level + 1,
+			updateSequenceNoAtStartOfDownload,
 			0,
 			layout.firstCachedIndex,
 			layout.numBeforeVisible,
@@ -401,6 +458,7 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 	
 	this._downloadItems(
 			level + 1,
+			updateSequenceNoAtStartOfDownload,
 			layout.numBeforeVisible + visibleCount,
 			layout.lastCachedIndex - layout.numAfterVisible + 1,
 			layout.numAfterVisible,
@@ -422,38 +480,26 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 GalleryCacheItems.prototype._computeNewCacheArrayLayout = function(level, firstVisibleIndex, visibleCount, totalNumberOfItems) {
 	
 	this.enter(level, '_computeNewCacheArrayLayout', ['firstVisibleIndex', firstVisibleIndex, 'visibleCount', visibleCount]);
-
-	var firstCachedIndex = firstVisibleIndex - this.cachedBeforeAndAfter;
-	if (firstCachedIndex < 0) {
-		firstCachedIndex = 0;
-		numBeforeVisible = firstVisibleIndex;
-	}
-	else {
-		numBeforeVisible = this.cachedBeforeAndAfter;
-	}
-		
-	// Items after
-	var nextIndexAfter = firstVisibleIndex + visibleCount;
-	if (nextIndexAfter >= totalNumberOfItems) {
-		throw "After total number of items: nextIndexAfter=" + nextIndexAfter + ", totalNumberOfItems=" + totalNumberOfItems;
+	
+	var firstCachedIndex = this._getFirstIndexInCache(level + 1, firstVisibleIndex);
+	var lastIndexInCache = this._getLastIndexInCache(level + 1, firstVisibleIndex, visibleCount, totalNumberOfItems);
+	
+	var numBeforeVisible = firstVisibleIndex - firstCachedIndex;
+	var numAfterVisible = (lastIndexInCache - firstCachedIndex + 1) - visibleCount - numBeforeVisible;
+	
+	if (numBeforeVisible < 0) {
+		throw "numBeforeVisible < 0";
 	}
 	
-	var remaining = totalNumberOfItems - nextIndexAfter - 1;
-		
-	if (remaining < this.cachedBeforeAndAfter) {
-		// At the end of scrollview, can only download remaining
-		numAfterVisible = remaining;
-	}
-	else {
-		// Can download complete set of entries after
-		numAfterVisible = this.cachedBeforeAndAfter;
+	if (numAfterVisible < 0) {
+		throw "numAfterVisible < 0";
 	}
 	
 	var result = {
 		firstCachedIndex : firstCachedIndex,
 		numBeforeVisible : numBeforeVisible,
 		
-		lastCachedIndex : firstCachedIndex + numBeforeVisible + visibleCount + numAfterVisible - 1,
+		lastCachedIndex : lastIndexInCache,
 		numAfterVisible : numAfterVisible
 	};
 
@@ -474,7 +520,7 @@ GalleryCacheItems.prototype._computeNewCacheArrayLayout = function(level, firstV
  */
 
 
-GalleryCacheItems.prototype._downloadItems = function(level, cacheIndex, itemIndex, itemCount, fetchImmediately, onDownloaded) {
+GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIndex, itemIndex, itemCount, fetchImmediately, onDownloaded) {
 
 	this.enter(level, '_downloadItems', [
 		'cacheIndex', cacheIndex,
@@ -485,6 +531,10 @@ GalleryCacheItems.prototype._downloadItems = function(level, cacheIndex, itemInd
 	
 	if (typeof this.cachedData === 'undefined') {
 		throw "Cached data is undefined";
+	}
+	
+	if (cacheIndex + itemCount > this.cachedData.length) {
+		throw "Cached index and itemcount out of bounds for cache length " + this.cachedData.length;
 	}
 	
 	var fetchFunction;
@@ -531,7 +581,7 @@ GalleryCacheItems.prototype._downloadItems = function(level, cacheIndex, itemInd
 		var downloadedOrDownloading;
 	
 		if (typeof cached === 'undefined') {
-			throw "Undefined item at index " + (cacheIndex + i);
+			throw "Undefined cached item at index " + (cacheIndex + i) + " out of " + this.cachedData.length + ": " + printArray(this.cachedData);
 		}
 	
 		if (cached == null) {
@@ -572,7 +622,7 @@ GalleryCacheItems.prototype._downloadItems = function(level, cacheIndex, itemInd
 				var subIndex = itemIndex + firstNotDownloaded;
 				var subCount = i - firstNotDownloaded;
 				
-				var downloadRequest = new GalleryCacheDownloadRequest(itemIndex, itemCount, subIndex, subCount, onDownloaded);
+				var downloadRequest = new GalleryCacheDownloadRequest(sequenceNo, itemIndex, itemCount, subIndex, subCount, onDownloaded);
 				
 				fetchFunction(downloadRequest);
 			}
@@ -592,7 +642,7 @@ GalleryCacheItems.prototype._downloadItems = function(level, cacheIndex, itemInd
 
 //		console.log('### download rest (' + subCount +') from ' + firstNotDownloaded + '/' + itemIndex);
 
-		var downloadRequest = new GalleryCacheDownloadRequest(itemIndex, itemCount, subIndex, subCount, onDownloaded);
+		var downloadRequest = new GalleryCacheDownloadRequest(sequenceNo, itemIndex, itemCount, subIndex, subCount, onDownloaded);
 
 		fetchFunction(downloadRequest);
 	}
@@ -625,11 +675,11 @@ GalleryCacheItems.prototype._startModelDownloadAndRemoveFromDownloadQueueWhenDon
 		'downloadRequest', JSON.stringify(downloadRequest)
 	]);
 	
-	if (this.downloadQueue.includes(downloadRequest)) {
+	if (arrayIncludes(this.downloadQueue, downloadRequest)) {
 		throw "Scheduled download request that is still in download queue";
 	}
 	
-	if (this.ongoingDownloads.includes(downloadRequest)) {
+	if (arrayIncludes(this.ongoingDownloads, downloadRequest)) {
 		throw "Already scheduled download request " + JSON.stringify(downloadRequest) + ": " + JSON.stringify(this.ongoingDownloads); 
 	}
 
@@ -637,6 +687,7 @@ GalleryCacheItems.prototype._startModelDownloadAndRemoveFromDownloadQueueWhenDon
 	
 	var t = this;
 	
+	// Call user-supplied model download function
 	this.modelDownloadItems(downloadRequest.subIndex, downloadRequest.subCount, function(data) {
 
 		var level = 0;
@@ -719,6 +770,10 @@ GalleryCacheItems.prototype._processDownloadResponse = function(level, downloadR
 			totalDownloadedArray[i] = cached.data;
 		}
 	}
+	
+	// track all outstanding request, when total is downloaded for some, must re-check completed downloads and add the newest one
+	// remove all others, eg just sort by sequence no
+	this.log(level, '_processDownloadResponse', '!! All downloaded for ' + downloadRequest + ' : ' + allDownloaded);
 	
 	if (allDownloaded) {
 		// no null-entries in initially downloaded range, run callback on all data
@@ -835,12 +890,31 @@ GalleryCacheItems.prototype._scheduleFromDownloadQueue = function(level) {
  *  - onDownloaded - callback for this particular chunk, will be called with this request as first parameter and data (an array of subCount elements)
  */
 
-function GalleryCacheDownloadRequest(totalIndex, totalCount, subIndex, subCount, onDownloaded) {
+function GalleryCacheDownloadRequest(sequenceNo, totalIndex, totalCount, subIndex, subCount, onDownloaded) {
+	this.sequenceNo = sequenceNo;
 	this.totalIndex = totalIndex;
 	this.totalCount = totalCount;
 	this.subIndex = subIndex; 
 	this.subCount = subCount;
 	this.onTotalDownloaded = onDownloaded;
+}
+
+/**
+ * An update request, as called to updateVisibleArea().
+ * 
+ * Since we might schedule multiple scattered download request via the model for one update request
+ * and responses might occur out of order even as new calls are made to updateVisibleArea(), we must track all
+ * these and only call back o the latest complete updateVisibleArea(), no point in calling back
+ * to earlier calls which area is already scrolled out of display.
+ * 
+ * We maintain sequenceno as well to keep track of requests
+ * 
+ */
+
+function GalleryCacheUpdateRequest(sequenceNo, firstIndex, count) {
+	this.sequenceNo = sequenceNo;
+	this.firstIndex = firstIndex;
+	this.count = count;
 }
 
 /**
@@ -866,12 +940,16 @@ function printArray(a) {
 		
 		for (var i = 0; i < a.length; ++ i) {
 			if (i > 0) {
-				s+= ',';
-				
-				s += '' + a[i]; 
+				s += ',';
 			}
+
+			s += '' + a[i]; 
 		}
 	}
 	
 	return s;
+}
+
+function arrayIncludes(array, element) {
+	return array.indexOf(element) >= 0;
 }

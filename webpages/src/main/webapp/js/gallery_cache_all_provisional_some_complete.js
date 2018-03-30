@@ -234,10 +234,20 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 		// Start-index to add is the one immediately after last-index
 		lastRendered = this._addProvisionalDivs(level + 1, prevDisplayed.lastVisibleIndex + 1, prevDisplayed.lastVisibleY, this.numColumns, heightToAdd);
 
-		firstRenderedY = posAndIndex.rowYPos;
-		lastRenderedY = lastRendered.yPos;
-		firstVisibleIndex = posAndIndex.rowItemIndex;
-		lastVisibleIndex = lastRendered.index;
+		if (lastRendered == null) {
+			// Nothing was rendered, ie. did not scroll any new items into display
+			// so just return old values
+			firstRenderedY 		= prevDisplayed.firstRenderedY;
+			lastRenderedY 		= prevDisplayed.lastRenderedY;
+			firstVisibleIndex 	= prevDisplayed.firstVisibleIndex;
+			lastVisibleIndex 	= prevDisplayed.lastVisibleIndex;
+		}
+		else {
+			firstRenderedY = posAndIndex.rowYPos;
+			lastRenderedY = lastRendered.yPos;
+			firstVisibleIndex = posAndIndex.rowItemIndex;
+			lastVisibleIndex = lastRendered.index;
+		}
 	}
 	else {
 		this.log(level, 'Did not match any test');
@@ -258,6 +268,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 };
 
 
+
 /**
  * Download and show complete items in a certain model range, provisional items
  * for this range must have been downloaded already.
@@ -275,7 +286,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._getRowItemDivHeights = functio
 	for (var j = 0; j < itemsThisRow; ++ j) {
 		var itemElement = rowDiv.childNodes[j];
 
-		rowWidthHeights.push({ width : itemElement.clientWidth})
+		rowWidthHeights.push({ width : itemElement.clientWidth, height : itemElement.clientHeight })
 	}
 	
 	return rowWidthHeights;
@@ -366,7 +377,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 			var curDim  = updatedRowWidthHeights[j];
 	
 			if (prevDim.width !== curDim.width || prevDim.height !== curDim.height) {
-				throw "Gallery item dimensions changed between provisional and updated";
+				throw "Gallery item dimensions changed between provisional and updated for " + (i + j)
+					+ " : prev=" + JSON.stringify(prevDim) + ", cur=" + JSON.stringify(curDim);
 			}
 		}
 	}

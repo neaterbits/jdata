@@ -120,7 +120,7 @@ public class ItemService extends BaseService {
 		
 		getItemDAO(request).addPhotoAndThumbnailForItem(
 				userId, itemId, ItemTypes.getTypeByName(itemType).getType(),
-				thumbnailInputStream, thumbnailMimeType, thumbWidth, thumbHeight, thumbDataLength,
+				thumbnailInputStream, thumbnailMimeType, thumbDataLength, thumbWidth, thumbHeight,
 				photoInputStream1, photoMimeType, imageData.length);
 	}
 	
