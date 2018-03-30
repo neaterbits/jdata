@@ -234,10 +234,20 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 		// Start-index to add is the one immediately after last-index
 		lastRendered = this._addProvisionalDivs(level + 1, prevDisplayed.lastVisibleIndex + 1, prevDisplayed.lastVisibleY, this.numColumns, heightToAdd);
 
-		firstRenderedY = posAndIndex.rowYPos;
-		lastRenderedY = lastRendered.yPos;
-		firstVisibleIndex = posAndIndex.rowItemIndex;
-		lastVisibleIndex = lastRendered.index;
+		if (lastRendered == null) {
+			// Nothing was rendered, ie. did not scroll any new items into display
+			// so just return old values
+			firstRenderedY 		= prevDisplayed.firstRenderedY;
+			lastRenderedY 		= prevDisplayed.lastRenderedY;
+			firstVisibleIndex 	= prevDisplayed.firstVisibleIndex;
+			lastVisibleIndex 	= prevDisplayed.lastVisibleIndex;
+		}
+		else {
+			firstRenderedY = posAndIndex.rowYPos;
+			lastRenderedY = lastRendered.yPos;
+			firstVisibleIndex = posAndIndex.rowItemIndex;
+			lastVisibleIndex = lastRendered.index;
+		}
 	}
 	else {
 		this.log(level, 'Did not match any test');
@@ -256,6 +266,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 	
 	return displayed;
 };
+
 
 
 /**
