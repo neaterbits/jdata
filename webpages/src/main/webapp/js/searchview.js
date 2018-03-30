@@ -245,6 +245,11 @@ function SearchView(
 	this._getGalleryProvisionalData = function(index, count, onsuccess) {
 		// Gallery was updated as a result of a query result and this.curResponse was updated,
 		// so just pass that back right away
+		
+		if (index !== 0 || count !== this.curResponse.items.length) {
+			throw "Expected to get all data";
+		}
+
 		onsuccess(this.curResponse.items);
 	}
 	
