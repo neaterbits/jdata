@@ -360,7 +360,7 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 	
 	
 	var updateSequenceNoAtStartOfDownload = this.updateSequenceNo;
-	var updateRequest = new GalleryCacheUpdateRequest(updateSequenceNoAtStartOfDownload, firstVisibleIndex, visibleCount);
+	var updateRequest = new GalleryCacheUpdateRequest(updateSequenceNoAtStartOfDownload, firstVisibleIndex, visibleCount, onAllVisibleDownloaded);
 
 	this.updateRequests.push(updateRequest);
 
@@ -371,6 +371,7 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 	this.log(level, 'Scheduling download with sequence no ' + updateSequenceNoAtStartOfDownload + ' for index ' + firstVisibleIndex + ', count=' + visibleCount)
 	
 	this._downloadItems(level + 1, updateSequenceNoAtStartOfDownload, indexIntoCacheArray, firstVisibleIndex, visibleCount, true, function (index, count, data) {
+		
 		
 		// If this can trigger the last entry in the update-request queue, then run it. Otherwise wait.
 		if (t.updateRequests.length == 0) {
@@ -389,19 +390,20 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 		for (var i = 0; i < newestUpdateRequest.count; ++ i) {
 			var cacheIndex = newestUpdateRequest.firstIndex - firstCachedIndex + i;
 			
-			var cached = t.cachedData[cacheIndex].data;
+			var cached = t.cachedData[cacheIndex];
 			
 			if (cached == null) {
 				allDownloaded = false;
 				break;
 			}
-			completeData[i] = cached;
+			completeData[i] = cached.data;
 		}
-		
-		
+
 		if (allDownloaded) {
 			// We have all items for the newest request, call back
-			onAllVisibleDownloaded(
+			// NOTE! call back on the queued-callback since so that called get called back with the corresponding closure
+			// for anonymous-functions
+			newestUpdateRequest.onAllVisibleDownloaded(
 					newestUpdateRequest.firstIndex,
 					newestUpdateRequest.count,
 					completeData);
@@ -911,10 +913,11 @@ function GalleryCacheDownloadRequest(sequenceNo, totalIndex, totalCount, subInde
  * 
  */
 
-function GalleryCacheUpdateRequest(sequenceNo, firstIndex, count) {
+function GalleryCacheUpdateRequest(sequenceNo, firstIndex, count, onAllVisibleDownloaded) {
 	this.sequenceNo = sequenceNo;
 	this.firstIndex = firstIndex;
 	this.count = count;
+	this.onAllVisibleDownloaded = onAllVisibleDownloaded
 }
 
 /**

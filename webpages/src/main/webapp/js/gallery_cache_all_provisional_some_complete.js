@@ -151,7 +151,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 					throw "Index mismatch: requested=" + visibleElements.firstVisibleIndex + ", retrieved: " + index;
 				}
 				if (count !== visibleCount) {
-					throw "Count mismatch";
+					throw "Count mismatch: " + count + "/" + visibleCount;
 				}
 				if (downloadedData.length !== visibleCount) {
 					throw "Number of items mismatch count, expected " + visibleCount + ", got " + downloadedData.length;
