@@ -1,11 +1,15 @@
 package com.test.cv.index.lucene;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 
+import com.test.cv.common.IOUtil;
 import com.test.cv.index.IndexSearchCursor;
 import com.test.cv.index.ItemIndex;
 import com.test.cv.index.ItemIndexException;
@@ -15,17 +19,22 @@ import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.StringAttributeValue;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.items.ItemTypes;
+import com.test.cv.model.items.TypeInfo;
 import com.test.cv.model.items.sports.Snowboard;
+import com.test.cv.model.items.vehicular.Car;
+import com.test.cv.model.items.vehicular.Fuel;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.Criterium;
 import com.test.cv.search.criteria.DecimalCriterium;
 import com.test.cv.search.criteria.DecimalRange;
 import com.test.cv.search.criteria.DecimalRangesCriterium;
+import com.test.cv.search.criteria.EnumInCriterium;
 import com.test.cv.search.criteria.IntegerCriterium;
 import com.test.cv.search.criteria.IntegerRange;
 import com.test.cv.search.criteria.IntegerRangesCriterium;
 import com.test.cv.search.criteria.StringCriterium;
+import com.test.cv.search.criteria.StringInCriterium;
 
 import junit.framework.TestCase;
 
@@ -191,6 +200,53 @@ public class LuceneItemIndexTest extends TestCase {
 		}
 	}
 
+	
+	public void testAddAndSearchToFileIndex() throws Exception {
+		// Issue when adding multiple entries to a index on file
+		final File directory = IOUtil.makeTempFileAndDeleteOnExit("luceneindex");
+
+		final Car car1 = new Car();
+		car1.setIdString("itemId1");
+		car1.setMake("Honda");
+		car1.setFuel(Fuel.GAS);
+		
+		final Car car2 = new Car();
+		
+		car2.setIdString("itemId2");
+		car2.setMake("Toyota");
+		car2.setFuel(Fuel.GAS);
+		
+		final String userId = "theUser";
+
+		openIndexAndStoreAndCloseIndex(userId, car1, FSDirectory.open(directory.toPath()));
+		openIndexAndStoreAndCloseIndex(userId, car2, FSDirectory.open(directory.toPath()));
+		
+		try (LuceneItemIndex index = new LuceneItemIndex(directory.getAbsolutePath())) {
+			
+			// index.indexItemAttributes(userId, Car.class, ItemTypes.getTypeName(Car.class), ClassAttributes.getValues(car1));
+			// index.indexItemAttributes(userId, Car.class, ItemTypes.getTypeName(Car.class), ClassAttributes.getValues(car2));
+			
+			final TypeInfo carTypeInfo = ItemTypes.getTypeInfo(Car.class);
+			
+			// Search by make should return 2 entries
+			final Criterium criterium = new EnumInCriterium<>(carTypeInfo.getAttributes().getByName("fuel"), new Fuel [] { Fuel.GAS }, false);
+			final IndexSearchCursor cursor = index.search(null, Arrays.asList(criterium), null);
+
+			assertThat(cursor.getTotalMatchCount()).isEqualTo(2);
+		}
+	}
+
+	private void openIndexAndStoreAndCloseIndex(String userId, Car car, Directory directory) throws IOException, Exception {
+		try (LuceneItemIndex index = new LuceneItemIndex(directory)) {
+			final Car car1 = new Car();
+			car1.setIdString("itemId1");
+			car1.setMake("Honda");
+			car1.setFuel(Fuel.GAS);
+
+			index.indexItemAttributes(userId, Car.class, ItemTypes.getTypeName(Car.class), ClassAttributes.getValues(car1));
+		}
+	}
+	
 	private static IntegerRangesCriterium makeIntegerRangeCriterium(ItemAttribute attribute, Integer lowerValue, boolean includeLower, Integer upperValue, boolean includeUpper) {
 		final IntegerRange integerRange = new IntegerRange(lowerValue, includeLower, upperValue, includeUpper);
 		

@@ -7,8 +7,28 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 
 public class IOUtil {
+	
+	public static File makeTempFileAndDeleteOnExit(String baseName) {
+		final File baseDir;
+		
+		try {
+			baseDir = Files.createTempDirectory(baseName).toFile();
+		} catch (IOException ex) {
+			throw new IllegalStateException("Failed to create test dir");
+		}
+
+		baseDir.mkdirs();
+
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			IOUtil.deleteDirectoryRecursively(baseDir);
+		}));
+	
+		return baseDir;
+	}
+	
 	public static void deleteDirectoryRecursively(File dir) {
 		
 		if (!dir.isDirectory()) {
