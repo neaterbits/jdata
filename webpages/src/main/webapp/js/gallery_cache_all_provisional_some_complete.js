@@ -25,7 +25,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 	
 	var t = this;
 
-	// Placeholder div at the beginnig which we can use set the start
+	// Placeholder div at the beginning which we can use set the start
 	// of rendered divs without adding all divs from the beginning and down
 	// so with a million entries in the virtual data array and visible area in the middle of this,
 	// we just adjust height of placeholder to be up to visible area, then add gallery elements to view.
@@ -170,7 +170,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 
 	this.enter(level, '_updateOnScroll',
 			[ 'curY', curY, 'prevDisplayed', JSON.stringify(prevDisplayed)],
-			[ 'firstY',  this.firstY,  'lastY', this.lastY, '_getVisibleHeigt()', this._getVisibleHeight() ],);
+			[ 'firstY',  this.firstY,  'lastY', this.lastY, '_getVisibleHeight()', this._getVisibleHeight() ]);
 	
 	// See if we have something that was not visible earlier scrolled into view
 
