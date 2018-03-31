@@ -22,6 +22,7 @@ final class JSScript implements JSEvaluatable {
 	
 	@Override
 	public JSRuntime eval(Map<String, Object> map) {
+		
 		final Bindings bindings = compiledScript.getEngine().createBindings();
 
 		final ScriptContext scriptContext = new SimpleScriptContext();

@@ -26,6 +26,17 @@ final class JSRuntime implements JSInvocable {
 	}
 
 	@Override
+	public Object invokeConstructor(String function, Object ... args) {
+		final Object result;
+
+		final JSObject f = (JSObject)scriptContext.getAttribute(function, ScriptContext.ENGINE_SCOPE);
+
+		result = f.newObject(args);
+
+		return result;
+	}
+	
+	@Override
 	public Object invokeFunction(String function, Object ... args) {
 		final Object result;
 		
@@ -48,6 +59,10 @@ final class JSRuntime implements JSInvocable {
 	@Override
 	public Object invokeMethod(Object obj, String method, Object ... args) {
 		
+		if (obj == null) {
+			throw new IllegalArgumentException("obj == null");
+		}
+
 		final Object result;
 		
 		final JSObject jsObj = (JSObject)obj;

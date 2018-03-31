@@ -2,18 +2,11 @@ package com.test.cv.jsutils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
+import java.util.Map;
 import java.util.function.Function;
-
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 
 import com.test.cv.common.IOUtil;
 
-import javax.script.ScriptEngine;
-import javax.script.CompiledScript;
-import javax.script.Compilable;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import junit.framework.TestCase;
@@ -21,38 +14,12 @@ import junit.framework.TestCase;
 @SuppressWarnings("restriction")
 public class BaseJSTest extends TestCase {
 
-	private final ScriptEngine engine;
+	private final JSEngine engine;
 	
 	protected BaseJSTest() {
-	    final ScriptEngineManager factory = new ScriptEngineManager();
-	    
-	    this.engine = factory.getEngineByName("nashorn");
+		this.engine = new NashornEngine();
 	}
 	
-	protected final JSEvaluatable compileJS(String js) {
-		return compileJS(new StringReader(js));
-	}
-	
-	protected final JSEvaluatable compileJS(Reader js) {
-
-		CompiledScript compiled;
-
-		try {
-			compiled = ((Compilable)engine).compile(js);
-		} catch (ScriptException ex) {
-			throw new IllegalArgumentException("Failed to compile script", ex);
-		}
-		
-		return new JSScript(compiled);
-	}
-
-	protected final Object eval(String js) {
-		try {
-			return engine.eval(js);
-		} catch (ScriptException ex) {
-			throw new IllegalStateException("Failed to execute JS", ex);
-		}
-	}
 
 	protected final Object registerJSFunctionCallback(Function<Object [], Object> function) {
 
@@ -153,7 +120,10 @@ public class BaseJSTest extends TestCase {
 		return sb.toString();
 	}
 	
-	protected final JSEvaluatable compileMavenWebAppScripts(String ... scripts) throws IOException {
-		return compileJS(readMavenWebAppScripts(scripts));
+	protected final JSInvocable prepareMavenWebAppScripts(Map<String, Object> bindings, ConstructRequest [] constructRequests, String ... scripts) throws IOException {
+		
+		final String s = readMavenWebAppScripts(scripts);
+		
+		return engine.prepare(s, bindings, constructRequests);
 	}
 }

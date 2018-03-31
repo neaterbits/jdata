@@ -10,33 +10,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.test.cv.jsutils.BaseJSTest;
+import com.test.cv.jsutils.ConstructRequest;
 import com.test.cv.jsutils.JSEvaluatable;
 import com.test.cv.jsutils.JSFunction;
 import com.test.cv.jsutils.JSInvocable;
 
-public class GalleryCacheItemsTest extends BaseJSTest {
+public class GalleryCacheItemsTest extends BaseGalleryTest {
 
-	
-	private JSInvocable prepareRuntime(List<DownloadInvocation> downloadRequests) throws IOException {
+	private GalleryCacheItems prepareRuntime(List<DownloadInvocation> downloadRequests) throws IOException {
 
-		final String allScripts = readMavenWebAppScripts(
-				"gallery_base.js",
-				"gallery_caches.js",
-				"gallery_cache_items.js");
-
-		// Add a test call
-		final String testCall = 
-			  "function createGalleryCacheItems() {"	
-			+ "  var items = new GalleryCacheItems(20, modelDownloadItems);\n"
-			+ "  \n"
-			+ "  return items;\n"
-			+ "}\n"
-				
-			+ allScripts;
-		
-		final JSEvaluatable jsScript = compileJS(testCall);
-		
 		final Map<String, Object> bindings = new HashMap<>();
 
 		final Function<Object [], Object> modelDownloadItems = (params) -> {
@@ -54,13 +36,15 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 				return null;
 		};
 		
-		bindings.put("modelDownloadItems", registerJSFunctionCallback(modelDownloadItems));
-		bindings.put("console", new Console());
+		
+		final Object callback = registerJSFunctionCallback(modelDownloadItems);
 
-		// Evaluate any vars
-		final JSInvocable jsRuntime = jsScript.eval(bindings);
-
-		return jsRuntime;
+		
+		final ConstructRequest constructRequest = new ConstructRequest("GalleryCacheItems", 20, callback);
+		
+		final JSInvocable invocable = super.prepareRuntime(bindings, constructRequest);
+		
+		return new GalleryCacheItems(invocable, constructRequest.getInstance());
 	}
 	
 	private Object prepareUpdateVisibleAreaCallback(List<UpdateCompletion> completedUpdates) {
@@ -88,30 +72,25 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 
 		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
 
-		final JSInvocable jsRuntime = prepareRuntime(downloadRequests);
+		final GalleryCacheItems cacheItems = prepareRuntime(downloadRequests);
 		
 		// List for tracking updated items
 		final List<UpdateCompletion> completedUpdates = new ArrayList<>();
 		final Object updateVisibleAreaCompleteCallback = prepareUpdateVisibleAreaCallback(completedUpdates);
-	
+
 		// Create cache loader
-		final Object galleryCacheItems = jsRuntime.invokeFunction("createGalleryCacheItems");
+		// final Object galleryCacheItems = 
+			// jsRuntime.invokeConstructor("GalleryCacheItems", 20, modelDownloadItems);
+		
 		
 		// No download requests until item downloaded
 		assertThat(downloadRequests.size()).isEqualTo(0);
 
-		final int debugIndentLevel = 0;
 		final int firstVisibleIndex = 0;
 		final int visibleCount = 4;
 		final int totalNumberOfItems = 20;
 		
-		jsRuntime.invokeMethod(galleryCacheItems, "updateVisibleArea",
-				debugIndentLevel,
-				firstVisibleIndex,
-				visibleCount,
-				totalNumberOfItems,
-				updateVisibleAreaCompleteCallback);
-
+		cacheItems.updateVisibleArea(firstVisibleIndex, visibleCount, totalNumberOfItems, updateVisibleAreaCompleteCallback);
 		
 		// Should now have one download request
 		assertThat(downloadRequests.size()).isEqualTo(1);
@@ -144,22 +123,17 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 		
 		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
 
-		final JSInvocable jsRuntime = prepareRuntime(downloadRequests);
+		final GalleryCacheItems cacheItems = prepareRuntime(downloadRequests);
 		
 		// List for tracking updated items
 		final List<UpdateCompletion> completedUpdates = new ArrayList<>();
 		final Object updateVisibleAreaCompleteCallback = prepareUpdateVisibleAreaCallback(completedUpdates);
 	
-		// Create cache loader
-		final Object galleryCacheItems = jsRuntime.invokeFunction("createGalleryCacheItems");
 		
 		// No download requests until item downloaded
 		assertThat(downloadRequests.size()).isEqualTo(0);
-
-		final int debugIndentLevel = 0;
 		
-		jsRuntime.invokeMethod(galleryCacheItems, "updateVisibleArea",
-				debugIndentLevel,
+		cacheItems.updateVisibleArea(
 				0, 4, 20, 
 				updateVisibleAreaCompleteCallback);
 		
@@ -167,8 +141,7 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 		assertThat(downloadRequests.size()).isEqualTo(1);
 
 		// Invoke once more to simulate scrolling
-		jsRuntime.invokeMethod(galleryCacheItems, "updateVisibleArea",
-				debugIndentLevel,
+		cacheItems.updateVisibleArea(
 				2, 4, 20, 
 				updateVisibleAreaCompleteCallback);
 
@@ -246,9 +219,4 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 		}
 	}
 	
-	public static class Console {
-		public void log(String s) {
-			System.out.println("console.log: " + s);;
-		}
-	}
 }

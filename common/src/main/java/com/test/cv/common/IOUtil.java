@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.nio.file.Files;
 
 public class IOUtil {
@@ -81,4 +82,23 @@ public class IOUtil {
 		
 		return new String(data);
 	}
+
+	public static String readAll(Reader reader) throws IOException {
+
+		final StringBuilder sb = new StringBuilder();
+		
+		final char [] buf = new char[10000];
+		for (;;) {
+			final int charsRead = reader.read(buf);
+			
+			if (charsRead < 0) {
+				break;
+			}
+			
+			sb.append(buf, 0, charsRead);
+		}
+
+		return sb.toString();
+	}
+
 }
