@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.print.Doc;
+
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.DoublePoint;
@@ -62,6 +64,7 @@ import com.test.cv.model.ItemAttributeValue;
 import com.test.cv.model.LongAttributeValue;
 import com.test.cv.model.StringAttributeValue;
 import com.test.cv.model.attributes.AttributeType;
+import com.test.cv.model.items.ItemTypes;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.ComparisonCriterium;
@@ -112,11 +115,29 @@ public class LuceneItemIndex implements ItemIndex {
 	public void indexItemAttributes(String userId, Class<? extends Item> itemType, String typeName, List<ItemAttributeValue<?>> attributeValues) throws ItemIndexException {
 		final Document document = new Document();
 
+		final boolean idFound = addToDocument(document, typeName, userId, attributeValues);
+	
+
+		if (!idFound) {
+			throw new IllegalArgumentException("No ID attribute supplied");
+		}
+
+		try {
+			writer.addDocument(document);
+			writer.commit();
+		} catch (IOException ex) {
+			throw new ItemIndexException("Failed to write document for item", ex);
+		}
+	}
+	
+	private boolean addToDocument(Document document, String typeName, String userId, List<ItemAttributeValue<?>> attributeValues) {
+		
 		// Must have ID
 		boolean idFound = false;
 		
-		document.add(new TextField("type", typeName, Field.Store.YES));
-		
+		document.add(new StringField("type", typeName, Field.Store.YES));
+		document.add(new StringField("userId", userId, Field.Store.YES));
+
 		for (ItemAttributeValue<?> attributeValue : attributeValues) {
 			
 			final ItemAttribute attribute = attributeValue.getAttribute();
@@ -195,21 +216,32 @@ public class LuceneItemIndex implements ItemIndex {
 				document.add(storedField);
 			}
 		}
-
-		document.add(new StringField("userId", userId, Field.Store.YES));
-
-		if (!idFound) {
-			throw new IllegalArgumentException("No ID attribute supplied");
-		}
-
-		try {
-			writer.addDocument(document);
-			writer.commit();
-		} catch (IOException ex) {
-			throw new ItemIndexException("Failed to write document for item", ex);
-		}
+		
+		return idFound;
 	}
 	
+	final List<ItemAttributeValue<?>> getValuesFromDocument(Document document, Set<ItemAttribute> attributes) {
+		
+		final List<ItemAttributeValue<?>> values = new ArrayList<>(attributes.size());
+
+		for (ItemAttribute attribute : attributes) {
+			final IndexableField field = document.getField(attribute.getName());
+			
+			if (field != null) {
+				final Object obj = getObjectValueFromField(attribute, field);
+				
+				final ItemAttributeValue<?> attributeValue = attribute.getValueFromObject(obj);
+				
+				if (attributeValue == null) {
+					throw new IllegalStateException("attributeValue == null");
+				}
+
+				values.add(attributeValue);
+			}
+		}
+		
+		return values;
+	}
 	
 	
 	@Override
@@ -316,26 +348,40 @@ public class LuceneItemIndex implements ItemIndex {
 				length -> new Long[length],
 				(tw, th) -> encodeSize(tw, th));
 
-		updateThumbnailSizes(doc, itemId, sizes);
+		updateThumbnailSizes(doc, itemId, type, sizes);
 	}
 	
-	private void updateThumbnailSizes(Document doc, String itemId, Long [] sizes) throws ItemIndexException {
+	private void updateThumbnailSizes(Document doc, String itemId, Class<? extends Item> type, Long [] sizes) throws ItemIndexException {
 		final byte [] bytes = longsToBytes(sizes);
 
 		
 		// Workaround since does not work to search on id if just re-indexing field
 		// and the field contains eg. hyphen
 		// TODO might be necessary for other fields as well with regard to facets
+		/*
 		final IndexableField idField = doc.getField("id");
 
 		doc.removeField("id");
 		doc.add(new StringField("id", idField.stringValue(), Field.Store.YES));
+		*/
+
+		// Seems like update resets string fields to TextField etc so matching does not work,
+		// just recreate document from attributes
+		final Set<ItemAttribute> attributes = ItemTypes.getTypeInfo(type).getAttributes().asSet();
 		
-		doc.removeFields(THUMBS_FIELD);
-		doc.add(new StoredField(THUMBS_FIELD, bytes));
+		final List<ItemAttributeValue<?>> values = getValuesFromDocument(doc, attributes);
+
+		final Document newDoc = new Document();
+		
+		// Get user id from existing doc
+		final String userId = doc.getField("userId").stringValue();
+		
+		addToDocument(newDoc, ItemTypes.getTypeName(type), userId, values);
+		
+		newDoc.add(new StoredField(THUMBS_FIELD, bytes));
 
 		try {
-			writer.updateDocument(new Term("id", itemId), doc);
+			writer.updateDocument(new Term("id", itemId), newDoc);
 			writer.commit();
 		} catch (IOException ex) {
 			throw new ItemIndexException("Failed to update thumb sizes", ex);
@@ -351,7 +397,7 @@ public class LuceneItemIndex implements ItemIndex {
 
 		final Long [] updated = deleteThumbnail(sizes, photoNo, length -> new Long[length]);
 
-		updateThumbnailSizes(doc, itemId, updated);
+		updateThumbnailSizes(doc, itemId, type, updated);
 	}
 
 	@Override
@@ -364,7 +410,7 @@ public class LuceneItemIndex implements ItemIndex {
 		
 		final Long [] moved = moveThumbnail(sizes, toMove, photoNo, toIndex, length -> new Long[length]);
 
-		updateThumbnailSizes(doc, itemId, moved);
+		updateThumbnailSizes(doc, itemId, type, moved);
 	}
 
 	@Override
@@ -880,6 +926,71 @@ public class LuceneItemIndex implements ItemIndex {
 
 		return rangeQuery;
 	}
+
+	private static Integer getIntegerValueFromField(IndexableField field) {
+		return field.numericValue().intValue();
+	}
+
+	private static BigDecimal getDecimalValueFromField(IndexableField field) {
+		return BigDecimal.valueOf(field.numericValue().doubleValue());
+	}
+
+	private static <T extends Enum<T>> T getEnumValueFromField(Class<T> enumClass, IndexableField field) {
+		final T [] enums = enumClass.getEnumConstants();
+		
+		T found = null;
+		
+		for (T e : enums) {
+			if (e.name().equals(field.stringValue())) {
+				found = e;
+				break;
+			}
+		}
+
+		if (found == null) {
+			throw new IllegalStateException("No enum found for " + field.stringValue() + " in enum " + enumClass.getName());
+		}
+
+		return found;
+	}
+
+	private static Boolean getBooleanValueFromField(IndexableField field) {
+		return field.numericValue().intValue() != 0 ? true : false;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static Object getObjectValueFromField(ItemAttribute attribute, IndexableField field) {
+		final AttributeType attributeType = attribute.getAttributeType();
+		
+		final Object result;
+		
+		switch (attributeType) {
+		case STRING:
+			result = field.stringValue();
+			break;
+			
+		case INTEGER:
+			result = getIntegerValueFromField(field);
+			break;
+			
+		case DECIMAL:
+			result = getDecimalValueFromField(field);
+			break;
+			
+		case ENUM:
+			result = getEnumValueFromField((Class<? extends Enum>)attribute.getAttributeValueClass(), field);
+			break;
+			
+		case BOOLEAN:
+			result = getBooleanValueFromField(field);
+			break;
+			
+		default:
+			throw new UnsupportedOperationException("Unknown attribute type " + attributeType);
+		}
+		
+		return result;
+	}
 	
 	private static ItemsFacets computeFacets(List<Document> documents, Set<ItemAttribute> facetedAttributes) {
 		return FacetUtils.computeFacets(documents, facetedAttributes, new FacetUtils.FacetFunctions<Document, IndexableField>() {
@@ -895,73 +1006,27 @@ public class LuceneItemIndex implements ItemIndex {
 
 			@Override
 			public Integer getIntegerValue(IndexableField field) {
-				return field.numericValue().intValue();
+				return getIntegerValueFromField(field);
 			}
 
 			@Override
 			public BigDecimal getDecimalValue(IndexableField field) {
-				return BigDecimal.valueOf(field.numericValue().doubleValue());
+				return getDecimalValueFromField(field);
 			}
 
 			@Override
 			public <T extends Enum<T>> T getEnumValue(Class<T> enumClass, IndexableField field) {
-				final T [] enums = enumClass.getEnumConstants();
-				
-				T found = null;
-				
-				for (T e : enums) {
-					if (e.name().equals(field.stringValue())) {
-						found = e;
-						break;
-					}
-				}
-
-				if (found == null) {
-					throw new IllegalStateException("No enum found for " + field.stringValue() + " in enum " + enumClass.getName());
-				}
-
-				return found;
+				return getEnumValueFromField(enumClass, field);
 			}
 
 			@Override
 			public Boolean getBooleanValue(IndexableField field) {
-				return field.numericValue().intValue() != 0 ? true : false;
+				return getBooleanValueFromField(field);
 			}
 
-			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
 			public Object getObjectValue(ItemAttribute attribute, IndexableField field) {
-				
-				final AttributeType attributeType = attribute.getAttributeType();
-				
-				final Object result;
-				
-				switch (attributeType) {
-				case STRING:
-					result = field.stringValue();
-					break;
-					
-				case INTEGER:
-					result = getIntegerValue(field);
-					break;
-					
-				case DECIMAL:
-					result = getDecimalValue(field);
-					break;
-					
-				case ENUM:
-					result = getEnumValue((Class<? extends Enum>)attribute.getAttributeValueClass(), field);
-					break;
-					
-				case BOOLEAN:
-					result = getBooleanValue(field);
-					break;
-					
-				default:
-					throw new UnsupportedOperationException("Unknown attribute type " + attributeType);
-				}
-				
-				return result;
+				return getObjectValueFromField(attribute, field);
 			}
 		});
 	}

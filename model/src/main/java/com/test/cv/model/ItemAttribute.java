@@ -133,6 +133,11 @@ public final class ItemAttribute {
 	public ItemAttributeValue<?> getValue(Item item) {
 		final Object value = getObjectValue(item);
 
+		return getValueFromObject(value);
+	}
+
+	public ItemAttributeValue<?> getValueFromObject(Object value) {
+
 		final ItemAttributeValue<?> itemAttributeValue;
 
 		if (value != null) {

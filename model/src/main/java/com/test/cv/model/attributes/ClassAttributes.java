@@ -8,9 +8,12 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import com.test.cv.model.Item;
@@ -83,6 +86,10 @@ public class ClassAttributes {
 		}
 		
 		return attributesInFacetOrder;
+	}
+	
+	public Set<ItemAttribute> asSet() {
+		return Collections.unmodifiableSet(new HashSet<>(this.attributes));
 	}
 	
 	public static List<ItemAttributeValue<?>> getValues(Item item) {
