@@ -41,11 +41,11 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 	this.galleryModel.getProvisionalData(0, totalNumberOfItems, function(provisionalDataArray) {
 		t.provisionalDataArray = provisionalDataArray;
 		// completed metadata build, now compute and rerender
-		t.render(level + 1, widthMode, heightMode);
+		t._render(level + 1, widthMode, heightMode);
 	});
 }
 
-GalleryCacheAllProvisionalSomeComplete.prototype.render = function(level, widthMode, heightMode) {
+GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level, widthMode, heightMode) {
 
 	// Get the width of element to compute how many elements there are room for
 	var numColumns = widthMode.computeNumColumns(this.config, this.columnSpacing, this._getVisibleWidth());
