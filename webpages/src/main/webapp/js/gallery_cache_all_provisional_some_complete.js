@@ -254,12 +254,12 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 	}
 	
 	var displayed = {
-		'firstVisibleY' : curY,
-		'firstRenderedY' : firstRenderedY,
-		'firstVisibleIndex' : firstVisibleIndex,
-		'lastVisibleY' : curY + this._getVisibleHeight() - 1,
-		'lastRenderedY' : lastRenderedY,
-		'lastVisibleIndex' : lastVisibleIndex
+		firstVisibleY : curY,
+		firstRenderedY : firstRenderedY,
+		firstVisibleIndex : firstVisibleIndex,
+		lastVisibleY : curY + this._getVisibleHeight() - 1,
+		lastRenderedY : lastRenderedY,
+		lastVisibleIndex : lastVisibleIndex
 	};
 
 	this.exit(level, '_updateOnScroll', JSON.stringify(displayed));
