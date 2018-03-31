@@ -7,7 +7,7 @@ import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
 
 @SuppressWarnings("restriction")
-public final class JSRuntime {
+final class JSRuntime implements JSInvocable {
 	private final ScriptContext scriptContext;
 	private final CompiledScript compiledScript;
 
@@ -25,6 +25,7 @@ public final class JSRuntime {
 		this.compiledScript = compiledScript;
 	}
 
+	@Override
 	public Object invokeFunction(String function, Object ... args) {
 		final Object result;
 		
@@ -44,6 +45,7 @@ public final class JSRuntime {
 		return result;
 	}
 	
+	@Override
 	public Object invokeMethod(Object obj, String method, Object ... args) {
 		
 		final Object result;

@@ -9,7 +9,7 @@ import javax.script.ScriptContext;
 import javax.script.ScriptException;
 import javax.script.SimpleScriptContext;
 
-public final class JSScript {
+final class JSScript implements JSEvaluatable {
 	private final CompiledScript compiledScript;
 
 	JSScript(CompiledScript compiledScript) {
@@ -20,6 +20,7 @@ public final class JSScript {
 		return eval(new HashMap<>());
 	}
 	
+	@Override
 	public JSRuntime eval(Map<String, Object> map) {
 		final Bindings bindings = compiledScript.getEngine().createBindings();
 

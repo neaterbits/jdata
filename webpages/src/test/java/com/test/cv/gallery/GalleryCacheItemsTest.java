@@ -2,7 +2,6 @@ package com.test.cv.gallery;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,43 +10,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.test.cv.common.IOUtil;
 import com.test.cv.jsutils.BaseJSTest;
+import com.test.cv.jsutils.JSEvaluatable;
 import com.test.cv.jsutils.JSFunction;
-import com.test.cv.jsutils.JSRuntime;
-import com.test.cv.jsutils.JSScript;
+import com.test.cv.jsutils.JSInvocable;
 
 public class GalleryCacheItemsTest extends BaseJSTest {
 
-	private File getScriptDir() {
-		final String file = getClass().getClassLoader().getResource("get_dir_file.txt").getPath();
-
-		final File projectBaseDir = new File(file).getParentFile().getParentFile().getParentFile()
-				.getParentFile().getParentFile().getParentFile();
-
-		final File scriptDir = new File(projectBaseDir, "src/main/webapp/js");
-
-		/*
-		final File projectBaseDir = new File(file).getParentFile().getParentFile();
-		final File scriptDir = new File(projectBaseDir, "webpages/js");
-		*/
-		
-		if (!scriptDir.exists()) {
-			throw new IllegalStateException("Could not find script dir " + scriptDir);
-		}
-
-		return scriptDir;
-	}
 	
-	private JSRuntime prepareRuntime(List<DownloadInvocation> downloadRequests) throws IOException {
-		final File scriptDir = getScriptDir();
+	private JSInvocable prepareRuntime(List<DownloadInvocation> downloadRequests) throws IOException {
 
-		final String baseScript1 = IOUtil.readFileToString(new File(scriptDir, "gallery_base.js"));
-		final String baseScript2 = IOUtil.readFileToString(new File(scriptDir, "gallery_caches.js"));
-
-		final String itemsScript = IOUtil.readFileToString(new File(scriptDir, "gallery_cache_items.js"));
-
-		final String allScripts = baseScript1 + baseScript2 + itemsScript;
+		final String allScripts = readMavenWebAppScripts(
+				"gallery_base.js",
+				"gallery_caches.js",
+				"gallery_cache_items.js");
 
 		// Add a test call
 		final String testCall = 
@@ -59,11 +35,10 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 				
 			+ allScripts;
 		
-		final JSScript jsScript = compileJS(testCall);
+		final JSEvaluatable jsScript = compileJS(testCall);
 		
 		final Map<String, Object> bindings = new HashMap<>();
 
-		
 		final Function<Object [], Object> modelDownloadItems = (params) -> {
 				System.out.println("modelDownloadItems: Got params " + Arrays.toString(params));
 
@@ -83,7 +58,7 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 		bindings.put("console", new Console());
 
 		// Evaluate any vars
-		final JSRuntime jsRuntime = jsScript.eval(bindings);
+		final JSInvocable jsRuntime = jsScript.eval(bindings);
 
 		return jsRuntime;
 	}
@@ -113,7 +88,7 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 
 		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
 
-		final JSRuntime jsRuntime = prepareRuntime(downloadRequests);
+		final JSInvocable jsRuntime = prepareRuntime(downloadRequests);
 		
 		// List for tracking updated items
 		final List<UpdateCompletion> completedUpdates = new ArrayList<>();
@@ -166,11 +141,10 @@ public class GalleryCacheItemsTest extends BaseJSTest {
 	// Tests issue where responses from network occuring in reverse order,
 	// eg when scrolling view
 	public void testNetworkOrderSwitch() throws IOException {
-
 		
 		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
 
-		final JSRuntime jsRuntime = prepareRuntime(downloadRequests);
+		final JSInvocable jsRuntime = prepareRuntime(downloadRequests);
 		
 		// List for tracking updated items
 		final List<UpdateCompletion> completedUpdates = new ArrayList<>();
