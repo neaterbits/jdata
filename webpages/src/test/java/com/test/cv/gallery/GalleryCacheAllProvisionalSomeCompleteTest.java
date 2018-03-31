@@ -106,6 +106,14 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 					element.setHeight(itemHeight);
 				}
 			}
+
+			@Override
+			public void applyRowContainerStyling(Div rowContainer, int y, int width, int height) {
+
+				rowContainer.setWidth(width);
+				rowContainer.setHeight(height);
+				
+			}
 		};
 		
 		final List<DownloadInvocation> downloadProvisional  = new ArrayList<>();

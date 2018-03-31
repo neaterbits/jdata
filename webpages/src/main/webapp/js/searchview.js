@@ -209,6 +209,18 @@ function SearchView(
 						}
 							
 						itemElement.setAttribute('style', styling);
+					},
+					
+					applyRowContainerStyling : function(rowDiv, y, width, height) {
+						
+						rowDiv.setAttribute('style',
+								//'position : relative; ' +
+								'top :  ' + y + 'px; ' +
+								'width : ' + width + 'px; ' +
+								'height : ' + height + 'px; ' +
+								'border : 1px solid black;' +
+								'background-color : yellow; ');
+	
 					}
 				}
 		);

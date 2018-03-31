@@ -337,15 +337,8 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 		
 		++ rowsAdded;
 		
-		rowDiv.setAttribute('style',
-				//'position : relative; ' +
-				'top :  ' + y + 'px; ' +
-				'width : ' + this.width + 'px; ' +
-				'height : ' + rowHeight + 'px; ' +
-				'border : 1px solid black;' +
-				'background-color : yellow; ');
-
-
+		this.galleryView.applyRowContainerStyling(rowDiv, y, this.width, rowHeight);
+	
 		y += (downwards ? rowHeight : -rowHeight);
 		heightAdded += rowHeight;
 

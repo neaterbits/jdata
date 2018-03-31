@@ -43,5 +43,7 @@ public interface GalleryView<CONTAINER, ELEMENT> {
 	ELEMENT makeProvisionalHTMLElement(int index, Object data);
 	
 	void applyItemStyles(ELEMENT element, Integer rowHeight, Integer itemWidth, Integer itemHeight, int spacing, boolean visible);
+
+	void applyRowContainerStyling(CONTAINER rowContainer, int y, int width, int height);
 }
 
