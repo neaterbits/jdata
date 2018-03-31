@@ -266,13 +266,43 @@ public abstract class SearchDAOTest extends TestCase {
 
 				// Should have one item that is missing this value
 				assertThat(widthFacet.getNoAttributeValueCount()).isEqualTo(1);
-}
+			}
 			finally {
 				if (itemId3 != null) {
 					itemDAO.deleteItem(userId, itemId3, Snowboard.class);
 				}
 			}
 			
+		});
+	}
+
+	// No mssing attribute value for all, then should NOT return the attribute
+	public void testFacetsNoCriteriaCheckDoesNotReturnFacetedAttributeIfOnlyUnknwown() throws Exception {
+		
+		final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
+
+		final ItemAttribute widthAttribute = snowboardAttributes.getByName("width");
+		final ItemAttribute makeAttribute = snowboardAttributes.getByName("make");
+
+		final Set<ItemAttribute> facetedAttributes = new HashSet<>(Arrays.asList(widthAttribute, makeAttribute));
+
+		final Snowboard snowboard1 = makeSnowboard1();
+		final Snowboard snowboard2 = makeSnowboard2();
+
+		// Clear "make" attribute of both snowboards so that we have no facet values
+		snowboard1.setMake(null);
+		snowboard2.setMake(null);
+
+		checkSnowboard(snowboard1, snowboard2, (userId, itemDAO, searchDAO, itemId1, itemId2) -> {
+			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), null, facetedAttributes);
+			
+			assertThat(cursor.getFacets().getTypes().size()).isEqualTo(1);
+			final TypeFacets typeFacets = cursor.getFacets().getTypes().get(0);
+			
+			assertThat(typeFacets.getType()).isEqualTo(Snowboard.class);
+			assertThat(typeFacets.getAttributes().size()).isEqualTo(1);
+			assertThat(typeFacets.getAttributes().get(0).getAttribute().getName()).isEqualTo("width");
+			assertThat(typeFacets.getAttributes().get(0).getNoAttributeValueCount()).isEqualTo(0);
 		});
 	}
 	
@@ -282,10 +312,15 @@ public abstract class SearchDAOTest extends TestCase {
 	}
 	
 	private void checkSnowboard(CheckSnowboard check) throws Exception {
-
-		final String  userId = "theUser";
 		final Snowboard snowboard1 = makeSnowboard1();
 		final Snowboard snowboard2 = makeSnowboard2();
+		
+		checkSnowboard(snowboard1, snowboard2, check);
+	}
+
+	private void checkSnowboard(Snowboard snowboard1, Snowboard snowboard2, CheckSnowboard check) throws Exception {
+
+		final String  userId = "theUser";
 		
 		String itemId1 = null;
 		String itemId2 = null;

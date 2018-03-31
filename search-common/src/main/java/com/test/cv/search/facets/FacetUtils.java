@@ -182,12 +182,35 @@ public class FacetUtils {
 		}
 	}
 	
-	private static <I, F> void processAttributes(List<I> documents, List<ItemAttribute> typeAttributes, FacetFunctions<I, F> functions, BiPredicate<I, ItemAttribute> includeAttribute, Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults) {
+	private static <I, F> void processAttributes(
+			List<I> documents,
+			List<ItemAttribute> typeAttributes,
+			FacetFunctions<I, F> functions,
+			BiPredicate<I, ItemAttribute> includeAttribute,
+			Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults) {
+		
 		for (I d : documents) {
 			for (ItemAttribute attribute : typeAttributes) {
 				if (includeAttribute == null || includeAttribute.test(d, attribute)) {
 					processAttribute(d, functions, attribute, attributeResults);
 				}
+			}
+		}
+		
+		// Go over key-set, if added but only has no-attribute count, then remove again
+		// Copy to avoid concurrent-modification issues
+		final List<ItemAttribute> keys = new ArrayList<>(attributeResults.keySet());
+		
+		for (ItemAttribute attribute : keys) {
+			final IndexFacetedAttributeResult result = attributeResults.get(attribute);
+			
+			if (result == null) {
+				throw new IllegalStateException("null result");
+			}
+			
+			if (!result.hasValueOrRangeMatches()) {
+				// Remove again, no point in returning a facet with only unknown-matches
+				attributeResults.remove(attribute);
 			}
 		}
 	}

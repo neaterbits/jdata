@@ -20,6 +20,20 @@ public final class IndexRangeFacetedAttributeResult extends IndexFacetedAttribut
 		this.matchCounts = matchCounts;
 	}
 
+	@Override
+	public boolean hasValueOrRangeMatches() {
+
+		for (int matchCount : matchCounts) {
+			if (matchCount > 0) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+
+
 	public int[] getMatchCounts() {
 		return matchCounts;
 	}

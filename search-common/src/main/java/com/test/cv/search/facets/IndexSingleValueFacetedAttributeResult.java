@@ -30,4 +30,17 @@ public class IndexSingleValueFacetedAttributeResult extends IndexFacetedAttribut
 	public void putForValue(Object value, IndexSingleValueFacet valueFacet) {
 		values.put(value, valueFacet);
 	}
+
+	@Override
+	public boolean hasValueOrRangeMatches() {
+		
+		for (IndexSingleValueFacet value : values.values()) {
+			if (value.getMatchCount() > 0) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 }

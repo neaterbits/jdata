@@ -17,6 +17,8 @@ public abstract class IndexFacetedAttributeResult {
 
 		this.attribute = attribute;
 	}
+	
+	public abstract boolean hasValueOrRangeMatches();
 
 	public ItemAttribute getAttribute() {
 		return attribute;
