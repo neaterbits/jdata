@@ -7,11 +7,8 @@ import java.util.function.Function;
 
 import com.test.cv.common.IOUtil;
 
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
-
 import junit.framework.TestCase;
 
-@SuppressWarnings("restriction")
 public class BaseJSTest extends TestCase {
 
 	private final JSEngine engine;
@@ -20,51 +17,12 @@ public class BaseJSTest extends TestCase {
 		this.engine = new NashornEngine();
 	}
 	
-
-	protected final Object registerJSFunctionCallback(Function<Object [], Object> function) {
-
-		return new BaseJSObject(JSObjectType.FUNCTION) {
-
-			@Override
-			public Object call(Object obj, Object... args) {
-
-				// Any function-parameters must be converted
-				final Object [] converted = new Object[args.length];
-				
-				for (int i = 0; i < args.length; ++ i) {
-					final Object arg = args[i];
-					final Object dst;
-					
-					if (arg instanceof ScriptObjectMirror) {
-						final ScriptObjectMirror objectMirror = (ScriptObjectMirror)arg;
-						
-						if (objectMirror.isFunction()) {
-							dst = new JSFunction(objectMirror);
-						}
-						else if (objectMirror.isArray()) {
-							final Object [] javaArray = new Object[objectMirror.size()];
-							
-							for (int arrayIndex = 0; arrayIndex < objectMirror.size(); ++ arrayIndex) {
-								javaArray[arrayIndex] = objectMirror.getSlot(arrayIndex);
-							}
-							
-							dst = javaArray;
-						}
-						else {
-							dst = arg;
-						}
-					}
-					else {
-						dst = arg;
-					}
-					
-					converted[i] = dst;
-				}
-				
-				return function.apply(converted);
-			}
-		};
-		
+	protected final Object createJSFunctionCallback(Function<Object [], Object> function) {
+		return engine.createJSFunctionCallback(function);
+	}
+	
+	protected final JSFunction getJSFunction(Object object) {
+		return engine.getJSFunction(object);
 	}
 
 	private File getMavenWebAppScriptDir() {

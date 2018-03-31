@@ -127,11 +127,11 @@ GalleryCacheBase.prototype._computeHeight = function(heightMode, numColumns) {
 }
 
 GalleryCacheBase.prototype._getVisibleWidth = function() {
-	return this.renderDiv.clientWidth;
+	return this.galleryView.getElementWidth(this.renderDiv);;
 };
 
 GalleryCacheBase.prototype._getVisibleHeight = function() {
-	return this.outerDiv.clientHeight;
+	return this.galleryView.getElementHeight(this.outerDiv);
 };
 
 // Set the div that we are going to render into (ie. add row DOM elements to)
@@ -145,7 +145,7 @@ GalleryCacheBase.prototype._getRenderDiv = function() {
 }
 
 GalleryCacheBase.prototype._setScrollableHeight = function(height) {
-	this.renderDiv.style.height = height + 'px';
+	this.galleryView.setElementHeight(this.renderDiv, height);
 }
 
 GalleryCacheBase.prototype._makeProvisionalElement = function (index, itemWidth, itemHeight) {
@@ -193,7 +193,7 @@ GalleryCacheBase.prototype._addDivs = function(level, startIndex, startPos, numC
 	
 	var addRowDiv = function (rowDiv) {
 		t.cachedRowDivs.push(rowDiv);
-		t.renderDiv.append(rowDiv);
+		t.galleryView.appendToContainer(t.renderDiv, rowDiv);
 	};
 
 	var lastRendered = this._addDivsWithAddFunc(level + 1, startIndex, startPos, numColumns, heightToAdd, true, addRowDiv, makeElement);
@@ -246,7 +246,7 @@ GalleryCacheBase.prototype._prependDivs = function(level, startIndex, startPos, 
 			function (rowDiv) {
 				if (firstRowDiv == null) {
 					t.cachedRowDivs.push(rowDiv);
-					t.innerDiv.append(rowDiv);
+					t.galleryView.appendToContainer(innerDiv, rowDiv);
 				}
 				else {
 					t.cachedRowDivs.splice(0, 0, rowDiv); // insert at beginning of row
@@ -313,9 +313,9 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 			? this.totalNumberOfItems - i
 			: numColumns; 
 		
-		var rowDiv = document.createElement('div');
-		
-		rowDiv.setAttribute('class', 'gallery_row');
+		var rowDiv = this.galleryView.createRowContainer();
+
+		this.galleryView.setCSSClasses(rowDiv, 'gallery_row');
 
 		// Add before adding elements so that we can add hidden row items and compute their size
 		addRowDiv(rowDiv);
@@ -330,13 +330,13 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 					return makeElement(index, itemWidth, itemHeight);
 				},
 				function (element, indexInRow) {
-					rowDiv.append(element);
+					t.galleryView.appendToContainer(rowDiv, element);
 				});
 		
 		this.log(level, 'Added row no ' + rowNo + ', first elem ' + i + ' at y pos ' + y + ' of height ' + rowHeight);
 		
 		++ rowsAdded;
-
+		
 		rowDiv.setAttribute('style',
 				//'position : relative; ' +
 				'top :  ' + y + 'px; ' +
@@ -505,7 +505,7 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 		// Update style to show item with given width, height and spacing
 		for (var i = 0; i < rowHTMLElements.length; ++ i) {
 			var elem = rowHTMLElements[i];
-			
+
 			var width = itemWidth == null ? elem.clientWidth : itemWidth;
 			var height = largestItemHeight;
 			
@@ -522,29 +522,5 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 
 // Apply necessary styling to set dimensions and placement of an item
 GalleryCacheBase.prototype._applyItemStyles = function(itemElement, rowHeight, itemWidth, itemHeight, spacing, visible) {
-	
-	var styling = 'position : relative; ' +
-		/*
-		'display : inline-block; ' +
-		*/
-		'float : left; ' +
-		'margin-left : ' + spacing + 'px; ' +
-		'background-color : white; ';
-	
-	
-	if (itemHeight != null) {
-		styling += 'top : ' + (rowHeight - itemHeight) / 2 + 'px; ';
-		styling += 'height : ' + itemHeight + 'px; ';
-	}
-	
-	if (itemWidth != null) {
-		'width : ' + itemWidth + 'px; ';
-	}
-	
-	if (!visible) {
-		// set hidden if we need to find item size
-		styling += 'visibility: hidden; '
-	}
-		
-	itemElement.setAttribute('style', styling);
+	this.galleryView.applyItemStyles(itemElement, rowHeight, itemWidth, itemHeight, spacing, visible);
 }

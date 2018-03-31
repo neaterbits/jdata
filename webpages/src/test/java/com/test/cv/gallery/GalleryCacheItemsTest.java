@@ -11,9 +11,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 import com.test.cv.jsutils.ConstructRequest;
-import com.test.cv.jsutils.JSEvaluatable;
 import com.test.cv.jsutils.JSFunction;
 import com.test.cv.jsutils.JSInvocable;
+
+import static com.test.cv.gallery.DownloadInvocation.dataString;
 
 public class GalleryCacheItemsTest extends BaseGalleryTest {
 
@@ -37,12 +38,12 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		};
 		
 		
-		final Object callback = registerJSFunctionCallback(modelDownloadItems);
+		final Object callback = createJSFunctionCallback(modelDownloadItems);
 
 		
 		final ConstructRequest constructRequest = new ConstructRequest("GalleryCacheItems", 20, callback);
 		
-		final JSInvocable invocable = super.prepareRuntime(bindings, constructRequest);
+		final JSInvocable invocable = super.prepareGalleryRuntime(bindings, constructRequest);
 		
 		return new GalleryCacheItems(invocable, constructRequest.getInstance());
 	}
@@ -63,7 +64,7 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 			return null;
 		};
 		
-		final Object updateVisibleAreaCompleteCallback = registerJSFunctionCallback(updateVisibleAreaComplete);
+		final Object updateVisibleAreaCompleteCallback = createJSFunctionCallback(updateVisibleAreaComplete);
 
 		return updateVisibleAreaCompleteCallback;
 	}
@@ -96,8 +97,8 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		assertThat(downloadRequests.size()).isEqualTo(1);
 
 		final DownloadInvocation downloadRequest = downloadRequests.get(0);
-		assertThat(downloadRequest.startIndex).isEqualTo(0);
-		assertThat(downloadRequest.count).isEqualTo(4);
+		assertThat(downloadRequest.getStartIndex()).isEqualTo(0);
+		assertThat(downloadRequest.getCount()).isEqualTo(4);
 		
 		assertThat(completedUpdates.size()).isEqualTo(0);
 		// Trigger downloaded (it. response from Ajax download)
@@ -150,8 +151,8 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 
 		// Trigger response to second request, then to first
 		// This should still result in completed-result to happen on second request as that is the newest one
-		assertThat(downloadRequests.get(1).startIndex).isEqualTo(4); // Starts at 4 since not re-requesting already performed request for items 0-3
-		assertThat(downloadRequests.get(1).count).isEqualTo(2);
+		assertThat(downloadRequests.get(1).getStartIndex()).isEqualTo(4); // Starts at 4 since not re-requesting already performed request for items 0-3
+		assertThat(downloadRequests.get(1).getCount()).isEqualTo(2);
 		downloadRequests.get(1).onDownloaded();
 		
 		// No completed-calls yet since we only responded for items 4-5
@@ -174,39 +175,6 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		assertThat(completedUpdate.data[3]).isEqualTo(dataString(4, 2, 1)); // Start at 4, index 1 out of count 2
 	}
 
-	private static final String dataString(int startIndex, int count, int arrayIndex) {
-		 return "Downloaded-item at index " + (startIndex + arrayIndex) + " / " + arrayIndex + " out of " + count;
-	}
-	
-	private static class DownloadInvocation {
-		private final int startIndex;
-		private final int count;
-		private final JSFunction callback;
-		
-		DownloadInvocation(int startIndex, int count, JSFunction callback) {
-			this.startIndex = startIndex;
-			this.count = count;
-			this.callback = callback;
-		}
-
-		void onDownloaded() {
-			
-			// Just return an array of strings, this would be images or thumb sizes or similar for a real gallery
-			final String [] result = new String[count];
-			
-			for (int i = 0; i < result.length; ++ i) {
-				result[i] = dataString(startIndex, count, i);
-			}
-			
-			callback.callWithArray(result);
-		}
-
-		@Override
-		public String toString() {
-			return "[startIndex=" + startIndex + ", count=" + count +  "]";
-		}
-	}
-	
 	private static class UpdateCompletion {
 		private final int startIndex;
 		private final int visibleCount;

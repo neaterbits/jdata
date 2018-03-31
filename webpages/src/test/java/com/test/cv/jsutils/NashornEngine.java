@@ -5,6 +5,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -14,6 +15,9 @@ import javax.script.ScriptException;
 
 import com.test.cv.common.IOUtil;
 
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
+
+@SuppressWarnings("restriction")
 public class NashornEngine implements JSEngine {
 	private final ScriptEngine engine;
 	
@@ -38,6 +42,59 @@ public class NashornEngine implements JSEngine {
 		}
 		
 		return new JSScript(compiled);
+	}
+	
+	
+	@Override
+	public final Object createJSFunctionCallback(Function<Object [], Object> function) {
+
+		return new BaseJSObject(JSObjectType.FUNCTION) {
+
+			@Override
+			public Object call(Object obj, Object... args) {
+
+				// Any function-parameters must be converted
+				final Object [] converted = new Object[args.length];
+				
+				for (int i = 0; i < args.length; ++ i) {
+					final Object arg = args[i];
+					final Object dst;
+					
+					if (arg instanceof ScriptObjectMirror) {
+						final ScriptObjectMirror objectMirror = (ScriptObjectMirror)arg;
+						
+						if (objectMirror.isFunction()) {
+							dst = new JSFunction(objectMirror);
+						}
+						else if (objectMirror.isArray()) {
+							final Object [] javaArray = new Object[objectMirror.size()];
+							
+							for (int arrayIndex = 0; arrayIndex < objectMirror.size(); ++ arrayIndex) {
+								javaArray[arrayIndex] = objectMirror.getSlot(arrayIndex);
+							}
+							
+							dst = javaArray;
+						}
+						else {
+							dst = arg;
+						}
+					}
+					else {
+						dst = arg;
+					}
+					
+					converted[i] = dst;
+				}
+				
+				return function.apply(converted);
+			}
+		};
+	}
+
+
+	@Override
+	public JSFunction getJSFunction(Object object) {
+		return new JSFunction((ScriptObjectMirror)object);
 	}
 
 	protected final Object eval(String js) {

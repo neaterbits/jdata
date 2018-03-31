@@ -21,7 +21,7 @@ public class BaseGalleryTest extends BaseJSTest {
 	 * @throws IOException
 	 */
 
-	final JSInvocable prepareRuntime(Map<String, Object> bindings, ConstructRequest ... constructRequests) throws IOException {
+	final JSInvocable prepareGalleryRuntime(Map<String, Object> bindings, ConstructRequest ... constructRequests) throws IOException {
 
 		final Map<String, Object> b = new HashMap<>(bindings);
 
@@ -31,7 +31,13 @@ public class BaseGalleryTest extends BaseJSTest {
 		final JSInvocable jsRuntime = super.prepareMavenWebAppScripts(b, constructRequests,
 				"gallery_base.js",
 				"gallery_caches.js",
-				"gallery_cache_items.js");
+				"gallery_cache_items.js",
+				"gallery_cache_all_provisional_some_complete.js",
+				"gallery_mode_base.js",
+				"gallery_mode_width_hint.js",
+				"gallery_mode_width_specific.js",
+				"gallery_mode_height_hint.js",
+				"gallery_mode_height_specific.js");
 
 
 		return jsRuntime;

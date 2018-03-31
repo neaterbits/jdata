@@ -32,8 +32,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 	// As the user scrolls, we update this height and replace the elements to view
 	
 	if (typeof this.upperPlaceHolder === 'undefined') {
-		this.upperPlaceHolder = document.createElement('div');
-		this._getRenderDiv().append(this.upperPlaceHolder);
+		this.upperPlaceHolder = t.galleryView.createUpperPlaceHolder();
+		this.galleryView.appendToContainer(this._getRenderDiv(), this.upperPlaceHolder);
 	}
 
 	this.totalNumberOfItems = totalNumberOfItems;

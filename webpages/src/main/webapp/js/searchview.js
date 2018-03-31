@@ -166,7 +166,50 @@ function SearchView(
 				},
 				{
 					makeProvisionalHTMLElement 	: _makeGalleryProvisionalItem,
-					makeCompleteHTMLElement 	: _makeGalleryImageItem
+					makeCompleteHTMLElement 	: _makeGalleryImageItem,
+					
+					// Element access methods
+					createUpperPlaceHolder : function () { return document.createElement('div'); },
+					createRowContainer : function () { return document.createElement('div'); },
+					
+					appendToContainer : function(container, element) { container.append(element); },
+					getElementWidth  : function(element) {  return element.clientWidth;  },
+					getElementHeight : function(element) {  return element.clientHeight; },
+					
+					setElementHeight : function(element, heightPx) {
+						element.style.height = heightPx + 'px';
+					},
+
+					setCSSClasses : function(element, classes) {
+						element.setAttribute('class', classes);
+					},
+					
+					applyItemStyles : function(itemElement, rowHeight, itemWidth, itemHeight, spacing, visible) {
+					
+						var styling = 'position : relative; ' +
+							/*
+							'display : inline-block; ' +
+							*/
+							'float : left; ' +
+							'margin-left : ' + spacing + 'px; ' +
+							'background-color : white; ';
+						
+						if (itemHeight != null) {
+							styling += 'top : ' + (rowHeight - itemHeight) / 2 + 'px; ';
+							styling += 'height : ' + itemHeight + 'px; ';
+						}
+						
+						if (itemWidth != null) {
+							'width : ' + itemWidth + 'px; ';
+						}
+						
+						if (!visible) {
+							// set hidden if we need to find item size
+							styling += 'visibility: hidden; '
+						}
+							
+						itemElement.setAttribute('style', styling);
+					}
 				}
 		);
 	}
