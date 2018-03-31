@@ -12,6 +12,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 import com.test.cv.common.IOUtil;
+import com.test.cv.jsutils.BaseJSTest;
+import com.test.cv.jsutils.JSFunction;
+import com.test.cv.jsutils.JSRuntime;
+import com.test.cv.jsutils.JSScript;
 
 public class GalleryCacheItemsTest extends BaseJSTest {
 
