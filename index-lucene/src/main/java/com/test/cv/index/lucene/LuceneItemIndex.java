@@ -73,6 +73,7 @@ import com.test.cv.search.criteria.InCriterium;
 import com.test.cv.search.criteria.IntegerCriterium;
 import com.test.cv.search.criteria.IntegerRange;
 import com.test.cv.search.criteria.IntegerRangesCriterium;
+import com.test.cv.search.criteria.NoValueCriterium;
 import com.test.cv.search.criteria.RangesCriterium;
 import com.test.cv.search.criteria.StringCriterium;
 import com.test.cv.search.facets.FacetUtils;
@@ -508,6 +509,9 @@ public class LuceneItemIndex implements ItemIndex {
 			else if (criterium instanceof RangesCriterium<?, ?>) {
 				queryAndOccur = createRangeQuery(criterium, fieldName);
 			}
+			else if (criterium instanceof NoValueCriterium) {
+				queryAndOccur = createNoValueQuery(criterium, fieldName);
+			}
 			else {
 				throw new UnsupportedOperationException("Unknown criterium");
 			}
@@ -692,6 +696,19 @@ public class LuceneItemIndex implements ItemIndex {
 		}
 
 		return query;
+	}
+
+	private static QueryAndOccur createNoValueQuery(Criterium criterium, String fieldName) {
+
+		
+		final Query query = null;
+		final Occur occur = Occur.MUST;
+		
+		//return new QueryAndOccur(query, occur);
+		throw new UnsupportedOperationException("TODO - match only on documents that have no value set - perhaps just skip this attribute completely? "
+				+ "However 'Other' in UI is indeed a specific selection so we should skip any documents that do have a value here"
+				+ "Probably easiest done with a mus-not query and then attribute type specifc, eg. range over all integers for ints etc"
+				+ " !!! NOTE inefficient so probably should find these and add them last in query, behind matching-queries !!!");
 	}
 
 	private static QueryAndOccur createRangeQuery(Criterium criterium, String fieldName) {

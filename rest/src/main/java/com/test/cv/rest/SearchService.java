@@ -37,6 +37,7 @@ import com.test.cv.search.criteria.EnumInCriterium;
 import com.test.cv.search.criteria.IntegerInCriterium;
 import com.test.cv.search.criteria.IntegerRange;
 import com.test.cv.search.criteria.IntegerRangesCriterium;
+import com.test.cv.search.criteria.NoValueCriterium;
 import com.test.cv.search.criteria.StringInCriterium;
 import com.test.cv.search.facets.IndexFacetedAttributeResult;
 import com.test.cv.search.facets.IndexRangeFacetedAttributeResult;
@@ -184,7 +185,14 @@ public class SearchService extends BaseService {
 		final List<Criterium> criteria = new ArrayList<>(searchCriteria.length);
 		
 		for (int i = 0; i < searchCriteria.length; ++ i) {
-			criteria.add(convertCriterium(searchCriteria[i]));
+			final Criterium criterium = convertCriterium(searchCriteria[i]);
+			
+			if (criterium == null) {
+				// Probably no checkboxes were selected
+			}
+			else {
+				criteria.add(criterium);
+			}
 		}
 
 		return criteria;
@@ -281,8 +289,13 @@ public class SearchService extends BaseService {
 				throw new UnsupportedOperationException("Unknown attribute type " + attribute.getAttributeType());
 			}
 		}
+		else if (searchCriterium.getOtherSelected()) {
+			// Only other-values, eg "other" selected
+			criterium = new NoValueCriterium(attribute);
+		}
 		else {
-			throw new IllegalArgumentException("Neither values nor ranges set");
+			// Nothing selected for criterium so ignoe
+			criterium = null;
 		}
 
 		return criterium;
