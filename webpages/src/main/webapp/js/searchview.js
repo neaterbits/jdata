@@ -86,7 +86,8 @@ function SearchView(
 		var url = this.searchUrl;
 		
 		for (var i = 0; i < types.length; ++ i) {
-			url += "&type=";
+			url += i == 0 ? "?" : "&";
+			url += "itemType=";
 			url += types[i];
 		}
 
