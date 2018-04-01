@@ -326,12 +326,15 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 
 	var lastRenderedElement = null;
 	
-	for (var i = startIndex; i < this._getTotalNumberOfItems(); i += (downwards ? numColumns : -numColumns)) {
+	var i;
+	var itemsThisRow;
+	
+	for (i = startIndex; i < this._getTotalNumberOfItems(); i += (downwards ? numColumns : -numColumns)) {
 
 		// Last row might not have a full number of items
-		var itemsThisRow = i + numColumns >= this._getTotalNumberOfItems()
+		itemsThisRow = i + numColumns >= this._getTotalNumberOfItems()
 			? this.totalNumberOfItems - i
-			: numColumns; 
+			: numColumns;
 		
 		var rowDiv = this.galleryView.createRowContainer();
 
@@ -365,6 +368,17 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 		if (heightAdded >= heightToAdd) {
 			lastRenderedElement = { 'index' : i + itemsThisRow - 1, 'yPos' :  y };
 			break;
+		}
+	}
+	
+	if (lastRenderedElement == null) {
+		if (rowsAdded > 0) {
+			// Added rows but never reached heightAdded >= heightToAdd which means we
+			// we we reached < 0 or > total, depending direction of adding
+			lastRenderedElement = { 'index' : i + itemsThisRow - 1, 'yPos' :  y };
+		}
+		else {
+			// Just return null which means no rows added
 		}
 	}
 
