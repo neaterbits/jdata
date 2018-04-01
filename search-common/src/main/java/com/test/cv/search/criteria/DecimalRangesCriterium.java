@@ -6,7 +6,7 @@ import com.test.cv.model.ItemAttribute;
 
 public class DecimalRangesCriterium extends RangesCriterium<BigDecimal, DecimalRange> {
 
-	public DecimalRangesCriterium(ItemAttribute attribute, DecimalRange[] ranges) {
-		super(attribute, ranges);
+	public DecimalRangesCriterium(ItemAttribute attribute, DecimalRange[] ranges, boolean includeItemsWithNoValue) {
+		super(attribute, ranges, includeItemsWithNoValue);
 	}
 }

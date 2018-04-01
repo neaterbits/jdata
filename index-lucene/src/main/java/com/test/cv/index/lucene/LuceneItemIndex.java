@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -75,6 +76,7 @@ import com.test.cv.search.criteria.IntegerCriterium;
 import com.test.cv.search.criteria.IntegerRange;
 import com.test.cv.search.criteria.IntegerRangesCriterium;
 import com.test.cv.search.criteria.NoValueCriterium;
+import com.test.cv.search.criteria.Range;
 import com.test.cv.search.criteria.RangesCriterium;
 import com.test.cv.search.criteria.StringCriterium;
 import com.test.cv.search.facets.FacetUtils;
@@ -896,50 +898,53 @@ public class LuceneItemIndex implements ItemIndex {
 		if (criterium instanceof IntegerRangesCriterium) {
 			final IntegerRangesCriterium integerRangeCriterium = (IntegerRangesCriterium)criterium;
 
-			final IntegerRange [] ranges = integerRangeCriterium.getRanges();
-			
-			if (ranges.length == 1) {
-				query = createIntegerRangeQuery(fieldName, ranges[0]);
-			}
-			else {
-				// Nest in should-query
-				final BooleanQuery.Builder rangeBooleanQuery = new BooleanQuery.Builder();
-                
-				for (IntegerRange range : ranges) {
-					rangeBooleanQuery.add(createIntegerRangeQuery(fieldName, range), Occur.SHOULD);
-				}
-
-				query = rangeBooleanQuery.build();
-			}
+			query = createRangesQuery(integerRangeCriterium, (f, r) -> createIntegerRangeQuery(f, r));
 			
 			occur = Occur.MUST;
 		}
 		else if (criterium instanceof DecimalRangesCriterium) {
 			final DecimalRangesCriterium decimalRangeCriterium = (DecimalRangesCriterium)criterium;
 			
-			final DecimalRange [] ranges = decimalRangeCriterium.getRanges();
+			query = createRangesQuery(decimalRangeCriterium, (f, r) -> createDecimalRangeQuery(f, r));
 
-			if (ranges.length == 1) {
-				query = createDecimalRangeQuery(fieldName, ranges[0]);
-			}
-			else {
-				// Nest in should-query
-				final BooleanQuery.Builder rangeBooleanQuery = new BooleanQuery.Builder();
-				
-				for (DecimalRange range : ranges) {
-					rangeBooleanQuery.add(createDecimalRangeQuery(fieldName, range), Occur.SHOULD);
-				}
-
-				query = rangeBooleanQuery.build();
-			}
-			
 			occur = Occur.MUST;
 		}
 		else {
 			throw new UnsupportedOperationException("Reange query");
 		}
+		
 
 		return new QueryAndOccur(query, occur);
+	}
+
+	private static <T extends Comparable<T>, RANGE extends Range<T>, CRITERIUM extends RangesCriterium<T, RANGE>>
+		Query createRangesQuery(CRITERIUM criterium, BiFunction<String, RANGE, Query> createQueryForOneRange) {
+		
+		final Query query;
+		final String fieldName = criterium.getAttribute().getName();
+
+		final RANGE [] ranges = criterium.getRanges();
+		
+		if (ranges.length == 1 && !criterium.includeItemsWithNoValue()) {
+			query = createQueryForOneRange.apply(fieldName, ranges[0]);
+		}
+		else {
+			// Nest in should-query
+			final BooleanQuery.Builder rangeBooleanQuery = new BooleanQuery.Builder();
+            
+			for (RANGE range : ranges) {
+				rangeBooleanQuery.add(createQueryForOneRange.apply(fieldName, range), Occur.SHOULD);
+			}
+
+			if (criterium.includeItemsWithNoValue()) {
+				// Add a no-match query
+				rangeBooleanQuery.add(createNoValueQueryOnly(criterium, fieldName), Occur.SHOULD);
+			}
+
+			query = rangeBooleanQuery.build();
+		}
+
+		return query;
 	}
 
 	private static Query createIntegerRangeQuery(String fieldName, IntegerRange range) {

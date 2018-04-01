@@ -247,6 +247,7 @@ public class FacetUtils {
 			}
 		}
 		else {
+
 			// No value so add to no-value count
 			assureResult(attribute, attributeResults).addToNoAttributeValueCount();
 		}

@@ -26,7 +26,7 @@ public abstract class IndexFacetedAttributeResult {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + " [attribute=" + attribute.getName() + "]";
+		return getClass().getSimpleName() + " [attribute=" + attribute.getName() + ", noAttributeValueCount=" + noAttributeValueCount + "]";
 	}
 
 	public void addToNoAttributeValueCount() {

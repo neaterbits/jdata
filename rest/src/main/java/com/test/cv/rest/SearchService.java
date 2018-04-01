@@ -218,6 +218,10 @@ public class SearchService extends BaseService {
 		}
 
 		final Criterium criterium;
+
+		final boolean includeItemsWithNoValue = searchCriterium.getOtherSelected() != null
+				? searchCriterium.getOtherSelected()
+			: false;
 		
 		final SearchRange [] ranges = searchCriterium.getRanges();
 		if (ranges != null) {
@@ -238,7 +242,7 @@ public class SearchService extends BaseService {
 					
 					integerRanges[i] = integerRange;
 				}
-				criterium = new IntegerRangesCriterium(attribute, integerRanges);
+				criterium = new IntegerRangesCriterium(attribute, integerRanges, includeItemsWithNoValue);
 				break;
 				
 			case DECIMAL:
@@ -254,7 +258,7 @@ public class SearchService extends BaseService {
 					decimalRanges[i] = decimalRange;
 				}
 
-				criterium = new DecimalRangesCriterium(attribute, decimalRanges);
+				criterium = new DecimalRangesCriterium(attribute, decimalRanges, includeItemsWithNoValue);
 				break;
 				
 			default:
@@ -263,9 +267,6 @@ public class SearchService extends BaseService {
 		}
 		else if (searchCriterium.getValues() != null) {
 			
-			final boolean includeItemsWithNoValue = searchCriterium.getOtherSelected() != null
-					? searchCriterium.getOtherSelected()
-				: false;
 			
 			switch (attribute.getAttributeType()) {
 			case STRING:
