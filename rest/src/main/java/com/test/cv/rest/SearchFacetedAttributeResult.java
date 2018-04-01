@@ -8,6 +8,8 @@ public abstract class SearchFacetedAttributeResult {
 	// Readable name to display in UI
 	private String name;
 	
+	// Elements that had no attribute value that could be faceted (ie. 'Other' or 'Unknown' checkbox in UI)
+	private Integer noAttributeValueCount;
 
 	public String getId() {
 		return id;
@@ -23,5 +25,13 @@ public abstract class SearchFacetedAttributeResult {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Integer getNoAttributeValueCount() {
+		return noAttributeValueCount;
+	}
+
+	public void setNoAttributeValueCount(int noAttributeValueCount) {
+		this.noAttributeValueCount = noAttributeValueCount;
 	}
 }

@@ -111,9 +111,13 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 						
 						cur = t._addFacetAttributeRange(viewElementFactory, cur, element);
 					}
-					else if (kind === 'attributeOther') {
-
+					else if (kind === 'attributeValueUnknown')
+						// 'Other' text for values
 						cur = t._addFacetOther(viewElementFactory, cur, element);
+					
+					else if (kind === 'attributeRangeUnknown') {
+						// 'Unknown' text for ranges
+						cur = t._addFacetUnknown(viewElementFactory, cur, element);
 					}
 					else {
 						throw "Neither type nor attribute: " + kind;
@@ -270,27 +274,38 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		viewElementFactory.setCheckboxOnClick(attributeValue.checkboxItem, onCheckboxClicked);
 	}
 
+	// For adding 'other' or 'unknown' elements, ie. where items have no value for some attribute
 	this._addFacetOther = function(viewElementFactory, cur, element, index) {
+		var attributeValue = this._addFacetUnknownValueOrRange(viewElementFactory, cur, element, index, 'Other');
+
+		cur.addValue(attributeValue, index);
+	}
+
+	this._addFacetUnknown = function(viewElementFactory, cur, element, index) {
+		var attributeRange = this._addFacetUnknownValueOrRange(viewElementFactory, cur, element, index, 'Unknown');
 		
+		cur.addRange(attributeRange, index);
+	}
+
+	this._addFacetUnknownValueOrRange = function(viewElementFactory, cur, element, index, displayText) {
+
 		// Attribute within a type in list of attributes
 		var attributeElement = viewElementFactory.createAttributeValueElement(
 				cur.getViewElement(),
-				'Other',
+				displayText,
 				element.matchCount,
 				false,
 				true);
-		
-		var attributeValue = new FacetAttributeOther(
+
+		var attributeValue = new FacetAttributeOtherOrUnknown(
 								viewElementFactory,
 								cur.getModelType(),
 								cur.getAttributeId(),
 								attributeElement.listItem,
 								attributeElement.checkboxItem);
-		
+
 		this._setAttributeCheckboxListener(viewElementFactory, attributeValue, false);
 				
-		cur.addValue(attributeValue, index);
-
 		return attributeValue;
 	}
 	
@@ -582,7 +597,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 								
 								criterium.ranges.push(range);
 							}
-							else if (value.getClassName() == 'FacetAttributeOther') {
+							else if (value.getClassName() == 'FacetAttributeOtherOrUnknown') {
 								criterium.otherSelected = true;
 							}
 						}
@@ -1132,11 +1147,11 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		return this.modelRange;
 	}
 
-	function FacetAttributeOther(viewElementFactory, modelType, attributeId, listItem, checkboxItem) {
-		FacetAttributeValue.call(this, 'FacetAttributeOther', viewElementFactory, modelType, attributeId, listItem, checkboxItem);
+	function FacetAttributeOtherOrUnknown(viewElementFactory, modelType, attributeId, listItem, checkboxItem) {
+		FacetAttributeValue.call(this, 'FacetAttributeOtherOrUnknown', viewElementFactory, modelType, attributeId, listItem, checkboxItem);
 	}
 
-	FacetAttributeOther.prototype = Object.create(FacetAttributeValue.prototype);
+	FacetAttributeOtherOrUnknown.prototype = Object.create(FacetAttributeValue.prototype);
 
 	function isNotNull(obj) {
 		return typeof obj !== 'undefined' && obj != null;

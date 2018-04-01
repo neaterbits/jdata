@@ -364,9 +364,6 @@ public class SearchService extends BaseService {
 				}
 				
 				searchSingleValueFacetedAttribute.setValues(searchValues);
-				if (indexSingleValueFacetedAttributeResult.getNoAttributeValueCount() != 0) {
-					searchSingleValueFacetedAttribute.setNoAttributeValueCount(indexSingleValueFacetedAttributeResult.getNoAttributeValueCount());
-				}
 
 				searchFacetedAttribute = searchSingleValueFacetedAttribute;
 			}
@@ -424,6 +421,10 @@ public class SearchService extends BaseService {
 			}
 			else {
 				throw new UnsupportedOperationException("Unknown index faceted attribute result type " + indexFacetedAttribute.getClass());
+			}
+
+			if (indexFacetedAttribute.getNoAttributeValueCount() != 0) {
+				searchFacetedAttribute.setNoAttributeValueCount(indexFacetedAttribute.getNoAttributeValueCount());
 			}
 
 			searchFacetedAttribute.setId(indexFacetedAttribute.getAttribute().getName());

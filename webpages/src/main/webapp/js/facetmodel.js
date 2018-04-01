@@ -68,7 +68,7 @@ function FacetModel(serviceUrl, allowCrossOrigin) {
 
 					if (typeof element.noAttributeValueCount !== 'undefined' && element.noAttributeValueCount > 0) {
 						// There are elements that have no value for this element, add an element for this too
-						onArrayElement('attributeOther', { matchCount : element.noAttributeValueCount }, attrValueIdx, valuesArrayCur);
+						onArrayElement('attributeValueUnknown', { matchCount : element.noAttributeValueCount }, attrValueIdx, valuesArrayCur);
 					}
 				}
 				else if (typeof element.ranges !== 'undefined') {
@@ -80,6 +80,10 @@ function FacetModel(serviceUrl, allowCrossOrigin) {
 						var attrRangeCur = onArrayElement('attributeRange', attrRange, attrRangeIdx, rangesArrayCur);
 					} 
 					
+					if (typeof element.noAttributeValueCount !== 'undefined' && element.noAttributeValueCount > 0) {
+						// There are elements that have no value for this element, add an element for this too
+						onArrayElement('attributeRangeUnknown', { matchCount : element.noAttributeValueCount }, attrValueIdx, rangesArrayCur);
+					}
 				}
 			}
 			else {
