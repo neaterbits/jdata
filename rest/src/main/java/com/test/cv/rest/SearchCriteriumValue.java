@@ -4,21 +4,21 @@ public class SearchCriteriumValue {
 
 	private Object value; // value: string, integer or decimal
 	
-	private SearchCriteria subCriteria; // eg. county under state
+	private SearchCriterium [] subCriteria; // eg. county under state
 
-	Object getValue() {
+	public Object getValue() {
 		return value;
 	}
 
-	void setValue(Object value) {
+	public void setValue(Object value) {
 		this.value = value;
 	}
 
-	SearchCriteria getSubCriteria() {
+	public SearchCriterium [] getSubCriteria() {
 		return subCriteria;
 	}
 
-	void setSubCriteria(SearchCriteria subCriteria) {
+	public void setSubCriteria(SearchCriterium [] subCriteria) {
 		this.subCriteria = subCriteria;
 	}
 }

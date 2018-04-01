@@ -531,7 +531,12 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	this.collectCriteriaAndTypesFromSelections = function() {
 
 		var types = {};
-		var criteria = [];
+		var toplevelCriteria = [];
+		
+		// A stack for figuring out whether should add to model as subattributes to a current value
+		// Eg model is a subattribute of make and hence should put model criteria under make so
+		// can qualify that in DB query (eg two different makes withs same model or more likely two states in a country with counties wtih same name)
+		var valuesStack = [];
 		
 		this.rootTypes.iterate(function(className, obj) {
 			if (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeList') {
@@ -552,16 +557,63 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 					}
 				}
 				
+				var criterium = null;
+				
 				if (numSelected > 0) {
 					
 					// Add type so that query can have list of which types attribute are from (for faster search)
 					types[obj.getModelType()] = '';
 
-					var criterium = {
-						type : obj.getModelType(),
-						attribute : obj.getAttributeId(),
-					};
-					
+					// Are we in a subattribute?
+					if (valuesStack.length != 0) {
+						var valueStackItem = valuesStack[valuesStack.length - 1];
+						
+						if (valueStackItem.type !== 'value') {
+							throw "Expected value item on stack, got " + JSON.stringify(valueStackItem);
+						}
+
+						var listStackItem = valuesStack[valuesStack.length - 2];
+						if (listStackItem.type !== 'list') {
+							throw "Expected list item on stack, got " + JSON.stringify(listStackItem);
+						}
+						
+						// Append as sub-criteria to last list
+						var criteriumValue = null; // JS object, not model value
+						
+						for (var i = 0; i < listStackItem.criterium.values.length; ++ i) {
+							var v = listStackItem.criterium.values[i];
+							
+							if (v.value === valueStackItem.modelValue) {
+								criteriumValue = v;
+								break;
+							}
+						}
+
+						if (criteriumValue == null) {
+							throw "No criterium value for " + valueStackItem.modelValue;
+						}
+
+						if (typeof criteriumValue.subCriteria === 'undefined') {
+							criteriumValue.subCriteria = [];
+						}
+
+						criterium = {
+								type : obj.getModelType(),
+								attribute : obj.getAttributeId(),
+						};
+
+						// Add to sub-criteria array
+						criteriumValue.subCriteria.push(criterium);
+					}
+					else {
+						criterium = {
+							type : obj.getModelType(),
+							attribute : obj.getAttributeId(),
+						};
+
+						// push to toplevel
+						toplevelCriteria.push(criterium);
+					}
 					
 					// Scan again to add values to search criteria
 					for (var i = 0; i < attributeValues.length; ++ i) {
@@ -602,13 +654,34 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 							}
 						}
 					}
-					
-					criteria.push(criterium);
+				}
+
+				valuesStack.push({ type : 'list', criterium : criterium })
+			}
+			else if (className === 'FacetAttributeSingleValue') {
+				valuesStack.push({ type : 'value', modelValue : obj.getModelValue() })
+			}
+		},
+		
+		// after recursion to subelements
+		function(className, obj) {
+			if (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeList') {
+				var item = valuesStack.pop();
+				
+				if (item.type !== 'list') {
+					throw "Expected list";
+				}
+			}
+			else if (className === 'FacetAttributeSingleValue') {
+				var item = valuesStack.pop();
+				
+				if (item.type !== 'value') {
+					throw "Expected value";
 				}
 			}
 		});
 
-		return { 'types' : Object.keys(types), criteria };
+		return { 'types' : Object.keys(types), 'criteria' : toplevelCriteria };
 	};
 
 	this._makeCriterium = function(attributeId, type, selectionCount) {
@@ -724,13 +797,13 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		this.inUse = inUse;
 	}
 	
-	FacetsElementBase.prototype._iterateIfDefinedAndNonNull = function(iterable, each) {
+	FacetsElementBase.prototype._iterateIfDefinedAndNonNull = function(iterable, before, after) {
 
 		var exitCode = ITER_CONTINUE;
 
 		if (isNotNull(iterable)) {
 			
-			var iter = iterable._iterateCurAndSub(each, this);
+			var iter = iterable._iterateCurAndSub(before, after, this);
 
 			if (iter == ITER_SKIP_SUB) {
 				throw "Should not return ITER_SKIP_SUB from sub elements";
@@ -742,13 +815,26 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		return exitCode;
 	}
 
-	FacetsElementBase.prototype.iterate = function(each) {
-		this._iterateSub(function(className, obj, parent) {
+	FacetsElementBase.prototype.iterate = function(before, after) {
+		
+		if (typeof before === 'undefined') {
+			throw "before callback is undefined";
+		}
+		
+		if (typeof after === 'undefined') {
+			// Set to null for simpler test
+			after = null;
+		}
 
-			each(className, obj);
+		this._iterateSub(
+			function(className, obj, parent) {
+	
+				before(className, obj);
+				
+				return ITER_CONTINUE;
+			},
 			
-			return ITER_CONTINUE;
-		});
+			after);
 	}
 	
 	FacetsElementBase.prototype.iterateWithReturnValue = function(each) {
@@ -758,12 +844,12 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	}
 
 	
-	FacetsElementBase.prototype._iterateArray = function(array, each) {
+	FacetsElementBase.prototype._iterateArray = function(array, before, after) {
 		
 		var exitCode = ITER_CONTINUE;
 		
 		for (var i = 0; i < array.length; ++ i) {
-			var iter = array[i]._iterateCurAndSub(each, this);
+			var iter = array[i]._iterateCurAndSub(before, after, this);
 			
 			if (iter == ITER_CONTINUE ) {
 				// Continue loop
@@ -784,13 +870,13 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	}
 
 
-	FacetsElementBase.prototype._iterateCurAndSub = function(each, parent) {
+	FacetsElementBase.prototype._iterateCurAndSub = function(before, after, parent) {
 		
-		var iter = each(this.className, this, parent);
+		var iter = before(this.className, this, parent);
 		var exitCode;
 		
 		if (iter == ITER_CONTINUE ) {
-			exitCode = this._iterateSub(each);
+			exitCode = this._iterateSub(before, after);
 		}
 		else if (iter == ITER_BREAK) {
 			exitCode = ITER_BREAK;
@@ -800,6 +886,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		}
 		else {
 			throw "Unknown iter code: " + iter;
+		}
+		
+		if (after !== null) {
+			after(this.className, this.parent);
 		}
 
 		return exitCode;
@@ -849,14 +939,14 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	
 	FacetTypeContainer.prototype = Object.create(FacetsElementBase.prototype);
 
-	FacetTypeContainer.prototype._iterateSub = function(each) {
+	FacetTypeContainer.prototype._iterateSub = function(before, after) {
 
-		var iter = this._iterateIfDefinedAndNonNull(this.typeList, each);
+		var iter = this._iterateIfDefinedAndNonNull(this.typeList, before, after);
 		if (iter === ITER_BREAK) {
 			return ITER_BREAK;
 		}
 
-		iter = this._iterateIfDefinedAndNonNull(this.attributeList, each);
+		iter = this._iterateIfDefinedAndNonNull(this.attributeList, before, after);
 		if (iter === ITER_BREAK) {
 			return ITER_BREAK;
 		}
@@ -917,8 +1007,8 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	FacetTypeList.prototype = Object.create(FacetsElementBase.prototype);
 
-	FacetTypeList.prototype._iterateSub = function(each) {
-		return this._iterateArray(this.types, each);
+	FacetTypeList.prototype._iterateSub = function(before, after) {
+		return this._iterateArray(this.types, before, after);
 	}
 
 	FacetTypeList.prototype.addType = function(type, index) {
@@ -940,8 +1030,8 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	FacetAttributeList.prototype = Object.create(FacetsElementBase.prototype);
 
-	FacetAttributeList.prototype._iterateSub = function(each) {
-		return this._iterateArray(this.attributes, each);
+	FacetAttributeList.prototype._iterateSub = function(before, after) {
+		return this._iterateArray(this.attributes, before, after);
 	}
 
 	FacetAttributeList.prototype.hasAttribute = function(attributeId) {
@@ -968,12 +1058,12 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	
 	FacetAttribute.prototype = Object.create(FacetsElementBase.prototype);
 
-	FacetAttribute.prototype.getAttributeId = function(each) {
+	FacetAttribute.prototype.getAttributeId = function() {
 		return this.attributeId;
 	}
 
-	FacetAttribute.prototype._iterateSub = function(each) {
-		return this.attributeValueOrRangeList._iterateCurAndSub(each, this);
+	FacetAttribute.prototype._iterateSub = function(before, after) {
+		return this.attributeValueOrRangeList._iterateCurAndSub(before, after, this);
 	}
 
 	FacetAttribute.prototype.setAttributeValueOrRangeList = function(attributeValueOrRangeList) {
@@ -1003,8 +1093,8 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	FacetAttributeValueList.prototype = Object.create(FacetsElementBase.prototype);
 
-	FacetAttributeValueList.prototype._iterateSub = function(each) {
-		return this._iterateArray(this.values, each);
+	FacetAttributeValueList.prototype._iterateSub = function(before, after) {
+		return this._iterateArray(this.values, before, after);
 	}
 
 	FacetAttributeValueList.prototype.getAttributeId = function() {
@@ -1035,8 +1125,8 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	FacetAttributeRangeList.prototype = Object.create(FacetsElementBase.prototype);
 
-	FacetAttributeRangeList.prototype._iterateSub = function(each) {
-		return this._iterateArray(this.ranges, each);
+	FacetAttributeRangeList.prototype._iterateSub = function(before, after) {
+		return this._iterateArray(this.ranges, before, after);
 	}
 
 	FacetAttributeRangeList.prototype.getAttributeId = function() {
@@ -1087,9 +1177,9 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		return this.attributeId;
 	}
 
-	FacetAttributeValue.prototype._iterateSub = function(each) {
+	FacetAttributeValue.prototype._iterateSub = function(before, after) {
 		if (isNotNull(this.attributeList)) {
-			return this.attributeList._iterateCurAndSub(each, this);
+			return this.attributeList._iterateCurAndSub(before, after, this);
 		}
 		
 		return ITER_CONTINUE;
