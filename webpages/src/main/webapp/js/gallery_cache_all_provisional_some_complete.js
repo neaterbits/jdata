@@ -89,7 +89,21 @@ GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level, width
 	this.log(level, 'Visible height: ' + visibleHeight);
 	
 	// Start at the current ones
-	this._addProvisionalDivs(level + 1, 0, 0, numColumns, visibleHeight);
+	var rendered = this._addProvisionalDivs(level + 1, 0, 0, numColumns, visibleHeight);
+
+	if (rendered != null) {
+		this.visibleElements = {
+			firstVisibleY : 0,
+			firstRenderedY : 0, // renders a bit outside of display since adding complete rows
+			firstVisibleIndex : 0,
+			lastVisibleY : visibleHeight - 1,
+			lastRenderedY : rendered.yPos, // renders a bit outside of display since adding complete rows
+			lastVisibleIndex : rendered.index
+		};
+
+		// Update complete-rendering as well
+		this._downloadAndRenderComplete(level, this.visibleElements);
+	}
 }
 
 
@@ -140,39 +154,40 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 		|| lastVisibleElements.lastVisibleIndex != this.visibleElements.lastVisibleIndex) {
 	
 		// Update cache view to point to new display area, it will also preload elements around display area
-		
-		var visibleCount = this.visibleElements.lastVisibleIndex - this.visibleElements.firstVisibleIndex + 1;
-	
-		var visibleElements = this.visibleElements;
-		
-		var t = this;
-		
-		// TODO also add callback for preload data since we would want to precreate divs? Test whether is good enough without
-		this.cacheItems.updateVisibleArea(
-				level + 1,
-				this.visibleElements.firstVisibleIndex,
-				visibleCount,
-				this.totalNumberOfItems,
-				
-				function (index, count, downloadedData) {
-					
-					// Only called when haven't scrolled (eg no other call to updateVisibleArea)
-					if (index !== visibleElements.firstVisibleIndex) {
-						throw "Index mismatch: requested=" + visibleElements.firstVisibleIndex + ", retrieved: " + index;
-					}
-					if (count !== visibleCount) {
-						throw "Count mismatch: " + count + "/" + visibleCount;
-					}
-					if (downloadedData.length !== visibleCount) {
-						throw "Number of items mismatch count, expected " + visibleCount + ", got " + downloadedData.length;
-					}
-	
-					// Can now update rows from data
-					t._showCompleteForRows(0, index, count, downloadedData);
-				});
+		this._downloadAndRenderComplete(level + 1, this.visibleElements);
 	}
 
 	this.exit(level, 'updateOnScroll');
+}
+
+GalleryCacheAllProvisionalSomeComplete.prototype._downloadAndRenderComplete = function(level, visibleElements) {
+	var visibleCount = visibleElements.lastVisibleIndex - visibleElements.firstVisibleIndex + 1;
+	
+	var t = this;
+	
+	// TODO also add callback for preload data since we would want to precreate divs? Test whether is good enough without
+	this.cacheItems.updateVisibleArea(
+			level + 1,
+			this.visibleElements.firstVisibleIndex,
+			visibleCount,
+			this.totalNumberOfItems,
+			
+			function (index, count, downloadedData) {
+				
+				// Only called when haven't scrolled (eg no other call to updateVisibleArea)
+				if (index !== visibleElements.firstVisibleIndex) {
+					throw "Index mismatch: requested=" + visibleElements.firstVisibleIndex + ", retrieved: " + index;
+				}
+				if (count !== visibleCount) {
+					throw "Count mismatch: " + count + "/" + visibleCount;
+				}
+				if (downloadedData.length !== visibleCount) {
+					throw "Number of items mismatch count, expected " + visibleCount + ", got " + downloadedData.length;
+				}
+
+				// Can now update rows from data
+				t._showCompleteForRows(0, index, count, downloadedData);
+			});
 }
 
 
