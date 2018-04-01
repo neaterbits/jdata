@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.http.HttpHost;
@@ -66,6 +67,7 @@ import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.Criterium;
 import com.test.cv.search.criteria.DecimalCriterium;
 import com.test.cv.search.criteria.InCriterium;
+import com.test.cv.search.criteria.InCriteriumValue;
 import com.test.cv.search.criteria.IntegerCriterium;
 import com.test.cv.search.criteria.StringCriterium;
 import com.test.cv.search.facets.FacetUtils;
@@ -74,8 +76,6 @@ import com.test.cv.search.facets.IndexRangeFacetedAttributeResult;
 import com.test.cv.search.facets.IndexSingleValueFacetedAttributeResult;
 import com.test.cv.search.facets.ItemsFacets;
 import com.test.cv.search.facets.TypeFacets;
-
-import static com.test.cv.common.ArrayUtil.convertArray;
 
 // TODO use multiple indices, one per type? instead of merging all into one index. Multiple types per index is obsleted in >= 6.x
 // See https://www.elastic.co/guide/en/elasticsearch/reference/5.3/general-recommendations.html#sparsity
@@ -172,7 +172,7 @@ public class ElasticSearchIndex implements ItemIndex {
 
 			final ItemAttribute attribute = value.getAttribute();
 
-			sb.append("  ").append('"').append(attribute.getName()).append('"').append(" : ");
+			sb.append("  ").append('"').append(ItemIndex.fieldName(attribute)).append('"').append(" : ");
 
 			final Object v = value.getValue();
 			final String s;
@@ -473,7 +473,7 @@ public class ElasticSearchIndex implements ItemIndex {
 					final SearchHit hit = hits[initialIdx + i];
 					
 					final Map<String, Object> sourceMap = hit.getSourceAsMap();
-					final String title = (String)sourceMap.get(titleAttribute.getName());
+					final String title = (String)sourceMap.get(ItemIndex.fieldName(titleAttribute));
 
 					@SuppressWarnings("unchecked")
 					final List<Integer> thumbs = (List<Integer>)sourceMap.get(FIELD_THUMBS);
@@ -554,7 +554,7 @@ public class ElasticSearchIndex implements ItemIndex {
 
 				final IndexFacetedAttributeResult attributeResult;
 				
-				final IndexFacetedAttributeResult existingAttrbuteResult = attributeResults.get(attribute);
+				final IndexFacetedAttributeResult existingAttributeResult = attributeResults.get(attribute);
 				
 				if (subAggregation instanceof Range) {
 					
@@ -582,7 +582,7 @@ public class ElasticSearchIndex implements ItemIndex {
 					
 					attributeResults.put(attribute, attributeResult);
 					
-					if (existingAttrbuteResult != null) {
+					if (existingAttributeResult != null) {
 						// had 
 					}
 				}
@@ -612,23 +612,24 @@ public class ElasticSearchIndex implements ItemIndex {
 					
 					attributeResult = null;
 					
-					final IndexFacetedAttributeResult missingAttributeResult = FacetUtils.assureResult(attribute, attributeResults);
 					
 					if (missing.getDocCount() > 0L) {
+						final IndexFacetedAttributeResult missingAttributeResult = FacetUtils.assureResult(attribute, attributeResults);
+
 						missingAttributeResult.addToNoAttributeValueCount((int)missing.getDocCount());
+
+						attributeResults.put(attribute, missingAttributeResult);
 					}
-					
-					attributeResults.put(attribute, missingAttributeResult);
 				}
 				else {
 					throw new UnsupportedOperationException("Unknown aggregation type: " + subAggregation.getClass());
 				}
 
 				if (attributeResult != null) {
-					if (existingAttrbuteResult != null) {
-						// missing-attribute was already found and added to hash so update count
-						// for opposite order, attributeResult will be null in missing-case so will never reach heres
-						attributeResult.addToNoAttributeValueCount(existingAttrbuteResult.getNoAttributeValueCount());
+					if (existingAttributeResult != null) {
+						// missing-attribute was already found and added to hash, so update count from already found attribute before we put new value in hash
+						// For opposite order (value attributes found first), attributeResult will be null in missing-case so will never reach here
+						attributeResult.addToNoAttributeValueCount(existingAttributeResult.getNoAttributeValueCount());
 					}
 					
 					attributeResults.put(attribute, attributeResult);
@@ -669,7 +670,7 @@ public class ElasticSearchIndex implements ItemIndex {
 	
 		for (Criterium criterium : criteria) {
 			final ItemAttribute attribute = criterium.getAttribute();
-			final String fieldName = attribute.getName();
+			final String fieldName = ItemIndex.fieldName(attribute);
 
 			if (criterium instanceof ComparisonCriterium<?>) {
 				final ESQueryAndOccur queryAndOccur = createComparisonQuery(criterium, fieldName);
@@ -689,40 +690,58 @@ public class ElasticSearchIndex implements ItemIndex {
 			}
 			else if (criterium instanceof InCriterium<?>) {
 				final InCriterium<?> inCriterium = (InCriterium<?>)criterium;
-
 				final QueryBuilder inQueryBuilder;
-				
-				switch (attribute.getAttributeType()) {
-				case BOOLEAN:
-				case STRING:
-				case INTEGER:
-				case LONG:
-				case DATE:
-					inQueryBuilder = QueryBuilders.termsQuery(fieldName, inCriterium.getValues());
-					break;
-					
-				case DECIMAL:
-					// Must convert to double
-					final Object [] doubles = convertArray(
-							inCriterium.getValues(),
-							length -> new Object[length],
-							o -> ((BigDecimal)o).doubleValue());
-					inQueryBuilder = QueryBuilders.termsQuery(fieldName, doubles);
-					break;
 
-				case ENUM:
-					final Object [] enums = convertArray(
-							inCriterium.getValues(),
-							length -> new Object[length],
-							o -> ((Enum<?>)o).name());
-					inQueryBuilder = QueryBuilders.termsQuery(fieldName, enums);
-					break;
+				final boolean hasSubCriteriaForAnyValues = inCriterium.getValues().stream().anyMatch(value -> value.getSubCritera() != null);
+
+				if (hasSubCriteriaForAnyValues) {
+					final BoolQueryBuilder booleanQuery = QueryBuilders.boolQuery();
 					
-				
-				default:
-					throw new UnsupportedOperationException("Unknown attribute type " + attribute.getAttributeType());
+					// Must create query for each test, then create sub-query if necessary
+					for (InCriteriumValue<?> value : inCriterium.getValues()) {
+						
+						final QueryBuilder valueQuery = QueryBuilders.termQuery(fieldName, convertValue(attribute, value.getValue()));
+						
+						final QueryBuilder toAdd;
+						if (value.getSubCritera() != null) {
+							
+							// Should have one of the subcritera
+							final BoolQueryBuilder sub = QueryBuilders.boolQuery();
+							
+							// must for both since we have to match both value and sub-criteria for this to be matched
+							sub.must(valueQuery);
+							
+							@SuppressWarnings({ "unchecked", "rawtypes" })
+							final List<Criterium> lc = (List)value.getSubCritera();
+							
+							sub.must(buildQuery(lc));
+							
+							toAdd = sub;
+						}
+						else {
+							// No sub-query so just add valueQuery directly
+							toAdd = valueQuery;
+						}
+
+ 						booleanQuery.should(toAdd);
+					}
+
+					inQueryBuilder = booleanQuery;
 				}
+				else {
+					// No sub-criteria, just add terms, ES will pass terms as array, eg
+					// "terms": {
+		            //  "make": [
+		            //           "Burton",
+					//           "Jones"
+		            //         ],
+		            //         "boost": 1.0
+		            //       }
 				
+					inQueryBuilder = makeTermsQuery(inCriterium);
+					
+					
+				}
 				queryBuilder.must(inQueryBuilder);
 			}
 			else {
@@ -731,6 +750,83 @@ public class ElasticSearchIndex implements ItemIndex {
 		}
 
 		return queryBuilder;
+	}
+	
+	private static QueryBuilder makeTermsQuery(InCriterium<?> inCriterium) {
+		
+		final QueryBuilder inQueryBuilder;
+		final ItemAttribute attribute = inCriterium.getAttribute();
+		final String fieldName = ItemIndex.fieldName(attribute);
+
+		switch (attribute.getAttributeType()) {
+		case BOOLEAN:
+		case STRING:
+		case INTEGER:
+		case LONG:
+		case DATE:
+			final Object [] strings = convertValues(inCriterium, o -> (String)o);
+			inQueryBuilder = QueryBuilders.termsQuery(fieldName, strings);
+			break;
+			
+		case DECIMAL:
+			// Must convert to double
+			final Object [] doubles = convertValues(inCriterium, o -> ((BigDecimal)o).doubleValue());
+			inQueryBuilder = QueryBuilders.termsQuery(fieldName, doubles);
+			break;
+
+		case ENUM:
+			final Object [] enums = convertValues(inCriterium, o -> ((Enum<?>)o).name());
+			inQueryBuilder = QueryBuilders.termsQuery(fieldName, enums);
+			break;
+			
+		
+		default:
+			throw new UnsupportedOperationException("Unknown attribute type " + attribute.getAttributeType());
+		}
+
+		return inQueryBuilder;
+	}
+
+	private static <T extends Comparable<T>> Object [] convertValues(InCriterium<T> criterium, Function<T, Object> convert) {
+
+		final List<InCriteriumValue<T>> values = criterium.getValues();
+		final Object [] result = new Object[values.size()];
+		
+		for (int i = 0; i < values.size(); ++ i) {
+			result[i] = convert.apply(values.get(i).getValue());
+		}
+
+		return result;
+	}
+	
+	private static Object convertValue(ItemAttribute attribute, Object value) {
+		
+		final Object result;
+		
+		switch (attribute.getAttributeType()) {
+		case BOOLEAN:
+		case STRING:
+		case INTEGER:
+		case LONG:
+		case DATE:
+			// Just keep same as input
+			result = value;
+			break;
+			
+		case DECIMAL:
+			// Must convert to double
+			result = ((BigDecimal)value).doubleValue();
+			break;
+
+		case ENUM:
+			result = ((Enum<?>)value).name();
+			break;
+		
+		default:
+			throw new UnsupportedOperationException("Unknown attribute type " + attribute.getAttributeType());
+		}
+
+		return result;
 	}
 	
 	
@@ -972,7 +1068,7 @@ public class ElasticSearchIndex implements ItemIndex {
 			TYPE_HANDLING.getCreateIndexAttributes(typeName).forEach(attribute -> {
 				final String esFieldType = getESFieldType(attribute.getAttributeType());
 				
-				fieldTypes.put(attribute.getName(), esFieldType);
+				fieldTypes.put(ItemIndex.fieldName(attribute), esFieldType);
 			});
 			
 			final Map<String, String> custom = TYPE_HANDLING.createIndexCustomFields(typeName);

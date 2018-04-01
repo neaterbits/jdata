@@ -3,6 +3,7 @@ package com.test.cv.dao.test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,8 +21,11 @@ import com.test.cv.model.items.sports.Snowboard;
 import com.test.cv.model.items.sports.SnowboardProfile;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonOperator;
+import com.test.cv.search.criteria.Criterium;
 import com.test.cv.search.criteria.DecimalCriterium;
 import com.test.cv.search.criteria.DecimalInCriterium;
+import com.test.cv.search.criteria.InCriteriumValue;
+import com.test.cv.search.criteria.StringInCriterium;
 import com.test.cv.search.facets.IndexRangeFacetedAttributeResult;
 import com.test.cv.search.facets.IndexSingleValueFacet;
 import com.test.cv.search.facets.IndexSingleValueFacetedAttributeResult;
@@ -164,7 +168,7 @@ public abstract class SearchDAOTest extends TestCase {
 			 
 			assertThat(widthAttribute).isNotNull();
 			 
-			DecimalInCriterium widthCriterium = new DecimalInCriterium(widthAttribute, new BigDecimal [] { new BigDecimal("30.4"), new BigDecimal("32.8") }, false);
+			DecimalInCriterium widthCriterium = new DecimalInCriterium(widthAttribute, values(new BigDecimal("30.4"), new BigDecimal("32.8")), false);
 			
 			ISearchCursor search = searchDAO.search(
 					Arrays.asList(Snowboard.class),
@@ -178,7 +182,7 @@ public abstract class SearchDAOTest extends TestCase {
 			assertThat(itemIds.contains(itemId2)).isTrue();
 			
 			// match only one
-			widthCriterium = new DecimalInCriterium(widthAttribute, new BigDecimal [] { new BigDecimal("32.4"), new BigDecimal("32.8") }, false);
+			widthCriterium = new DecimalInCriterium(widthAttribute, values(new BigDecimal("32.4"), new BigDecimal("32.8")), false);
 			
 			search = searchDAO.search(
 					Arrays.asList(Snowboard.class),
@@ -191,6 +195,17 @@ public abstract class SearchDAOTest extends TestCase {
 			assertThat(itemIds.contains(itemId2)).isTrue();
 		});
 		
+	}
+	
+	
+	private static List<InCriteriumValue<BigDecimal>> values(BigDecimal ... values) {
+		final List<InCriteriumValue<BigDecimal>> list = new ArrayList<>(values.length);
+		
+		for (BigDecimal value : values) {
+			list.add(new InCriteriumValue<BigDecimal>(value, null));
+		}
+		
+		return list;
 	}
 	
 	public void testFacetsNoCriteria() throws Exception {
@@ -306,6 +321,114 @@ public abstract class SearchDAOTest extends TestCase {
 		});
 	}
 	
+	public void testSearchReturnsOnlyOneMakeEvenIfSameModel() throws Exception {
+		final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
+
+		final ItemAttribute makeAttribute = snowboardAttributes.getByName("make");
+		final ItemAttribute modelAttribute = snowboardAttributes.getByName("model");
+
+		final Set<ItemAttribute> facetedAttributes = new HashSet<>(Arrays.asList(makeAttribute));
+
+		final Snowboard snowboard1 = makeSnowboard1();
+		final Snowboard snowboard2 = makeSnowboard2();
+
+		// Different make but same model, should only return model from one of the makes
+		assertThat(snowboard1.getMake()).isNotEqualTo(snowboard2.getMake());
+
+		final String sameModel = "SnowboardModel";
+
+		snowboard1.setModel(sameModel);
+		snowboard2.setModel(sameModel);
+		
+		final List<InCriteriumValue<String>> modelValues = Arrays.asList(new InCriteriumValue<String>(sameModel, null));
+		final StringInCriterium modelSubCriterium = new StringInCriterium(modelAttribute, modelValues, false);
+
+		final StringInCriterium makeCriterium = new StringInCriterium(
+				makeAttribute,
+				Arrays.asList(new InCriteriumValue<String>(snowboard1.getMake(), Arrays.asList(modelSubCriterium))),
+				false);
+		
+		final List<Criterium> criteria = Arrays.asList(makeCriterium);
+
+		checkSnowboard(snowboard1, snowboard2, (userId, itemDAO, searchDAO, itemId1, itemId2) -> {
+			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), criteria, facetedAttributes);
+			
+			assertThat(cursor.getItemIDs(0, Integer.MAX_VALUE).size()).isEqualTo(1);
+			assertThat(cursor.getItemIDs(0, Integer.MAX_VALUE).get(0)).isEqualTo(itemId1);
+			
+			assertThat(cursor.getFacets().getTypes().size()).isEqualTo(1);
+			final TypeFacets typeFacets = cursor.getFacets().getTypes().get(0);
+			
+			assertThat(typeFacets.getType()).isEqualTo(Snowboard.class);
+			assertThat(typeFacets.getAttributes().size()).isEqualTo(1);
+			assertThat(typeFacets.getAttributes().get(0).getAttribute().getName()).isEqualTo("make");
+			assertThat(typeFacets.getAttributes().get(0).getNoAttributeValueCount()).isEqualTo(0);
+		});
+	}
+	
+	@SafeVarargs
+	private static <T extends Comparable<T>> List<InCriteriumValue<T>> values(T ... values)  {
+		final List<InCriteriumValue<T>> list = new ArrayList<>(values.length);
+
+		for (T value : values) {
+			list.add(new InCriteriumValue<T>(value, null));
+		}
+
+		return list;
+	}
+
+	public void testSearchReturnsOnlyOneWhenSameMakeButDifferentModel() throws Exception {
+		final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
+
+		final ItemAttribute makeAttribute = snowboardAttributes.getByName("make");
+		final ItemAttribute modelAttribute = snowboardAttributes.getByName("model");
+
+		final Set<ItemAttribute> facetedAttributes = new HashSet<>(Arrays.asList(makeAttribute));
+
+		final Snowboard snowboard1 = makeSnowboard1();
+		final Snowboard snowboard2 = makeSnowboard2();
+
+		// Different make but same model, should only return model from one of the makes
+		assertThat(snowboard1.getMake()).isNotEqualTo(snowboard2.getMake());
+
+		final String sameMake = "SameMake";
+		snowboard1.setMake(sameMake);
+		snowboard2.setMake(sameMake);
+
+		final String model1 = "SnowboardModel1";
+		final String model2 = "SnowboardModel2";
+		
+		snowboard1.setModel(model1);
+		snowboard2.setModel(model2);
+		
+		final List<InCriteriumValue<String>> modelValues = Arrays.asList(new InCriteriumValue<String>(model2, null));
+		final StringInCriterium modelSubCriterium = new StringInCriterium(modelAttribute, modelValues, false);
+
+		final StringInCriterium makeCriterium = new StringInCriterium(
+				makeAttribute,
+				Arrays.asList(new InCriteriumValue<String>(sameMake, Arrays.asList(modelSubCriterium))),
+				false);
+		
+
+		checkSnowboard(snowboard1, snowboard2, (userId, itemDAO, searchDAO, itemId1, itemId2) -> {
+			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), Arrays.asList(makeCriterium), facetedAttributes);
+
+			final List<String> itemIds = cursor.getItemIDs(0, Integer.MAX_VALUE);
+
+			assertThat(itemIds.size()).isEqualTo(1);
+			assertThat(itemIds.get(0)).isEqualTo(itemId2);
+			
+			assertThat(cursor.getFacets().getTypes().size()).isEqualTo(1);
+			final TypeFacets typeFacets = cursor.getFacets().getTypes().get(0);
+			
+			assertThat(typeFacets.getType()).isEqualTo(Snowboard.class);
+			assertThat(typeFacets.getAttributes().size()).isEqualTo(1);
+			assertThat(typeFacets.getAttributes().get(0).getAttribute().getName()).isEqualTo("make");
+			assertThat(typeFacets.getAttributes().get(0).getNoAttributeValueCount()).isEqualTo(0);
+		});
+		
+	}
+
 	@FunctionalInterface
 	public interface CheckSnowboard {
 		void check(String userId, IItemDAO itemDAO,  ISearchDAO searchDAO, String itemId1, String itemId2) throws SearchException, Exception;

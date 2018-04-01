@@ -72,6 +72,7 @@ import com.test.cv.search.criteria.DecimalCriterium;
 import com.test.cv.search.criteria.DecimalRange;
 import com.test.cv.search.criteria.DecimalRangesCriterium;
 import com.test.cv.search.criteria.InCriterium;
+import com.test.cv.search.criteria.InCriteriumValue;
 import com.test.cv.search.criteria.IntegerCriterium;
 import com.test.cv.search.criteria.IntegerRange;
 import com.test.cv.search.criteria.IntegerRangesCriterium;
@@ -268,7 +269,7 @@ public class LuceneItemIndex implements ItemIndex {
 	
 	private void addNoAttributeValueToDocument(Document document, ItemAttribute attribute) {
 		
-		final String fieldName = attribute.getName();
+		final String fieldName = ItemIndex.fieldName(attribute);
 		
 		final Field field;
 		
@@ -315,7 +316,8 @@ public class LuceneItemIndex implements ItemIndex {
 		final List<ItemAttributeValue<?>> values = new ArrayList<>(attributes.size());
 
 		for (ItemAttribute attribute : attributes) {
-			final IndexableField field = document.getField(attribute.getName());
+			final String fieldName = ItemIndex.fieldName(attribute);
+			final IndexableField field = document.getField(fieldName);
 			
 			if (field != null) {
 				final Object obj = getObjectValueFromField(attribute, field);
@@ -520,7 +522,7 @@ public class LuceneItemIndex implements ItemIndex {
 		else {
 			query = new MatchAllDocsQuery();
 		}
-		
+
 		final ResultsCollector resultsCollector;
 		try {
 			resultsCollector = new ResultsCollector();
@@ -632,7 +634,7 @@ public class LuceneItemIndex implements ItemIndex {
 		for (Criterium criterium : criteria) {
 
 			final ItemAttribute attribute = criterium.getAttribute();
-			final String fieldName = attribute.getName();
+			final String fieldName = ItemIndex.fieldName(attribute);
 
 			final QueryAndOccur queryAndOccur;
 			
@@ -786,19 +788,22 @@ public class LuceneItemIndex implements ItemIndex {
 		
 		final InCriterium<?> inCriterium = (InCriterium<?>)criterium;
 		
-		final Object [] values = inCriterium.getValues();
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final List<InCriteriumValue<?>> values = (List)inCriterium.getValues();
 		
 		final AttributeType attributeType = criterium.getAttribute().getAttributeType();
 
-		if (values.length == 1 && !inCriterium.includeItemsWithNoValue()) {
-			query = createExactQuery(fieldName, attributeType, values[0]);
+		
+		if (values.size() == 1 && !inCriterium.includeItemsWithNoValue() && (values.get(0).getSubCritera() == null || values.get(0).getSubCritera().isEmpty())) {
+			// If single value and not including no-value attributes and no subattributes, creare
+			query = createExactQueryForInCriteriumValue(fieldName, attributeType, values.get(0));
 		}
 		else {
 
 			final BooleanQuery.Builder booleanQuery = new BooleanQuery.Builder();
 
-			for (Object value : values) {
-				booleanQuery.add(createExactQuery(fieldName, attributeType, value), Occur.SHOULD);
+			for (InCriteriumValue<?> value : values) {
+				booleanQuery.add(createExactQueryForInCriteriumValue(fieldName, attributeType, value), Occur.SHOULD);
 			}
 			
 			if (inCriterium.includeItemsWithNoValue()) {
@@ -812,8 +817,35 @@ public class LuceneItemIndex implements ItemIndex {
 		
 		return new QueryAndOccur(query, occur);
 	}
+
+	private static Query createExactQueryForInCriteriumValue(String fieldName, AttributeType attributeType, InCriteriumValue<?> value) {
+		
+		final Query query;
+
+		if (value.getSubCritera() != null) {
+			// Sub-criteria so must have boolean query with must for each
+			final BooleanQuery.Builder booleanQuery = new BooleanQuery.Builder();
+			
+			final Query valueQuery = createExactQueryForValue(fieldName, attributeType, value.getValue());
+			booleanQuery.add(valueQuery, Occur.MUST);
+			
+			// Must match all the sub queries that are themselves in-queries
+			for (InCriterium<?> sub : value.getSubCritera()) {
+				final Query subQuery = createInQuery(sub, ItemIndex.fieldName(sub.getAttribute())).query;
+				
+				booleanQuery.add(subQuery, Occur.MUST);
+			}
+			
+			query = booleanQuery.build();
+		}
+		else {
+			query = createExactQueryForValue(fieldName, attributeType, value.getValue());
+		}
+
+		return query;
+	}
 	
-	private static Query createExactQuery(String fieldName, AttributeType attributeType, Object value) {
+	private static Query createExactQueryForValue(String fieldName, AttributeType attributeType, Object value) {
 		final Query query;
 		
 		switch (attributeType) {

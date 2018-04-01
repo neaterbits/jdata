@@ -34,6 +34,8 @@ import com.test.cv.search.criteria.DecimalInCriterium;
 import com.test.cv.search.criteria.DecimalRange;
 import com.test.cv.search.criteria.DecimalRangesCriterium;
 import com.test.cv.search.criteria.EnumInCriterium;
+import com.test.cv.search.criteria.InCriterium;
+import com.test.cv.search.criteria.InCriteriumValue;
 import com.test.cv.search.criteria.IntegerInCriterium;
 import com.test.cv.search.criteria.IntegerRange;
 import com.test.cv.search.criteria.IntegerRangesCriterium;
@@ -270,15 +272,15 @@ public class SearchService extends BaseService {
 			
 			switch (attribute.getAttributeType()) {
 			case STRING:
-				criterium = new StringInCriterium(attribute, convertArray(searchCriterium.getValues(), length -> new String[length], o -> (String)o.getValue()), includeItemsWithNoValue);
+				criterium = new StringInCriterium(attribute, convertCriteriaValues(searchCriterium, o -> (String)o), includeItemsWithNoValue);
 				break;
 
 			case INTEGER:
-				criterium = new IntegerInCriterium(attribute, convertArray(searchCriterium.getValues(), length -> new Integer[length], o -> (Integer)o.getValue()), includeItemsWithNoValue);
+				criterium = new IntegerInCriterium(attribute, convertCriteriaValues(searchCriterium, o -> (Integer)o), includeItemsWithNoValue);
 				break;
 
 			case DECIMAL:
-				criterium = new DecimalInCriterium(attribute, convertArray(searchCriterium.getValues(), length -> new BigDecimal[length], o -> (BigDecimal)o.getValue()), includeItemsWithNoValue);
+				criterium = new DecimalInCriterium(attribute, convertCriteriaValues(searchCriterium, o -> (BigDecimal)o), includeItemsWithNoValue);
 				break;
 				
 			case ENUM:
@@ -303,12 +305,40 @@ public class SearchService extends BaseService {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static EnumInCriterium<?> makeEnumCriterium(ItemAttribute attribute, SearchCriterium searchCriterium, boolean includeItemsWithNoValue) {
+	private static <T extends Comparable<T>> List<InCriteriumValue<T>> convertCriteriaValues(SearchCriterium sc, Function<Object, T> convertValue) {
+		
+		final SearchCriteriumValue [] values = sc.getValues();
+		
+		final List<InCriteriumValue<T>> list = new ArrayList<>(values.length);
+		
+		for (int i = 0; i < values.length; ++ i) {
+			final SearchCriteriumValue value = values[i];
+			final SearchCriterium [] subCriteria = value.getSubCriteria();
+			final List<InCriterium<?>> sub;
+
+			if (subCriteria != null) {
+				// Convert subcriteria as well
+				sub = (List)convertCriteria(subCriteria);
+			}
+			else {
+				sub = null;
+			}
+			
+			final T converted = convertValue.apply(value.getValue());
+
+			list.add(new InCriteriumValue<T>(converted, sub));
+		}
+
+		return list;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static <E extends Enum<E>> EnumInCriterium<E> makeEnumCriterium(ItemAttribute attribute, SearchCriterium searchCriterium, boolean includeItemsWithNoValue) {
 		final Class enumClass = attribute.getAttributeValueClass();
 
-		return new EnumInCriterium<>(
+		return new EnumInCriterium<E>(
 				attribute,
-				(Enum[])convertArray(searchCriterium.getValues(), length -> new Enum[length], o -> (Enum)Enum.valueOf(enumClass, (String)o.getValue())),
+				convertCriteriaValues(searchCriterium, o -> (E)Enum.valueOf(enumClass, (String)o)),
 				includeItemsWithNoValue);
 	}
 	

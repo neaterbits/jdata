@@ -48,6 +48,10 @@ public interface ItemIndex extends AutoCloseable {
 	
 	void deleteItem(String itemId, Class<? extends Item> type) throws ItemIndexException;
 	
+	public static String fieldName(ItemAttribute attribute) {
+		return attribute.getName();
+	}
+
 	public default boolean isIdAttribute(ItemAttribute attribute) {
 		return attribute.getName().equals("id");
 	}
