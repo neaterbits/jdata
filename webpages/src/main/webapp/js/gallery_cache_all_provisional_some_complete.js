@@ -101,8 +101,14 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 	
 	// var curFirstY = this.firstY;
 	
+	var lastVisibleElements = this.visibleElements;
+	
 	// Updates first and last cached item index base on y position
 	this.visibleElements = this._updateOnScroll(level + 1, yPos, this.visibleElements);
+	
+	if (lastVisibleElements == this.visibleElements) {
+		throw "Expected updated visibleElements instance to be returned";
+	}
 	
 	// Start a timer to check whether user has stopped scrolling,
 	// we are not going to update the DOM as longs as user is scrolling as
@@ -128,37 +134,43 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 	}
 	*/
 	
-	// Update cache view to point to new display area, it will also preload elements around display area
+	// Only call cache to load items if display has changed
+	if (   lastVisibleElements == null
+		|| lastVisibleElements.firstVisibleIndex != this.visibleElements.firstVisibleIndex
+		|| lastVisibleElements.lastVisibleIndex != this.visibleElements.lastVisibleIndex) {
 	
-	var visibleCount = this.visibleElements.lastVisibleIndex - this.visibleElements.firstVisibleIndex + 1;
-
-	var visibleElements = this.visibleElements;
+		// Update cache view to point to new display area, it will also preload elements around display area
+		
+		var visibleCount = this.visibleElements.lastVisibleIndex - this.visibleElements.firstVisibleIndex + 1;
 	
-	var t = this;
-	
-	// TODO also add callback for preload data since we would want to precreate divs? Test whether is good enough without
-	this.cacheItems.updateVisibleArea(
-			level + 1,
-			this.visibleElements.firstVisibleIndex,
-			visibleCount,
-			this.totalNumberOfItems,
-			
-			function (index, count, downloadedData) {
+		var visibleElements = this.visibleElements;
+		
+		var t = this;
+		
+		// TODO also add callback for preload data since we would want to precreate divs? Test whether is good enough without
+		this.cacheItems.updateVisibleArea(
+				level + 1,
+				this.visibleElements.firstVisibleIndex,
+				visibleCount,
+				this.totalNumberOfItems,
 				
-				// Only called when haven't scrolled (eg no other call to updateVisibleArea)
-				if (index !== visibleElements.firstVisibleIndex) {
-					throw "Index mismatch: requested=" + visibleElements.firstVisibleIndex + ", retrieved: " + index;
-				}
-				if (count !== visibleCount) {
-					throw "Count mismatch: " + count + "/" + visibleCount;
-				}
-				if (downloadedData.length !== visibleCount) {
-					throw "Number of items mismatch count, expected " + visibleCount + ", got " + downloadedData.length;
-				}
-
-				// Can now update rows from data
-				t._showCompleteForRows(0, index, count, downloadedData);
-			});
+				function (index, count, downloadedData) {
+					
+					// Only called when haven't scrolled (eg no other call to updateVisibleArea)
+					if (index !== visibleElements.firstVisibleIndex) {
+						throw "Index mismatch: requested=" + visibleElements.firstVisibleIndex + ", retrieved: " + index;
+					}
+					if (count !== visibleCount) {
+						throw "Count mismatch: " + count + "/" + visibleCount;
+					}
+					if (downloadedData.length !== visibleCount) {
+						throw "Number of items mismatch count, expected " + visibleCount + ", got " + downloadedData.length;
+					}
+	
+					// Can now update rows from data
+					t._showCompleteForRows(0, index, count, downloadedData);
+				});
+	}
 
 	this.exit(level, 'updateOnScroll');
 }
