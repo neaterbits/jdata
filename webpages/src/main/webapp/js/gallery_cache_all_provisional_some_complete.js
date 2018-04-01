@@ -16,6 +16,9 @@ GalleryCacheAllProvisionalSomeComplete.prototype = Object.create(GalleryCacheBas
 //returns approximate complete size of view
 GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, totalNumberOfItems, widthMode, heightMode) {
 	
+	// Remove any added divs
+	this._clear(level + 1);
+
 	var t = this;
 	
 	// Mechanism for downloading complete-data on the fly as user scrolls
@@ -37,11 +40,18 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 	}
 
 	this.totalNumberOfItems = totalNumberOfItems;
-	
+
+	// Get all provisional data, complete-data is gathered dynamically
 	this.galleryModel.getProvisionalData(0, totalNumberOfItems, function(provisionalDataArray) {
 		t.provisionalDataArray = provisionalDataArray;
-		// completed metadata build, now compute and rerender
+
+		// completed metadata build, now compute and re-render with provisional data
 		t._render(level + 1, widthMode, heightMode);
+		
+		// Then start rendering with complete-data
+		// Just call _updateOnScroll() with the same coordinates as this ought to render complete-data where possible,
+		// which would be the whole screen in this case
+		t.updateOnScroll(level + 1, 0);
 	});
 }
 

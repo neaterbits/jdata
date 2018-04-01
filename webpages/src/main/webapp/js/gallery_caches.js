@@ -153,6 +153,15 @@ GalleryCacheBase.prototype._makeProvisionalElement = function (index, itemWidth,
 }
 
 /**
+ * Clear all contents by removing all divs
+ */
+GalleryCacheBase.prototype._clear = function(level) {
+	while (this.renderDiv.firstChild) {
+		this.renderDiv.removeChild(this.renderDiv.firstChild);
+	}
+}
+
+/**
  * return {
  * 		index, - index of last element rendered
  *  	yPos - yPos of below last element rendered, ie. start of next row
