@@ -378,8 +378,6 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 		}
 	}
 	
-	
-	
 	if (lastRenderedElement == null) {
 		if (rowsAdded > 0) {
 			// Added rows but never reached heightAdded >= heightToAdd which means we
