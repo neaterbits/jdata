@@ -18,6 +18,10 @@ public class TypeInfo {
 		return type;
 	}
 	
+	public String getTypeName() {
+		return ItemTypes.getTypeName(type);
+	}
+	
 	public String getFacetDisplayName() {
 		return facetDisplayName;
 	}
