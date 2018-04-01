@@ -16,8 +16,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.print.Doc;
-
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.DoublePoint;
@@ -26,7 +24,6 @@ import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -65,6 +62,7 @@ import com.test.cv.model.LongAttributeValue;
 import com.test.cv.model.StringAttributeValue;
 import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.items.ItemTypes;
+import com.test.cv.model.items.TypeInfo;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.ComparisonCriterium;
@@ -83,6 +81,15 @@ import com.test.cv.search.facets.FacetUtils;
 import com.test.cv.search.facets.ItemsFacets;
 
 public class LuceneItemIndex implements ItemIndex {
+	
+	// Hack to be able to match documents that do not have a value for a field, eg if selected 'Other' in a facet menu
+	private static final String STRING_NONE = "__no_value__";
+	private static final int INTEGER_NONE = -1;
+	private static final long LONG_NONE = -1L;
+	private static final double DOUBLE_NONE = -1.0;
+	private static final int BOOLEAN_NONE = -1;
+	private static final String ENUM_NONE = STRING_NONE; // Enums are stored as strings
+	private static final long DATE_NONE = -1L;
 
 	private static final String THUMBS_FIELD = "thumbs";
 	
@@ -115,8 +122,7 @@ public class LuceneItemIndex implements ItemIndex {
 	public void indexItemAttributes(String userId, Class<? extends Item> itemType, String typeName, List<ItemAttributeValue<?>> attributeValues) throws ItemIndexException {
 		final Document document = new Document();
 
-		final boolean idFound = addToDocument(document, typeName, userId, attributeValues);
-	
+		final boolean idFound = addToDocument(document, ItemTypes.getTypeInfo(itemType), userId, attributeValues);
 
 		if (!idFound) {
 			throw new IllegalArgumentException("No ID attribute supplied");
@@ -130,12 +136,12 @@ public class LuceneItemIndex implements ItemIndex {
 		}
 	}
 	
-	private boolean addToDocument(Document document, String typeName, String userId, List<ItemAttributeValue<?>> attributeValues) {
+	private boolean addToDocument(Document document, TypeInfo typeInfo, String userId, List<ItemAttributeValue<?>> attributeValues) {
 		
 		// Must have ID
 		boolean idFound = false;
 		
-		document.add(new StringField("type", typeName, Field.Store.YES));
+		document.add(new StringField("type", typeInfo.getTypeName(), Field.Store.YES));
 		document.add(new StringField("userId", userId, Field.Store.YES));
 
 		for (ItemAttributeValue<?> attributeValue : attributeValues) {
@@ -157,10 +163,19 @@ public class LuceneItemIndex implements ItemIndex {
 			if (attributeValue instanceof StringAttributeValue) {
 				final String value = ((StringAttributeValue)attributeValue).getValue();
 				
+				if (value.equals(STRING_NONE)) {
+					throw new IllegalArgumentException("Trying to index string no-value");
+				}
+				
 				field = new StringField(fieldName, value,  storeValue ? Field.Store.YES : Field.Store.NO);
 			}
 			else if (attributeValue instanceof IntegerAttributeValue) {
 				final int value = ((IntegerAttributeValue)attributeValue).getValue();
+
+				if (value == INTEGER_NONE) {
+					throw new IllegalArgumentException("Trying to index integer no-value");
+				}
+
 				field = new IntPoint(fieldName, value);
 				
 				if (storeValue) {
@@ -169,6 +184,11 @@ public class LuceneItemIndex implements ItemIndex {
 			}
 			else if (attributeValue instanceof LongAttributeValue) {
 				final long value = ((LongAttributeValue)attributeValue).getValue();
+
+				if (value == LONG_NONE) {
+					throw new IllegalArgumentException("Trying to index long no-value");
+				}
+
 				field = new LongPoint(fieldName, value);
 
 				if (storeValue) {
@@ -179,6 +199,10 @@ public class LuceneItemIndex implements ItemIndex {
 				final double value = ((DecimalAttributeValue)attributeValue).getValue().doubleValue();
 				// TODO Lucene does not support decimals yet
 				field = new DoublePoint(fieldName, value);
+				
+				if (value == DOUBLE_NONE) {
+					throw new IllegalArgumentException("Trying to index double no-value");
+				}
 
 				if (storeValue) {
 					storedField = new StoredField(fieldName, value);
@@ -186,6 +210,12 @@ public class LuceneItemIndex implements ItemIndex {
 			}
 			else if (attributeValue instanceof EnumAttributeValue) {
 				final Enum<?> value = ((EnumAttributeValue)attributeValue).getValue();
+				
+				if (value.name().equals(ENUM_NONE)) {
+					throw new IllegalArgumentException("Trying to index enum no-value");
+				}
+
+				
 				field = new StringField(fieldName, value.name(), storeValue ? Field.Store.YES : Field.Store.NO);
 			}
 			else if (attributeValue instanceof BooleanAttributeValue) {
@@ -200,6 +230,11 @@ public class LuceneItemIndex implements ItemIndex {
 			}
 			else if (attributeValue instanceof DateAttributeValue) {
 				final long value = ((DateAttributeValue)attributeValue).getValue().getTime();
+
+				if (value == DATE_NONE) {
+					throw new IllegalArgumentException("Trying to index date no-value");
+				}
+
 				field = new LongPoint(fieldName, value);
 
 				if (storeValue) {
@@ -217,7 +252,60 @@ public class LuceneItemIndex implements ItemIndex {
 			}
 		}
 		
+		
+		// Add no-value field for all fields that do not have a value
+		typeInfo.getAttributes().forEach(attribute -> {
+			if (!attributeValues.stream().anyMatch(value -> value.getAttribute().equals(attribute))) {
+				// Does not exist, add none-value
+				addNoAttributeValueToDocument(document, attribute);
+			}
+		});
+		
 		return idFound;
+	}
+	
+	private void addNoAttributeValueToDocument(Document document, ItemAttribute attribute) {
+		
+		final String fieldName = attribute.getName();
+		
+		final Field field;
+		
+		final Field.Store stored = Field.Store.NO;
+
+		switch (attribute.getAttributeType()) {
+		case STRING:
+			field = new StringField(fieldName, STRING_NONE, stored);
+			break;
+			
+		case INTEGER:
+			field = new IntPoint(fieldName, INTEGER_NONE);
+			break;
+			
+		case LONG:
+			field = new LongPoint(fieldName, LONG_NONE);
+			break;
+
+		case DECIMAL:
+			field = new DoublePoint(fieldName, DOUBLE_NONE);
+			break;
+			
+		case ENUM:
+			field = new StringField(fieldName, ENUM_NONE, stored);
+			break;
+			
+		case BOOLEAN:
+			field = new IntPoint(fieldName, BOOLEAN_NONE);
+			break;
+
+		case DATE:
+			field = new LongPoint(fieldName, DATE_NONE);
+			break;
+			
+		default:
+			throw new UnsupportedOperationException("Unknown attribute type: " + attribute.getAttributeType());
+		}
+		
+		document.add(field);
 	}
 	
 	final List<ItemAttributeValue<?>> getValuesFromDocument(Document document, Set<ItemAttribute> attributes) {
@@ -376,7 +464,7 @@ public class LuceneItemIndex implements ItemIndex {
 		// Get user id from existing doc
 		final String userId = doc.getField("userId").stringValue();
 		
-		addToDocument(newDoc, ItemTypes.getTypeName(type), userId, values);
+		addToDocument(newDoc, ItemTypes.getTypeInfo(type), userId, values);
 		
 		newDoc.add(new StoredField(THUMBS_FIELD, bytes));
 
@@ -556,16 +644,19 @@ public class LuceneItemIndex implements ItemIndex {
 				queryAndOccur = createRangeQuery(criterium, fieldName);
 			}
 			else if (criterium instanceof NoValueCriterium) {
-				queryAndOccur = createNoValueQuery(criterium, fieldName);
+				queryAndOccur = createNoValueQueryAndOccur(criterium, fieldName);
 			}
 			else {
 				throw new UnsupportedOperationException("Unknown criterium");
 			}
-
+			
 			queryBuilder.add(queryAndOccur.query, queryAndOccur.occur);
 		}
+		
 
-		return queryBuilder.build();
+		final Query query =  queryBuilder.build();
+
+		return query;
 	}
 	
 	private static QueryAndOccur createComparisonQuery(Criterium criterium, String fieldName) {
@@ -697,7 +788,7 @@ public class LuceneItemIndex implements ItemIndex {
 		
 		final AttributeType attributeType = criterium.getAttribute().getAttributeType();
 
-		if (values.length == 1) {
+		if (values.length == 1 && !inCriterium.includeItemsWithNoValue()) {
 			query = createExactQuery(fieldName, attributeType, values[0]);
 		}
 		else {
@@ -706,6 +797,10 @@ public class LuceneItemIndex implements ItemIndex {
 
 			for (Object value : values) {
 				booleanQuery.add(createExactQuery(fieldName, attributeType, value), Occur.SHOULD);
+			}
+			
+			if (inCriterium.includeItemsWithNoValue()) {
+				booleanQuery.add(createNoValueQueryOnly(inCriterium, fieldName), Occur.SHOULD);
 			}
 
 			query = booleanQuery.build();
@@ -744,17 +839,54 @@ public class LuceneItemIndex implements ItemIndex {
 		return query;
 	}
 
-	private static QueryAndOccur createNoValueQuery(Criterium criterium, String fieldName) {
-
-		
-		final Query query = null;
+	private static QueryAndOccur createNoValueQueryAndOccur(Criterium criterium, String fieldName) {
 		final Occur occur = Occur.MUST;
 		
-		//return new QueryAndOccur(query, occur);
-		throw new UnsupportedOperationException("TODO - match only on documents that have no value set - perhaps just skip this attribute completely? "
-				+ "However 'Other' in UI is indeed a specific selection so we should skip any documents that do have a value here"
-				+ "Probably easiest done with a mus-not query and then attribute type specifc, eg. range over all integers for ints etc"
-				+ " !!! NOTE inefficient so probably should find these and add them last in query, behind matching-queries !!!");
+		final Query query = createNoValueQueryOnly(criterium, fieldName);
+		
+		return new QueryAndOccur(query, occur);
+	}
+
+	private static Query createNoValueQueryOnly(Criterium criterium, String fieldName) {
+
+		final AttributeType attributeType = criterium.getAttribute().getAttributeType();
+		
+		final Query query;
+		
+		switch (attributeType) {
+		case STRING:
+			query = new TermQuery(new Term(fieldName, STRING_NONE));
+			break;
+			
+		case INTEGER:
+			query = IntPoint.newExactQuery(fieldName, INTEGER_NONE);
+			break;
+			
+		case LONG:
+			query = LongPoint.newExactQuery(fieldName, LONG_NONE);
+			break;
+			
+		case DECIMAL:
+			query = DoublePoint.newExactQuery(fieldName, DOUBLE_NONE);
+			break;
+			
+		case BOOLEAN:
+			query = IntPoint.newExactQuery(fieldName, BOOLEAN_NONE);
+			break;
+			
+		case ENUM:
+			query = new TermQuery(new Term(fieldName, ENUM_NONE));
+			break;
+
+		case DATE:
+			query = LongPoint.newExactQuery(fieldName, DATE_NONE);
+			break;
+			
+		default:
+			throw new UnsupportedOperationException("Unknown attribute type " + attributeType);
+		}
+
+		return query;
 	}
 
 	private static QueryAndOccur createRangeQuery(Criterium criterium, String fieldName) {
