@@ -117,6 +117,8 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		};
 		
 		final List<DownloadInvocation> downloadProvisional  = new ArrayList<>();
+
+		final List<DownloadInvocation> downloadComplete = new ArrayList<>();
 		
 		final GalleryModel galleryModel = new GalleryModel() {
 
@@ -127,8 +129,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 
 			@Override
 			public void getCompleteData(int index, int count, Object onSuccess) {
-				// TODO Auto-generated method stub
-				
+				downloadComplete.add(new DownloadInvocation(index, count, getJSFunction(onSuccess)));
 			}
 		};
 
@@ -155,8 +156,10 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		// Call back with data, will generate strings to send back
 		initialProvisional.onDownloaded();
 		
+		// Should try to download complete-items as well
+		assertThat(downloadComplete.size()).isEqualTo(0);
 	}
-	
+
 	// Represents a div.
 	private static class Div extends Element {
 		
