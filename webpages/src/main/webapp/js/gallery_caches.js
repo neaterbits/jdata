@@ -316,8 +316,9 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 	
 	var numRows = Math.floor((this._getTotalNumberOfItems() - 1) / numColumns) + 1;
 
-	if (startIndex % numColumns != 0) {
-		throw "Start index not at start of column: " + startIndex + "/" + numColumns;
+	// If not at last element + 1 and does not start at a numColumns number, there is an issue at the caller side
+	if (startIndex % numColumns != 0 && startIndex != this._getTotalNumberOfItems()) {
+		throw "Start index not at start of column: " + startIndex + "/" + numColumns + ", total=" + this._getTotalNumberOfItems();
 	}
 
 	var rowNo = Math.floor(startIndex / numColumns);
@@ -370,16 +371,21 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 		heightAdded += rowHeight;
 
 		if (heightAdded >= heightToAdd) {
-			lastRenderedElement = { 'index' : i + itemsThisRow - 1, 'yPos' :  y };
+			var offset = itemsThisRow - 1;
+			
+			lastRenderedElement = { 'index' : i + (downwards ? offset : -offset), 'yPos' :  y };
 			break;
 		}
 	}
+	
+	
 	
 	if (lastRenderedElement == null) {
 		if (rowsAdded > 0) {
 			// Added rows but never reached heightAdded >= heightToAdd which means we
 			// we we reached < 0 or > total, depending direction of adding
-			lastRenderedElement = { 'index' : i + itemsThisRow - 1, 'yPos' :  y };
+			var lastIndex = (downwards ? i - 1 : i + 1);
+			lastRenderedElement = { 'index' : lastIndex /* itemsThisRow already added */, 'yPos' :  y };
 		}
 		else {
 			// Just return null which means no rows added
