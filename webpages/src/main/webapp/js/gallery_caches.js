@@ -329,7 +329,11 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 	var i;
 	var itemsThisRow;
 	
-	for (i = startIndex; i < this._getTotalNumberOfItems(); i += (downwards ? numColumns : -numColumns)) {
+	for (i = startIndex;
+			i < this._getTotalNumberOfItems();
+			// use itemsThisRows instead of numColumns below in case this is last row with < numColumns
+			// so that return value returns the right value for lastRendered.index
+			i += (downwards ? itemsThisRow : -itemsThisRow)) {
 
 		// Last row might not have a full number of items
 		itemsThisRow = i + numColumns >= this._getTotalNumberOfItems()
