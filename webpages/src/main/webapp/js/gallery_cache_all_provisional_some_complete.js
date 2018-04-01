@@ -51,7 +51,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 		// Then start rendering with complete-data
 		// Just call _updateOnScroll() with the same coordinates as this ought to render complete-data where possible,
 		// which would be the whole screen in this case
-		t.updateOnScroll(level + 1, 0);
+		t.updateOnScroll(level + 1, 0, null);
 	});
 }
 
@@ -99,18 +99,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 	
 	this.enter(level, 'updateOnScroll', ['yPos', yPos], ['this.firstY', this.firstY]);
 	
-	var curFirstY = this.firstY;
-	
-	if (this.visibleElements == null) {
-		this.visibleElements = {
-			firstVisibleY : 0,
-			firstRenderedY : 0, // renders a bit outside of display since adding complete rows
-			firstVisibleIndex : 0,
-			lastVisibleY : 0,
-			lastRenderedY : 0, // renders a bit outside of display since adding complete rows
-			lastVisibleIndex : 0
-		};
-	}
+	// var curFirstY = this.firstY;
 	
 	// Updates first and last cached item index base on y position
 	this.visibleElements = this._updateOnScroll(level + 1, yPos, this.visibleElements);
@@ -183,6 +172,23 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 			[ 'firstY',  this.firstY,  'lastY', this.lastY, '_getVisibleHeight()', this._getVisibleHeight() ]);
 	
 	// See if we have something that was not visible earlier scrolled into view
+	var initialUpdate;
+
+	if (prevDisplayed == null) {
+		prevDisplayed = {
+			firstVisibleY : 0,
+			firstRenderedY : 0, // renders a bit outside of display since adding complete rows
+			firstVisibleIndex : 0,
+			lastVisibleY : 0,
+			lastRenderedY : 0, // renders a bit outside of display since adding complete rows
+			lastVisibleIndex : 0
+		};
+
+		initialUpdate = true;
+	}
+	else {
+		initialUpdate = false;
+	}
 
 	var firstRenderedY;
 	var lastRenderedY;
@@ -242,7 +248,10 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 		// just add new ones below current ones.
 
 		// Start-index to add is the one immediately after last-index
-		lastRendered = this._addProvisionalDivs(level + 1, prevDisplayed.lastVisibleIndex + 1, prevDisplayed.lastVisibleY, this.numColumns, heightToAdd);
+		// unless this is initial update, in which case we should update from index 0
+		var startIndex = initialUpdate ? 0 : prevDisplayed.lastVisibleIndex + 1;
+
+		lastRendered = this._addProvisionalDivs(level + 1, startIndex, prevDisplayed.lastVisibleY, this.numColumns, heightToAdd);
 
 		if (lastRendered == null) {
 			// Nothing was rendered, ie. did not scroll any new items into display

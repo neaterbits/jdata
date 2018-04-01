@@ -170,11 +170,22 @@ GalleryCacheBase.prototype._clear = function(level) {
 
 GalleryCacheBase.prototype._addProvisionalDivs = function(level, startIndex, startPos, numColumns, heightToAdd) {
 	
+	this.enter(level, '_addProvisionalDivs', [
+		'startIndex', startIndex,
+		'startPos', startPos,
+		'numColumns', numColumns,
+		'heightToAdd', heightToAdd
+	]);
+	
 	var t = this;
 	
-	return this._addDivs(level, startIndex, startPos, numColumns, heightToAdd, function(index, itemWidth, itemHeight) {
+	var result = this._addDivs(level, startIndex, startPos, numColumns, heightToAdd, function(index, itemWidth, itemHeight) {
 		return t._makeProvisionalElement(index, itemWidth, itemHeight);
 	});
+
+	this.exit(level, '_addProvisionalDivs', JSON.stringify(result));
+
+	return result;
 }
 
 /**
