@@ -56,8 +56,15 @@ GalleryModeWidthBase.prototype._computeNumberOfColumns = function(itemWidth, col
 
 GalleryModeWidthBase.prototype._computeHeight = function(itemHeight, rowSpacing, numColumns, totalNumberOfItems) {
 	
-	var numRows = ((totalNumberOfItems - 1) / numColumns) + 1;
+	var numRows;
 	
+	if (totalNumberOfItems == 0) {
+		numRows = 0;
+	}
+	else {
+		numRows = Math.floor((totalNumberOfItems - 1) / numColumns) + 1;
+	}
+
 	return numRows * (itemHeight + rowSpacing);
 }
 
