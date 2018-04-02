@@ -331,8 +331,9 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 	else if (prevDisplayed.lastVisibleY - curY < this._getVisibleHeight()) {
 		// Scrolling down partly out of visible area
 		// First figure out how much visible space that must be added
-		var heightToAdd = this._getVisibleHeight() - (prevDisplayed.lastVisibleY - curY);
-
+		// + 1 because lastVisibleY is within visibleHeight. Eg after initial rendering of height 100 then lastVisibleY is 99
+		var heightToAdd = this._getVisibleHeight() - (prevDisplayed.lastVisibleY + 1 - curY);
+		
 		this.log(level, 'Scrolled to view partly below previous, must add ' + heightToAdd);
 
 		// Do we need to add one or more rows? Should do so without removing existing rows,
