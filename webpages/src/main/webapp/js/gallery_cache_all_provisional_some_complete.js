@@ -52,11 +52,6 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 
 		// completed metadata build, now compute and re-render with provisional data
 		t._render(level + 1, widthMode, heightMode);
-		
-		// Then start rendering with complete-data
-		// Just call _updateOnScroll() with the same coordinates as this ought to render complete-data where possible,
-		// which would be the whole screen in this case
-		t.updateOnScroll(level + 1, 0, null);
 	});
 }
 
