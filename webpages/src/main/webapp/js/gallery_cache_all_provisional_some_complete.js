@@ -478,8 +478,6 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 	//					newRowItems.push(element);
 				});
 		
-		i += itemsThisRow;
-	
 		var updatedRowWidthHeights = this._getRowItemDivHeights(rowDiv);
 	
 		for (var j = 0; j < itemsThisRow; ++ j) {
@@ -487,10 +485,19 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 			var curDim  = updatedRowWidthHeights[j];
 	
 			if (prevDim.width !== curDim.width || prevDim.height !== curDim.height) {
-				throw "Gallery item dimensions changed between provisional and updated for " + (i + j)
-					+ " : prev=" + JSON.stringify(prevDim) + ", cur=" + JSON.stringify(curDim);
+				
+				var itemIndex = i + j;
+				
+				var provisionalData = this.provisionalDataArray[itemIndex];
+				var completeData = this.cacheItems._debugGetCachedDataAtIndex(itemIndex);
+				
+				throw "Gallery item dimensions changed between provisional and updated for " + itemIndex + ", row " + j
+					+ " : prev=" + JSON.stringify(prevDim) + ", cur=" + JSON.stringify(curDim) + ", provisional data " + JSON.stringify(provisionalData)
+					;
 			}
 		}
+
+		i += itemsThisRow;
 	}
 }
 
