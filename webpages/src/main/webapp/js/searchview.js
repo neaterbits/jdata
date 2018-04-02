@@ -262,6 +262,8 @@ function SearchView(
 		
 		var image = document.createElement('img');
 		
+		image.width = provisionalData.thumbWidth;
+		image.height = provisionalData.thumbHeight;
 		
 		/*
 		provisionalImage.style.width = thumbWidth;
