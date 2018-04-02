@@ -171,7 +171,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	
 	this._addFacetType = function(viewElementFactory, cur, element, index) {
 		// Add a div for the particular type, will have a box for expanding the type
-		var typeElement = viewElementFactory.createTypeContainer(cur.getViewElement(), element.displayName);
+		var typeElement = viewElementFactory.createTypeContainer(cur.getViewElement(), element.displayName, true); // TODO expand if not root?
 		
 		var typeContainer = new FacetTypeContainer(viewElementFactory, element.type, typeElement, element.displayName);
 		
@@ -182,7 +182,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	this._addFacetAttribute = function(viewElementFactory, cur, element, index) {
 		// Attribute within a type in list of attributes
-		var attributeElement = viewElementFactory.createAttributeListElement(cur.getViewElement(), element.name);
+		var attributeElement = viewElementFactory.createAttributeListElement(cur.getViewElement(), element.name, false);
 		
 		var attribute = new FacetAttribute(viewElementFactory, cur.getModelType(), element.id, attributeElement);
 		
@@ -204,6 +204,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				displayValue,
 				element.matchCount,
 				hasSubAttributes,
+				false,
 				true);
 		
 		var attributeValue = new FacetAttributeSingleValue(
@@ -231,7 +232,13 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		text += (typeof element.upper !== 'undefined' ? element.upper : '');
 
 		// Attribute within a type in list of attributes
-		var attributeElement = viewElementFactory.createAttributeValueElement(cur.getViewElement(), text, element.matchCount, false, true);
+		var attributeElement = viewElementFactory.createAttributeValueElement(
+				cur.getViewElement(),
+				text,
+				element.matchCount,
+				false,
+				false,
+				true);
 		
 		var attributeRange = new FacetAttributeRange(
 				viewElementFactory,
@@ -294,6 +301,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				cur.getViewElement(),
 				displayText,
 				element.matchCount,
+				false,
 				false,
 				true);
 

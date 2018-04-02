@@ -7,7 +7,12 @@
 
 function FacetViewElements() {
 	
-	this.createTypeContainer = function(parentElement, text) {
+	this.createTypeContainer = function(parentElement, text, isExpanded) {
+		
+		function expandedClass(expanded) {
+			return expanded ? 'typeExpanderExpanded' :'typeExpanderCollapsed';
+		}
+		
 		var typeDiv = document.createElement('div');
 		
 		typeDiv.setAttribute("class", "facetType");
@@ -19,7 +24,7 @@ function FacetViewElements() {
 		var typeTitleDiv = document.createElement('div');
 		typeTitleDiv.innerHTML = 
 			  "<div class='typeTitleDiv'>"
-				+ "<div class='typeExpander typeExpanderExpanded'></div>"
+				+ "<div class='typeExpander " + expandedClass(isExpanded) + "'></div>"
 				+ "<span class='typeTitle'>" + text + "</span>"
 			+ "</div>";
 		append(typeDiv, typeTitleDiv);
@@ -29,8 +34,8 @@ function FacetViewElements() {
 		listsDiv.setAttribute('class', 'facetListsDiv');
 		
 		// Make it possible to show and hide the below lists
-		var accordion = this._makeAccordion(listsDiv, function (expanded) {
-			var cl = expanded ? 'typeExpanderExpanded' :'typeExpanderCollapsed';
+		var accordion = this._makeAccordion(listsDiv, isExpanded, function (expanded) {
+			var cl = expandedClass(expanded);
 
 			typeTitleDiv.getElementsByClassName('typeExpander')[0].className = 'typeExpander ' + cl;
 		});
@@ -60,12 +65,17 @@ function FacetViewElements() {
 	}
 	
 	// TODO there are some issue in this, try collapse Snowboards, then Sports, then expand both again
-	this._makeAccordion = function(listsDiv, onexpandcollapse) {
+	this._makeAccordion = function(listsDiv, isExpanded, onexpandcollapse) {
 		var wrapperDiv = document.createElement('div');
 		
 		wrapperDiv.setAttribute('class', 'facetsAccordion')
 		
-		wrapperDiv.style.height = 'auto';
+		if (isExpanded) {
+			wrapperDiv.style.height = 'auto';
+		}
+		else {
+			wrapperDiv.style.height = '0px';
+		}
 		
 		append(wrapperDiv, listsDiv);
 
@@ -166,7 +176,12 @@ function FacetViewElements() {
 		return ul;
 	}
 	
-	this.createAttributeListElement = function(parentElement, text) {
+	this.createAttributeListElement = function(parentElement, text, isExpanded) {
+
+		function expandedClass(expanded) {
+			return expanded ? 'attributeExpanderExpanded' :'attributeExpanderCollapsed';
+		}
+	
 		var li = document.createElement('li');
 		
 		li.style['list-style'] = 'none';
@@ -177,7 +192,7 @@ function FacetViewElements() {
 
 		attributeTitleDiv.innerHTML =
 			"<div class='attributeTitleDiv'>"
-			+ "<div class='attributeExpander attributeExpanderExpanded'></div>"
+			+ "<div class='attributeExpander " + expandedClass(isExpanded) + "'></div>"
 			+ "<span class='attributeTitle'>" + text + "</span>"
 		  + "</div>";
 
@@ -185,8 +200,8 @@ function FacetViewElements() {
 
 		append(li, attributeTitleDiv);
 
-		var accordion = this._makeAccordion(attributeDiv, function (expanded) {
-			var cl = expanded ? 'attributeExpanderExpanded' :'attributeExpanderCollapsed';
+		var accordion = this._makeAccordion(attributeDiv, isExpanded, function (expanded) {
+			var cl = expandedClass(expanded);
 
 			attributeTitleDiv.getElementsByClassName('attributeExpander')[0].className = 'attributeExpander ' + cl;
 		});
@@ -225,7 +240,7 @@ function FacetViewElements() {
 		return ul;
 	}
 
-	this.createAttributeValueElement = function(parentElement, value, matchCount, hasSubAttributes, checked) {
+	this.createAttributeValueElement = function(parentElement, value, matchCount, hasSubAttributes, isExpanded, checked) {
 		var li = document.createElement('li');
 		
 		li.style['list-style'] = 'none';
@@ -250,7 +265,7 @@ function FacetViewElements() {
 			var listDiv = document.createElement('div');
 			listDiv.setAttribute('class', 'facetListsDiv');
 	
-			var accordion = this._makeAccordion(listDiv, function (expanded) { });
+			var accordion = this._makeAccordion(listDiv, isExpanded, function (expanded) { });
 
 			span.onclick = accordion.onclick;
 
