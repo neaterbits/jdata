@@ -317,7 +317,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 		lastRenderedY = lastRendered.yPos;
 		lastVisibleIndex = lastRendered.index;
 	}
-	else if (curY > prevDisplayed.lastVisibleY) {
+	else if (curY > prevDisplayed.lastVisibleY) { 
 		// We are scrolling downwards totally out of visible area, just add items for the pos in question
 		this.log(level, 'Scrolled to completely below previous curY ' + curY + ' visibleHeight ' + this._getVisibleHeight() + ' > lastY ' + this.lastY);
 
@@ -328,7 +328,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 		firstVisibleIndex = posAndIndex.rowItemIndex;
 		lastVisibleIndex = lastRendered.index;
 	}
-	else if (prevDisplayed.lastVisibleY - curY < this._getVisibleHeight()) {
+	else if (curY > prevDisplayed.firstVisibleY) { // Scrolled downwards but not completely out, since that was tested on above
 		// Scrolling down partly out of visible area
 		// First figure out how much visible space that must be added
 		// + 1 because lastVisibleY is within visibleHeight. Eg after initial rendering of height 100 then lastVisibleY is 99
@@ -359,6 +359,13 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 			firstVisibleIndex = posAndIndex.rowItemIndex;
 			lastVisibleIndex = lastRendered.index;
 		}
+	}
+	else if (curY === prevDisplayed.firstVisibleY) {
+		// Scroll called without any change in coordinates
+		firstRenderedY 		= prevDisplayed.firstRenderedY;
+		lastRenderedY 		= prevDisplayed.lastRenderedY;
+		firstVisibleIndex 	= prevDisplayed.firstVisibleIndex;
+		lastVisibleIndex 	= prevDisplayed.lastVisibleIndex;
 	}
 	else {
 		this.log(level, 'Did not match any test');
