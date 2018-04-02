@@ -5,6 +5,12 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
@@ -30,11 +36,11 @@ import com.test.cv.search.criteria.DecimalCriterium;
 import com.test.cv.search.criteria.DecimalRange;
 import com.test.cv.search.criteria.DecimalRangesCriterium;
 import com.test.cv.search.criteria.EnumInCriterium;
+import com.test.cv.search.criteria.InCriteriumValue;
 import com.test.cv.search.criteria.IntegerCriterium;
 import com.test.cv.search.criteria.IntegerRange;
 import com.test.cv.search.criteria.IntegerRangesCriterium;
 import com.test.cv.search.criteria.StringCriterium;
-import com.test.cv.search.criteria.StringInCriterium;
 
 import junit.framework.TestCase;
 
@@ -127,36 +133,39 @@ public class LuceneItemIndexTest extends TestCase {
 			cursor = search(index, new IntegerCriterium(yearAttribute, 2014, ComparisonOperator.LESS_THAN_OR_EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 
+			// TODO test include no-value as well
+			final boolean includeWithNoValue = false;
+			
 			// Integer range tests
-			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2015, false, 2017, false));
+			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2015, false, 2017, false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 	
-			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2015, true, 2017, false));
+			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2015, true, 2017, false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2014, false, 2016, false));
+			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2014, false, 2016, false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2013, false, 2015, false));
+			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2013, false, 2015, false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 	
-			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2013, false, 2015, true));
+			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2013, false, 2015, true, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
 			// Decimal range tests
-			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("32.5"), false, new BigDecimal("40.2"), false));
+			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("32.5"), false, new BigDecimal("40.2"), false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 	
-			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("32.5"), true, new BigDecimal("40.2"), false));
+			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("32.5"), true, new BigDecimal("40.2"), false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("30.5"), false, new BigDecimal("40.2"), false));
+			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("30.5"), false, new BigDecimal("40.2"), false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("30.5"), false, new BigDecimal("32.5"), false));
+			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("30.5"), false, new BigDecimal("32.5"), false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 	
-			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("30.5"), false, new BigDecimal("32.5"), true));
+			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("30.5"), false, new BigDecimal("32.5"), true, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 		}
 		catch (Throwable t) {
@@ -229,13 +238,16 @@ public class LuceneItemIndexTest extends TestCase {
 			final TypeInfo carTypeInfo = ItemTypes.getTypeInfo(Car.class);
 			
 			// Search by make should return 2 entries
-			final Criterium criterium = new EnumInCriterium<>(carTypeInfo.getAttributes().getByName("fuel"), new Fuel [] { Fuel.GAS }, false);
+			final Criterium criterium = new EnumInCriterium<>(
+					carTypeInfo.getAttributes().getByName("fuel"),
+					Arrays.asList(new InCriteriumValue<Fuel>(Fuel.GAS, null)),
+					false);
 			final IndexSearchCursor cursor = index.search(null, Arrays.asList(criterium), null);
 
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(2);
 		}
 	}
-
+	
 	private void openIndexAndStoreAndCloseIndex(String userId, Car car, Directory directory) throws IOException, Exception {
 		try (LuceneItemIndex index = new LuceneItemIndex(directory)) {
 			final Car car1 = new Car();
@@ -247,16 +259,16 @@ public class LuceneItemIndexTest extends TestCase {
 		}
 	}
 	
-	private static IntegerRangesCriterium makeIntegerRangeCriterium(ItemAttribute attribute, Integer lowerValue, boolean includeLower, Integer upperValue, boolean includeUpper) {
+	private static IntegerRangesCriterium makeIntegerRangeCriterium(ItemAttribute attribute, Integer lowerValue, boolean includeLower, Integer upperValue, boolean includeUpper, boolean includeItemsWithNoValue) {
 		final IntegerRange integerRange = new IntegerRange(lowerValue, includeLower, upperValue, includeUpper);
 		
-		return new IntegerRangesCriterium(attribute, new IntegerRange [] { integerRange });
+		return new IntegerRangesCriterium(attribute, new IntegerRange [] { integerRange }, includeItemsWithNoValue);
 	}
 	
-	private static DecimalRangesCriterium makeDecimalRangeCriterium(ItemAttribute attribute, BigDecimal lowerValue, boolean includeLower, BigDecimal upperValue, boolean includeUpper) {
+	private static DecimalRangesCriterium makeDecimalRangeCriterium(ItemAttribute attribute, BigDecimal lowerValue, boolean includeLower, BigDecimal upperValue, boolean includeUpper, boolean includeItemsWithNoValue) {
 		final DecimalRange decimalRange = new DecimalRange(lowerValue, includeLower, upperValue, includeUpper);
 		
-		return new DecimalRangesCriterium(attribute, new DecimalRange [] { decimalRange });
+		return new DecimalRangesCriterium(attribute, new DecimalRange [] { decimalRange }, includeItemsWithNoValue);
 	}
 	
 	private static IndexSearchCursor search(ItemIndex index, Criterium criterium) throws ItemIndexException {
