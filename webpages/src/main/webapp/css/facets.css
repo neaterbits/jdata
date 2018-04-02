@@ -1,12 +1,57 @@
 @CHARSET "UTF-8";
 
-.facetType {
-	background-color: LightGrey;
+#facets {
+	background-color: white;
+	overflow: auto;
 }
+
+.facetType {
+	width: 100%;
+}
+
+.facetListsDiv {
+	width: 100%;
+}
+
+.facetTypeList {
+	width:100%;
+	padding: 1em;
+	box-sizing: border-box;
+}
+
+.facetTypeListElement {
+	width: 100%;
+}
+
+.facetAttributeList {
+	padding-left :1em;
+}
+
+.facetAttributeValueList, .facetAttributeRangeList {
+	padding-left: 1em;
+}
+
+.attributeTitle {
+	font-family: serif;
+	font-weight: bold;
+}
+
 .typeTitle  {
-	background-color: #AAAA77;
-	border: 1px;
-	border-color: black;
+	display: block;
+	width: 100%;
+	padding-top: 0.2em;
+	padding-left: 0.5em;
+	padding-bottom: 0.2em;
+	margin-bottom: 1px;
+	box-sizing: border-box;
+	// background-color: #CCCCFF;
+	// background-color: LightBlue;
+	background-color: #CCBEFC; // #C3B2FE; // #B7A3FE;
+	border: 1px solid black;
+	border-radius: 2px;
+	font-family: serif;
+	font-weight: bold;
+	font-size: 1.1em;
 }
 
 .facetsAccordion {
