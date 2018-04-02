@@ -31,24 +31,83 @@
 	padding-left: 1em;
 }
 
+.attributeExpander {
+	width: 0px;
+	height: 0px;
+	display: inline-block;
+	box-sizing: border-box;
+	
+	/* TODO center otherwise? display-table/vertical-align?*/
+	margin-bottom: 0.05em;
+	margin-right: 0.2em;
+	margin-left: 0.3em;
+}
+
+.attributeExpanderExpanded {
+	border-left: 0.30em solid transparent;
+	border-top: 0.5em solid #404040;
+	border-right: 0.30em solid transparent;
+	border-radius: 2px;
+}
+
+.attributeExpanderCollapsed {
+	border-top: 0.30em solid transparent;
+	border-left: 0.5em solid #404040;
+	border-bottom: 0.30em solid transparent;
+	border-radius: 2px;
+}
+
+.attributeTitleDiv {
+	width: 100%;
+}
+
 .attributeTitle {
 	font-family: serif;
 	font-weight: bold;
 }
 
-.typeTitle  {
-	display: block;
+.typeTitleDiv {
+	/* background-color: #CCCCFF; */
+	/* background-color: LightBlue; */
+	background-color: #CCBEFC; /* #C3B2FE; // #B7A3FE; */
 	width: 100%;
-	padding-top: 0.2em;
-	padding-left: 0.5em;
-	padding-bottom: 0.2em;
 	margin-bottom: 1px;
 	box-sizing: border-box;
-	// background-color: #CCCCFF;
-	// background-color: LightBlue;
-	background-color: #CCBEFC; // #C3B2FE; // #B7A3FE;
 	border: 1px solid black;
 	border-radius: 2px;
+}
+/* http://www.cssportal.com/css3-shapes/ */
+.typeExpander {
+	width: 0px;
+	height: 0px;
+	display: inline-block;
+	box-sizing: border-box;
+	
+	/* TODO center otherwise? display-table/vertical-align?*/
+	margin-bottom: 0.05em;
+	margin-right: 0.2em;
+	margin-left: 0.3em;
+}
+
+.typeExpanderExpanded {
+	border-left: 0.35em solid transparent;
+	border-top: 0.6em solid #404040;
+	border-right: 0.35em solid transparent;
+	border-radius: 2px;
+}
+
+.typeExpanderCollapsed {
+	border-top: 0.35em solid transparent;
+	border-left: 0.6em solid #404040;
+	border-bottom: 0.35em solid transparent;
+	border-radius: 2px;
+}
+
+.typeTitle  {
+	display: inline-block;
+	padding-top: 0.2em;
+	padding-left: 0.2em;
+	padding-bottom: 0.2em;
 	font-family: serif;
 	font-weight: bold;
 	font-size: 1.1em;

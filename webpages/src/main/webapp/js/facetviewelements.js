@@ -17,7 +17,11 @@ function FacetViewElements() {
 		// Type container contains of two divs, one of title name
 		// and one for subtypes and attributes
 		var typeTitleDiv = document.createElement('div');
-		typeTitleDiv.innerHTML = "<span class='typeTitle'>" + text + "</span>";
+		typeTitleDiv.innerHTML = 
+			  "<div class='typeTitleDiv'>"
+				+ "<div class='typeExpander typeExpanderExpanded'></div>"
+				+ "<span class='typeTitle'>" + text + "</span>"
+			+ "</div>";
 		append(typeDiv, typeTitleDiv);
 		
 		var listsDiv = document.createElement('div');
@@ -25,8 +29,12 @@ function FacetViewElements() {
 		listsDiv.setAttribute('class', 'facetListsDiv');
 		
 		// Make it possible to show and hide the below lists
-		var accordion = this._makeAccordion(listsDiv); // this._makeShowHide(listsDiv);
-		
+		var accordion = this._makeAccordion(listsDiv, function (expanded) {
+			var cl = expanded ? 'typeExpanderExpanded' :'typeExpanderCollapsed';
+
+			typeTitleDiv.getElementsByClassName('typeExpander')[0].className = 'typeExpander ' + cl;
+		});
+
 		typeTitleDiv.onclick = accordion.onclick;
 
 		append(typeDiv, accordion.element);
@@ -52,7 +60,7 @@ function FacetViewElements() {
 	}
 	
 	// TODO there are some issue in this, try collapse Snowboards, then Sports, then expand both again
-	this._makeAccordion = function(listsDiv) {
+	this._makeAccordion = function(listsDiv, onexpandcollapse) {
 		var wrapperDiv = document.createElement('div');
 		
 		wrapperDiv.setAttribute('class', 'facetsAccordion')
@@ -83,11 +91,14 @@ function FacetViewElements() {
 				setTimeout(function() {
 					wrapperDiv.style.height = 0 + 'px';
 					t.setAttribute('data-accordion-in-progress', false)
+					
+					onexpandcollapse(false);
 				},
 				100);
 			}
 			else {
 				wrapperDiv.style.height = heightToSet + 'px'; 
+				onexpandcollapse(true);
 			}
 			
 			event.stopPropagation();
@@ -163,13 +174,22 @@ function FacetViewElements() {
 		// In order to have a clickable title, we must add a div
 
 		var attributeTitleDiv = document.createElement('div');
-		attributeTitleDiv.innerHTML = "<span class='attributeTitle'>" + text + "</span>";
+
+		attributeTitleDiv.innerHTML =
+			"<div class='attributeTitleDiv'>"
+			+ "<div class='attributeExpander attributeExpanderExpanded'></div>"
+			+ "<span class='attributeTitle'>" + text + "</span>"
+		  + "</div>";
 
 		var attributeDiv = document.createElement('div');
 
 		append(li, attributeTitleDiv);
 
-		var accordion = this._makeAccordion(attributeDiv);
+		var accordion = this._makeAccordion(attributeDiv, function (expanded) {
+			var cl = expanded ? 'attributeExpanderExpanded' :'attributeExpanderCollapsed';
+
+			attributeTitleDiv.getElementsByClassName('attributeExpander')[0].className = 'attributeExpander ' + cl;
+		});
 
 		attributeTitleDiv.onclick = accordion.onclick;
 		
@@ -230,7 +250,7 @@ function FacetViewElements() {
 			var listDiv = document.createElement('div');
 			listDiv.setAttribute('class', 'facetListsDiv');
 	
-			var accordion = this._makeAccordion(listDiv);
+			var accordion = this._makeAccordion(listDiv, function (expanded) { });
 
 			span.onclick = accordion.onclick;
 
