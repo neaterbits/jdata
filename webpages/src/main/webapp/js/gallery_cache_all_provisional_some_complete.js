@@ -109,6 +109,63 @@ GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level) {
 		// Update complete-rendering as well
 		this._downloadAndRenderComplete(level, this.visibleElements);
 	}
+
+	this._updateHeightIfApproximation(level + 1, this.visibleElements);
+}
+
+/**
+ * If we are running with heightHint, we must update height of the display based on lastest last-rendered and index.
+ * If we are at last element, this ought to add up to height being yPos of after last rendered.
+ * 
+ */
+
+GalleryCacheAllProvisionalSomeComplete.prototype._updateHeightIfApproximation = function(level, visibleElements) {
+	
+	this.enter(level, '_updateHeightIfApproximation', ['visibleElements', JSON.stringify(visibleElements)]);
+
+	if (this.gallerySizes.getSpecificHeightOrNull() == null) {
+		
+		// Only height hint, must update remaning height as has not been set accurately
+		
+		var currentHeight = this._getScrollableHeight();
+		var lastRenderedY = visibleElements.lastRenderedY;
+		
+		if (currentHeight < lastRenderedY) {
+			throw "currentHeight < lastRenderedY";
+		}
+		
+		// Computes height after last-rendered element
+		var remainingElements
+			= this._getTotalNumberOfItems()
+				- visibleElements.lastVisibleIndex
+				- 1; // since last visible is index, so if 3 elements total, last element is index 2
+
+		// Now divide up remaining space on those elements
+		var remainingSpace = currentHeight - lastRenderedY;
+
+		var recomputedHeight = this.gallerySizes.computeHeightFromVisible(remainingElements, this._getVisibleWidth());
+
+		this.log(level, 'remainingElements: ' + remainingElements +', remainingSpace: ' + remainingSpace + ', recomputedHeight: ' + recomputedHeight);
+
+		if (remainingSpace != recomputedHeight) {
+
+			var diff = recomputedHeight - remainingSpace;
+
+			// diff might be negative here
+			if (diff < 0 && (-diff) > currentHeight) {
+				throw new "Diff more than current height: " + (-diff);
+			}
+
+			var newHeight = currentHeight + diff;
+
+			this.log(level, 'Computed new height from current ' + currentHeight + ' and diff ' + diff + ': ' + newHeight);
+
+			// Set height to account for diff
+			this._setScrollableHeight(newHeight);
+		}
+	}
+
+	this.exit(level, '_updateHeightIfApproximation');
 }
 
 
@@ -161,6 +218,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 		// Update cache view to point to new display area, it will also preload elements around display area
 		this._downloadAndRenderComplete(level + 1, this.visibleElements);
 	}
+
+	this._updateHeightIfApproximation(level + 1, this.visibleElements);
 
 	this.exit(level, 'updateOnScroll');
 }

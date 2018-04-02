@@ -137,6 +137,10 @@ GalleryCacheBase.prototype._setScrollableHeight = function(height) {
 	this.galleryView.setElementHeight(this.renderDiv, height);
 }
 
+GalleryCacheBase.prototype._getScrollableHeight = function(height) {
+	return this.galleryView.getElementHeight(this.renderDiv);
+}
+
 GalleryCacheBase.prototype._makeProvisionalElement = function (index, itemWidth, itemHeight) {
 	return this.galleryView.makeProvisionalHTMLElement(index, this.provisionalDataArray[index]);
 }

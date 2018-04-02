@@ -60,10 +60,16 @@ function GallerySizes(config) {
 			: this.config.width;
 
 		heightOfOneElement += this.getRowSpacing();
-		
+
 		return heightOfOneElement;
 	}
-	
+
+	this.computeHeightFromVisible = function(numberOfElements, visibleWidth) {
+		return this.computeHeightFromNumColumns(
+				numberOfElements,
+				this.computeNumColumns(visibleWidth));
+	}
+		
 	this.computeHeightFromNumColumns = function(numberOfElements, numColumns) {
 		return this.heightMode.computeHeight(
 				this.config,
