@@ -88,6 +88,18 @@ GalleryCacheItems.prototype._clear = function(array, arrayIndex, count) {
  * 
  */
 
+GalleryCacheItems.prototype._debugGetCachedDataAtIndex = function(index) {
+
+	var firstCachedIndex = this._getFirstIndexInCache(0, this.curVisibleIndex);
+
+	if (index < firstCachedIndex) {
+		throw "index < firstCachedIndex";
+	}
+
+	var cacheIndex = index - firstCachedIndex;
+	
+	return this.cachedData[cacheIndex].data;
+}
 
 GalleryCacheItems.prototype._getFirstIndexInCache = function(level, visibleIndex) {
 	
