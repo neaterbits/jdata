@@ -29,27 +29,13 @@
  * 
  */
 
-function GalleryCacheBase(config, galleryModel, galleryView, initialTotalNumberOfItems) {
+function GalleryCacheBase(gallerySizes, galleryModel, galleryView, initialTotalNumberOfItems) {
 	
-	this.config = config;
+	this.gallerySizes = gallerySizes;
 	this.galleryModel = galleryModel;
 	this.galleryView = galleryView;
 	this.totalNumberOfItems = initialTotalNumberOfItems;
 
-	if (typeof config.columnSpacing === 'undefined') {
-		this.columnSpacing = 20;
-	}
-	else {
-		this.columnSpacing = config.columnSpacing;
-	}
-	
-	if (typeof config.rowSpacing === 'undefined') {
-		this.rowSpacing = 20;
-	}
-	else {
-		this.rowSpacing = config.rowSpacing;
-	}
-	
 	// Some common data for all these views
 
 	// The row divs (ie DOM div elements that each hold a row) that are currently
@@ -117,13 +103,8 @@ GalleryCacheBase.prototype._getRowWidth = function() {
 	return this._getVisibleWidth();
 }
 
-
 GalleryCacheBase.prototype._getTotalNumberOfItems = function() {
 	return this.totalNumberOfItems;
-}
-
-GalleryCacheBase.prototype._computeHeight = function(heightMode, numColumns) {
-	return heightMode.computeHeight(this.config, this.rowSpacing, numColumns, this._getTotalNumberOfItems());
 }
 
 GalleryCacheBase.prototype._getVisibleWidth = function() {
@@ -132,6 +113,14 @@ GalleryCacheBase.prototype._getVisibleWidth = function() {
 
 GalleryCacheBase.prototype._getVisibleHeight = function() {
 	return this.galleryView.getElementHeight(this.outerDiv);
+};
+
+GalleryCacheBase.prototype._getColumnSpacing = function() {
+	return this.gallerySizes.getColumnSpacing();
+};
+
+GalleryCacheBase.prototype._getRowSpacing = function() {
+	return this.gallerySizes.getRowSpacing();
 };
 
 // Set the div that we are going to render into (ie. add row DOM elements to)
@@ -428,7 +417,7 @@ GalleryCacheBase.prototype._computeColumnSpacing = function(rowWidth, totalRowIt
 GalleryCacheBase.prototype._getRowHeight = function(rowMaxHeight, rowNo, numRows) {
 	var rowHeigth;
 
-	rowHeight = rowMaxHeight + this.rowSpacing;
+	rowHeight = rowMaxHeight + this._getRowSpacing();
 
 	return rowHeight;
 }
@@ -449,16 +438,8 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 		'rowWidth', rowWidth])
 	*/
 	
-	var itemWidth = null;
-	var itemHeight = null;
-	
-	if (typeof this.config.width !== 'undefined') {
-		itemWidth = this.config.width;
-	}
-	
-	if (typeof this.config.height !== 'undefined') {
-		itemHeight = this.config.height;
-	}
+	var itemWidth = this.gallerySizes.getSpecificWidthOrNull();
+	var itemHeight = this.gallerySizes.getSpecificHeightOrNull();
 	
 	var x = 0;
 

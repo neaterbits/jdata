@@ -128,7 +128,8 @@ function Gallery(divId, config, galleryModel, galleryView) {
 
 	this.galleryModel = galleryModel;
 	this.galleryView = galleryView;
-	
+	this.gallerySizes = new GallerySizes(config);
+
 	this.cachedRowDivs = new Array();
 
 	this.firstCachedIndex = 0; // index of first visible element
@@ -142,25 +143,6 @@ function Gallery(divId, config, galleryModel, galleryView) {
 	this.innerDiv = document.createElement('div');
 	document.getElementById(divId).append(this.innerDiv);
 
-	if (typeof config.width !== 'undefined') {
-		this.widthMode = new GalleryModeWidthSpecific();
-	}
-	else if (typeof config.widthHint !== 'undefined') {
-		this.widthMode = new GalleryModeWidthHint();
-	}
-	else {
-		throw "Neither width nor width hint specified in config, specify one of them";
-	}
-
-	if (typeof config.height !== 'undefined') {
-		this.heightMode = new GalleryModeHeightSpecific();
-	}
-	else if (typeof config.heightHint !== 'undefined') {
-		this.heightMode = new GalleryModeHeightHint();
-	}
-	else {
-		throw "Neither height nor height hint specified in config, specify one of them";
-	}
 
 	// Set inner and outer dimensions
 	this.outerDiv.style.width = '100%';
@@ -201,7 +183,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 		// TODO here we could choose cache implementations, eg if showing far fewer or far more items
 		if (this.cache == null) {
 			// Initial refresh
-			this.cache = new GalleryCacheAllProvisionalSomeComplete(this.config, this.galleryModel, this.galleryView, totalNumberOfItems);
+			this.cache = new GalleryCacheAllProvisionalSomeComplete(this.gallerySizes, this.galleryModel, this.galleryView, totalNumberOfItems);
 			
 			this.cache.setGalleryDivs(this.outerDiv, this.innerDiv);
 		}
@@ -210,7 +192,7 @@ function Gallery(divId, config, galleryModel, galleryView) {
 		}
 		
 		// Refresh, passing in a function for retrieving provisional items
-		this.cache.refresh(level + 1, totalNumberOfItems, this.widthMode, this.heightMode);
+		this.cache.refresh(level + 1, totalNumberOfItems);
 
 		this.exit(level, 'refresh');
 	};

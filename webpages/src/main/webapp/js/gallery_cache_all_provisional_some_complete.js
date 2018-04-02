@@ -3,10 +3,15 @@
  * then download complete-data (eg. image thumbs) on demand, eg keep 3 pages of images above and below the
  * currently visible pages.
  * 
+ * - gallerySizes - interface for computing number of columns, getting sizes etc
+ * - galleryModel - data model for downloading provisional and complete items
+ * - galleryView - for creating and updating UI elements, this class does not access DOM directly, easier to unit test
+ * - initialTotalNumberOfItems - total number of items to be displayed, if known
+ * 
  */
 
-function GalleryCacheAllProvisionalSomeComplete(config, galleryModel, galleryView, initialTotalNumberOfItems) {
-	GalleryCacheBase.call(this, config, galleryModel, galleryView, initialTotalNumberOfItems);
+function GalleryCacheAllProvisionalSomeComplete(gallerySizes, galleryModel, galleryView, initialTotalNumberOfItems) {
+	GalleryCacheBase.call(this, gallerySizes, galleryModel, galleryView, initialTotalNumberOfItems);
 	
 	this.visibleElements = null;
 }
@@ -55,17 +60,17 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 	});
 }
 
-GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level, widthMode, heightMode) {
+GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level) {
 
 	// Get the width of element to compute how many elements there are room for
-	var numColumns = widthMode.computeNumColumns(this.config, this.columnSpacing, this._getVisibleWidth());
+	var numColumns = this.gallerySizes.computeNumColumns(this._getVisibleWidth());
 	
 	this.numColumns = numColumns;
 	
 	this.log(level, 'Thumbs per row: ' + numColumns);
 	
 	// Have thumbs per row, now compute height
-	var height = this._computeHeight(heightMode, numColumns);
+	var height = this.gallerySizes.computeHeightFromNumColumns(this._getTotalNumberOfItems(), numColumns);
 	
 	// Set height of complete scrollable area, this might have to be adjusted as we scroll
 	// but must be set in order to have scrollbars appear correctly relative to number of elements in virtual array
@@ -473,13 +478,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._findElementYPosAndItemIndex = 
 	
 	// We do not know item heights, only an approximation in case of heightHint
 	// so just figure out by multiplying
-	
-	// TODO move this out, should be in modes or other place, maybe in config?
-	var heightOfOneElement = typeof this.config.widthHint !== 'undefined'
-				? this.config.widthHint
-				: this.config.width;
-
-	heightOfOneElement += this.rowSpacing;
+	var heightOfOneElement = this.gallerySizes.getHeightOfOneElement();
 	
 	// Now we have can divide to find start
 	var itemIndex = Math.floor(yPos / heightOfOneElement);
@@ -496,7 +495,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._findElementYPosAndItemIndex = 
 			: this.numColumns; 
 		
 		var nextY = y;
-		nextY += this.rowSpacing;
+		nextY += this._getRowSpacing();
 		
 		var rowMaxHeight = this._findRowMaxItemHeight(i, itemsThisRow);
 		

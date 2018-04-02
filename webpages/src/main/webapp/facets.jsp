@@ -9,6 +9,7 @@
 
 
 <script src="js/gallery_base.js" type="text/javascript"></script>
+<script src="js/gallery_sizes.js" type="text/javascript"></script>
 <script src="js/gallery_caches.js" type="text/javascript"></script>
 <script src="js/gallery_cache_items.js" type="text/javascript"></script>
 <script src="js/gallery_cache_all_complete.js" type="text/javascript"></script>

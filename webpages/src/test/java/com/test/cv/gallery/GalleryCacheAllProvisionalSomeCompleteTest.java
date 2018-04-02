@@ -25,17 +25,15 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 
 		final Map<String, Object> bindings = new HashMap<>();
 
-		final ConstructRequest constructRequest = new ConstructRequest("GalleryCacheAllProvisionalSomeComplete", config, galleryModel, galleryView, 0);
-		final ConstructRequest widthMode = new ConstructRequest("GalleryModeWidthHint");
-		final ConstructRequest heightMode = new ConstructRequest("GalleryModeHeightHint");
-		
-		final JSInvocable invocable = super.prepareGalleryRuntime(bindings, constructRequest, widthMode, heightMode);
+		final ConstructRequest gallerySizes = new ConstructRequest("GallerySizes", config);
+		final ConstructRequest constructRequest = new ConstructRequest("GalleryCacheAllProvisionalSomeComplete", gallerySizes, galleryModel, galleryView, 0);
+			
+		final JSInvocable invocable = super.prepareGalleryRuntime(bindings, gallerySizes, constructRequest);
 		
 		return new GalleryCacheAllProvisionalSomeComplete(
 				invocable,
 				constructRequest.getInstance(),
-				galleryModel, galleryView,
-				widthMode.getInstance(), heightMode.getInstance());
+				galleryModel, galleryView);
 	}
 	
 	public void testSimple() throws IOException {

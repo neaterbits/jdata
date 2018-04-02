@@ -3,6 +3,7 @@ package com.test.cv.jsutils;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -133,15 +134,44 @@ public class NashornEngine implements JSEngine {
 			s += buildConstructFunction(request);
 		}
 		
-		
 		// Construct function
 		
 		final JSInvocable invocable = compileJS(s).eval(b);
 		
 		// Invoke all construct requests to create instances
-		for (ConstructRequest request : constructRequests) {
+		for (int i = 0; i < constructRequests.length; ++ i) {
 			
-			final Object instance = invocable.invokeFunction(constructFunctionName(request), request.getParams());
+			final ConstructRequest request = constructRequests[i];
+
+			final Object [] paramsCopy = Arrays.copyOf(request.getParams(), request.getParams().length);
+			
+			for (int paramNo = 0; paramNo < paramsCopy.length; ++ paramNo) {
+				if (paramsCopy[paramNo] instanceof ConstructRequest) {
+					// Dependency to other constructed instance, ought to have been constructed already
+					// so just swap out param
+					ConstructRequest found = null;
+					for (int j = 0; j < i; ++ j) {
+						if (constructRequests[j] == paramsCopy[paramNo]) {
+							found = constructRequests[j];
+							break;
+						}
+					}
+					
+					if (found == null) {
+						throw new IllegalStateException("No prior constructrequest found for " + paramsCopy[paramNo]);
+					}
+					
+					if (found.getInstance() == null) { 
+						throw new IllegalStateException("No instance for dependency " + found + " for " + paramsCopy[paramNo]);
+					}
+					
+					paramsCopy[paramNo] = found.getInstance();
+				}
+			}
+			
+			// Check if a
+			
+			final Object instance = invocable.invokeFunction(constructFunctionName(request), paramsCopy);
 			
 			if (instance == null) {
 				throw new IllegalStateException("Failed to create instance for " + request.getJsClass());
