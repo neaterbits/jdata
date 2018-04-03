@@ -52,7 +52,7 @@
 	box-sizing: border-box;
 	
 	/* TODO center otherwise? display-table/vertical-align?*/
-	margin-bottom: 0.05em;
+	margin-bottom: 0.1em;
 	margin-right: 0.2em;
 	margin-left: 0.3em;
 }
@@ -73,6 +73,8 @@
 
 .attributeTitleDiv {
 	width: 100%;
+	margin-top: 0.1em;
+	border-bottom: 1px solid #EEEEEE;
 }
 
 .attributeTitle {
