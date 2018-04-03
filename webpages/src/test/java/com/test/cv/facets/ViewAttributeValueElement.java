@@ -43,4 +43,9 @@ final class ViewAttributeValueElement extends ViewContainer<ViewElement> {
 	boolean isChecked() {
 		return checked;
 	}
+
+	@Override
+	public String toString() {
+		return "[value=" + value + ", matchCount=" + matchCount + "]";
+	}
 }

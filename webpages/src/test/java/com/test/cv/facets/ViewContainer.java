@@ -7,11 +7,13 @@ import java.util.List;
 abstract class ViewContainer<SUB extends ViewElement> extends ViewElement {
 
 	private final List<SUB> subElements;
+	private final List<ViewCheckbox> checkboxes;
 	
 	ViewContainer(ViewContainer<?> parentElement) {
 		super(parentElement);
 		
 		this.subElements = new ArrayList<>();
+		this.checkboxes = new ArrayList<>();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -25,5 +27,17 @@ abstract class ViewContainer<SUB extends ViewElement> extends ViewElement {
 	
 	final List<SUB> getSubElements() {
 		return Collections.unmodifiableList(this.subElements);
+	}
+	
+	final void addCheckbox(ViewCheckbox checkbox) {
+		if (checkbox == null) {
+			throw new IllegalArgumentException("checkbox == null");
+		}
+		
+		this.checkboxes.add(checkbox);
+	}
+
+	final List<ViewCheckbox> getCheckboxes() {
+		return Collections.unmodifiableList(this.checkboxes);
 	}
 }

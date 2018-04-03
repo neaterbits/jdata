@@ -1,15 +1,16 @@
 package com.test.cv.facets;
 
-final class ViewCheckbox extends ViewElement{
+final class ViewCheckbox {
 
 	private Object onClicked;
 	
 	ViewCheckbox(ViewContainer<?> parentElement) {
-		super(parentElement);
 	
 		if (parentElement == null) {
 			throw new IllegalArgumentException("parentElement == null");
 		}
+		
+		parentElement.addCheckbox(this);
 	}
 
 	Object getOnClicked() {

@@ -196,7 +196,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	}
 
 	this._addFacetSingleValue = function(viewElementFactory, cur, element, index) {
-		var hasSubAttributes = typeof element.subAttributes !== 'undefined';
+		var hasSubAttributes = typeof element.subAttributes !== 'undefined' && element.subAttributes != null;
 		
 		var displayValue = isNotNull(element.displayValue)
 			? element.displayValue
