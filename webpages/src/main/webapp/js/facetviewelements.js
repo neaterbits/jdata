@@ -6,7 +6,11 @@
  */
 
 function FacetViewElements() {
-	
+
+	this.getRootContainer = function(divId) {
+		return document.getElementById(divId);
+	}
+
 	this.createTypeContainer = function(parentElement, text, isExpanded, checked) {
 		
 		function expandedClass(expanded) {

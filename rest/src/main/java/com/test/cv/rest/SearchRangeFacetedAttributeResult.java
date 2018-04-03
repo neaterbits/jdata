@@ -7,6 +7,14 @@ public class SearchRangeFacetedAttributeResult extends SearchFacetedAttributeRes
 	// A list of ranges with matchcount for each
 	private List<SearchFacetedAttributeRangeResult<?>> ranges;
 
+	public SearchRangeFacetedAttributeResult() {
+
+	}
+
+	public SearchRangeFacetedAttributeResult(String id, String name, Integer noAttributeValueCount) {
+		super(id, name, noAttributeValueCount);
+	}
+
 	public List<SearchFacetedAttributeRangeResult<?>> getRanges() {
 		return ranges;
 	}

@@ -4,10 +4,7 @@
  * since each level of facets are arrays
  */
 
-function FacetModel(serviceUrl, allowCrossOrigin) {
-	
-	this.serviceUrl = serviceUrl;
-	this.allowCrossOrigin = allowCrossOrigin;
+function FacetModel() {
 	
 	this.updateFacets = function(facets) {
 		this.types = facets.types;
@@ -33,23 +30,23 @@ function FacetModel(serviceUrl, allowCrossOrigin) {
 
 		for (var i = 0; i < modelCurArray.length; ++ i) {
 			var element = modelCurArray[i];
-
+			
 			var arrayElementCur = onArrayElement(kind, element, i, arrayCur);
 
 			if (kind === 'type') {
 
-				if (typeof element.subTypes !== 'undefined') {
+				if (typeof element.subTypes !== 'undefined' && element.subTypes != null) {
 					this._iterate(element.subTypes, 'type', arrayElementCur, onArray, onArrayElement);
 				}
 
-				if (typeof element.attributes !== 'undefined') {
+				if (typeof element.attributes !== 'undefined' && element.attributes != null) {
 					this._iterate(element.attributes, 'attribute', arrayElementCur, onArray, onArrayElement);
 				}
 			}
 			else if (kind === 'attribute') {
 				
 				// Iterate over values
-				if (typeof element.values !== 'undefined') {
+				if (typeof element.values !== 'undefined' && element.values != null) {
 					
 					var valuesArrayCur = onArray('attributeValue', element.values.length, arrayElementCur);
 					
@@ -59,7 +56,7 @@ function FacetModel(serviceUrl, allowCrossOrigin) {
 						var attrValueCur = onArrayElement('attributeValue', attrValue, attrValueIdx, valuesArrayCur);
 			
 						
-						if (typeof attrValue.subAttributes !== 'undefined') {
+						if (typeof attrValue.subAttributes !== 'undefined' && attrValue.subAttributes != null) {
 							// Recursive attributes, eg County under State
 
 							this._iterate(attrValue.subAttributes, 'attribute', attrValueCur, onArray, onArrayElement);
@@ -71,7 +68,7 @@ function FacetModel(serviceUrl, allowCrossOrigin) {
 						onArrayElement('attributeValueUnknown', { matchCount : element.noAttributeValueCount }, attrValueIdx, valuesArrayCur);
 					}
 				}
-				else if (typeof element.ranges !== 'undefined') {
+				else if (typeof element.ranges !== 'undefined' && element.ranges != null) {
 					var rangesArrayCur = onArray('attributeRange', element.ranges.length, arrayElementCur);
 					
 					for (var attrRangeIdx = 0; attrRangeIdx < element.ranges.length; ++ attrRangeIdx) {

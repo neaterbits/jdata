@@ -2,6 +2,7 @@ package com.test.cv.jsutils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -80,8 +81,19 @@ public class BaseJSTest extends TestCase {
 	
 	protected final JSInvocable prepareMavenWebAppScripts(Map<String, Object> bindings, ConstructRequest [] constructRequests, String ... scripts) throws IOException {
 		
+		final Map<String, Object> b = new HashMap<String, Object>(bindings);
+
+		// Add console corresponding to web browser console
+		b.put("console", new Console());
+
 		final String s = readMavenWebAppScripts(scripts);
 		
-		return engine.prepare(s, bindings, constructRequests);
+		return engine.prepare(s, b, constructRequests);
+	}
+
+	public static class Console {
+		public void log(String s) {
+			System.out.println("console.log: " + s);;
+		}
 	}
 }

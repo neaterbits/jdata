@@ -29,7 +29,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		
 		// First element callback is always an array of types. Pass in a FacetTypeContainer
 		
-		var rootElement = document.getElementById(divId);
+		var rootElement = this.facetViewElements.getRootContainer(divId);
 		var t = this;
 
 		// Iterate through facet model, called back for each single element (like type or attribute)
@@ -777,7 +777,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	function FacetsElementBase(className, viewElementFactory, modelType, viewElement) {
 		
 		if (typeof viewElement === 'undefined' || viewElement == null) {
-			throw "No view element: " + viewElement;
+			throw "No view element: " + viewElement + "/" + typeof viewelement;
 		}
 		
 		this.className = className;

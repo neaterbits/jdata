@@ -19,11 +19,18 @@
   	  <artifactId>javax.servlet-api</artifactId>
   	  <version>3.0.1</version>
   	</dependency>
+
   	<!-- test -->
-  	
   	<dependency>
 	  	<groupId>${project.groupId}</groupId>
 	  	<artifactId>common</artifactId>
+	  	<version>${project.version}</version>
+	  	<scope>test</scope>
+  	</dependency>
+
+  	<dependency>
+	  	<groupId>${project.groupId}</groupId>
+	  	<artifactId>rest</artifactId>
 	  	<version>${project.version}</version>
 	  	<scope>test</scope>
   	</dependency>

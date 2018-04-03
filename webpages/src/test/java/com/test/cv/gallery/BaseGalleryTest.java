@@ -1,7 +1,6 @@
 package com.test.cv.gallery;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.test.cv.jsutils.BaseJSTest;
@@ -23,12 +22,7 @@ public class BaseGalleryTest extends BaseJSTest {
 
 	final JSInvocable prepareGalleryRuntime(Map<String, Object> bindings, ConstructRequest ... constructRequests) throws IOException {
 
-		final Map<String, Object> b = new HashMap<>(bindings);
-
-		// Add console corresponding to web browser console
-		b.put("console", new Console());
-		
-		final JSInvocable jsRuntime = super.prepareMavenWebAppScripts(b, constructRequests,
+		final JSInvocable jsRuntime = super.prepareMavenWebAppScripts(bindings, constructRequests,
 				"gallery_base.js",
 				"gallery_sizes.js",
 				"gallery_caches.js",
@@ -42,11 +36,5 @@ public class BaseGalleryTest extends BaseJSTest {
 
 
 		return jsRuntime;
-	}
-
-	public static class Console {
-		public void log(String s) {
-			System.out.println("console.log: " + s);;
-		}
 	}
 }
