@@ -30,46 +30,48 @@
 <div style='width: 100%; height: 100%; margin: 0; padding: 0.5em; box-sizing: border-box;'>
 	
 	<div id="leftSideSearchPanel" style='width: 30%; height: 100%;'>
-		<div id="fulltextAndResultsDiv">
-			<div id="fulltextDiv">
-				 <div id="fulltextRow" class="infoRow">
-				 	<div id="fullTextInputs">
-						<input id="fulltextInput" type="text" placeholder="Enter any search word here"/>
-						<input id="fulltextButton" type="button" value="Search"/>
+		<div id="leftSideSearchPanelFlex">
+			<div id="fulltextAndResultsDiv">
+				<div id="fulltextDiv">
+					 <div id="fulltextRow" class="infoRow">
+					 	<div id="fullTextInputs">
+							<input id="fulltextInput" type="text" placeholder="Enter any search word here"/>
+							<input id="fulltextButton" type="button" value="Search"/>
+						</div>
+						
+						<div id="viewPersonalDov">
+							<div id="viewPersonalBorder">
+								<span id="viewPersonalText">Personal</span>
+								<span id="viewPersonalArrow">&gt;</span>
+							</div>
+						</div>
 					</div>
 					
-					<div id="viewPersonalDov">
-						<div id="viewPersonalBorder">
-							<span id="viewPersonalText">Personal</span>
-							<span id="viewPersonalArrow">&gt;</span>
-						</div>
+					 <div id="resultsRow" class="infoRow">
+					 	<div id="resultsAndSorting">
+						 	<div id="numberOfItemsDiv">
+							 	<span id="numberOfItemsLabel"># found:</span>
+							 	<span id="numberOfItemsCount">12345</span>
+							</div>
+			
+							<select id="sortListBox">
+								<option>Price - low to high</option>
+								<option>Price - high to low</option>
+							</select>
+					 	</div>
+					 	
+					 	<div id="hideSidebarDiv">
+							<div id="hideSidebarBorder">
+								<span id="hideSidebarArrow">&lt;</span>
+								<span id="hideSidebarText">Hide</span>
+							</div>
+						 </div>
 					</div>
 				</div>
-				
-				 <div id="resultsRow" class="infoRow">
-				 	<div id="resultsAndSorting">
-					 	<div id="numberOfItemsDiv">
-						 	<span id="numberOfItemsLabel"># found:</span>
-						 	<span id="numberOfItemsCount">12345</span>
-						</div>
-		
-						<select id="sortListBox">
-							<option>Price - low to high</option>
-							<option>Price - high to low</option>
-						</select>
-				 	</div>
-				 	
-				 	<div id="hideSidebarDiv">
-						<div id="hideSidebarBorder">
-							<span id="hideSidebarArrow">&lt;</span>
-							<span id="hideSidebarText">Hide</span>
-						</div>
-					 </div>
-				</div>
 			</div>
+
+			<div id='facets'></div>
 		</div>
-		
-		<div id='facets' style='display: block; width: 100%;'></div>
 	</div>
 	
 	<!-- TODO not set wrapper? Create wrapper in gallery so not setting style on gallery -->

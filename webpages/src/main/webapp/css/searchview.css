@@ -24,25 +24,41 @@
 	height: 100%;
 }
 
+/* Placeholder for flex-layout.
+   This allows for facet view to get scrolling
+   even while not setting an explicit height (pixels or percentage)
+   or using Javascript to set height.
+   
+   This makes resizing work as well with pure CSS. 
+ */
+#leftSideSearchPanelFlex {
+	margin: 0;
+	padding: 0;
+
+	display: flex;
+	flex-direction: column;
+	
+	height: 100%;	
+}
+
 #fulltextAndResultsDiv {
 	border-bottom: 1px solid #CCCCCC;
 	padding-bottom: 0.5em;
 	box-sizing: border-box;
 	width: 100%;
-
-	height: 15%;	
 }
 
 #facets {
-	top: 0; left:0;
 	margin-right: 0.5em;
 	padding: 0.5em;
 	box-sizing: border-box;
+	
 	overflow: auto;
-
-	height: 85%;
+	flex-grow: 1; /* Take up remaining space */
+	
+	/* Hack for firefox */
+	min-height: 0;
 }
-
 
 #fulltextDiv {
 	margin-left: 0.5em;
