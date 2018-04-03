@@ -202,6 +202,8 @@ function SearchView(
 						}
 						
 						if (itemWidth != null) {
+							
+							// TODO: setter ikke width her
 							'width : ' + itemWidth + 'px; ';
 						}
 						
@@ -232,6 +234,8 @@ function SearchView(
 		var div = document.createElement('div');
 
 		var provisionalImage = document.createElement('div');
+		
+		div.setAttribute('class', 'provisionalImage');
 
 		provisionalImage.style.width = data.thumbWidth;
 		provisionalImage.style.height = data.thumbHeight;
@@ -262,7 +266,9 @@ function SearchView(
 		var div = document.createElement('div');
 		
 		var image = document.createElement('img');
-		
+
+		image.setAttribute('class', 'thumbnailImage');
+
 		image.width = provisionalData.thumbWidth;
 		image.height = provisionalData.thumbHeight;
 		

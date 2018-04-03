@@ -13,6 +13,19 @@
 
 .galleryItem {
 	border : 1px solid black;
-	
+	margin : 3px;
+}
+
+.provisonalImage, .thumbnailImage {
+
+	border 1px solid #EEEEEE;
+	box-shadow: 3px 3px 1px #AAAAAA;
+	box-sizing: border-box;
+	margin-left: 6px;
+	margin-right: 6px;
+	margin-top: 4px;
+	margin-bottom: 4px;	
+
+
 }
 
