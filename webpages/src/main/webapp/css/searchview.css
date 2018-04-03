@@ -14,6 +14,7 @@
 .galleryItem {
 	border : 1px solid black;
 	margin : 3px;
+	box-shadow: 2px 2px 1px #777777;
 }
 
 .provisonalImage, .thumbnailImage {
