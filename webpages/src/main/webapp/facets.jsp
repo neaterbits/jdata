@@ -28,7 +28,17 @@
 </head>
 <body style='height: 100%; margin: 0;'>
 <div style='width: 100%; height: 100%; margin: 0; padding: 0; box-sizing: border-box;'>
-	<div id='facets' style='display: inline-block; width: 30%; height: 100%;'></div>
+	
+	<div id="fulltextAndFacets" style='width: 30%; height: 100%;'>
+		<div id="fulltextDiv">
+		<!-- 
+			<span id="fulltextLabel">Search:</span>
+		 -->
+			<input id="fulltextInput" type="text"/>
+			<input id="fulltextButton" type="button" value="Search"/>
+		</div>
+		<div id='facets' style='display: block; width: 100%;'></div>
+	</div>
 	
 	<!-- TODO not set wrapper? Create wrapper in gallery so not setting style on gallery -->
 	<div id = "gallery_frame" style='display: inline-block; width: 65%; height: 100%;'>

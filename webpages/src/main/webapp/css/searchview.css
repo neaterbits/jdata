@@ -1,5 +1,32 @@
 @CHARSET "UTF-8";
 
+#fulltextAndFacets {
+	margin: 0;
+	padding: 0;
+	display: inline-block;
+	vertical-align: top;
+
+	margin-right: 1em;
+	
+	height: 100%;
+}
+
+#fulltextDiv {
+	margin: 0.5em;
+	margin-top: 0.75em;
+	margin-bottom: 0.75em;
+}
+
+#fulltextInput {
+	vertical-align: middle;
+	width: 70%;
+}
+
+#fulltextButton {
+	font-size: 1.1em;
+	vertical-align: middle;
+}
+
 #gallery {
 	border : 1px solid black;
 }
@@ -26,7 +53,5 @@
 	margin-right: 6px;
 	margin-top: 4px;
 	margin-bottom: 4px;	
-
-
 }
 
