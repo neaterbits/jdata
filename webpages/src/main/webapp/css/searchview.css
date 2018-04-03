@@ -5,6 +5,7 @@
 	padding: 0;
 	display: inline-block;
 	vertical-align: top;
+	box-sizing: border-box;
 
 	margin-right: 1em;
 	
@@ -12,19 +13,50 @@
 }
 
 #fulltextDiv {
-	margin: 0.5em;
-	margin-top: 0.75em;
-	margin-bottom: 0.75em;
+	margin-left: 0.5em;
+	width: 100%;
+	height: 15%;
+}
+
+.infoRow {
+	width: 100%;
+}
+
+#fulltextRow {
+	padding-top: 0.3em;
+	border-bottom: 1px solid #CCCCCC;
+	padding-bottom: 0.7em;
 }
 
 #fulltextInput {
-	vertical-align: middle;
 	width: 70%;
+	vertical-align: middle;
 }
 
 #fulltextButton {
 	font-size: 1.1em;
+	display: table-cell;
 	vertical-align: middle;
+}
+
+#resultsRow {
+	padding-top: 0.3em;
+	width: 100%;
+	position: relative;
+}
+
+#numberOfItemsDiv {
+	display : inline;
+	margin-right: 2em;
+}
+
+#sortListBox {
+	position: absolute;
+	right: 2em;
+}
+
+#facets {
+	height : 85%;
 }
 
 #gallery {
