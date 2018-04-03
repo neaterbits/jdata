@@ -428,6 +428,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				function (kind, length, cur) {
 					if (kind === 'type') {
 						// FacetTypeList under FacetTypeContainer
+
 						if (isNotNull(cur.getTypeList())) {
 							// Existing list
 							cur.getTypeList().setInUse(true);
@@ -460,7 +461,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 					if (kind == 'type') {
 						// cur is FacetTypeList
 						var typeIndex = cur.findType(element.type);
-						if (typeIndx >= 0) {
+						if (typeIndex >= 0) {
 							cur.getTypes()[typeIndex].setInUse(true);
 							
 							cur = cur.getTypes();
