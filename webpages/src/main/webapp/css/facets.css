@@ -82,6 +82,38 @@
 	font-weight: bold;
 }
 
+.attributeValueCheckbox {
+}
+
+.attributeValueElement {
+}
+
+.attributeValueExpander {
+	width: 0px;
+	height: 0px;
+	display: inline-block;
+	box-sizing: border-box;
+	
+	/* TODO center otherwise? display-table/vertical-align?*/
+	margin-bottom: 0.1em;
+	margin-right: 0.1em;
+	margin-left: 0.15em;
+}
+
+.attributeValueExpanderExpanded {
+	border-left: 0.20em solid transparent;
+	border-top: 0.4em solid #404040;
+	border-right: 0.20em solid transparent;
+	border-radius: 1px;
+}
+
+.attributeValueExpanderCollapsed {
+	border-top: 0.20em solid transparent;
+	border-left: 0.4em solid #404040;
+	border-bottom: 0.20em solid transparent;
+	border-radius: 1px;
+}
+
 .typeTitleDiv {
 	/* background-color: #CCCCFF; */
 	/* background-color: LightBlue; */

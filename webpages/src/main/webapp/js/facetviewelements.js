@@ -252,17 +252,28 @@ function FacetViewElements() {
 		li.style['list-style'] = 'none';
 		
 		var checkbox = document.createElement('input');
+		checkbox.setAttribute('class', 'attributeValueCheckbox');
 		checkbox.type = 'checkbox';
 		checkbox.checked = checked;
-		
+
 		var span = document.createElement('span');
 		span.setAttribute('class', 'attributeValueElement');
 		span.innerHTML = value + ' (' + matchCount + ')';
 		
 		if (hasSubAttributes) {
-			// There are sub attributes so we have to make sure they are
+			
+			function expandedClass(expanded) {
+				return expanded ? 'attributeValueExpanderExpanded' :'attributeValueExpanderCollapsed';
+			}
+			
+			// There are sub attributes so we have to make sure they are expandable
 			var valueNameDiv = document.createElement('div');
 
+			var attributeValueExpander = document.createElement('div');
+			
+			attributeValueExpander.className = 'attributeValueExpander ' + expandedClass(isExpanded);
+			
+			append(valueNameDiv, attributeValueExpander);
 			append(valueNameDiv, checkbox);
 			append(valueNameDiv, span);
 
@@ -271,9 +282,12 @@ function FacetViewElements() {
 			var listDiv = document.createElement('div');
 			listDiv.setAttribute('class', 'facetListsDiv');
 	
-			var accordion = this._makeAccordion(listDiv, isExpanded, function (expanded) { });
+			var accordion = this._makeAccordion(listDiv, isExpanded, function (expanded) {
+				attributeValueExpander.className = 'attributeValueExpander ' + expandedClass(expanded);
+			});
 
 			span.onclick = accordion.onclick;
+			attributeValueExpander.onclick = accordion.onclick;
 
 			append(li, accordion.element);
 		}
