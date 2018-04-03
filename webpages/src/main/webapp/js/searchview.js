@@ -187,13 +187,14 @@ function SearchView(
 					
 					applyItemStyles : function(itemElement, rowHeight, itemWidth, itemHeight, spacing, visible) {
 					
+						itemElement.setAttribute('class', 'galleryItem');
+						
 						var styling = 'position : relative; ' +
 							/*
 							'display : inline-block; ' +
 							*/
 							'float : left; ' +
-							'margin-left : ' + spacing + 'px; ' +
-							'background-color : white; ';
+							'margin-left : ' + spacing + 'px; ';
 						
 						if (itemHeight != null) {
 							styling += 'top : ' + (rowHeight - itemHeight) / 2 + 'px; ';
@@ -201,6 +202,8 @@ function SearchView(
 						}
 						
 						if (itemWidth != null) {
+							
+							// TODO: setter ikke width her
 							'width : ' + itemWidth + 'px; ';
 						}
 						
@@ -214,13 +217,13 @@ function SearchView(
 					
 					applyRowContainerStyling : function(rowDiv, y, width, height) {
 						
+						rowDiv.setAttribute('class', 'galleryRowDiv');
+						
 						rowDiv.setAttribute('style',
 								//'position : relative; ' +
 								'top :  ' + y + 'px; ' +
 								'width : ' + width + 'px; ' +
-								'height : ' + height + 'px; ' +
-								'border : 1px solid black;' +
-								'background-color : yellow; ');
+								'height : ' + height + 'px;');
 	
 					}
 				}
@@ -231,6 +234,8 @@ function SearchView(
 		var div = document.createElement('div');
 
 		var provisionalImage = document.createElement('div');
+		
+		div.setAttribute('class', 'provisionalImage');
 
 		provisionalImage.style.width = data.thumbWidth;
 		provisionalImage.style.height = data.thumbHeight;
@@ -261,7 +266,9 @@ function SearchView(
 		var div = document.createElement('div');
 		
 		var image = document.createElement('img');
-		
+
+		image.setAttribute('class', 'thumbnailImage');
+
 		image.width = provisionalData.thumbWidth;
 		image.height = provisionalData.thumbHeight;
 		

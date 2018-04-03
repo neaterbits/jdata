@@ -148,7 +148,6 @@ function Gallery(divId, config, galleryModel, galleryView) {
 	this.outerDiv.style.width = '100%';
 	this.outerDiv.style.height = '100%';
 	this.outerDiv.style.overflow = 'auto';
-	this.outerDiv.style['background-color'] = 'blue';
 	
 	this.innerDiv.style.width = '100%';
 	this.innerDiv.style.height = '100%';

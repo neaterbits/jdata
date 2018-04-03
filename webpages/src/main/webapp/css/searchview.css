@@ -1,0 +1,32 @@
+@CHARSET "UTF-8";
+
+#gallery {
+	border : 1px solid black;
+}
+
+.galleryRowDiv {
+/*	
+	border : 1px solid black;
+	background-color : yellow;
+*/
+}
+
+.galleryItem {
+	border : 1px solid black;
+	margin : 3px;
+	box-shadow: 2px 2px 1px #777777;
+}
+
+.provisonalImage, .thumbnailImage {
+
+	border 1px solid #EEEEEE;
+	box-shadow: 3px 3px 1px #AAAAAA;
+	box-sizing: border-box;
+	margin-left: 6px;
+	margin-right: 6px;
+	margin-top: 4px;
+	margin-bottom: 4px;	
+
+
+}
+

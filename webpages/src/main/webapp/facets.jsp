@@ -1,6 +1,9 @@
 <html style='height: 100%'>
 <head>
+
 <link rel="stylesheet" type="text/css" href="css/facets.css">
+<link rel="stylesheet" type="text/css" href="css/searchview.css">
+
 <script src="js/facetpath.js" type="text/javascript"></script>
 <script src="js/facetviewelements.js" type="text/javascript"></script>
 <script src="js/facetview.js" type="text/javascript"></script>
@@ -28,7 +31,7 @@
 	<div id='facets' style='display: inline-block; width: 30%; height: 100%;'></div>
 	
 	<!-- TODO not set wrapper? Create wrapper in gallery so not setting style on gallery -->
-	<div style='display: inline-block; width: 65%; height: 100%; margin: 0; padding: 0; box-sizing: border-box;'>
+	<div id = "gallery_frame" style='display: inline-block; width: 65%; height: 100%;'>
 		<div id='gallery' style='height: 100%'></div>
 	</div>
 </div>
