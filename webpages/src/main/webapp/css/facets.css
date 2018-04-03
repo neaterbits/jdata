@@ -75,21 +75,23 @@
 
 .facetAttributeValueElement {
 	width: 100%;
-	position: relative;
 }
 
 .attributeValueTitleDiv {
 	width: 100%;
-	position: relative;
+
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 }
 
 .attributeValueTitle {
 	font-size: 0.9em;
+
+	flex-grow: 1;
 }
 
 .thisAttributeValueOnlyContainer {
-	position: absolute;
-	right: 0.2em;
 }
 
 .thisAttributeValueOnlyText {
@@ -97,7 +99,6 @@
 	font-size: 0.7em;
 	font-weight: 500;
 }
-
 
 .attributeValueExpander {
 	width: 0px;
@@ -135,13 +136,13 @@
 	border: 1px solid black;
 	border-radius: 3px;
 
-	position: relative;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 }
 
 
 .thisTypeOnlyContainer {
-	position: absolute;
-	right: 0.2em;
 }
 
 .thisTypeOnlyText {
@@ -184,6 +185,8 @@
 	font-family: serif;
 	font-weight: bold;
 	font-size: 0.9em;
+
+	flex-grow: 1;
 }
 
 

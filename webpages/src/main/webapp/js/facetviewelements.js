@@ -323,9 +323,15 @@ function FacetViewElements() {
 			append(li, accordion.element);
 		}
 		else {
-			append(li, checkbox);
-			append(li, span);
-			append(li, thisAttrValueOnlyContainer);
+			var valueNameDiv = document.createElement('div');
+			
+			valueNameDiv.setAttribute('class', 'attributeValueTitleDiv');
+
+			append(valueNameDiv, checkbox);
+			append(valueNameDiv, span);
+			append(valueNameDiv, thisAttrValueOnlyContainer);
+			
+			append(li, valueNameDiv);
 		}
 			
 		append(parentElement, li);
