@@ -69,6 +69,7 @@ function FacetController(facetModel, facetView) {
 	this.refresh = function() {
 		
 		if (this.viewInitialized) {
+			this.view.refreshFromNewModel(this.model);
 			this._updateUI();
 		}
 		else {
@@ -77,19 +78,4 @@ function FacetController(facetModel, facetView) {
 			this.viewInitialized = true;
 		}
 	}
-	
-	this._updateUI = function() {
-		// Topmost facetview is the list of matching types
-		
-		// Must merge the result with facet views that are already there
-		// Remove views that are not there anymore, add new ones
-		// Keep expanded-state for views that are expanded
-		// We do the diffing in the controller, view maps a path to a div
-		
-		
-		// TODO what about common attributes like location? Shared for multiple types
-		// TODO should select probably at same level as type but could possibly override in subtype, might be confusing
-		// TODO probably best to share or make it selectable through annotation.
-		// TODO location can be shared but length/width/height does not make sense since is very different ranges depending on type of item
-	};
 }
