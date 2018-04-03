@@ -1,6 +1,9 @@
 <html style='height: 100%'>
 <head>
+
 <link rel="stylesheet" type="text/css" href="css/facets.css">
+<link rel="stylesheet" type="text/css" href="css/searchview.css">
+
 <script src="js/facetpath.js" type="text/javascript"></script>
 <script src="js/facetviewelements.js" type="text/javascript"></script>
 <script src="js/facetview.js" type="text/javascript"></script>

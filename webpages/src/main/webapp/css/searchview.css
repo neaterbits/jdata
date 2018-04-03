@@ -1,0 +1,18 @@
+@CHARSET "UTF-8";
+
+#gallery {
+	border : 1px solid black;
+}
+
+.galleryRowDiv {
+/*	
+	border : 1px solid black;
+	background-color : yellow;
+*/
+}
+
+.galleryItem {
+	border : 1px solid black;
+	
+}
+

@@ -187,13 +187,14 @@ function SearchView(
 					
 					applyItemStyles : function(itemElement, rowHeight, itemWidth, itemHeight, spacing, visible) {
 					
+						itemElement.setAttribute('class', 'galleryItem');
+						
 						var styling = 'position : relative; ' +
 							/*
 							'display : inline-block; ' +
 							*/
 							'float : left; ' +
-							'margin-left : ' + spacing + 'px; ' +
-							'background-color : white; ';
+							'margin-left : ' + spacing + 'px; ';
 						
 						if (itemHeight != null) {
 							styling += 'top : ' + (rowHeight - itemHeight) / 2 + 'px; ';
@@ -214,13 +215,13 @@ function SearchView(
 					
 					applyRowContainerStyling : function(rowDiv, y, width, height) {
 						
+						rowDiv.setAttribute('class', 'galleryRowDiv');
+						
 						rowDiv.setAttribute('style',
 								//'position : relative; ' +
 								'top :  ' + y + 'px; ' +
 								'width : ' + width + 'px; ' +
-								'height : ' + height + 'px; ' +
-								'border : 1px solid black;' +
-								'background-color : yellow; ');
+								'height : ' + height + 'px;');
 	
 					}
 				}
