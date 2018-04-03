@@ -147,7 +147,13 @@ function FacetViewElements() {
 			append(listsDiv, ul);
 		}
 
-		ul.setAttribute("class", "facetTypeList");
+		var classes = 'facetTypeList';
+		
+		if (isRoot) {
+			classes += ' rootFacetTypeList'
+		}
+		
+		ul.setAttribute("class", classes);
 		
 		return ul;
 	}

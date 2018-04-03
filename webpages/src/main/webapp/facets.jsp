@@ -27,7 +27,7 @@
 <h2>Test</h2>
 <input id="use_test_data" type="checkbox" checked>Use test data<br/>
 <div style='width: 100%; height: 90%; margin: 0; padding: 0; border-box;'>
-	<div id='facets' style='display: inline-block; width: 30%; height: 100%; margin: 0; padding: 0; box-sizing: border-box; overflow: scroll'></div>
+	<div id='facets' style='display: inline-block; width: 30%; height: 100%;'></div>
 	
 	<!-- TODO not set wrapper? Create wrapper in gallery so not setting style on gallery -->
 	<div style='display: inline-block; width: 65%; height: 100%; margin: 0; padding: 0; box-sizing: border-box;'>
