@@ -3,9 +3,9 @@ package com.test.cv.facets;
 /**
  * Sub-container, ie non-root container thus has a parentElement
  */
-abstract class ViewSubContainer extends ViewContainer {
+abstract class ViewSubContainer<SUB extends ViewElement> extends ViewContainer<SUB> {
 
-	ViewSubContainer(ViewContainer parentElement) {
+	ViewSubContainer(ViewContainer<?> parentElement) {
 		super(parentElement);
 
 		if (parentElement == null) {

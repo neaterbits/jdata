@@ -1,10 +1,10 @@
 package com.test.cv.facets;
 
-abstract class ViewListElement extends ViewContainer {
+abstract class ViewListElement<SUB extends ViewElement> extends ViewContainer<SUB> {
 
 	private final String text;
 
-	ViewListElement(ViewContainer parentElement, String text) {
+	ViewListElement(ViewContainer<?> parentElement, String text) {
 		super(parentElement);
 
 		checkText(text);

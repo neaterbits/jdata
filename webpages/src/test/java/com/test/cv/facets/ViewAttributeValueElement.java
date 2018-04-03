@@ -1,7 +1,7 @@
 package com.test.cv.facets;
 
 // Container since may have subattributes
-final class ViewAttributeValueElement extends ViewContainer {
+final class ViewAttributeValueElement extends ViewContainer<ViewElement> {
 	
 	private final Object value;
 	private final int matchCount;
@@ -9,7 +9,7 @@ final class ViewAttributeValueElement extends ViewContainer {
 	private final boolean isExpanded;
 	private final boolean checked;
 	
-	ViewAttributeValueElement(ViewList parentElement, Object value, int matchCount,
+	ViewAttributeValueElement(ViewList<?> parentElement, Object value, int matchCount,
 			boolean hasSubAttributes, boolean isExpanded, boolean checked) {
 		super(parentElement);
 		
@@ -32,7 +32,7 @@ final class ViewAttributeValueElement extends ViewContainer {
 		return matchCount;
 	}
 
-	boolean isHasSubAttributes() {
+	boolean hasSubAttributes() {
 		return hasSubAttributes;
 	}
 

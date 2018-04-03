@@ -1,10 +1,14 @@
 package com.test.cv.facets;
 
 abstract class ViewElement {
-	private final ViewContainer parentElement;
+	private final ViewContainer<?> parentElement;
 
-	ViewElement(ViewContainer parentElement) {
+	ViewElement(ViewContainer<?> parentElement) {
 		this.parentElement = parentElement;
+		
+		if (parentElement != null) {
+			parentElement.addSubElement(this);
+		}
 	}
 
 	final void checkText(String text) {
@@ -23,7 +27,7 @@ abstract class ViewElement {
 		}
 	}
 	
-	final ViewContainer getParentElement() {
+	final ViewContainer<?> getParentElement() {
 		return parentElement;
 	}
 }

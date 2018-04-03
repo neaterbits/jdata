@@ -4,7 +4,7 @@ final class ViewCheckbox extends ViewElement{
 
 	private Object onClicked;
 	
-	ViewCheckbox(ViewContainer parentElement) {
+	ViewCheckbox(ViewContainer<?> parentElement) {
 		super(parentElement);
 	
 		if (parentElement == null) {

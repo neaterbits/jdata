@@ -1,12 +1,14 @@
 package com.test.cv.facets;
 
+import java.util.List;
+
 final class TestFacetViewElements implements FacetViewElements<
 
-		ViewContainer,
-		ViewContainer,
+		ViewContainer<?>,
+		ViewContainer<?>,
 		
-		ViewContainer,
-		ViewList,
+		ViewContainer<?>,
+		ViewList<?>,
 		
 		ViewTypeContainer,
 		ViewTypeList,
@@ -24,21 +26,31 @@ final class TestFacetViewElements implements FacetViewElements<
 	
 
 	private final ViewRootContainer rootContainer = new ViewRootContainer();
+
+	public ViewTypeList getRootTypeList() {
+		final List<ViewTypeList> subElements = rootContainer.getSubElements();
+
+		if (subElements.size() != 1) {
+			throw new IllegalStateException("Expected one subelemnt of root");
+		}
+		
+		return (ViewTypeList)subElements.get(0);
+	}
 	
 	@Override
-	public ViewContainer getRootContainer(String divId) {
+	public ViewContainer<ViewTypeList> getRootContainer(String divId) {
 		return rootContainer;
 	}
 
 	@Override
-	public ViewTypeContainer createTypeContainer(ViewContainer parentElement, String text, boolean isExpanded,
+	public ViewTypeContainer createTypeContainer(ViewContainer<?> parentElement, String text, boolean isExpanded,
 			boolean checked) {
 
 		return new ViewTypeContainer(parentElement, text);
 	}
 
 	@Override
-	public ViewTypeList createTypeList(ViewContainer parentElement, boolean isRoot) {
+	public ViewTypeList createTypeList(ViewContainer<?> parentElement, boolean isRoot) {
 		return new ViewTypeList(parentElement, isRoot);
 	}
 
@@ -48,7 +60,7 @@ final class TestFacetViewElements implements FacetViewElements<
 	}
 
 	@Override
-	public ViewAttributeList createAttributeList(ViewContainer parentElement) {
+	public ViewAttributeList createAttributeList(ViewContainer<?> parentElement) {
 		return new ViewAttributeList(parentElement);
 	}
 
@@ -68,7 +80,7 @@ final class TestFacetViewElements implements FacetViewElements<
 	}
 
 	@Override
-	public CreateAttributeValueElementResult<ViewAttributeValueElement, ViewCheckbox> createAttributeValueElement(ViewList parentElement, Object value, int matchCount,
+	public CreateAttributeValueElementResult<ViewAttributeValueElement, ViewCheckbox> createAttributeValueElement(ViewList<?> parentElement, Object value, int matchCount,
 			boolean hasSubAttributes, boolean isExpanded, boolean checked) {
 
 		final ViewAttributeValueElement valueElement = new ViewAttributeValueElement(
