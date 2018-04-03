@@ -26,17 +26,36 @@
 	padding-top: 0.3em;
 	border-bottom: 1px solid #CCCCCC;
 	padding-bottom: 0.7em;
+	
+	position: relative;
 }
 
 #fulltextInput {
-	width: 70%;
+	width: 40%;
 	vertical-align: middle;
 }
 
 #fulltextButton {
 	font-size: 1.1em;
-	display: table-cell;
 	vertical-align: middle;
+}
+
+#viewLogin {
+	/*
+	writing-mode:vertical-lr;
+	text-orientation: upright;
+	display: inline;
+	font-size: 0.7em;
+	*/
+	position: absolute;
+	top: 0.5em; /* TODO - not aligned to search fields*/
+	right: 1em;
+	vertical-align: middle;
+	
+	border: 1px solid #777777;
+	box-sizing: border-box;
+	padding: 0.1em;
+	border-radius: 0.2em;
 }
 
 #resultsRow {
@@ -57,6 +76,7 @@
 
 #facets {
 	height : 85%;
+	overflow: scroll;
 }
 
 #gallery {

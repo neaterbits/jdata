@@ -27,13 +27,14 @@
 <script src="js/searchview.js" type="text/javascript"></script>
 </head>
 <body style='height: 100%; margin: 0;'>
-<div style='width: 100%; height: 100%; margin: 0; padding-top: 0.5em; box-sizing: border-box;'>
+<div style='width: 100%; height: 100%; margin: 0; padding: 0.5em; box-sizing: border-box;'>
 	
 	<div id="fulltextAndFacets" style='width: 30%; height: 100%;'>
 		<div id="fulltextDiv">
 			 <div id="fulltextRow" class="infoRow">
 				<input id="fulltextInput" type="text" placeholder="Enter any search word here"/>
 				<input id="fulltextButton" type="button" value="Search"/>
+				<span id="viewLogin"><span>Personal</span><span>></span></span>
 			</div>
 			
 			 <div id="resultsRow" class="infoRow">
@@ -43,7 +44,7 @@
 				</div>
 
 				<select id="sortListBox">
-					<option>Price - low to low</option>
+					<option>Price - low to high</option>
 					<option>Price - high to low</option>
 				</select>
 			 	
