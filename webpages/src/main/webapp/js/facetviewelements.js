@@ -7,7 +7,7 @@
 
 function FacetViewElements() {
 	
-	this.createTypeContainer = function(parentElement, text, isExpanded) {
+	this.createTypeContainer = function(parentElement, text, isExpanded, checked) {
 		
 		function expandedClass(expanded) {
 			return expanded ? 'typeExpanderExpanded' :'typeExpanderCollapsed';
@@ -25,23 +25,43 @@ function FacetViewElements() {
 		typeTitleDiv.innerHTML = 
 			  "<div class='typeTitleDiv'>"
 				+ "<div class='typeExpander " + expandedClass(isExpanded) + "'></div>"
+				+ "<input type='checkbox' class='includeTypeCheckbox'/>"
 				+ "<span class='typeTitle'>" + text + "</span>"
-			+ "</div>";
+				
+				+ "<span class='thisTypeOnlyContainer'>"
+					+ "<span class='thisTypeOnlyText'>This only</span>"
+					+ "<input type='checkbox' class='thisTypeOnlyCheckbox'/>"
+				+ "</span>"
+		 	+ "</div>";
+
 		append(typeDiv, typeTitleDiv);
+		
+		var checkbox = typeTitleDiv.getElementsByTagName('input')[0];
+		
+		checkbox.setAttribute('class', 'attributeValueCheckbox');
+		checkbox.checked = checked;
 		
 		var listsDiv = document.createElement('div');
 		
 		listsDiv.setAttribute('class', 'facetListsDiv');
 		
+		var typeExpander = typeTitleDiv.getElementsByClassName('typeExpander')[0];
+		
 		// Make it possible to show and hide the below lists
 		var accordion = this._makeAccordion(listsDiv, isExpanded, function (expanded) {
 			var cl = expandedClass(expanded);
 
-			typeTitleDiv.getElementsByClassName('typeExpander')[0].className = 'typeExpander ' + cl;
+			typeExpander.className = 'typeExpander ' + cl;
 		});
+		
+		var typeTitle = typeTitleDiv.getElementsByClassName('typeTitle')[0];
 
-		typeTitleDiv.onclick = accordion.onclick;
+		typeExpander.onclick = accordion.onclick;
+		typeTitle.onclick = accordion.onclick;
 
+		var thisOnly = typeTitleDiv.getElementsByClassName('thisTypeOnlyContainer')[0];
+		thisOnly.checked = false;
+		
 		append(typeDiv, accordion.element);
 
 
@@ -257,8 +277,17 @@ function FacetViewElements() {
 		checkbox.checked = checked;
 
 		var span = document.createElement('span');
-		span.setAttribute('class', 'attributeValueElement');
+		span.setAttribute('class', 'attributeValueTitle');
 		span.innerHTML = value + ' (' + matchCount + ')';
+		
+		var thisAttrValueOnlyContainer = document.createElement('span');
+		
+		thisAttrValueOnlyContainer.setAttribute('class', 'thisAttributeValueOnlyContainer');
+
+		thisAttrValueOnlyContainer.innerHTML =
+			  "<span class='thisAttributeValueOnlyText'>This only</span>"
+			+ "<input type='checkbox' class='thisAttributeValueOnlyCheckbox'/>";
+
 		
 		if (hasSubAttributes) {
 			
@@ -268,6 +297,7 @@ function FacetViewElements() {
 			
 			// There are sub attributes so we have to make sure they are expandable
 			var valueNameDiv = document.createElement('div');
+			valueNameDiv.setAttribute('class', 'attributeValueTitleDiv');
 
 			var attributeValueExpander = document.createElement('div');
 			
@@ -276,6 +306,7 @@ function FacetViewElements() {
 			append(valueNameDiv, attributeValueExpander);
 			append(valueNameDiv, checkbox);
 			append(valueNameDiv, span);
+			append(valueNameDiv, thisAttrValueOnlyContainer);
 
 			append(li, valueNameDiv);
 
@@ -294,6 +325,7 @@ function FacetViewElements() {
 		else {
 			append(li, checkbox);
 			append(li, span);
+			append(li, thisAttrValueOnlyContainer);
 		}
 			
 		append(parentElement, li);

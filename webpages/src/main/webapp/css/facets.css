@@ -73,9 +73,31 @@
 .attributeValueCheckbox {
 }
 
-.attributeValueElement {
+.facetAttributeValueElement {
+	width: 100%;
+	position: relative;
+}
+
+.attributeValueTitleDiv {
+	width: 100%;
+	position: relative;
+}
+
+.attributeValueTitle {
 	font-size: 0.9em;
 }
+
+.thisAttributeValueOnlyContainer {
+	position: absolute;
+	right: 0.2em;
+}
+
+.thisAttributeValueOnlyText {
+	font-family: sans-serif;
+	font-size: 0.7em;
+	font-weight: 500;
+}
+
 
 .attributeValueExpander {
 	width: 0px;
@@ -112,7 +134,21 @@
 	box-sizing: border-box;
 	border: 1px solid black;
 	border-radius: 3px;
+
+	position: relative;
 }
+
+
+.thisTypeOnlyContainer {
+	position: absolute;
+	right: 0.2em;
+}
+
+.thisTypeOnlyText {
+	font-family: sans-serif;
+	font-size: 0.7em;
+}
+
 /* http://www.cssportal.com/css3-shapes/ */
 .typeExpander {
 	width: 0px;
@@ -149,6 +185,7 @@
 	font-weight: bold;
 	font-size: 0.9em;
 }
+
 
 .facetsAccordion {
 	-moz-transition: height 0.5s;

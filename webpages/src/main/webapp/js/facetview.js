@@ -171,7 +171,11 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	
 	this._addFacetType = function(viewElementFactory, cur, element, index) {
 		// Add a div for the particular type, will have a box for expanding the type
-		var typeElement = viewElementFactory.createTypeContainer(cur.getViewElement(), element.displayName, true); // TODO expand if not root?
+		var typeElement = viewElementFactory.createTypeContainer(
+				cur.getViewElement(),
+				element.displayName,
+				true, // TODO expand if not root?
+				true);
 		
 		var typeContainer = new FacetTypeContainer(viewElementFactory, element.type, typeElement, element.displayName);
 		
