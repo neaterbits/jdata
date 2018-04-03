@@ -23,10 +23,8 @@
 
 <script src="js/searchview.js" type="text/javascript"></script>
 </head>
-<body style='height: 100%'>
-<h2>Test</h2>
-<input id="use_test_data" type="checkbox" checked>Use test data<br/>
-<div style='width: 100%; height: 90%; margin: 0; padding: 0; border-box;'>
+<body style='height: 100%; margin: 0;'>
+<div style='width: 100%; height: 100%; margin: 0; padding: 0; box-sizing: border-box;'>
 	<div id='facets' style='display: inline-block; width: 30%; height: 100%;'></div>
 	
 	<!-- TODO not set wrapper? Create wrapper in gallery so not setting style on gallery -->
@@ -39,9 +37,6 @@
 	window.onload = function() {
 		
 		var useTestData = false;
-		
-		document.getElementById("use_test_data").checked = useTestData;
-		
 			
 		var searchView = new SearchView(
 					getSearchUrl(useTestData),
