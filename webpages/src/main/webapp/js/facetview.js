@@ -879,7 +879,57 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 		return exitCode;
 	}
+	
+	function indent(level) {
+		var s = '';
+		
+		for (var i = 0; i < level; ++ i) {
+			s += '  ';
+		}
 
+		return s;
+	}
+	
+	var DEBUG_ITERATE = true;
+
+	FacetsElementBase.prototype._wrapIfDebug = function(before, after) {
+		var subAfter;
+		
+		if (DEBUG_ITERATE) {
+			var stack = []
+			
+			subBefore = function (className, obj, parent) {
+				
+				console.log(indent(stack.length) + 'ITER START ' + obj.className + ': ' + obj.toDebugString());
+				
+				stack.push({});
+				
+				return before(className, obj, parent);
+			};
+			
+			subAfter = function (className, obj) {
+				
+				if (typeof obj === 'undefined') {
+					throw "Undefined for classname " + className;
+				}
+
+				if (after != null) {
+					after(className, obj);
+				}
+
+				stack.pop();
+				
+				console.log(indent(stack.length) + 'ITER END ' + obj.className + ': ' + obj.toDebugString());
+			};
+		}
+		else {
+			subBefore = b;
+			subAfter = after;
+		}
+
+		return { before : subBefore, after : subAfter}
+	}
+	
 	FacetsElementBase.prototype.iterate = function(before, after) {
 		
 		if (typeof before === 'undefined') {
@@ -890,23 +940,29 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 			// Set to null for simpler test
 			after = null;
 		}
-
-		this._iterateSub(
+		
+		var callbacks = this._wrapIfDebug(
 			function(className, obj, parent) {
-	
 				before(className, obj);
 				
 				return ITER_CONTINUE;
 			},
-			
 			after);
+
+		this._iterateSub(callbacks.before, callbacks.after);
 	}
 	
 	FacetsElementBase.prototype.iterateWithReturnValue = function(each) {
-		return this._iterateSub(function(className, obj, parent) {
-			return each(className, obj, parent);
-		},
-		null); // no after-function
+		
+		var stack = [];
+		
+		
+		var callbacks = this._wrapIfDebug(function(className, obj, parent) {
+				return each(className, obj, parent);
+			},
+			null); // no after-function
+		
+		return this._iterateSub(callbacks.before, callbacks.after);
 	}
 
 	
@@ -955,7 +1011,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		}
 		
 		if (after !== null) {
-			after(this.className, this.parent);
+			after(this.className, parent);
 		}
 
 		return exitCode;
@@ -1036,6 +1092,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	
 	FacetTypeContainer.prototype = Object.create(FacetsElementBase.prototype);
 
+	FacetTypeContainer.prototype.toDebugString = function() {
+		return this.modelType;
+	}
+
 	FacetTypeContainer.prototype._iterateSub = function(before, after) {
 
 		var iter = this._iterateIfDefinedAndNonNull(this.typeList, before, after);
@@ -1094,6 +1154,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	FacetTypeList.prototype = Object.create(FacetsElementBase.prototype);
 
+	FacetTypeList.prototype.toDebugString = function() {
+		return this.modelType + '[' + this.types.length + ']';
+	}
+
 	FacetTypeList.prototype._iterateSub = function(before, after) {
 		return this._iterateArray(this.types, before, after);
 	}
@@ -1138,6 +1202,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	FacetAttributeList.prototype = Object.create(FacetsElementBase.prototype);
 
+	FacetAttributeList.prototype.toDebugString = function() {
+		return '[' + this.attributes.length + ']';
+	}
+
 	FacetAttributeList.prototype._iterateSub = function(before, after) {
 		return this._iterateArray(this.attributes, before, after);
 	}
@@ -1174,6 +1242,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	FacetAttribute.prototype.getAttributeId = function() {
 		return this.attributeId;
+	}
+
+	FacetAttribute.prototype.toDebugString = function() {
+		return this.attributeId + '[' + this.attributeValueOrRangeList.length + ']';
 	}
 
 	FacetAttribute.prototype._iterateSub = function(before, after) {
@@ -1217,6 +1289,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	FacetAttributeValueList.prototype.getAttributeId = function() {
 		return this.attributeId;
+	}
+
+	FacetAttributeValueList.prototype.toDebugString = function() {
+		return this.attributeId + '[' + this.values.length + ']';
 	}
 	
 	FacetAttributeValueList.prototype.addValue = function(value, index) {
@@ -1262,6 +1338,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	}
 
 	FacetAttributeRangeList.prototype = Object.create(FacetsElementBase.prototype);
+
+	FacetAttributeRangeList.prototype.toDebugString = function() {
+		return this.attributeId + '[' + this.ranges.length + ']';
+	}
 
 	FacetAttributeRangeList.prototype._iterateSub = function(before, after) {
 		return this._iterateArray(this.ranges, before, after);
@@ -1325,6 +1405,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		return this.attributeId;
 	}
 
+	FacetAttributeValue.prototype.toDebugString = function() {
+		return this.attributeId;
+	}
+
 	FacetAttributeValue.prototype._iterateSub = function(before, after) {
 		if (isNotNull(this.attributeList)) {
 			return this.attributeList._iterateCurAndSub(before, after, this);
@@ -1368,6 +1452,15 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	FacetAttributeSingleValue.prototype = Object.create(FacetAttributeValue.prototype);
 
+	
+	FacetAttributeValue.prototype.getAttributeId = function() {
+		return this.attributeId;
+	}
+
+	FacetAttributeValue.prototype.toDebugString = function() {
+		return this.attributeId + '=' + this.modelValue;
+	}
+
 	FacetAttributeSingleValue.prototype.getModelValue = function() {
 		return this.modelValue;
 	}
@@ -1380,6 +1473,14 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	}
 
 	FacetAttributeRange.prototype = Object.create(FacetAttributeValue.prototype);
+
+	FacetAttributeRange.prototype.getAttributeId = function() {
+		return this.attributeId;
+	}
+
+	FacetAttributeRange.prototype.toDebugString = function() {
+		return this.attributeId + '=' + this.modelRange;
+	}
 
 	FacetAttributeRange.prototype.getModelRange = function() {
 		return this.modelRange;
