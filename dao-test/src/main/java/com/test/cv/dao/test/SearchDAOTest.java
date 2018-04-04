@@ -26,6 +26,7 @@ import com.test.cv.search.criteria.DecimalCriterium;
 import com.test.cv.search.criteria.DecimalInCriterium;
 import com.test.cv.search.criteria.InCriteriumValue;
 import com.test.cv.search.criteria.StringInCriterium;
+import com.test.cv.search.facets.IndexFacetedAttributeResult;
 import com.test.cv.search.facets.IndexRangeFacetedAttributeResult;
 import com.test.cv.search.facets.IndexSingleValueFacet;
 import com.test.cv.search.facets.IndexSingleValueFacetedAttributeResult;
@@ -426,7 +427,69 @@ public abstract class SearchDAOTest extends TestCase {
 			assertThat(typeFacets.getAttributes().get(0).getAttribute().getName()).isEqualTo("make");
 			assertThat(typeFacets.getAttributes().get(0).getNoAttributeValueCount()).isEqualTo(0);
 		});
+	}
+	
+	public void testReturnsSubAttributesEvenIfOnlyHasNoMatch() throws Exception {
+		// Issue: if only matching sub-attribute on no-value, we should return a subattribute for that
+		final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
+
+		final ItemAttribute makeAttribute = snowboardAttributes.getByName("make");
+		final ItemAttribute modelAttribute = snowboardAttributes.getByName("model");
+
+		final Set<ItemAttribute> facetedAttributes = new HashSet<>(Arrays.asList(makeAttribute, modelAttribute));
+
+		final Snowboard snowboard1 = makeSnowboard1();
+		final Snowboard snowboard2 = makeSnowboard2();
+
+		// Different make but same model, should only return model from one of the makes
+		assertThat(snowboard1.getMake()).isNotEqualTo(snowboard2.getMake());
+
+
+		// Set bot to null, Burton snowboard make should model subattribute present and noattr value count of 1
+		snowboard1.setModel(null);
+		snowboard2.setModel(null);
+
+		final StringInCriterium makeCriterium = new StringInCriterium(
+				makeAttribute,
+				Arrays.asList(new InCriteriumValue<String>("Burton", null)),
+				false);
 		
+		checkSnowboard(snowboard1, snowboard2, (userId, itemDAO, searchDAO, itemId1, itemId2) -> {
+			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), Arrays.asList(makeCriterium), facetedAttributes);
+
+			final List<String> itemIds = cursor.getItemIDs(0, Integer.MAX_VALUE);
+			
+			assertThat(snowboard1.getMake()).isEqualTo("Burton");
+
+			assertThat(itemIds.size()).isEqualTo(1);
+			assertThat(itemIds.get(0)).isEqualTo(itemId1);
+			
+			assertThat(cursor.getFacets().getTypes().size()).isEqualTo(1);
+			final TypeFacets typeFacets = cursor.getFacets().getTypes().get(0);
+			
+			assertThat(typeFacets.getType()).isEqualTo(Snowboard.class);
+			assertThat(typeFacets.getAttributes().size()).isEqualTo(1);
+			assertThat(typeFacets.getAttributes().get(0).getAttribute().getName()).isEqualTo("make");
+			assertThat(typeFacets.getAttributes().get(0).getNoAttributeValueCount()).isEqualTo(0);
+			
+			final IndexSingleValueFacetedAttributeResult makeFacet = (IndexSingleValueFacetedAttributeResult)typeFacets.getAttributes().get(0);
+			
+			assertThat(makeFacet.getValues().size()).isEqualTo(1);
+			final IndexSingleValueFacet burtonValue = makeFacet.getValues().get(0);
+			
+			assertThat(burtonValue.getValue()).isEqualTo("Burton");
+			assertThat(burtonValue.getMatchCount()).isEqualTo(1);
+			
+			assertThat(burtonValue.getSubFacets().size()).isEqualTo(1);
+			
+			final IndexFacetedAttributeResult subResult = burtonValue.getSubFacets().get(0);
+			assertThat(subResult.getAttribute().getName()).isEqualTo("model");
+			assertThat(subResult.getNoAttributeValueCount()).isEqualTo(1);
+			
+			final IndexSingleValueFacetedAttributeResult modelFacet = (IndexSingleValueFacetedAttributeResult)subResult;
+
+			assertThat(modelFacet.getValues().size()).isEqualTo(0);
+		});
 	}
 
 	@FunctionalInterface
