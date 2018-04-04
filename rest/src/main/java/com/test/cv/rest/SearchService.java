@@ -314,7 +314,7 @@ public class SearchService extends BaseService {
 		for (int i = 0; i < values.length; ++ i) {
 			final SearchCriteriumValue value = values[i];
 			final SearchCriterium [] subCriteria = value.getSubCriteria();
-			final List<InCriterium<?>> sub;
+			final List<Criterium> sub;
 
 			if (subCriteria != null) {
 				// Convert subcriteria as well

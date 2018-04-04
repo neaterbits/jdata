@@ -830,9 +830,21 @@ public class LuceneItemIndex implements ItemIndex {
 			booleanQuery.add(valueQuery, Occur.MUST);
 			
 			// Must match all the sub queries that are themselves in-queries
-			for (InCriterium<?> sub : value.getSubCritera()) {
-				final Query subQuery = createInQuery(sub, ItemIndex.fieldName(sub.getAttribute())).query;
+			for (Criterium sub : value.getSubCritera()) {
 				
+				final Query subQuery;
+				final String subFieldName = ItemIndex.fieldName(sub.getAttribute());
+
+				if (sub instanceof InCriterium<?>) {
+					subQuery = createInQuery(sub, subFieldName).query;
+				}
+				else if (sub instanceof NoValueCriterium) {
+					subQuery = createNoValueQueryOnly(sub, subFieldName);
+				}
+				else {
+					throw new UnsupportedOperationException("Unknown subceriteria: " + sub.getClass());
+				}
+
 				booleanQuery.add(subQuery, Occur.MUST);
 			}
 			

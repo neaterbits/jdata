@@ -5,9 +5,9 @@ import java.util.List;
 public final class InCriteriumValue<T extends Comparable<T>> {
 
 	private final T value;
-	private final List<InCriterium<?>> subCritera;
+	private final List<Criterium> subCritera;
 
-	public InCriteriumValue(T value, List<InCriterium<?>> subCritera) {
+	public InCriteriumValue(T value, List<Criterium> subCritera) {
 		if (value == null) {
 			throw new IllegalArgumentException("value == null");
 		}
@@ -20,7 +20,7 @@ public final class InCriteriumValue<T extends Comparable<T>> {
 		return value;
 	}
 
-	public List<InCriterium<?>> getSubCritera() {
+	public List<Criterium> getSubCritera() {
 		return subCritera;
 	}
 }
