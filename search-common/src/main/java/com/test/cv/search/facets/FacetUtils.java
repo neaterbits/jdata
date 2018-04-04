@@ -106,7 +106,6 @@ public class FacetUtils {
 		
 		// Process all attributes except subattributes
 		processAttributes(
-				true,
 				documents,
 				typeAttributes,
 				functions,
@@ -158,7 +157,6 @@ public class FacetUtils {
 					final Map<ItemAttribute, IndexFacetedAttributeResult> subAttributeResults = new LinkedHashMap<>(subAttributes.size());
 		
 					processAttributes(
-							false,
 							documents,
 							subAttributes,
 							functions,
@@ -185,7 +183,6 @@ public class FacetUtils {
 	}
 	
 	private static <I, F> void processAttributes(
-			boolean atRoot,
 			List<I> documents,
 			List<ItemAttribute> typeAttributes,
 			FacetFunctions<I, F> functions,
@@ -209,11 +206,6 @@ public class FacetUtils {
 			
 			if (result == null) {
 				throw new IllegalStateException("null result");
-			}
-			
-			if (atRoot && !result.hasValueOrRangeMatches()) {
-				// Remove again, no point in returning a facet with only unknown-matches
-				attributeResults.remove(attribute);
 			}
 		}
 	}

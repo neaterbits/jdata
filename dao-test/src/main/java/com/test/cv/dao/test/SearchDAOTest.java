@@ -293,36 +293,6 @@ public abstract class SearchDAOTest extends TestCase {
 		});
 	}
 
-	// No mssing attribute value for all, then should NOT return the attribute
-	public void testFacetsNoCriteriaCheckDoesNotReturnFacetedAttributeIfOnlyUnknwown() throws Exception {
-		
-		final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
-
-		final ItemAttribute widthAttribute = snowboardAttributes.getByName("width");
-		final ItemAttribute makeAttribute = snowboardAttributes.getByName("make");
-
-		final Set<ItemAttribute> facetedAttributes = new HashSet<>(Arrays.asList(widthAttribute, makeAttribute));
-
-		final Snowboard snowboard1 = makeSnowboard1();
-		final Snowboard snowboard2 = makeSnowboard2();
-
-		// Clear "make" attribute of both snowboards so that we have no facet values
-		snowboard1.setMake(null);
-		snowboard2.setMake(null);
-
-		checkSnowboard(snowboard1, snowboard2, (userId, itemDAO, searchDAO, itemId1, itemId2) -> {
-			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), null, facetedAttributes);
-			
-			assertThat(cursor.getFacets().getTypes().size()).isEqualTo(1);
-			final TypeFacets typeFacets = cursor.getFacets().getTypes().get(0);
-			
-			assertThat(typeFacets.getType()).isEqualTo(Snowboard.class);
-			assertThat(typeFacets.getAttributes().size()).isEqualTo(1);
-			assertThat(typeFacets.getAttributes().get(0).getAttribute().getName()).isEqualTo("width");
-			assertThat(typeFacets.getAttributes().get(0).getNoAttributeValueCount()).isEqualTo(0);
-		});
-	}
-	
 	public void testSearchReturnsOnlyOneMakeEvenIfSameModel() throws Exception {
 		final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
 
@@ -429,7 +399,52 @@ public abstract class SearchDAOTest extends TestCase {
 			assertThat(typeFacets.getAttributes().get(0).getNoAttributeValueCount()).isEqualTo(0);
 		});
 	}
-	
+
+	public void testReturnsAttributesEvenIfOnlyHasNoMatch() throws Exception {
+		// Issue: if only matching sub-attribute on no-value, we should return a subattribute for that
+		final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
+
+		final ItemAttribute makeAttribute = snowboardAttributes.getByName("make");
+		final ItemAttribute modelAttribute = snowboardAttributes.getByName("model");
+
+		final Set<ItemAttribute> facetedAttributes = new HashSet<>(Arrays.asList(makeAttribute, modelAttribute));
+
+		final Snowboard snowboard1 = makeSnowboard1();
+		final Snowboard snowboard2 = makeSnowboard2();
+
+		// Different make but same model, should only return model from one of the makes
+		assertThat(snowboard1.getMake()).isNotEqualTo(snowboard2.getMake());
+
+		snowboard1.setMake(null);
+		
+		snowboard1.setModel("Abc");
+		snowboard2.setModel(null);
+
+		final NoValueCriterium makeCriterium = new NoValueCriterium(makeAttribute);
+		
+		checkSnowboard(snowboard1, snowboard2, (userId, itemDAO, searchDAO, itemId1, itemId2) -> {
+			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), Arrays.asList(makeCriterium), facetedAttributes);
+
+			final List<String> itemIds = cursor.getItemIDs(0, Integer.MAX_VALUE);
+
+			assertThat(itemIds.size()).isEqualTo(1);
+			assertThat(itemIds.get(0)).isEqualTo(itemId1);
+			
+			assertThat(cursor.getFacets().getTypes().size()).isEqualTo(1);
+			final TypeFacets typeFacets = cursor.getFacets().getTypes().get(0);
+			
+			assertThat(typeFacets.getType()).isEqualTo(Snowboard.class);
+			assertThat(typeFacets.getAttributes().size()).isEqualTo(1);
+			assertThat(typeFacets.getAttributes().get(0).getAttribute().getName()).isEqualTo("make");
+			assertThat(typeFacets.getAttributes().get(0).getNoAttributeValueCount()).isEqualTo(1);
+			
+			final IndexSingleValueFacetedAttributeResult makeFacet = (IndexSingleValueFacetedAttributeResult)typeFacets.getAttributes().get(0);
+			
+			assertThat(makeFacet.getValues().size()).isEqualTo(0);
+
+		});
+	}
+
 	public void testReturnsSubAttributesEvenIfOnlyHasNoMatch() throws Exception {
 		// Issue: if only matching sub-attribute on no-value, we should return a subattribute for that
 		final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
@@ -446,7 +461,7 @@ public abstract class SearchDAOTest extends TestCase {
 		assertThat(snowboard1.getMake()).isNotEqualTo(snowboard2.getMake());
 
 
-		// Set bot to null, Burton snowboard make should model subattribute present and noattr value count of 1
+		// Set both to null, Burton snowboard make should model subattribute present and noattr value count of 1
 		snowboard1.setModel(null);
 		snowboard2.setModel(null);
 
