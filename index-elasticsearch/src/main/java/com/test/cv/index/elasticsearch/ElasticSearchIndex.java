@@ -69,6 +69,7 @@ import com.test.cv.search.criteria.DecimalCriterium;
 import com.test.cv.search.criteria.InCriterium;
 import com.test.cv.search.criteria.InCriteriumValue;
 import com.test.cv.search.criteria.IntegerCriterium;
+import com.test.cv.search.criteria.NoValueCriterium;
 import com.test.cv.search.criteria.StringCriterium;
 import com.test.cv.search.facets.FacetUtils;
 import com.test.cv.search.facets.IndexFacetedAttributeResult;
@@ -743,6 +744,9 @@ public class ElasticSearchIndex implements ItemIndex {
 					
 				}
 				queryBuilder.must(inQueryBuilder);
+			}
+			else if (criterium instanceof NoValueCriterium) {
+				queryBuilder.mustNot(QueryBuilders.existsQuery(fieldName));
 			}
 			else {
 				throw new UnsupportedOperationException("Unknown criteria type " + criterium.getClass());
