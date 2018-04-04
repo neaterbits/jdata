@@ -19,7 +19,7 @@ function GalleryCacheAllProvisionalSomeComplete(gallerySizes, galleryModel, gall
 GalleryCacheAllProvisionalSomeComplete.prototype = Object.create(GalleryCacheBase.prototype);
 
 //returns approximate complete size of view
-GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, totalNumberOfItems, widthMode, heightMode) {
+GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, totalNumberOfItems) {
 	
 	// Remove any added divs
 	this._clear(level + 1);
@@ -51,7 +51,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 		t.provisionalDataArray = provisionalDataArray;
 
 		// completed metadata build, now compute and re-render with provisional data
-		t._render(level + 1, widthMode, heightMode);
+		t._render(level + 1);
 	});
 }
 
