@@ -971,7 +971,14 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 			throw "Element not found in array";
 		}
 		
-		array.splice(index, 1);
+		var removed = array.splice(index, 1);
+		
+		if (removed.length != 1) {
+			throw "No such item : " + obj;
+		}
+		else if (removed[0] !== obj) {
+			throw "Rmoved other object: " + removed[0];
+		}
 	}
 	
 	FacetsElementBase.prototype._addToArrayWithOptionalIndex = function(array, index, obj) {
