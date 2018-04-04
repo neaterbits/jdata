@@ -92,17 +92,6 @@
 					'gallery');
 
 		searchView.refresh(true);
-		
-		document.getElementById("use_test_data").onchange = function(e) {
-
-			var checked = e.target.checked;
-			
-			searchView.setServiceUrl(getServiceUrl(checked));
-			
-			searchView.refresh(true);
-			
-			return false;
-		}
 	}
 	
 	
