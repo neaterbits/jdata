@@ -3,8 +3,8 @@ package com.test.cv.facets;
 // Container since may have subattributes
 final class ViewAttributeValueElement extends ViewContainer<ViewElement> {
 	
-	private final Object value;
-	private final int matchCount;
+	private Object value;
+	private int matchCount;
 	private final boolean hasSubAttributes;
 	private final boolean isExpanded;
 	private final boolean checked;
@@ -22,6 +22,15 @@ final class ViewAttributeValueElement extends ViewContainer<ViewElement> {
 		this.hasSubAttributes = hasSubAttributes;
 		this.isExpanded = isExpanded;
 		this.checked = checked;
+	}
+
+	void updateValue(Object value, int matchCount) {
+		if (value == null) {
+			throw new IllegalArgumentException("value == null");
+		}
+
+		this.value = value;
+		this.matchCount = matchCount;
 	}
 
 	Object getValue() {

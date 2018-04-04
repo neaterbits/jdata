@@ -57,4 +57,6 @@ public interface FacetViewElements<
 	void setCheckboxOnClick(CHECKBOX checkbox, Object onClicked);
 
 	void removeElement(CONTAINER container, VIEW_ELEMENT element);
+
+	void updateAttributeValueElement(VIEW_ELEMENT element, Object value, int matchCount);
 }

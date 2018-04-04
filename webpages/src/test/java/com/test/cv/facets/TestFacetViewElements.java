@@ -110,4 +110,12 @@ final class TestFacetViewElements implements FacetViewElements<
 		
 		container.removeSubElement(element);
 	}
+
+	@Override
+	public void updateAttributeValueElement(ViewElement element, Object value, int matchCount) {
+		final ViewAttributeValueElement valueElement =
+				(ViewAttributeValueElement)element;
+
+		valueElement.updateValue(value, matchCount);
+	}
 }
