@@ -581,6 +581,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				parent.removeSub(obj);
 
 				// Remove from DOM
+
 				obj.getViewElementFactory().removeElement(parent.getViewElement(), obj.getViewElement());
 				
 				iter = ITER_SKIP_SUB;
@@ -890,7 +891,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		return s;
 	}
 	
-	var DEBUG_ITERATE = true;
+	var DEBUG_ITERATE = false;
 
 	FacetsElementBase.prototype._wrapIfDebug = function(before, after) {
 		var subAfter;
@@ -923,7 +924,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 			};
 		}
 		else {
-			subBefore = b;
+			subBefore = before;
 			subAfter = after;
 		}
 
@@ -1370,13 +1371,15 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		for (var i = 0; i < this.ranges.length; ++ i) {
 			var r = this.ranges[i];
 			
-			if (r.lower == range.lower && r.upper == range.upper) {
+			// null == undefined below
+			if (r.modelRange.lower == range.lower && r.modelRange.upper == range.upper) {
 				return i;
 			}
 		}
 		
 		return -1;
 	}
+	
 
 	FacetAttributeRangeList.prototype.findRange = function(range) {
 		var idx = this._findRangeIdx(range);
@@ -1479,7 +1482,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	}
 
 	FacetAttributeRange.prototype.toDebugString = function() {
-		return this.attributeId + '=' + this.modelRange;
+		return this.attributeId + '=' + JSON.stringify(this.modelRange);
 	}
 
 	FacetAttributeRange.prototype.getModelRange = function() {
