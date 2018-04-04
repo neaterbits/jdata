@@ -145,6 +145,17 @@
 .thisTypeOnlyContainer {
 }
 
+.thisTypeOnlyButton {
+	font-family: sans-serif;
+	font-size: 0.6em;
+	padding-left: 2px;
+	padding-right: 2px;
+	padding-top: 1px;
+	padding-bottom: 1px;
+	margin-right: 1em;
+	border-radius: 2px;
+}
+
 .thisTypeOnlyText {
 	font-family: sans-serif;
 	font-size: 0.7em;

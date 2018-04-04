@@ -33,8 +33,7 @@ function FacetViewElements() {
 				+ "<span class='typeTitle'>" + text + "</span>"
 				
 				+ "<span class='thisTypeOnlyContainer'>"
-					+ "<span class='thisTypeOnlyText'>This only</span>"
-					+ "<input type='checkbox' class='thisTypeOnlyCheckbox'/>"
+					+ "<input type='button' class='thisTypeOnlyButton' value='This only'/>"
 				+ "</span>"
 		 	+ "</div>";
 
