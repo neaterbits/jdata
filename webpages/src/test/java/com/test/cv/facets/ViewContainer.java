@@ -29,6 +29,10 @@ abstract class ViewContainer<SUB extends ViewElement> extends ViewElement {
 		return Collections.unmodifiableList(this.subElements);
 	}
 	
+	final void removeSubElement(Object sub) {
+		this.subElements.remove(sub);
+	}
+	
 	final void addCheckbox(ViewCheckbox checkbox) {
 		if (checkbox == null) {
 			throw new IllegalArgumentException("checkbox == null");

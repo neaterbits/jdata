@@ -6,8 +6,9 @@ package com.test.cv.facets;
  */
 
 public interface FacetViewElements<
-	CONTAINER,
-	ROOT_OR_TYPE_CONTAINER,
+	VIEW_ELEMENT,
+	CONTAINER extends VIEW_ELEMENT,
+	ROOT_OR_TYPE_CONTAINER extends CONTAINER,
 	
 	TYPE_OR_ATTRIBUTEVALUE_LIST_ELEMENT,
 	ATTRIBUTE_VALUE_OR_RANGE_LIST,
@@ -54,4 +55,6 @@ public interface FacetViewElements<
 			boolean checked);
 
 	void setCheckboxOnClick(CHECKBOX checkbox, Object onClicked);
+
+	void removeElement(CONTAINER container, VIEW_ELEMENT element);
 }

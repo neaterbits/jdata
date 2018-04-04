@@ -10,6 +10,15 @@ public class SearchFacetedTypeResult {
 	private String type;
 	private String displayName;
 	
+	public SearchFacetedTypeResult() {
+
+	}
+
+	public SearchFacetedTypeResult(String type, String displayName) {
+		this.type = type;
+		this.displayName = displayName;
+	}
+
 	private List<SearchFacetedTypeResult> subTypes;
 	
 	private List<SearchFacetedAttributeResult> attributes;

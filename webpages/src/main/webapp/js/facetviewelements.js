@@ -358,6 +358,10 @@ function FacetViewElements() {
 	this.isCheckboxSelected = function(checkbox) {
 		return checkbox.checked;
 	};
+	
+	this.removeElement = function(parent, sub) {
+		parent.removeChild(sub);
+	}
 
 	function append(parent, element) {
 

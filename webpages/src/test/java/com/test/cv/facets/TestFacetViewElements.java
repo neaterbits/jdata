@@ -3,6 +3,7 @@ package com.test.cv.facets;
 import java.util.List;
 
 final class TestFacetViewElements implements FacetViewElements<
+		ViewElement,
 
 		ViewContainer<?>,
 		ViewContainer<?>,
@@ -99,5 +100,14 @@ final class TestFacetViewElements implements FacetViewElements<
 	@Override
 	public void setCheckboxOnClick(ViewCheckbox checkbox, Object onClicked) {
 		checkbox.setOnClicked(onClicked);
+	}
+
+	@Override
+	public void removeElement(ViewContainer<?> container, ViewElement element) {
+		if (!container.getSubElements().contains(element)) {
+			throw new IllegalStateException("Element " + element + " not contained in " + container);
+		}
+		
+		container.removeSubElement(element);
 	}
 }

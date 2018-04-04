@@ -70,7 +70,6 @@ function FacetController(facetModel, facetView) {
 		
 		if (this.viewInitialized) {
 			this.view.refreshFromNewModel(this.model);
-			this._updateUI();
 		}
 		else {
 			this.view.initFromModel(this.model);
