@@ -270,6 +270,10 @@ function FacetViewElements() {
 		return ul;
 	}
 
+	this._makeAttributeValueText = function(value, matchCount) {
+		return value + ' (' + matchCount + ')';
+	}
+	
 	this.createAttributeValueElement = function(parentElement, value, matchCount, hasSubAttributes, isExpanded, checked) {
 		var li = document.createElement('li');
 		
@@ -282,7 +286,7 @@ function FacetViewElements() {
 
 		var span = document.createElement('span');
 		span.setAttribute('class', 'attributeValueTitle');
-		span.innerHTML = value + ' (' + matchCount + ')';
+		span.innerHTML = this._makeAttributeValueText(value, matchCount);
 		
 		var thisAttrValueOnlyContainer = document.createElement('span');
 		
@@ -343,6 +347,12 @@ function FacetViewElements() {
 		li.setAttribute("class", "facetAttributeValueElement");
 
 		return { 'listItem' : li, 'checkboxItem' : checkbox };
+	}
+
+	this.updateAttributeValueElement = function(element, value, matchCount) {
+		var text = this._makeAttributeValueText(value, matchCount);
+		
+		element.getElementsByClassName('attributeValueTitle')[0].innerHTML = text;
 	}
 
 	this.setCheckboxOnClick = function(checkbox, onCheckboxClicked) {

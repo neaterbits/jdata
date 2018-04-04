@@ -298,7 +298,8 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 								cur.getModelType(),
 								cur.getAttributeId(),
 								attributeElement.listItem,
-								attributeElement.checkboxItem);
+								attributeElement.checkboxItem,
+								displayText);
 
 		this._setAttributeCheckboxListener(viewElementFactory, attributeValue, false);
 				
@@ -315,7 +316,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		this.rootTypes.iterate(function(className, obj) { obj.setInUse(false); })
 
 		// Iterate over model to mark all elements that are still there as in use
-		this._markAllStillInDataModelAsInUse(model);
+		this._markAllStillInDataModelAsInUseAndUpdateMatchCounts(model);
 
 		// Remove unused elements first so that indices become correct when inserting elements from model afterwards
 		this._removeElementsNotInUse(model);
@@ -461,7 +462,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				});
 	};
 
-	this._markAllStillInDataModelAsInUse = function(model) {
+	this._markAllStillInDataModelAsInUseAndUpdateMatchCounts = function(model) {
 		
 		// Must wrap root types list in similar to FacetTypeContainer so that works for initial access
 		// cur below is really parent element from view model
@@ -515,6 +516,8 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 				function (kind, element, index, cur) {
 					var sub;
+					var updateMatchCount = false;
+
 					
 					if (kind == 'type') {
 						// cur is FacetTypeList
@@ -527,16 +530,24 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 					else if (kind === 'attributeValue') {
 						// cur is FacetAttributeValueList
 						sub = cur.findAttributeValue(element.value);
+
+						updateMatchCount = true;
 					}
 					else if (kind === 'attributeRange') {
 						// cur is FacetAttributeValueList
 						sub = cur.findRange(element);
+
+						updateMatchCount = true;
 					}
 					else if (kind === 'attributeValueUnknown') {
 						sub = cur.findValueUnknown();
+
+						updateMatchCount = true;
 					}
 					else if (kind === 'attributeRangeUnknown') {
 						sub = cur.findValueUnknown();
+
+						updateMatchCount = true;
 					}
 					else {
 						throw "Unknown data element type for markAllStillInUse: " + kind;
@@ -547,7 +558,11 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 						cur = sub;
 					}
-					
+
+					if (updateMatchCount) {
+						sub.updateMatchCount(element.matchCount);
+					}
+ 					
 					return cur;
  				});
 	}
@@ -1395,11 +1410,12 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		return this._arrayFindWithClassName(this.ranges, 'FacetAttributeOtherOrUnknown');
 	}
 
-	function FacetAttributeValue(className, viewElementFactory, modelType, attributeId, listItem, checkboxItem) {
+	function FacetAttributeValue(className, viewElementFactory, modelType, attributeId, listItem, checkboxItem, displayText) {
 		FacetsElementBase.call(this, className, viewElementFactory, modelType, listItem);
 	
 		this.attributeId = attributeId;
 		this.checkboxItem = checkboxItem;
+		this.displayText = displayText;
 	}
 	
 	FacetAttributeValue.prototype = Object.create(FacetsElementBase.prototype);
@@ -1410,6 +1426,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	FacetAttributeValue.prototype.toDebugString = function() {
 		return this.attributeId;
+	}
+	
+	FacetAttributeValue.prototype.updateMatchCount = function(matchCount) {
+		this.getViewElementFactory().updateAttributeValueElement(this.getViewElement(), this.displayText, matchCount);
 	}
 
 	FacetAttributeValue.prototype._iterateSub = function(before, after) {
@@ -1447,7 +1467,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	}
 
 	function FacetAttributeSingleValue(viewElementFactory, modelType, attributeId, modelValue, displayValue, listItem, checkboxItem) {
-		FacetAttributeValue.call(this, 'FacetAttributeSingleValue', viewElementFactory, modelType, attributeId, listItem, checkboxItem);
+		FacetAttributeValue.call(this, 'FacetAttributeSingleValue', viewElementFactory, modelType, attributeId, listItem, checkboxItem, '' + displayValue);
 
 		this.modelValue = modelValue;
 		this.displayValue = displayValue;
@@ -1469,8 +1489,8 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	}
 	
 	
-	function FacetAttributeRange(viewElementFactory, modelType, attributeId, modelRange, listItem, checkboxItem) {
-		FacetAttributeValue.call(this, 'FacetAttributeRange', viewElementFactory, modelType, attributeId, listItem, checkboxItem);
+	function FacetAttributeRange(viewElementFactory, modelType, attributeId, modelRange, listItem, checkboxItem, text) {
+		FacetAttributeValue.call(this, 'FacetAttributeRange', viewElementFactory, modelType, attributeId, listItem, checkboxItem, text);
 
 		this.modelRange = modelRange;
 	}
@@ -1489,8 +1509,8 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		return this.modelRange;
 	}
 
-	function FacetAttributeOtherOrUnknown(viewElementFactory, modelType, attributeId, listItem, checkboxItem) {
-		FacetAttributeValue.call(this, 'FacetAttributeOtherOrUnknown', viewElementFactory, modelType, attributeId, listItem, checkboxItem);
+	function FacetAttributeOtherOrUnknown(viewElementFactory, modelType, attributeId, listItem, checkboxItem, text) {
+		FacetAttributeValue.call(this, 'FacetAttributeOtherOrUnknown', viewElementFactory, modelType, attributeId, listItem, checkboxItem, text);
 	}
 
 	FacetAttributeOtherOrUnknown.prototype = Object.create(FacetAttributeValue.prototype);
