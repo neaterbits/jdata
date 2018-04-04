@@ -88,6 +88,32 @@ public class FacetsTest extends BaseFacetsTest {
 		controller.refresh();
 		
 		// Now look into viewElements and check that we have loaded some data
+
+		// Check that has created the elements in question
+		checkAddedSubElements(viewElements);
+		
+		// Refresh with exactly same model and check that have the same items
+		// This means that the refresh comparison algorithm works correctly
+		// either by only removing items if not present in search result anymore,
+		// and not adding elements twice (ie. it should diff to existing)
+		controller.getModel().updateFacets(facetsResult);
+		controller.refresh();
+		checkAddedSubElements(viewElements);
+		
+		// Update model and refresh again for view to be updated
+		final SearchFacetsResult updatedFacets = new SearchFacetsResult();
+		final SearchFacetedTypeResult updatedCars = new SearchFacetedTypeResult(CAR_TYPE_NAME, CAR_DISPLAY_NAME);
+
+		updatedCars.setAttributes(Arrays.asList(productionYearAttr, odometerAttr));
+		updatedFacets.setTypes(Arrays.asList(updatedCars));
+
+		controller.getModel().updateFacets(updatedFacets);
+		controller.refresh();
+		
+	}
+	
+	
+	private void checkAddedSubElements(TestFacetViewElements viewElements) {
 		final ViewTypeList rootTypeList = viewElements.getRootTypeList();
 		
 		assertThat(rootTypeList).isNotNull();
@@ -112,23 +138,9 @@ public class FacetsTest extends BaseFacetsTest {
 
 		assertThat(productionYearValues.getSubElements().size()).isEqualTo(3);
 
-		assertThat(productionYearValues.getSubElements().get(0).getValue()).isEqualTo(2005);
-		assertThat(productionYearValues.getSubElements().get(0).getMatchCount()).isEqualTo(2);
-		assertThat(productionYearValues.getSubElements().get(0).hasSubAttributes()).isFalse();
-		assertThat(productionYearValues.getSubElements().get(0).isExpanded()).isFalse();
-		assertThat(productionYearValues.getSubElements().get(0).isChecked()).isTrue();
-
-		assertThat(productionYearValues.getSubElements().get(1).getValue()).isEqualTo(2007);
-		assertThat(productionYearValues.getSubElements().get(1).getMatchCount()).isEqualTo(1);
-		assertThat(productionYearValues.getSubElements().get(1).hasSubAttributes()).isFalse();
-		assertThat(productionYearValues.getSubElements().get(1).isExpanded()).isFalse();
-		assertThat(productionYearValues.getSubElements().get(1).isChecked()).isTrue();
-
-		assertThat(productionYearValues.getSubElements().get(2).getValue()).isEqualTo("Other");
-		assertThat(productionYearValues.getSubElements().get(2).getMatchCount()).isEqualTo(1);
-		assertThat(productionYearValues.getSubElements().get(2).hasSubAttributes()).isFalse();
-		assertThat(productionYearValues.getSubElements().get(2).isExpanded()).isFalse();
-		assertThat(productionYearValues.getSubElements().get(2).isChecked()).isTrue();
+		checkSubElement(productionYearValues, 0, 2005, 2);
+		checkSubElement(productionYearValues, 1, 2007, 1);
+		checkSubElement(productionYearValues, 2, "Other", 1);
 
 		final ViewAttributeListElement carTypeElement = attributeList.getSubElements().get(1);
 		assertThat(carTypeElement.getText()).isEqualTo("Type");
@@ -137,23 +149,9 @@ public class FacetsTest extends BaseFacetsTest {
 
 		assertThat(carTypeValues.getSubElements().size()).isEqualTo(3);
 
-		assertThat(carTypeValues.getSubElements().get(0).getValue()).isEqualTo("Sedan");
-		assertThat(carTypeValues.getSubElements().get(0).getMatchCount()).isEqualTo(1);
-		assertThat(carTypeValues.getSubElements().get(0).hasSubAttributes()).isFalse();
-		assertThat(carTypeValues.getSubElements().get(0).isExpanded()).isFalse();
-		assertThat(carTypeValues.getSubElements().get(0).isChecked()).isTrue();
-
-		assertThat(carTypeValues.getSubElements().get(1).getValue()).isEqualTo("Compact");
-		assertThat(carTypeValues.getSubElements().get(1).getMatchCount()).isEqualTo(1);
-		assertThat(carTypeValues.getSubElements().get(1).hasSubAttributes()).isFalse();
-		assertThat(carTypeValues.getSubElements().get(1).isExpanded()).isFalse();
-		assertThat(carTypeValues.getSubElements().get(1).isChecked()).isTrue();
-
-		assertThat(carTypeValues.getSubElements().get(2).getValue()).isEqualTo("Convertible");
-		assertThat(carTypeValues.getSubElements().get(2).getMatchCount()).isEqualTo(1);
-		assertThat(carTypeValues.getSubElements().get(2).hasSubAttributes()).isFalse();
-		assertThat(carTypeValues.getSubElements().get(2).isExpanded()).isFalse();
-		assertThat(carTypeValues.getSubElements().get(2).isChecked()).isTrue();
+		checkSubElement(carTypeValues, 0, "Sedan", 1);
+		checkSubElement(carTypeValues, 1, "Compact", 1);
+		checkSubElement(carTypeValues, 2, "Convertible", 1);
 
 		
 		final ViewAttributeListElement odometerElement = attributeList.getSubElements().get(2);
@@ -167,46 +165,19 @@ public class FacetsTest extends BaseFacetsTest {
 		
 		assertThat(rangeList.getSubElements().size()).isEqualTo(5);
 
-		assertThat(rangeList.getSubElements().get(0).getValue()).isEqualTo("  - 100000");
-		assertThat(rangeList.getSubElements().get(0).getMatchCount()).isEqualTo(0);
-		assertThat(rangeList.getSubElements().get(0).hasSubAttributes()).isFalse();
-		assertThat(rangeList.getSubElements().get(0).isExpanded()).isFalse();
-		assertThat(rangeList.getSubElements().get(0).isChecked()).isTrue();
-
-		assertThat(rangeList.getSubElements().get(1).getValue()).isEqualTo("100000 - 200000");
-		assertThat(rangeList.getSubElements().get(1).getMatchCount()).isEqualTo(1);
-		assertThat(rangeList.getSubElements().get(1).hasSubAttributes()).isFalse();
-		assertThat(rangeList.getSubElements().get(1).isExpanded()).isFalse();
-		assertThat(rangeList.getSubElements().get(1).isChecked()).isTrue();
-
-		assertThat(rangeList.getSubElements().get(2).getValue()).isEqualTo("200000 - 300000");
-		assertThat(rangeList.getSubElements().get(2).getMatchCount()).isEqualTo(0);
-		assertThat(rangeList.getSubElements().get(2).hasSubAttributes()).isFalse();
-		assertThat(rangeList.getSubElements().get(2).isExpanded()).isFalse();
-		assertThat(rangeList.getSubElements().get(2).isChecked()).isTrue();
-
-		assertThat(rangeList.getSubElements().get(3).getValue()).isEqualTo("300000 - ");
-		assertThat(rangeList.getSubElements().get(3).getMatchCount()).isEqualTo(0);
-		assertThat(rangeList.getSubElements().get(3).hasSubAttributes()).isFalse();
-		assertThat(rangeList.getSubElements().get(3).isExpanded()).isFalse();
-		assertThat(rangeList.getSubElements().get(3).isChecked()).isTrue();
-
-		assertThat(rangeList.getSubElements().get(4).getValue()).isEqualTo("Unknown");
-		assertThat(rangeList.getSubElements().get(4).getMatchCount()).isEqualTo(2);
-		assertThat(rangeList.getSubElements().get(4).hasSubAttributes()).isFalse();
-		assertThat(rangeList.getSubElements().get(4).isExpanded()).isFalse();
-		assertThat(rangeList.getSubElements().get(4).isChecked()).isTrue();
-
-		
-		// Update model and refresh again for view to be updated
-		final SearchFacetsResult updatedFacets = new SearchFacetsResult();
-		final SearchFacetedTypeResult updatedCars = new SearchFacetedTypeResult(CAR_TYPE_NAME, CAR_DISPLAY_NAME);
-		
-		updatedCars.setAttributes(Arrays.asList(productionYearAttr, odometerAttr));
-		
-		updatedFacets.setTypes(Arrays.asList(updatedCars));
-
-		controller.getModel().updateFacets(updatedFacets);
-		controller.refresh();
+		checkSubElement(rangeList, 0, "  - 100000", 0);
+		checkSubElement(rangeList, 1, "100000 - 200000", 1);
+		checkSubElement(rangeList, 2, "200000 - 300000", 0);
+		checkSubElement(rangeList, 3, "300000 - ", 0);
+		checkSubElement(rangeList, 4, "Unknown", 2);
 	}
+	
+	private void checkSubElement(ViewList<ViewAttributeValueElement> list, int index, Object expectedValue, int matchCount) {
+		assertThat(list.getSubElements().get(index).getValue()).isEqualTo(expectedValue);
+		assertThat(list.getSubElements().get(index).getMatchCount()).isEqualTo(matchCount);
+		assertThat(list.getSubElements().get(index).hasSubAttributes()).isFalse();
+		assertThat(list.getSubElements().get(index).isExpanded()).isFalse();
+		assertThat(list.getSubElements().get(index).isChecked()).isTrue();
+	}
+	
 }
