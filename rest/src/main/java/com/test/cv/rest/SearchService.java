@@ -292,12 +292,12 @@ public class SearchService extends BaseService {
 				throw new UnsupportedOperationException("Unknown attribute type " + attribute.getAttributeType());
 			}
 		}
-		else if (searchCriterium.getOtherSelected()) {
+		else if (searchCriterium.getOtherSelected() != null && searchCriterium.getOtherSelected()) {
 			// Only other-values, eg "other" selected
 			criterium = new NoValueCriterium(attribute);
 		}
 		else {
-			// Nothing selected for criterium so ignoe
+			// Nothing selected for criterium so ignore
 			criterium = null;
 		}
 
