@@ -291,9 +291,7 @@ function FacetViewElements() {
 		
 		thisAttrValueOnlyContainer.setAttribute('class', 'thisAttributeValueOnlyContainer');
 
-		thisAttrValueOnlyContainer.innerHTML =
-			  "<span class='thisAttributeValueOnlyText'>This only</span>"
-			+ "<input type='checkbox' class='thisAttributeValueOnlyCheckbox'/>";
+		thisAttrValueOnlyContainer.innerHTML = "<input type='button' class='thisAttributeValueOnlyCheckbox' value='This only'/>";
 
 		
 		if (hasSubAttributes) {
