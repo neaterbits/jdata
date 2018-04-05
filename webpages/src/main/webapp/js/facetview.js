@@ -554,6 +554,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 					}
 
 					if (sub != null) {
+						
 						sub.setInUse(true);
 
 						cur = sub;
@@ -986,9 +987,12 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		
 		var exitCode = ITER_CONTINUE;
 		
-		for (var i = 0; i < array.length; ++ i) {
-			var iter = array[i]._iterateCurAndSub(before, after, this);
-			
+		// In case of removes elements from the array
+		var arrayCopy = array.slice();
+		
+		for (var i = 0; i < arrayCopy.length; ++ i) {
+			var iter = arrayCopy[i]._iterateCurAndSub(before, after, this);
+
 			if (iter == ITER_CONTINUE ) {
 				// Continue loop
 			}
