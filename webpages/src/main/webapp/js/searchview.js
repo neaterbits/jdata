@@ -96,14 +96,14 @@ function SearchView(
 			
 			t._updateFacets(response.facets, onsuccess);
 
-			t._refreshGallery(response.items);
+			//t._refreshGallery(response.items);
 		});
 	}
 
 	this._updateFacets = function(facets, onsuccess) {
 		this.facetModel.updateFacets(facets);
 
-		this.facetController.refresh();
+		this.facetController.refresh(false); // TODO true if caused by full-search update, must pass search criteria in response? Or some userData
 
 		onsuccess();
 	}
