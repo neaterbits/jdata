@@ -372,6 +372,22 @@ function FacetViewElements() {
 	this.removeElement = function(parent, sub) {
 		parent.removeChild(sub);
 
+		this._updateAccordionHeight(parent);
+	}
+
+	this.hideElement = function(sub) {
+		sub.style.display = 'none';
+
+		this._updateAccordionHeight(sub.parentNode);
+	}
+
+	this.showElement = function(sub) {
+		sub.style.display = 'block';
+
+		this._updateAccordionHeight(sub.parentNode);
+	}
+
+	this._updateAccordionHeight = function(parent) {
 		if (true) {
 			var accordionNode = parent.parentNode.parentNode;
 	

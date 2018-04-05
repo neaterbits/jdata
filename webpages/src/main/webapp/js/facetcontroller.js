@@ -66,10 +66,10 @@ function FacetController(facetModel, facetView) {
 	
 	this.viewInitialized = false;
 
-	this.refresh = function() {
+	this.refresh = function(causedByFullTextSearchUpdate) {
 		
 		if (this.viewInitialized) {
-			this.view.refreshFromNewModel(this.model);
+			this.view.refreshFromNewModel(this.model, causedByFullTextSearchUpdate);
 		}
 		else {
 			this.view.initFromModel(this.model);
