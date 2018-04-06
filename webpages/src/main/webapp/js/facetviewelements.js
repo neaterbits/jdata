@@ -291,9 +291,10 @@ function FacetViewElements() {
 		
 		thisAttrValueOnlyContainer.setAttribute('class', 'thisAttributeValueOnlyContainer');
 
-		thisAttrValueOnlyContainer.innerHTML = "<input type='button' class='thisAttributeValueOnlyCheckbox' value='This only'/>";
+		thisAttrValueOnlyContainer.innerHTML = "<input type='button' class='thisAttributeValueOnlyButton' value='This only'/>";
 
-		
+		var thisOnlyButton = thisAttrValueOnlyContainer.getElementsByTagName('input')[0];
+
 		if (hasSubAttributes) {
 			
 			function expandedClass(expanded) {
@@ -343,7 +344,7 @@ function FacetViewElements() {
 
 		li.setAttribute("class", "facetAttributeValueElement");
 
-		return { 'listItem' : li, 'checkboxItem' : checkbox };
+		return { 'listItem' : li, 'checkboxItem' : checkbox, 'thisOnlyItem' : thisOnlyButton };
 	}
 
 	this.updateAttributeValueElement = function(element, value, matchCount) {
@@ -358,11 +359,17 @@ function FacetViewElements() {
 		};
 	}
 
-	this.setCheckBoxChecked = function(checkbox, checked) {
+	this.setThisOnlyButtonOnClick = function(thisOnlyButton, onButtonClicked) {
+		thisOnlyButton.onclick = function(event) {
+			onButtonClicked();
+		};
+	}
+
+	this.setCheckboxChecked = function(checkbox, checked) {
 		checkbox.checked = checked;
 	}
 	
-	this.isCheckboxSelected = function(checkbox) {
+	this.isCheckboxChecked = function(checkbox) {
 		return checkbox.checked;
 	};
 	
