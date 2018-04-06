@@ -88,7 +88,7 @@ public class JettyRunServlet {
 			// Get parameters
 			String freeText = null;
 			
-			String [] types = req.getParameterValues("type");
+			String [] types = req.getParameterValues("itemType");
 			
 			final String pageNoString = req.getParameter("pageNo");
 			final int pageNo = pageNoString == null ? 1 : Integer.parseInt(pageNoString);

@@ -1,6 +1,8 @@
 package com.test.cv.model.items;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,13 +35,20 @@ public class ItemTypes {
 	
 	private static final Map<String, TypeInfo> typesByName;
 	
+	private static final Set<Class<? extends Item>> typesSet;
+	
 	static {
 		typeNames = types.stream().map(t -> getTypeName(t)).collect(Collectors.toList());
+		typesSet = Collections.unmodifiableSet(new HashSet<>(types));
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static Class<? extends Item> [] getTypeClasses() {
 		return types.toArray(new Class[types.size()]);
+	}
+	
+	public static Set<Class<? extends Item>> getAllTypesSet() {
+		return typesSet;
 	}
 
 	public static String [] getTypeNames() {
@@ -71,11 +80,11 @@ public class ItemTypes {
 		return getTypeInfo(getType(item));
 	}
 	
-	public static Set<ItemAttribute> getFacetAttributes(String ... types) {
+	public static Set<ItemAttribute> getFacetAttributes(Collection<Class<? extends Item>> types) {
 		final Set<ItemAttribute> facetAttributes = new HashSet<>();
 
-		for (String typeName : types) {
-			final TypeInfo typeInfo = getTypeByName(typeName);
+		for (Class<? extends Item> type : types) {
+			final TypeInfo typeInfo = getTypeInfo(type);
 			
 			typeInfo.getAttributes().forEach(itemAttribute -> {
 				if (itemAttribute.isFaceted()) {

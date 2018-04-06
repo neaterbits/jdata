@@ -44,7 +44,7 @@ public interface ItemIndex extends AutoCloseable {
 	/**
 	 * Search for values in an index based on types
 	 */
-	IndexSearchCursor search(String freeText, List<Criterium> criteria, Set<ItemAttribute> facetAttributes) throws ItemIndexException;
+	IndexSearchCursor search(List<Class<? extends Item>> types, String freeText, List<Criterium> criteria, Set<ItemAttribute> facetAttributes) throws ItemIndexException;
 	
 	void deleteItem(String itemId, Class<? extends Item> type) throws ItemIndexException;
 	

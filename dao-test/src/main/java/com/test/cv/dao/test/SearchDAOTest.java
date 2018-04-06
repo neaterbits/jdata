@@ -19,6 +19,7 @@ import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.items.sports.Snowboard;
 import com.test.cv.model.items.sports.SnowboardProfile;
+import com.test.cv.model.items.vehicular.Car;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.Criterium;
@@ -68,7 +69,75 @@ public abstract class SearchDAOTest extends TestCase {
 
 		return snowboard;
 	}
+	
+	public void testSearchWithNullValueForTypesThrowsException() throws Exception {
+		try (ISearchDAO searchDAO = getSearchDAO()) {
 
+			try {
+				searchDAO.search(null, null, null);
+				
+				fail("Expected IllegalArgumentException because of types == null");
+			}
+			catch (IllegalArgumentException ex){
+				
+			}
+		}
+	}
+
+	public void testSearchWithNullValueForCriteriumIsOk() throws Exception {
+		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {
+			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), null, null);
+
+			final List<String> itemIds = cursor.getAllItemIDs();
+			assertThat(itemIds.size()).isEqualTo(2);
+			assertThat(itemIds.contains(itemId1)).isTrue();
+			assertThat(itemIds.contains(itemId2)).isTrue();
+		});
+	}
+
+	// Test with empty types list ought to give empty result set
+	public void testSearchWithEmptyTypeListGivesEmptyResult() throws Exception {
+		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {
+			final ISearchCursor cursor = searchDAO.search(new ArrayList<>(), null, null);
+
+			final List<String> itemIds = cursor.getAllItemIDs();
+			assertThat(itemIds.size()).isEqualTo(0);
+		});
+	}
+
+	// Store more that one type
+	public void testSearchWithOneOfMultipleTypes() throws Exception {
+
+		final String userId = "theUser";
+		
+		try (IItemDAO itemDAO = getItemDAO()) {
+		
+			final Car car = new Car();
+			
+			car.setMake("Totyota");
+			car.setModel("Corolla");
+			
+
+			itemDAO.addItem(userId, car);
+
+			final String carItemId = car.getIdString();
+			assertThat(carItemId).isNotNull();
+
+			final Snowboard snowboard = makeSnowboard1();
+
+			itemDAO.addItem(userId, snowboard);
+
+			try (ISearchDAO searchDAO = getSearchDAO()) {
+
+				final ISearchCursor cursor = searchDAO.search(Arrays.asList(Car.class), null, null);
+				final List<String> itemIds = cursor.getAllItemIDs();
+
+				assertThat(itemIds.size()).isEqualTo(1);
+				assertThat(itemIds.get(0)).isEqualTo(carItemId);
+			}
+		}
+	}
+	
 	public void testSearchNoCriteria() throws Exception {
 
 		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {

@@ -24,6 +24,7 @@ import com.test.cv.dao.ItemStorageException;
 import com.test.cv.dao.SearchException;
 import com.test.cv.dao.index.IndexSearchDAO;
 import com.test.cv.integrationtest.IntegrationTestHelper;
+import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.items.ItemTypes;
@@ -84,10 +85,25 @@ public class SearchService extends BaseService {
 	// TODO check that we adhere to best practices for pageNo and itemsPerPage
 	public SearchResult search(String freeText, String [] types, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, Boolean testdata, HttpServletRequest request) {
 
-		// If no types passed, this is the initial search so pass all
 		if (types == null) {
-			// All types
+			// No types selected, ought to return empty resultset
+			types = new String[0];  
+		}
+		else if (types.length == 1 && types[0].equals("_all_")) {
+			// Hack to get all types at the start and separate this case from the "no types" case above
 			types = ItemTypes.getTypeNames();
+		}
+		
+		final List<Class<? extends Item>> typesList = new ArrayList<>(types.length);
+		
+		for (String typeName : types) {
+			final TypeInfo typeInfo = ItemTypes.getTypeByName(typeName);
+			
+			if (typeInfo == null) {
+				throw new IllegalArgumentException("Unknown type " + typeName);
+			}
+
+			typesList.add(typeInfo.getType());
 		}
 
 		final SearchResult result;
@@ -96,13 +112,13 @@ public class SearchService extends BaseService {
 			result = makeTestResult();
 		}
 		else {
-			result = searchInDB(freeText, types, criteria, pageNo, itemsPerPage, request);
+			result = searchInDB(typesList, freeText, criteria, pageNo, itemsPerPage, request);
 		}
 
 		return result;
 	}
 
-	private SearchResult searchInDB(String freeText, String [] types, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, HttpServletRequest request) {
+	private SearchResult searchInDB(List<Class<? extends Item>> types, String freeText, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, HttpServletRequest request) {
 		
 		final List<Criterium> daoCriteria; 
 		if (criteria != null) {
@@ -122,7 +138,7 @@ public class SearchService extends BaseService {
 		try {
 			final ISearchCursor cursor;
 			try {
-				cursor = searchDAO.search(null, daoCriteria, ItemTypes.getFacetAttributes(types));
+				cursor = searchDAO.search(types, daoCriteria, ItemTypes.getFacetAttributes(types));
 			} catch (SearchException ex) {
 				throw new IllegalStateException("Failed to search", ex);
 			}

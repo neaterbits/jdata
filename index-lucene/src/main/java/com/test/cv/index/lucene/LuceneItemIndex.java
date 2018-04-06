@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,6 +39,7 @@ import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.LeafCollector;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Scorer;
@@ -95,7 +97,9 @@ public class LuceneItemIndex implements ItemIndex {
 	private static final long DATE_NONE = -1L;
 
 	private static final String THUMBS_FIELD = "thumbs";
-	
+	private static final String TYPE_FIELD = "type";
+	private static final String USERID_FIELD = "userId";
+
 	private final Directory directory;
 	private IndexWriter writer;
 	private DirectoryReader reader;
@@ -144,8 +148,8 @@ public class LuceneItemIndex implements ItemIndex {
 		// Must have ID
 		boolean idFound = false;
 		
-		document.add(new StringField("type", typeInfo.getTypeName(), Field.Store.YES));
-		document.add(new StringField("userId", userId, Field.Store.YES));
+		document.add(new StringField(TYPE_FIELD, typeInfo.getTypeName(), Field.Store.YES));
+		document.add(new StringField(USERID_FIELD, userId, Field.Store.YES));
 
 		for (ItemAttributeValue<?> attributeValue : attributeValues) {
 			
@@ -506,21 +510,47 @@ public class LuceneItemIndex implements ItemIndex {
 	}
 
 	@Override
-	public IndexSearchCursor search(String freeText, List<Criterium> criteria, Set<ItemAttribute> facetAttributes) throws ItemIndexException {
+	public IndexSearchCursor search(
+			List<Class<? extends Item>> types,
+			String freeText,
+			List<Criterium> criteria, 
+			Set<ItemAttribute> facetAttributes) throws ItemIndexException {
 		
 		refreshReader();
 
 		final IndexSearcher searcher = new IndexSearcher(reader);
 		
 		final Query query;
-		
-		if (criteria != null && !criteria.isEmpty()) {
-			final BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
 
-			query = createQueryFromCriteria(criteria, queryBuilder);
+		if (types == null) {
+			throw new IllegalArgumentException("types == null");
 		}
-		else {
-			query = new MatchAllDocsQuery();
+		else if (types.isEmpty()) {
+			// Optimization, no types specified so just return no docs since
+			// does not have any matches no matter what criterium is passed in
+			query = new MatchNoDocsQuery();
+		}
+		else{
+			if (criteria != null && !criteria.isEmpty()) {
+				final BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
+	
+				final Query criteriaQuery = createQueryFromCriteria(criteria, queryBuilder);
+				
+				// Must add criterias for types
+				query = makeTypesQuery(types, criteriaQuery, Occur.MUST); // Occur.MUST for criteriaQuery
+			}
+			else {
+				final Set<Class<? extends Item>> typesSet = new HashSet<>(types);
+				final Set<Class<? extends Item>> allTypesSet = ItemTypes.getAllTypesSet();
+
+				if (typesSet.equals(allTypesSet)) {
+					// All supported types included so can just call MatchAllDocsQuery()
+					query = new MatchAllDocsQuery();
+				}
+				else {
+					query = makeTypesQuery(typesSet);
+				}
+			}
 		}
 
 		final ResultsCollector resultsCollector;
@@ -531,6 +561,7 @@ public class LuceneItemIndex implements ItemIndex {
 		} catch (IOException ex) {
 			throw new ItemIndexException("Failed to search", ex);
 		}
+		
 		
 		final List<Document> documents = new ArrayList<>(resultsCollector.documents.size());
 	
@@ -617,6 +648,53 @@ public class LuceneItemIndex implements ItemIndex {
 				return facets;
 			}
 		};
+	}
+
+	private static Query makeTypesQuery(Collection<Class<? extends Item>> types) {
+		return makeTypesQuery(types, null, null);
+	}
+
+	private static Query makeTypesQuery(Collection<Class<? extends Item>> types, Query appendQuery, Occur appendOccur) {
+
+		if (types == null) {
+			throw new IllegalArgumentException("types == null");
+		}
+		
+		if (types.isEmpty()) {
+			throw new IllegalArgumentException("no types");
+		}
+
+		final Query query;
+		
+		if (types.size() == 1 && appendQuery == null) {
+			// Can return a simple term query since only checking on one type
+			query = createTypeTermQuery(types.iterator().next());
+		}
+		else {
+			// Must use a boolean query to "should" together types
+			final BooleanQuery.Builder typesQueryBuilder = new BooleanQuery.Builder();
+
+			for (Class<? extends Item> type : types) {
+				final Query oneTypeQuery = createTypeTermQuery(type);
+				typesQueryBuilder.add(oneTypeQuery, Occur.SHOULD);
+			}
+
+			if (appendQuery == null) {
+				query = typesQueryBuilder.build();
+			}
+			else {
+				// Append query, either should or must
+				typesQueryBuilder.add(appendQuery, appendOccur);
+				
+				query = typesQueryBuilder.build();
+			}
+		}
+
+		return query;
+	}
+
+	private static TermQuery createTypeTermQuery(Class<? extends Item> type) {
+		return new TermQuery(new Term(TYPE_FIELD, ItemTypes.getTypeName(type)));
 	}
 	
 	
@@ -1177,7 +1255,7 @@ public class LuceneItemIndex implements ItemIndex {
 		return FacetUtils.computeFacets(documents, facetedAttributes, new FacetUtils.FacetFunctions<Document, IndexableField>() {
 			@Override
 			public boolean isType(Document d, String typeName) {
-				return d.getField("type").stringValue().equals(typeName);
+				return d.getField(TYPE_FIELD).stringValue().equals(typeName);
 			}
 
 			@Override

@@ -15,6 +15,10 @@ public interface ISearchCursor {
 	 */
 	List<String> getItemIDs(int initialIdx, int count);
 	
+	public default List<String> getAllItemIDs() {
+		return getItemIDs(0, Integer.MAX_VALUE);
+	}
+	
 	/**
 	 * Retrieve items and information
 	 * 

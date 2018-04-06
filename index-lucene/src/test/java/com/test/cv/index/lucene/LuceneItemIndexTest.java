@@ -5,12 +5,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
@@ -68,104 +62,104 @@ public class LuceneItemIndexTest extends TestCase {
 	
 			index.indexItemAttributes(userId, Snowboard.class, ItemTypes.getTypeName(Snowboard.class), Arrays.asList(idAttributeValue, makeAttributeValue, yearAttrbuteValue, widthAttributeValue));
 
-			IndexSearchCursor cursor = search(index, new StringCriterium(makeAttribute, "Burton", ComparisonOperator.EQUALS));
+			IndexSearchCursor cursor = searchSnowboads(index, new StringCriterium(makeAttribute, "Burton", ComparisonOperator.EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
 			// Decimal value tests
-			cursor = search(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.5"), ComparisonOperator.EQUALS));
+			cursor = searchSnowboads(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.5"), ComparisonOperator.EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.5"), ComparisonOperator.NOT_EQUALS));
+			cursor = searchSnowboads(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.5"), ComparisonOperator.NOT_EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 
-			cursor = search(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.5"), ComparisonOperator.GREATER_THAN));
+			cursor = searchSnowboads(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.5"), ComparisonOperator.GREATER_THAN));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 
-			cursor = search(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.5"), ComparisonOperator.GREATER_THAN_OR_EQUALS));
+			cursor = searchSnowboads(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.5"), ComparisonOperator.GREATER_THAN_OR_EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.5"), ComparisonOperator.LESS_THAN));
+			cursor = searchSnowboads(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.5"), ComparisonOperator.LESS_THAN));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 
-			cursor = search(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.5"), ComparisonOperator.LESS_THAN_OR_EQUALS));
+			cursor = searchSnowboads(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.5"), ComparisonOperator.LESS_THAN_OR_EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.4"), ComparisonOperator.GREATER_THAN));
+			cursor = searchSnowboads(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.4"), ComparisonOperator.GREATER_THAN));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.6"), ComparisonOperator.GREATER_THAN_OR_EQUALS));
+			cursor = searchSnowboads(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.6"), ComparisonOperator.GREATER_THAN_OR_EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 
-			cursor = search(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.51"), ComparisonOperator.LESS_THAN));
+			cursor = searchSnowboads(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.51"), ComparisonOperator.LESS_THAN));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.49"), ComparisonOperator.LESS_THAN_OR_EQUALS));
+			cursor = searchSnowboads(index, new DecimalCriterium(widthAttribute, new BigDecimal("32.49"), ComparisonOperator.LESS_THAN_OR_EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 
 			// Integer value tests
-			cursor = search(index, new IntegerCriterium(yearAttribute, 2015, ComparisonOperator.EQUALS));
+			cursor = searchSnowboads(index, new IntegerCriterium(yearAttribute, 2015, ComparisonOperator.EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, new IntegerCriterium(yearAttribute, 2016, ComparisonOperator.NOT_EQUALS));
+			cursor = searchSnowboads(index, new IntegerCriterium(yearAttribute, 2016, ComparisonOperator.NOT_EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 
-			cursor = search(index, new IntegerCriterium(yearAttribute, 2015, ComparisonOperator.GREATER_THAN));
+			cursor = searchSnowboads(index, new IntegerCriterium(yearAttribute, 2015, ComparisonOperator.GREATER_THAN));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 
-			cursor = search(index, new IntegerCriterium(yearAttribute, 2015, ComparisonOperator.GREATER_THAN_OR_EQUALS));
+			cursor = searchSnowboads(index, new IntegerCriterium(yearAttribute, 2015, ComparisonOperator.GREATER_THAN_OR_EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, new IntegerCriterium(yearAttribute, 2015, ComparisonOperator.LESS_THAN));
+			cursor = searchSnowboads(index, new IntegerCriterium(yearAttribute, 2015, ComparisonOperator.LESS_THAN));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 
-			cursor = search(index, new IntegerCriterium(yearAttribute, 2015, ComparisonOperator.LESS_THAN_OR_EQUALS));
+			cursor = searchSnowboads(index, new IntegerCriterium(yearAttribute, 2015, ComparisonOperator.LESS_THAN_OR_EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, new IntegerCriterium(yearAttribute, 2014, ComparisonOperator.GREATER_THAN));
+			cursor = searchSnowboads(index, new IntegerCriterium(yearAttribute, 2014, ComparisonOperator.GREATER_THAN));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, new IntegerCriterium(yearAttribute, 2016, ComparisonOperator.GREATER_THAN_OR_EQUALS));
+			cursor = searchSnowboads(index, new IntegerCriterium(yearAttribute, 2016, ComparisonOperator.GREATER_THAN_OR_EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 
-			cursor = search(index, new IntegerCriterium(yearAttribute, 2016, ComparisonOperator.LESS_THAN));
+			cursor = searchSnowboads(index, new IntegerCriterium(yearAttribute, 2016, ComparisonOperator.LESS_THAN));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, new IntegerCriterium(yearAttribute, 2014, ComparisonOperator.LESS_THAN_OR_EQUALS));
+			cursor = searchSnowboads(index, new IntegerCriterium(yearAttribute, 2014, ComparisonOperator.LESS_THAN_OR_EQUALS));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 
 			// TODO test include no-value as well
 			final boolean includeWithNoValue = false;
 			
 			// Integer range tests
-			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2015, false, 2017, false, includeWithNoValue));
+			cursor = searchSnowboads(index, makeIntegerRangeCriterium(yearAttribute, 2015, false, 2017, false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 	
-			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2015, true, 2017, false, includeWithNoValue));
+			cursor = searchSnowboads(index, makeIntegerRangeCriterium(yearAttribute, 2015, true, 2017, false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2014, false, 2016, false, includeWithNoValue));
+			cursor = searchSnowboads(index, makeIntegerRangeCriterium(yearAttribute, 2014, false, 2016, false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2013, false, 2015, false, includeWithNoValue));
+			cursor = searchSnowboads(index, makeIntegerRangeCriterium(yearAttribute, 2013, false, 2015, false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 	
-			cursor = search(index, makeIntegerRangeCriterium(yearAttribute, 2013, false, 2015, true, includeWithNoValue));
+			cursor = searchSnowboads(index, makeIntegerRangeCriterium(yearAttribute, 2013, false, 2015, true, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
 			// Decimal range tests
-			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("32.5"), false, new BigDecimal("40.2"), false, includeWithNoValue));
+			cursor = searchSnowboads(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("32.5"), false, new BigDecimal("40.2"), false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 	
-			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("32.5"), true, new BigDecimal("40.2"), false, includeWithNoValue));
+			cursor = searchSnowboads(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("32.5"), true, new BigDecimal("40.2"), false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("30.5"), false, new BigDecimal("40.2"), false, includeWithNoValue));
+			cursor = searchSnowboads(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("30.5"), false, new BigDecimal("40.2"), false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 
-			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("30.5"), false, new BigDecimal("32.5"), false, includeWithNoValue));
+			cursor = searchSnowboads(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("30.5"), false, new BigDecimal("32.5"), false, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(0);
 	
-			cursor = search(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("30.5"), false, new BigDecimal("32.5"), true, includeWithNoValue));
+			cursor = searchSnowboads(index, makeDecimalRangeCriterium(widthAttribute, new BigDecimal("30.5"), false, new BigDecimal("32.5"), true, includeWithNoValue));
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(1);
 		}
 		catch (Throwable t) {
@@ -198,6 +192,7 @@ public class LuceneItemIndexTest extends TestCase {
 			index.indexThumbnailSize(itemId, Snowboard.class, 2, 290, 340);
 
 			final IndexSearchCursor searchCursor = index.search(
+					Arrays.asList(Snowboard.class),
 					null,
 					Arrays.asList(new StringCriterium(idAttribute, itemId, ComparisonOperator.EQUALS)),
 					null);
@@ -242,7 +237,7 @@ public class LuceneItemIndexTest extends TestCase {
 					carTypeInfo.getAttributes().getByName("fuel"),
 					Arrays.asList(new InCriteriumValue<Fuel>(Fuel.GAS, null)),
 					false);
-			final IndexSearchCursor cursor = index.search(null, Arrays.asList(criterium), null);
+			final IndexSearchCursor cursor = index.search(Arrays.asList(Snowboard.class), null, Arrays.asList(criterium), null);
 
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(2);
 		}
@@ -270,9 +265,9 @@ public class LuceneItemIndexTest extends TestCase {
 		
 		return new DecimalRangesCriterium(attribute, new DecimalRange [] { decimalRange }, includeItemsWithNoValue);
 	}
-	
-	private static IndexSearchCursor search(ItemIndex index, Criterium criterium) throws ItemIndexException {
-		return index.search(null, Arrays.asList(criterium), null);
+
+	private static IndexSearchCursor searchSnowboads(ItemIndex index, Criterium criterium) throws ItemIndexException {
+		return index.search(Arrays.asList(Snowboard.class), null, Arrays.asList(criterium), null);
 	}
 }
 
