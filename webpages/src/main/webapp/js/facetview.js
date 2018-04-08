@@ -184,10 +184,29 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 			// and switch button to "View other types"?
 			
 			// For now perhaps just remove checkboxes
-			console.log('## typeThisOnly clicked');
+
+			// Must mark all other types as unselected
+			// TODO if subtypes, then this must not ascendant types
+			
+			// Re-collect criteria based on type
+			t._deselectAllTypesExcept(cur, typeContainer);
+
+			// Collect criterias, call model to search for updated list and retunr
+			t._collectAndTriggerCriteriaChange();
 		});
 
 		return typeContainer;
+	}
+	
+	this._deselectAllTypesExcept = function(typeList, selectedType) {
+		
+		for (var i = 0; i < typeList.types.length; ++ i) {
+			var type = typeList.types[i];
+			
+			if (type !== selectedType) {
+				type.getViewElementFactory().setCheckboxChecked(type.checkboxElement, false);
+			}
+		}
 	}
 
 	this._addFacetAttribute = function(viewElementFactory, cur, element, index) {
@@ -216,7 +235,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				hasSubAttributes,
 				false,
 				true);
-		
+
 		var attributeValue = new FacetAttributeSingleValue(
 								viewElementFactory,
 								cur.getModelType(),
@@ -227,7 +246,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 								attributeElement.listItem,
 								attributeElement.checkboxItem,
 								attributeElement.thisOnlyItem);
-		
+
 		this._setAttributeCheckboxListener(viewElementFactory, cur, attributeValue, hasSubAttributes);
 				
 		cur.addValue(attributeValue, index);
