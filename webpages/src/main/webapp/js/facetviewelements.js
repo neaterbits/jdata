@@ -39,9 +39,7 @@ function FacetViewElements() {
 
 		append(typeDiv, typeTitleDiv);
 		
-		var checkbox = typeTitleDiv.getElementsByTagName('input')[0];
-		
-		checkbox.setAttribute('class', 'attributeValueCheckbox');
+		var checkbox = typeTitleDiv.getElementsByClassName('includeTypeCheckbox')[0];
 		checkbox.checked = checked;
 		
 		var listsDiv = document.createElement('div');
@@ -53,7 +51,7 @@ function FacetViewElements() {
 		// Make it possible to show and hide the below lists
 		var accordion = this._makeAccordion(listsDiv, isExpanded, function (expanded) {
 			var cl = expandedClass(expanded);
-
+			
 			typeExpander.className = 'typeExpander ' + cl;
 		});
 		
@@ -62,13 +60,11 @@ function FacetViewElements() {
 		typeExpander.onclick = accordion.onclick;
 		typeTitle.onclick = accordion.onclick;
 
-		var thisOnly = typeTitleDiv.getElementsByClassName('thisTypeOnlyContainer')[0];
-		thisOnly.checked = false;
+		var thisOnlyButton = typeTitleDiv.getElementsByClassName('thisTypeOnlyButton')[0];
 		
 		append(typeDiv, accordion.element);
 
-
-		return typeDiv;
+		return { 'typeElement' : typeDiv, 'checkboxElement' : checkbox, 'thisOnlyButtonElement' : thisOnlyButton };
 	}
 	
 	this._makeShowHide = function(listsDiv) {
@@ -359,7 +355,13 @@ function FacetViewElements() {
 		};
 	}
 
-	this.setThisOnlyButtonOnClick = function(thisOnlyButton, onButtonClicked) {
+	this.setAttributeThisOnlyButtonOnClick = function(thisOnlyButton, onButtonClicked) {
+		thisOnlyButton.onclick = function(event) {
+			onButtonClicked();
+		};
+	}
+
+	this.setTypeThisOnlyButtonOnClick = function(thisOnlyButton, onButtonClicked) {
 		thisOnlyButton.onclick = function(event) {
 			onButtonClicked();
 		};
@@ -368,7 +370,7 @@ function FacetViewElements() {
 	this.setCheckboxChecked = function(checkbox, checked) {
 		checkbox.checked = checked;
 	}
-	
+
 	this.isCheckboxChecked = function(checkbox) {
 		return checkbox.checked;
 	};

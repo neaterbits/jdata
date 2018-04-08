@@ -155,15 +155,37 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	
 	this._addFacetType = function(viewElementFactory, cur, element, index) {
 		// Add a div for the particular type, will have a box for expanding the type
-		var typeElement = viewElementFactory.createTypeContainer(
+		var typeElements = viewElementFactory.createTypeContainer(
 				cur.getViewElement(),
 				element.displayName,
 				true, // TODO expand if not root?
 				true);
 		
-		var typeContainer = new FacetTypeContainer(viewElementFactory, element.type, typeElement, element.displayName);
-		
+		var typeContainer = new FacetTypeContainer(
+				viewElementFactory,
+				element.type,
+				typeElements.typeElement,
+				element.displayName,
+				typeElements.checkboxElement,
+				typeElements.thisOnlyButtonElement);
+
 		cur.addType(typeContainer, index);
+
+		var t = this;
+
+		viewElementFactory.setCheckboxOnClick(typeElements.checkboxElement, function(checked) {
+			// Re-collect criteria based on type
+			t._collectAndTriggerCriteriaChange();
+		});
+
+		viewElementFactory.setTypeThisOnlyButtonOnClick(typeElements.thisOnlyButtonElement, function (){
+			// Must hide all other types (to save space in the list),
+			// set the checkbox on this type to non-selectable
+			// and switch button to "View other types"?
+			
+			// For now perhaps just remove checkboxes
+			console.log('## typeThisOnly clicked');
+		});
 
 		return typeContainer;
 	}
@@ -247,16 +269,20 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	};
 	
 	
-	this._collectAndTriggerCriteriaChange = function(attributeList) {
+	this._collectAndTriggerCriteriaChangeWithAttributeList = function(attributeList) {
 		// Store last deselected so that when getting response back, we can keep subattributes at (0) matchcount
 		// so they can be re-selected
 		this.lastDeselectedAttributeValueList = attributeList;
 
+		this._collectAndTriggerCriteriaChange();
+	}
+
+	this._collectAndTriggerCriteriaChange = function() {
 		var criteria = this.collectCriteriaAndTypesFromSelections();
 
 		this.onCriteriaChanged(criteria);
 	}
-	
+
 	this._updateSubAttributeCheckedState = function(attributeValue, checked) {
 		if (attributeValue.hasSubAttributes()) {
 			// We must update the state of all sub attributes. If checked, update all sub attributes as checked.
@@ -278,7 +304,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 		var onCheckboxClicked = function(checked) {
 			t._updateSubAttributeCheckedState(attributeValue, checked);
-			t._collectAndTriggerCriteriaChange(attributeList);
+			t._collectAndTriggerCriteriaChangeWithAttributeList(attributeList);
 		};
 
 		viewElementFactory.setCheckboxOnClick(attributeValue.checkboxItem, onCheckboxClicked);
@@ -287,7 +313,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 			throw "Expected attribute value list: " + attributeList.className;
 		}
 
-		viewElementFactory.setThisOnlyButtonOnClick(attributeValue.thisOnlyButtonItem, function () {
+		viewElementFactory.setAttributeThisOnlyButtonOnClick(attributeValue.thisOnlyButtonItem, function () {
 			// Select only this attribute, that is unselect all other attributes in this list
 			// Try to trigger a single update
 
@@ -331,7 +357,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 		if (numUpdated > 0) {
 			// Must collect criterias anew
-			this._collectAndTriggerCriteriaChange(attributeList);
+			this._collectAndTriggerCriteriaChangeWithAttributeList(attributeList);
 		}
 	}
 
@@ -562,7 +588,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	};
 
 	this._markAllStillInDataModelAsInUseAndUpdateMatchCounts = function(model, facetUpdate) {
-		
+
 		// Must wrap root types list in similar to FacetTypeContainer so that works for initial access
 		// cur below is really parent element from view model
 		var t = this;
@@ -577,37 +603,43 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 				// model array, eg type list
 				function (kind, length, cur) {
+					
+					var sub = null;
+					
 					if (kind === 'type') {
 						// FacetTypeList under FacetTypeContainer
+						
+						sub = cur.getTypeList();
 
-						if (isNotNull(cur.getTypeList())) {
-							// Existing list
-							cur.getTypeList().setPresentInDataModel(true);
-							
-							cur = cur.getTypeList();
+						if (isNotNull(sub)) {
+							// Existing list]
+							sub.setPresentInDataModel(true);
 						}
 					}
 					else if (kind === 'attribute') {
 						// Cur may be FacetTypeContainer or FacetAttributeValue (in case of subattributes)
-						if (isNotNull(cur.getAttributeList())) {
+						sub = cur.getAttributeList();
+
+						if (isNotNull(sub)) {
 							// Existing list
-							cur.getAttributeList().setPresentInDataModel(true);
-							
-							cur = cur.getAttributeList();
+							sub.setPresentInDataModel(true);
 						}
 					}
 					else if (kind === 'attributeValue' || kind === 'attributeRange') {
-						
-						var valueOrRangeList = cur.getAttributeValueOrRangeList();
+						sub = cur.getAttributeValueOrRangeList();
 
-						if (isNotNull(valueOrRangeList)) {
-							valueOrRangeList.setPresentInDataModel(true);
-							
-							cur = valueOrRangeList;
+						if (isNotNull(sub)) {
+							sub.setPresentInDataModel(true);
 						}
 					}
 					else {
 						throw "Unknown data model element: " + kind;
+					}
+
+					if (isNotNull(sub)) {
+						t._updateVisibilityStateForList(facetUpdate, sub);
+
+						cur = sub;
 					}
 
 					return cur;
@@ -616,7 +648,6 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				function (kind, element, index, cur) {
 					var sub;
 					var updateMatchCount = false;
-
 					
 					if (kind == 'type') {
 						// cur is FacetTypeList
@@ -629,52 +660,69 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 					else if (kind === 'attributeValue') {
 						// cur is FacetAttributeValueList
 						sub = cur.findAttributeValue(element.value);
-
-						updateMatchCount = true;
 					}
 					else if (kind === 'attributeRange') {
 						// cur is FacetAttributeValueList
 						sub = cur.findRange(element);
-
-						updateMatchCount = true;
 					}
 					else if (kind === 'attributeValueUnknown') {
 						sub = cur.findValueUnknown();
-
-						updateMatchCount = true;
 					}
 					else if (kind === 'attributeRangeUnknown') {
 						sub = cur.findValueUnknown();
-
-						updateMatchCount = true;
 					}
 					else {
 						throw "Unknown data element type for markAllStillInUse: " + kind;
 					}
 
 					if (sub != null) {
-						
+
 						sub.setPresentInDataModel(true);
 
 						cur = sub;
 					}
 
-					if (updateMatchCount) {
-						// attribute value item that is both in datamodel and in view model
-						// Update depending on whether is visible or not
-						if (sub.isVisible()) {
-							facetUpdate.onStillInDataModelAndVisibleInViewModel(sub, element.matchCount);
-						}
-						else {
-							// make sub visible
-							facetUpdate.onInDataModelButHiddenInViewModel(sub, element.matchCount);
-
-							sub.setVisible(true);
-						}
-					}
+					t._updateVisibilityStateForElement(facetUpdate, sub, element);
 
 					return cur;
  				});
+	}
+
+	this._updateVisibilityStateForList = function(facetUpdate, sub) {
+		
+		if (typeof facetUpdate === 'undefined') {
+			throw "No facetUpdate";
+		}
+
+		// attribute value item that is both in datamodel and in view model
+		// Update depending on whether is visible or not
+		if (sub.isVisible()) {
+			facetUpdate.onListStillInDataModelAndVisibleInViewModel(sub);
+		}
+		else {
+			// make sub visible
+			if (typeof facetUpdate.onListInDataModelButHiddenInViewModel === 'undefined') {
+				throw "No facet update on list for " + sub.className + "/" + facetUpdate.facetUpdateClassName;
+			}
+
+			facetUpdate.onListInDataModelButHiddenInViewModel(sub);
+
+			sub.setVisible(true);
+		}
+	}
+
+	this._updateVisibilityStateForElement = function(facetUpdate, sub, element) {
+		// attribute value item that is both in datamodel and in view model
+		// Update depending on whether is visible or not
+		if (sub.isVisible()) {
+			facetUpdate.onElementStillInDataModelAndVisibleInViewModel(sub, element.matchCount);
+		}
+		else {
+			// make sub visible
+			facetUpdate.onElementInDataModelButHiddenInViewModel(sub, element.matchCount);
+
+			sub.setVisible(true);
+		}
 	}
 
 	this._removeElementsNotPresentInDataModel = function(facetUpdate) {
@@ -694,6 +742,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 			
 			// Remove only if not in use any more and is not in same list as last deselected
 			if (!obj.isPresentInDataModel()) {
+				
 				// Object no longer in use so must remove from DOM and skip recursing to sub-elements
 				// since we only need to remove this element from the DOM
 				
@@ -724,7 +773,13 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 					obj.setVisible(false);
 				}
 
-				iter = ITER_SKIP_SUB;
+				if (className == 'FacetTypeContainer') { // TODO should be returned from facetUpdate whether continuing iterating?
+					// we are not hiding type container so just iterating to sub elements and hide those instead
+					iter = ITER_CONTINUE;
+				}
+				else{
+					iter = ITER_SKIP_SUB;
+				}
 			}
 			else {
 				iter = ITER_CONTINUE;
@@ -739,6 +794,8 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	
 	this.collectCriteriaAndTypesFromSelections = function() {
 
+		var selectedTypes = {};
+		
 		var types = {};
 		var toplevelCriteria = [];
 		
@@ -748,7 +805,15 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		var valuesStack = [];
 		
 		this.rootTypes.iterate(function(className, obj) {
-			if (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeList') {
+			if (className == 'FacetTypeContainer') {
+				// Add to selected-types if this one is checked
+				if (obj.getViewElementFactory().isCheckboxChecked(obj.checkboxElement)) {
+					selectedTypes[obj.getModelType()] = '';
+				}
+			}
+			else if (
+					   (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeList')
+					&& typeof selectedTypes[obj.getModelType()] !== 'undefined') { // type for this attribute must be selected
 
 				// Get array of either FacetAttributeSingleValue or FacetAttributeRange
 				var attributeValues = className == 'FacetAttributeValueList'
@@ -874,7 +939,9 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		
 		// after recursion to subelements
 		function(className, obj) {
-			if (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeList') {
+			if (   (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeList')
+				&& typeof selectedTypes[obj.getModelType()] !== 'undefined') { // type for this attribute must be selected
+
 				var item = valuesStack.pop();
 				
 				if (item.type !== 'list') {
@@ -980,10 +1047,25 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		this.viewElementFactory = viewElementFactory;
 		this.modelType = modelType;
 		this.viewElement = viewElement;
+
+		// Always visible at first since only created if new in datamodel and not in viewmodel
+		this.visible = true;
+	}
+
+	FacetsElementBase.prototype.isAttributeValue = function() {
+		return false;
 	}
 
 	FacetsElementBase.prototype.getClassName = function() {
 		return this.className;
+	}
+
+	FacetsElementBase.prototype.setVisible = function(visible) {
+		this.visible = visible;
+	}
+
+	FacetsElementBase.prototype.isVisible = function() {
+		return this.visible;
 	}
 
 	FacetsElementBase.prototype.getViewElementFactory = function() {
@@ -1231,10 +1313,13 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 		return idx >= 0 ? array[idx] : null;
 	}
-			
+		
 	// Container for a facet type
-	function FacetTypeContainer(viewElementFactory, modelType, container) {
+	function FacetTypeContainer(viewElementFactory, modelType, container, displayName, checkboxElement, thisOnlyButtonElement) {
 		FacetsElementBase.call(this, 'FacetTypeContainer', viewElementFactory, modelType, container);
+
+		this.checkboxElement = checkboxElement;
+		this.thisOnlyButtonElement = thisOnlyButtonElement;
 	}
 	
 	FacetTypeContainer.prototype = Object.create(FacetsElementBase.prototype);
@@ -1257,6 +1342,11 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 		return ITER_CONTINUE;
 	}
+	
+	FacetTypeContainer.prototype.updateMatchCount = function(matchCount) {
+
+	}
+
 
 	FacetTypeContainer.prototype.getTypeList = function() {
 		return this.typeList;
@@ -1548,12 +1638,13 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		this.checkboxItem = checkboxItem;
 		this.thisOnlyButtonItem = thisOnlyItem;
 		this.displayText = displayText;
-		
-		// Always visible at first since only created if new in datamodel and not in viewmodel
-		this.visible = true;
 	}
 	
 	FacetAttributeValue.prototype = Object.create(FacetsElementBase.prototype);
+	
+	FacetAttributeValue.prototype.isAttributeValue = function() {
+		return true;
+	}
 
 	FacetAttributeValue.prototype.getAttributeId = function() {
 		return this.attributeId;
@@ -1561,14 +1652,6 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	FacetAttributeValue.prototype.getDisplayText = function() {
 		return this.displayText;
-	}
-
-	FacetAttributeValue.prototype.setVisible = function(visible) {
-		this.visible = visible;
-	}
-	
-	FacetAttributeValue.prototype.isVisible = function() {
-		return this.visible;
 	}
 
 	FacetAttributeValue.prototype.toDebugString = function() {
@@ -1678,49 +1761,31 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	 * 
 	 */
 	function FacetUpdateSetMatchCountTo0() {
-		
+		this.facetUpdateClassName = 'FacetUpdateSetMatchCountTo0';
+	};
+	
+	FacetUpdateSetMatchCountTo0.prototype.onListStillInDataModelAndVisibleInViewModel = function(list) {
+		// Nothing to do since no match counts to update
+	}
+
+	FacetUpdateSetMatchCountTo0.prototype.onListInDataModelButHiddenInViewModel = function(list) {
+		// Facet attribute list or type list, these are completely hidden when
+		// user deactivates eg a type. So show again
+		list.getViewElementFactory().showElement(list.getViewElement());
 	}
 
 	// Show a previous hidden value since there are now matches
-	FacetUpdateSetMatchCountTo0.prototype.onStillInDataModelAndVisibleInViewModel = function(value, matchCount) {
-		// Update match count
-		value.updateMatchCount(matchCount);
+	FacetUpdateSetMatchCountTo0.prototype.onElementStillInDataModelAndVisibleInViewModel = function(value, matchCount) {
+
+		if (value.isAttributeValue() || value.className === 'FacetTypeContainer') {
+			// Update match count
+			value.updateMatchCount(matchCount);
+		}
 	}
 
 	FacetUpdateSetMatchCountTo0.prototype.onNoLongerInDataModel = function(parent, lastDeselectedAttributeValueList, value) {
-		// Not in use, just set matchcount to 0
-		value.updateMatchCount(0);
 
-		return false; // Do not remove from model
-	}
-
-	// Was not in use but is now in use
-	FacetUpdateSetMatchCountTo0.prototype.onInDataModelButHiddenInViewModel = function(value, matchCount) {
-		// Update match count
-		value.updateMatchCount(matchCount);
-	}
-
-	FacetUpdateSetMatchCountTo0.prototype.onInDataModelButNotInViewModel = function(parent, value, matchCount) {
-		throw "Should not reach here as this FacetUpdate only works for existing elements in ViewModel";
-	}
-
-
-	function FacetUpdateShowHide() {
-		
-	}
-	
-	/**
-	 * Facet update after changing selections on same fulltext search criteria.
-	 * Thus the basis query is the same, only the faceting selections are different.
-	 */
-	FacetUpdateShowHide.prototype.onStillInDataModelAndVisibleInViewModel = function(value, matchCount) {
-		// Update match count
-		value.updateMatchCount(matchCount);
-	}
-	
-	FacetUpdateShowHide.prototype.onNoLongerInDataModel = function(valueList, lastDeselectedAttributeValueList, value) {
-		// Not in use, hide element unless was the last deselected value list
-		if (valueList === lastDeselectedAttributeValueList) {
+		if (value.isAttributeValue() || value.className === 'FacetTypeContainer') {
 			// Just set match count to 0
 			value.updateMatchCount(0);
 		}
@@ -1735,9 +1800,67 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	}
 
 	// Was not in use but is now in use
-	FacetUpdateShowHide.prototype.onInDataModelButHiddenInViewModel = function(value, matchCount) {
-		// Element was hidden and will now be shown
+	FacetUpdateSetMatchCountTo0.prototype.onElementInDataModelButHiddenInViewModel = function(value, matchCount) {
+		// Update match count
 		value.updateMatchCount(matchCount);
+	}
+
+	FacetUpdateSetMatchCountTo0.prototype.onInDataModelButNotInViewModel = function(parent, value, matchCount) {
+		throw "Should not reach here as this FacetUpdate only works for existing elements in ViewModel";
+	}
+
+	function FacetUpdateShowHide() {
+		this.facetUpdateClassName = 'FacetUpdateShowHide';
+	}
+
+	FacetUpdateShowHide.prototype.onListStillInDataModelAndVisibleInViewModel = function(list) {
+		// Nothing to do since no match counts to update
+	}
+
+	FacetUpdateShowHide.prototype.onListInDataModelButHiddenInViewModel = function(list) {
+		
+		// Facet attribute list or type list, these are completely hidden when
+		// user deactivates eg a type. So show again
+		list.getViewElementFactory().showElement(list.getViewElement());
+	}
+
+	/**
+	 * Facet update after changing selections on same fulltext search criteria.
+	 * Thus the basis query is the same, only the faceting selections are different.
+	 */
+	FacetUpdateShowHide.prototype.onElementStillInDataModelAndVisibleInViewModel = function(value, matchCount) {
+
+		if (value.isAttributeValue() || value.className == 'FacetTypeContainer') {
+			// Update match count
+			value.updateMatchCount(matchCount);
+		}
+	}
+
+	FacetUpdateShowHide.prototype.onNoLongerInDataModel = function(valueList, lastDeselectedAttributeValueList, value) {
+		// Not in use, hide element unless was the last deselected value list
+
+		if ((value.isAttributeValue() && valueList === lastDeselectedAttributeValueList) || value.className === 'FacetTypeContainer') {
+			// Just set match count to 0
+			value.updateMatchCount(0);
+		}
+		else {
+			// Hide element, but do not remove completely
+			// since we need to keep the selected-state of the checkbox so that is
+			// correct if an deselected item is re-selected
+			value.getViewElementFactory().hideElement(value.getViewElement());
+		}
+
+		return false; // Do not remove from model
+	}
+
+	// Was not in use but is now in use
+	FacetUpdateShowHide.prototype.onElementInDataModelButHiddenInViewModel = function(value, matchCount) {
+
+		if (value.isAttributeValue() || value.className === 'FacetTypeContainer') {
+			// Element was hidden and will now be shown
+			value.updateMatchCount(matchCount);
+		}
+
 		value.getViewElementFactory().showElement(value.getViewElement());
 	}
 
@@ -1761,12 +1884,14 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		}
 
 		this.delegateFacetUpdate = delegateFacetUpdate;
+
+		this.facetUpdateClassName = 'FacetUpdateSearchChanged';
 	}
 
-	FacetUpdateSearchChanged.prototype.onStillInDataModelAndVisibleInViewModel = function(value, matchCount) {
+	FacetUpdateSearchChanged.prototype.onElementStillInDataModelAndVisibleInViewModel = function(value, matchCount) {
 		// Facet still in use and present in DOM, this means we can just update the match count
 		// or whatever the delegate does
-		this.delegateFacetUpdate.onStillInDataModelAndVisibleInViewModel(value, matchCount);
+		this.delegateFacetUpdate.onElementStillInDataModelAndVisibleInViewModel(value, matchCount);
 	}
 
 	FacetUpdateSearchChanged.prototype.onNoLongerInDataModel = function(valueList, lastDeselectedAttributeValueList, value) {
@@ -1777,11 +1902,11 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		return true; // Remove from view model
 	}
 
-	FacetUpdateSearchChanged.prototype.onInDataModelButHiddenInViewModel = function(value, matchCount) {
+	FacetUpdateSearchChanged.prototype.onElementInDataModelButHiddenInViewModel = function(value, matchCount) {
 		// Still in datamodel but hidden, no structural change in viewmodel necessary but must be made visible again
 		// which might just be update matchcount from 0, or show the element if it was really hidden
 		
-		this.delegateFacetUpdate.onInDataModelButHiddenInViewModel(value, text, matchCount);
+		this.delegateFacetUpdate.onElementInDataModelButHiddenInViewModel(value, text, matchCount);
 	}
 	
 	FacetUpdateSearchChanged.prototype.onInDataModelButNotInViewModel = function(parent, value, matchCount) {

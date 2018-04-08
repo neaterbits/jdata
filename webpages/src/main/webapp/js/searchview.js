@@ -61,7 +61,7 @@ function SearchView(
 		var t = this;
 
 		// Post to get initial for all known
-		this._postAjax(this.searchUrl, function(response) {
+		this._postAjax(this.searchUrl + '?itemType=_all_', function(response) {
 			t.curResponse = response;
 
 			t._updateFacets(response.facets, onsuccess);
