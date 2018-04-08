@@ -195,6 +195,7 @@ public class LuceneItemIndexTest extends TestCase {
 					Arrays.asList(Snowboard.class),
 					null,
 					Arrays.asList(new StringCriterium(idAttribute, itemId, ComparisonOperator.EQUALS)),
+					null,
 					null);
 			
 			final SearchItem item = searchCursor.getItemIDsAndTitles(0, 1).get(0);
@@ -237,7 +238,7 @@ public class LuceneItemIndexTest extends TestCase {
 					carTypeInfo.getAttributes().getByName("fuel"),
 					Arrays.asList(new InCriteriumValue<Fuel>(Fuel.GAS, null)),
 					false);
-			final IndexSearchCursor cursor = index.search(Arrays.asList(Snowboard.class), null, Arrays.asList(criterium), null);
+			final IndexSearchCursor cursor = index.search(Arrays.asList(Snowboard.class), null, Arrays.asList(criterium), null, null);
 
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(2);
 		}
@@ -267,7 +268,7 @@ public class LuceneItemIndexTest extends TestCase {
 	}
 
 	private static IndexSearchCursor searchSnowboads(ItemIndex index, Criterium criterium) throws ItemIndexException {
-		return index.search(Arrays.asList(Snowboard.class), null, Arrays.asList(criterium), null);
+		return index.search(Arrays.asList(Snowboard.class), null, Arrays.asList(criterium), null, null);
 	}
 }
 

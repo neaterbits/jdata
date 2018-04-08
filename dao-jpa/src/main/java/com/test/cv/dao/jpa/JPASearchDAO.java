@@ -41,7 +41,7 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 
 	// Search for criteria on all attributes on a particular type
 	@Override
-	public ISearchCursor search(List<Class<? extends Item>> types /*, String freeText */, List<Criterium> criteria, Set<ItemAttribute> facetAttributes) {
+	public ISearchCursor search(List<Class<? extends Item>> types /*, String freeText */, List<Criterium> criteria, List<ItemAttribute> sortOrder, Set<ItemAttribute> facetAttributes) {
 
 		// Must dynamically construct criteria from database by mapping to table
 		final LinkedHashMap<EntityType<?>, String> typeToVarName = new LinkedHashMap<>(types.size());

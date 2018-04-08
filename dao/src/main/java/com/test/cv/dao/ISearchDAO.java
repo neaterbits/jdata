@@ -19,6 +19,7 @@ public interface ISearchDAO extends AutoCloseable {
 	 * @param type item type
 	 * @param freeText freetext to search for
 	 * @param criteria list of criteria
+	 * @param sortOrder multiple attributes at which we can sort
 	 * @param facetAttributes attributes for which to return faceted results
 	 * 
 	 * @return a cursor for showing results, may be a long list of items
@@ -29,6 +30,7 @@ public interface ISearchDAO extends AutoCloseable {
 			List<Class<? extends Item>> types
 			/*, String freeText */,
 			List<Criterium> criteria,
+			List<ItemAttribute>sortOrder,
 			Set<ItemAttribute> facetAttributes) throws SearchException;
 	
 }

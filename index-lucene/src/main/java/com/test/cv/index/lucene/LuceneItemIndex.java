@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -84,6 +86,7 @@ import com.test.cv.search.criteria.RangesCriterium;
 import com.test.cv.search.criteria.StringCriterium;
 import com.test.cv.search.facets.FacetUtils;
 import com.test.cv.search.facets.ItemsFacets;
+import com.test.cv.search.facets.SortUtils;
 
 public class LuceneItemIndex implements ItemIndex {
 	
@@ -513,7 +516,8 @@ public class LuceneItemIndex implements ItemIndex {
 	public IndexSearchCursor search(
 			List<Class<? extends Item>> types,
 			String freeText,
-			List<Criterium> criteria, 
+			List<Criterium> criteria,
+			List<ItemAttribute> sortOrder,
 			Set<ItemAttribute> facetAttributes) throws ItemIndexException {
 		
 		refreshReader();
@@ -600,10 +604,18 @@ public class LuceneItemIndex implements ItemIndex {
 			
 			@Override
 			public List<SearchItem> getItemIDsAndTitles(int initialIdx, int count) {
-				return documents.stream()
+				
+				Stream<Document> s = documents.stream()
 						.skip(initialIdx)
-						.limit(count)
-						.map(d -> {
+						.limit(count);
+
+				final Comparator<Document> comparator = SortUtils.makeSortItemsComparator(sortOrder, (doc, attribute) -> getObjectValueFromDocument(doc, attribute));
+
+				if (comparator != null) {
+					s = s.sorted(comparator);
+				}
+
+				return s.map(d -> {
 							
 							final Integer thumbWidth;
 							final Integer thumbHeight;
@@ -1216,12 +1228,16 @@ public class LuceneItemIndex implements ItemIndex {
 	private static Boolean getBooleanValueFromField(IndexableField field) {
 		return field.numericValue().intValue() != 0 ? true : false;
 	}
+	
+	private static Comparable<?> getObjectValueFromDocument(Document document, ItemAttribute attribute) {
+		return getObjectValueFromField(attribute, document.getField(ItemIndex.fieldName(attribute)));
+	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static Object getObjectValueFromField(ItemAttribute attribute, IndexableField field) {
+	private static Comparable<?> getObjectValueFromField(ItemAttribute attribute, IndexableField field) {
 		final AttributeType attributeType = attribute.getAttributeType();
 		
-		final Object result;
+		final Comparable<?> result;
 		
 		switch (attributeType) {
 		case STRING:

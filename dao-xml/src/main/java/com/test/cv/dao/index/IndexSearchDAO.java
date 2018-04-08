@@ -32,7 +32,7 @@ public class IndexSearchDAO implements ISearchDAO {
 	}
 
 	@Override
-	public ISearchCursor search(List<Class<? extends Item>> types, List<Criterium> criteria, Set<ItemAttribute> facetAttributes) throws SearchException {
+	public ISearchCursor search(List<Class<? extends Item>> types, List<Criterium> criteria, List<ItemAttribute> sortOrder, Set<ItemAttribute> facetAttributes) throws SearchException {
 
 		if (types == null) {
 			throw new IllegalArgumentException("types == null");
@@ -40,7 +40,7 @@ public class IndexSearchDAO implements ISearchDAO {
 
 		IndexSearchCursor cursor;
 		try {
-			cursor = index.search(types, null, criteria, facetAttributes);
+			cursor = index.search(types, null, criteria, sortOrder, facetAttributes);
 		} catch (ItemIndexException ex) {
 			throw new SearchException("Failed to search", ex);
 		}

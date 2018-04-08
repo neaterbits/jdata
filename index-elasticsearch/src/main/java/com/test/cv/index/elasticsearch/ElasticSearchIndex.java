@@ -403,7 +403,7 @@ public class ElasticSearchIndex implements ItemIndex {
 	}
 
 	@Override
-	public IndexSearchCursor search(List<Class<? extends Item>> types, String freeText, List<Criterium> criteria, Set<ItemAttribute> facetAttributes)
+	public IndexSearchCursor search(List<Class<? extends Item>> types, String freeText, List<Criterium> criteria, List<ItemAttribute> sortOrder, Set<ItemAttribute> facetAttributes)
 			throws ItemIndexException {
 
 		// Must add both query and also aggregations if necessary

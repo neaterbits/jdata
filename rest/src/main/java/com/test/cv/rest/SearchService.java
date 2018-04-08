@@ -138,7 +138,7 @@ public class SearchService extends BaseService {
 		try {
 			final ISearchCursor cursor;
 			try {
-				cursor = searchDAO.search(types, daoCriteria, ItemTypes.getFacetAttributes(types));
+				cursor = searchDAO.search(types, daoCriteria, null, ItemTypes.getFacetAttributes(types));
 			} catch (SearchException ex) {
 				throw new IllegalStateException("Failed to search", ex);
 			}

@@ -28,6 +28,10 @@ public interface ISearchCursor {
 	 */
 	List<SearchItem> getItemIDsAndTitles(int initialIdx, int count);
 	
+	public default List<SearchItem> getAllItemIDsAndTitles() {
+		return getItemIDsAndTitles(0, Integer.MAX_VALUE);
+	}
+
 	/**
 	 * Total number of items that matched the search.
 	 * Useful when displaying scrollbar.
