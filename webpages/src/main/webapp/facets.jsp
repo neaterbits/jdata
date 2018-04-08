@@ -39,12 +39,6 @@
 							<input id="fulltextButton" type="button" value="Search"/>
 						</div>
 						
-						<div id="viewPersonalDov">
-							<div id="viewPersonalBorder">
-								<span id="viewPersonalText">Personal</span>
-								<span id="viewPersonalArrow">&gt;</span>
-							</div>
-						</div>
 					</div>
 					
 					 <div id="resultsRow" class="infoRow">
@@ -60,15 +54,18 @@
 							</select>
 					 	</div>
 					 	
-					 	<div id="hideSidebarDiv">
-							<div id="hideSidebarBorder">
-								<span id="hideSidebarArrow">&lt;</span>
-								<span id="hideSidebarText">Hide</span>
-							</div>
-						 </div>
 					</div>
 				</div>
-			</div>
+				
+			 	<div id="hideSidebarDiv">
+				 	<div id="hideSidebarFlex">
+						<div id="hideSidebarBorder">
+							<span id="hideSidebarArrow">&lt;</span>
+							<span id="hideSidebarText">Hide</span>
+						</div>
+					 </div>
+				   </div>
+				</div>
 
 			<div id='facets'></div>
 		</div>

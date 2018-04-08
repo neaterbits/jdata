@@ -46,6 +46,7 @@
 	padding-bottom: 0.5em;
 	box-sizing: border-box;
 	width: 100%;
+	
 }
 
 #facets {
@@ -62,14 +63,13 @@
 
 #fulltextDiv {
 	margin-left: 0.5em;
-	width: 100%;
-	display: table;
-	table-layout: auto;
+	
+	width : 75%;
+	display: inline-block;
 }
 
 .infoRow {
 	width: 100%;
-	display: table-row;
 }
 
 #fulltextRow {
@@ -81,21 +81,25 @@
 }
 
 #fullTextInputs {
-	display : table-cell;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
 }
 
 #fulltextInput {
 	width: 60%;
 	vertical-align: middle;
+
+	flex-grow: 1;
+	margin-right: 0.5em;
 }
 
 #fulltextButton {
-	font-size: 1.1em;
+	font-weight: bold;
 	vertical-align: middle;
-	display: table-cell;
 }
 
-#viewLoginDiv, #hideSidbarDiv {
+#hideSidebarDiv {
 	/*
 	writing-mode:vertical-lr;
 	text-orientation: upright;
@@ -103,29 +107,40 @@
 	font-size: 0.7em;
 	*/
 
-	display : table-cell;
+	display: inline-block;
 }
 
-#viewPersonalBorder, #hideSidebarBorder {
+
+#hideSidebarFlex {
+	display: flex;
+	flex-direction: row;
+	
+	align: center;
+	justify-content: end;
+}
+
+#hideSidebarBorder {
 	vertical-align: middle;
 
 	border: 1px solid #777777;
 	box-sizing: border-box;
 	padding: 0.1em;
 	border-radius: 0.2em;
-	width: 5em;
 	text-align: center;
+	flex-grow: 1;
 }
 
-#viewPersonalText, #hideSidebarText {
+#hideSidebarText {
 	font-family: sans-serif;
 	font-size: 0.8em;
 	color: #777777;
+	/*
 	vertical-align: middle;
+	*/
 	display: inline-block;
 }
 
-#viewPersonalArrow, #hideSidebarArrow {
+#hideSidebarArrow {
 	font-family: sans-serif;
 	font-weight: bold;
 	color: #777777;
@@ -138,12 +153,12 @@
 #resultsRow {
 	padding-top: 0.3em;
 	width: 100%;
-	display: table-row;
 }
 
 #resultsAndSorting {
 	margin-right: 2em;
-	display: table-cell;
+	width: 100%;
+	position: relative;
 }
 
 #numberOfItemsDiv {
@@ -152,6 +167,10 @@
 
 #sortListBox {
 	margin-left: 2em;
+	
+	position: absolute;
+	
+	right: 1px;
 }
 
 #gallery {
