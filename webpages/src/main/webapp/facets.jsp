@@ -50,8 +50,8 @@
 					 <div id="resultsRow" class="infoRow">
 					 	<div id="resultsAndSorting">
 						 	<div id="numberOfItemsDiv">
-							 	<span id="numberOfItemsLabel"># found:</span>
-							 	<span id="numberOfItemsCount">12345</span>
+							 	<span id="numberOfItemsLabel">Hits:</span>
+							 	<span id="numberOfItemsCount"></span>
 							</div>
 			
 							<select id="sortListBox">
@@ -89,7 +89,8 @@
 					getSearchUrl(useTestData),
 					getThumbsUrl(useTestData),
 					'facets',
-					'gallery');
+					'gallery',
+					'numberOfItemsCount');
 
 		searchView.refresh(true);
 	}

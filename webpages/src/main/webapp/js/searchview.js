@@ -10,7 +10,8 @@ function SearchView(
 		searchUrl,
 		thumbsUrl,
 		facetsDiv,
-		galleryDivId) {
+		galleryDivId,
+		searchHitsCountId) {
 
 	var facetModel = new FacetModel();
 
@@ -40,7 +41,9 @@ function SearchView(
 
 	this.hasPerformedInitialSearch = false;
 	this.curResponse = null;
-	
+
+	this.searchHitsCountElement = document.getElementById(searchHitsCountId);
+
 	/*
 	var buf = new ArrayBuffer(4);
 	
@@ -68,6 +71,8 @@ function SearchView(
 
 			// Refresh gallery, will call back to galleryModel (ie. in this file) that were passed to Gallery constructor
 			t.gallery.refresh(response.items.length)
+
+			t._updateSearchHitsCount(response);
 		});
 	}
 
@@ -97,7 +102,13 @@ function SearchView(
 			t._updateFacets(response.facets, onsuccess);
 
 			//t._refreshGallery(response.items);
+			
+			t._updateSearchHitsCount(response);
 		});
+	}
+	
+	this._updateSearchHitsCount = function(response) {
+		this.searchHitsCountElement.innerHTML = '' + response.totalItemMatchCount;
 	}
 
 	this._updateFacets = function(facets, onsuccess) {
