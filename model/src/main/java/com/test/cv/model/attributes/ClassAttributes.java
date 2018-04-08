@@ -24,9 +24,11 @@ import com.test.cv.model.annotations.Facet;
 import com.test.cv.model.annotations.FacetAttribute;
 import com.test.cv.model.annotations.FacetAttributes;
 import com.test.cv.model.annotations.FacetEntity;
+import com.test.cv.model.annotations.Freetext;
 import com.test.cv.model.annotations.IndexItemAttribute;
 import com.test.cv.model.annotations.IndexItemAttributeTransient;
 import com.test.cv.model.annotations.IntegerRange;
+import com.test.cv.model.annotations.Sortable;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.TypeInfo;
 
@@ -155,6 +157,9 @@ public class ClassAttributes {
 				continue;
 			}
 
+			final boolean isFreetext = findAnnotation(Freetext.class, type, propertyDescriptor) != null;
+			final boolean isSortable = findAnnotation(Sortable.class, type, propertyDescriptor) != null;
+
 			final boolean isFacet;
 			final String facetDisplayName;
 			final String facetSuperAttribute;
@@ -226,6 +231,8 @@ public class ClassAttributes {
 					propertyDescriptor,
 					fieldNameOverride,
 					storeFieldInIndex,
+					isFreetext,
+					isSortable,
 					isFacet,
 					facetDisplayName,
 					facetSuperAttribute != null ? (facetSuperAttribute.trim().isEmpty() ? null : facetSuperAttribute.trim()) : null,

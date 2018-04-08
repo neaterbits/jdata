@@ -15,6 +15,7 @@ public @interface Facet {
 	public IntegerRange [] integerRanges() default {};
 	public DecimalRange [] decimalRanges() default {};
 
+	// For boolean facets, what to show as true or false in display
 	public String trueString() default "";
 	public String falseString() default "";
 }

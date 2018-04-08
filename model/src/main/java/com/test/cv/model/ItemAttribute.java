@@ -20,6 +20,9 @@ public final class ItemAttribute {
 	private final String fieldNameOverride;
 
 	private final boolean storeValueInSearchIndex;
+
+	private final boolean isSortable;
+	private final boolean isFreetext;
 	
 	// Does this attribute have facets?
 	private final boolean isFaceted;
@@ -39,6 +42,8 @@ public final class ItemAttribute {
 	public ItemAttribute(Class<? extends Item> itemType, PropertyDescriptor property,
 				String fieldNameOverride,
 				boolean storeValueInSearchIndex,
+				boolean isFreetext,
+				boolean isSortable,
 				boolean isFaceted,
 				String facetDisplayName,
 				String facetSuperAttribute,
@@ -57,6 +62,9 @@ public final class ItemAttribute {
 		this.property = property;
 		
 		this.fieldNameOverride = fieldNameOverride;
+
+		this.isFreetext = isFreetext;
+		this.isSortable = isSortable;
 		
 		if (isFaceted && !storeValueInSearchIndex) {
 			// TODO is this the case for elasticsearch?
@@ -200,6 +208,14 @@ public final class ItemAttribute {
 	
 	public boolean shouldStoreValueInSearchIndex() {
 		return storeValueInSearchIndex;
+	}
+
+	public boolean isSortable() {
+		return isSortable;
+	}
+
+	public boolean isFreetext() {
+		return isFreetext;
 	}
 
 	public boolean isFaceted() {

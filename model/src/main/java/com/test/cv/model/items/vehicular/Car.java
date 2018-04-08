@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.test.cv.model.annotations.Facet;
 import com.test.cv.model.annotations.FacetEntity;
 import com.test.cv.model.annotations.IntegerRange;
+import com.test.cv.model.annotations.Sortable;
 
 @Entity(name="car")
 @FacetEntity(value="Cars", propertyOrder = {
@@ -51,6 +52,7 @@ public class Car extends Vehicle {
 	@Facet("Title status")
 	private TitleStatus titleStatus;
 	
+	@Sortable
 	@Column
 	@Facet(value = "Odometer", integerRanges = {
 			@IntegerRange(upper=50000),

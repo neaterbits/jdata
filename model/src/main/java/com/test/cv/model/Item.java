@@ -12,8 +12,10 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 
+import com.test.cv.model.annotations.Freetext;
 import com.test.cv.model.annotations.IndexItemAttribute;
 import com.test.cv.model.annotations.IndexItemAttributeTransient;
+import com.test.cv.model.annotations.Sortable;
 
 // Base class for all storable structured items
 @Entity
@@ -30,6 +32,8 @@ public abstract class Item {
 	@IndexItemAttribute(name="id", storeValue=true)
 	private String idString;
 	
+	@Sortable
+	@Freetext
 	@IndexItemAttribute(storeValue=true) // must store for quick-lookup in search results
 	@Column(nullable=false)
 	private String title;

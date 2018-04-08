@@ -9,12 +9,15 @@ import javax.persistence.InheritanceType;
 
 import com.test.cv.model.Item;
 import com.test.cv.model.annotations.Facet;
+import com.test.cv.model.annotations.Freetext;
+import com.test.cv.model.annotations.Sortable;
 
 
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public abstract class BaseItem extends Item {
 
+	@Sortable
 	@Facet("Make")
 	@Column
 	private String make;
@@ -23,6 +26,7 @@ public abstract class BaseItem extends Item {
 	@Column
 	private String model;
 	
+	@Sortable
 	@Facet("Production year")
 	@Column
 	private Integer productionYear;
@@ -31,6 +35,7 @@ public abstract class BaseItem extends Item {
 	@Column
 	private Seller seller;
 
+	@Freetext
 	@Column
 	private String descriptionHtml;
 	
