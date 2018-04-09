@@ -42,6 +42,7 @@
 	    <module>word</module>
 	    <module>pdf</module>
 	    <module>jetty-test</module>
+	    <module>reindex</module>
     <module>rest</module>
   </modules>
   <repositories>

@@ -46,7 +46,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	@Override
 	public List<IFoundItemPhotoThumbnail> getPhotoThumbnails(String userId, String itemId) {
 
-		final String query = "select ipt.id, ipt.index, ipt.mimeType, ipc, ipt.data "
+		final String query = "select ipt.id, ipt.index, ipt.mimeType, ipt.width, ipt.height, ipc, ipt.data "
 					+ " from ItemPhotoThumbnail ipt "
 				    + " left outer join ipt.photo ip "
 				    + " left outer join ip.categories ipc "
@@ -64,12 +64,14 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 			final long id = (Long)columns[0];
 			final int index = (Integer)columns[1];
 			final String mimeType = (String)columns[2];
+			final int width = (Integer)columns[3];
+			final int height = (Integer)columns[4];
 			@SuppressWarnings({ "unchecked", "rawtypes" })
-			final List<ItemPhotoCategory> categories = (List)columns[3];
-			
-			final byte []data = (byte[])columns[4];
-			
-			result.add(new JPAFoundItemPhotoThumbnail(id, itemId, index, mimeType, categories, data));
+			final List<ItemPhotoCategory> categories = (List)columns[5];
+
+			final byte []data = (byte[])columns[6];
+
+			result.add(new JPAFoundItemPhotoThumbnail(id, itemId, index, mimeType, width, height, categories, data));
 		}
 		
 		return result;

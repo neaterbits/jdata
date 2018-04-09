@@ -23,14 +23,14 @@ import com.test.cv.model.items.vehicular.Car;
 
 public class ItemTypes {
 	
-	private static final List<Class<? extends Item>> baseTypes = Arrays.asList(Item.class);
+	private static final List<Class<? extends Item>> baseTypes = Collections.unmodifiableList(Arrays.asList(Item.class));
 	
-	private static final List<Class<? extends Item>> types = Arrays.asList(
+	private static final List<Class<? extends Item>> types = Collections.unmodifiableList(Arrays.asList(
 			Snowboard.class,
 			Ski.class,
 			Boat.class,
 			Car.class,
-			RentalApartment.class);
+			RentalApartment.class));
 	
 	private static final List<Class<? extends Item>> jaxbTypes;
 	
@@ -54,6 +54,10 @@ public class ItemTypes {
 		return types.toArray(new Class[types.size()]);
 	}
 	
+	public static List<Class<? extends Item>> getAllTypesList() {
+		return types;
+	}
+
 	public static Set<Class<? extends Item>> getAllTypesSet() {
 		return typesSet;
 	}

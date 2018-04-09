@@ -10,6 +10,10 @@ public interface IFoundItemPhotoThumbnail {
 	
 	int getIndex();
 	
+	int getWidth();
+	
+	int getHeight();
+	
 	String getMimeType();
 	
 	List<ItemPhotoCategory> getCategories();

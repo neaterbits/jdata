@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -164,7 +165,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	private Images getOrCreateImageList(String userId, String itemId) throws StorageException {
 		Images images = getImageList(userId, itemId);
 		
-		if (images == null) {
+		if (images == null || images.getImages() == null) {
 			images = new Images();
 			
 			images.setImages(new ArrayList<>());
@@ -301,7 +302,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		
 		int fileNo = 0;
 		
-		result = new ArrayList<>(images.getImages().size());
+		result = images != null ? new ArrayList<>(images.getImages().size()) : Collections.emptyList();
 		
 		for (fileNo = 0; fileNo < images.getImages().size(); ++ fileNo) {
 
@@ -331,7 +332,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		
 		final Images imageList = getImageList(userId, itemId);
 		
-		if (imageList == null || imageList.getImages().size() <= photoNo) {
+		if (imageList == null || imageList.getImages() == null || imageList.getImages().size() <= photoNo) {
 			metaData = null;
 		}
 		else {

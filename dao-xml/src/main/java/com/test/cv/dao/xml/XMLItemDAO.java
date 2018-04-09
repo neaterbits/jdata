@@ -159,7 +159,7 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 						// TODO categories
 						final List<ItemPhotoCategory> categories = new ArrayList<>();
 		
-						result.add(new XMLFoundItemPhotoThumbnail(id, itemId, i, image.mimeType, categories, data));
+						result.add(new XMLFoundItemPhotoThumbnail(id, itemId, i, image.mimeType, image.width, image.height, categories, data));
 					}
 				}
 				catch (IOException ex) {
