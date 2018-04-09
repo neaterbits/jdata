@@ -547,6 +547,10 @@ public class LuceneItemIndex implements ItemIndex {
 			if (trimmedFreetext.isEmpty()) {
 				trimmedFreetext = null;
 			}
+			else {
+				// Must convert to lowercase since Lucene does that when indexing
+				trimmedFreetext = trimmedFreetext.toLowerCase();
+			}
 		}
 		else {
 			trimmedFreetext = null;
