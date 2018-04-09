@@ -46,21 +46,6 @@ function SearchView(
 	this.searchHitsCountElement = document.getElementById(searchHitsCountId);
 	this.sortListboxElement = document.getElementById(sortListboxId);
 
-	/*
-	var buf = new ArrayBuffer(4);
-	
-	var view = new DataView(buf);
-	
-	view.setInt8(0, 97);
-	view.setInt8(1, 98);
-	view.setInt8(2, 99);
-	view.setInt8(3, 100);
-	
-	console.log('Base 64: ' + base64_encode(view, 0, 4));
-	
-	throw "exit searchview";
-	*/
-
 	this._getInitial = function(onsuccess) {
 
 		var t = this;
@@ -109,9 +94,11 @@ function SearchView(
 		// Call REST service with criteria
 		this._sendAjax(url, 'POST', 'json', 'application/json', JSON.stringify(criteria), function(response) {
 			
+			t.curResponse = response;
+			
 			t._updateFacets(response.facets, onsuccess);
 
-			//t._refreshGallery(response.items);
+			t.gallery.refresh(response.items.length);
 			
 			t._updateSearchHitsCount(response);
 			t._updateSortOrder(response.sortOrders);
@@ -358,7 +345,7 @@ function SearchView(
 		// so just pass that back right away
 		
 		if (index !== 0 || count !== this.curResponse.items.length) {
-			throw "Expected to get all data";
+			throw "Expected to get all data: " + index + "/" + count + "/" + this.curResponse.items.length;
 		}
 
 		onsuccess(this.curResponse.items);
@@ -456,29 +443,6 @@ function SearchView(
 		});
 	}
 
-	this._refreshGallery = function(items) {
-
-		this.gallery.refresh(function (initial, eachItem, metaDataComplete) {
-			// Add a lot of items just to test scrolling when using many items
-			
-			console.log("Gallery: adding " + items.length + " items");
-
-			// Tell gallery about number of items before adding item metadata
-			initial(items.length);
-			
-			// Add all metadata, ie. title and dimensions
-			for (var i = 0; i < items.length; ++ i) {
-				var item = items[i];
-
-				console.log("Gallery: adding item " + i + " : " + print(item));
-
-				eachItem(item.title, item.thumbWidth, item.thumbHeight);
-			}
-
-			// Tell gallery that we have added all metadata and that it can perform the refresh
-			metaDataComplete();
-		});
-	}
 
 	function print(obj) {
 		return JSON.stringify(obj, null, 2);
