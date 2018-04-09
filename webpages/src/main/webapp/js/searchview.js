@@ -11,6 +11,8 @@ function SearchView(
 		thumbsUrl,
 		facetsDiv,
 		galleryDivId,
+		searchTextInputId,
+		searchButtonId,
 		searchHitsCountId,
 		sortListboxId) {
 
@@ -44,16 +46,33 @@ function SearchView(
 	this.hasPerformedInitialSearch = false;
 	this.curResponse = null;
 
+	this.searchTextInputElement = document.getElementById(searchTextInputId);
 	this.searchHitsCountElement = document.getElementById(searchHitsCountId);
 	this.sortListboxElement = document.getElementById(sortListboxId);
 	
+	var searchButtonElement = document.getElementById(searchButtonId);
+	
+	searchButtonElement.onclick = function(e) {
+		if (t.curResponse != null) {
+			t.refresh(false);
+		}
+	}
+	
+	/* Click search button instead
+	this.searchTextInputElement.onchange = function(e) {
+		if (t.curResponse != null) {
+			t.refresh(false);
+		}
+	};
+	*/
+
 	this.sortListboxElement.onchange = function(e) {
 		// Updated sort order, change sort order of result
 		// Call for new result set from server
 		if (t.curResponse != null) {
 			t.refresh(false);
 		}
-	}
+	};
 
 	this._getInitial = function(onsuccess) {
 
@@ -104,6 +123,12 @@ function SearchView(
 		
 		if (sortOrder != null && sortOrder !== '') {
 			url += "&sortOrder=" + sortOrder;
+		}
+
+		var freeText = this.searchTextInputElement.value;
+
+		if (freeText != '') {
+			url += '&freeText=' + encodeURIComponent(freeText);
 		}
 
 		// Call REST service with criteria

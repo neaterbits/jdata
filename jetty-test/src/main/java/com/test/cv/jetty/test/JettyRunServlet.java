@@ -86,7 +86,7 @@ public class JettyRunServlet {
 			final SearchService searchService = new SearchService();
 			
 			// Get parameters
-			String freeText = null;
+			String freeText = req.getParameter("freeText");
 			
 			String [] types = req.getParameterValues("itemType");
 			
@@ -119,8 +119,8 @@ public class JettyRunServlet {
 			final boolean testdata = "true".equals(req.getParameter("testdata"));
 
 			final SearchResult result = searchService.search(
-					freeText,
 					types,
+					freeText,
 					searchCriteria,
 					null,
 					pageNo,

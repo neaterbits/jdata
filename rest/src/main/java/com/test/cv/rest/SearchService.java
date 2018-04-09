@@ -94,7 +94,7 @@ public class SearchService extends BaseService {
 	@GET
 	@Path("search")
 	// TODO check that we adhere to best practices for pageNo and itemsPerPage
-	public SearchResult search(String freeText, String [] types, SearchCriterium [] criteria, String [] sortOrder, Integer pageNo, Integer itemsPerPage, Boolean testdata, HttpServletRequest request) {
+	public SearchResult search(String [] types, String freeText, SearchCriterium [] criteria, String [] sortOrder, Integer pageNo, Integer itemsPerPage, Boolean testdata, HttpServletRequest request) {
 
 		
 		if (types == null) {
@@ -681,7 +681,7 @@ public class SearchService extends BaseService {
 		// titles, in order
 		// thumbnail sizes (byte width, byte height), in order
 
-		final SearchResult searchResult = this.search(freeText, types, criteria, sortOrder, pageNo, itemsPerPage, false, request);
+		final SearchResult searchResult = this.search(types, freeText, criteria, sortOrder, pageNo, itemsPerPage, false, request);
 
 		// Add information to compression stream
 		

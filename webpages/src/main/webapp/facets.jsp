@@ -85,6 +85,8 @@
 					getThumbsUrl(useTestData),
 					'facets',
 					'gallery',
+					'fulltextInput',
+					'fulltextButton',
 					'numberOfItemsCount',
 					'sortListBox');
 
