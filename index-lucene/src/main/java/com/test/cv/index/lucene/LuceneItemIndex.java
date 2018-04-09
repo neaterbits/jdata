@@ -595,10 +595,18 @@ public class LuceneItemIndex implements ItemIndex {
 			@Override
 			public List<String> getItemIDs(int initialIdx, int count) {
 				
-				return documents.stream()
+				Stream<Document> s = documents.stream()
 //						.peek(d -> System.out.println("Got document " +  "/" + d.getField("id")))
 						.skip(initialIdx)
-						.limit(count)
+						.limit(count);
+
+				final Comparator<Document> comparator = SortUtils.makeSortItemsComparator(sortOrder, (doc, attribute) -> getObjectValueFromDocument(doc, attribute));
+
+				if (comparator != null) {
+					s = s.sorted(comparator);
+				}
+				
+				return s
 						.map(d -> d.getField("id").stringValue())
 						.collect(Collectors.toList());
 			}
