@@ -29,6 +29,7 @@ import com.test.cv.dao.index.IndexSearchDAO;
 import com.test.cv.integrationtest.IntegrationTestHelper;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
+import com.test.cv.model.annotations.SortableType;
 import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.items.ItemTypes;
@@ -224,7 +225,18 @@ public class SearchService extends BaseService {
 
 		attrs.forEach(attr -> {
 			if (attr.isSortable()) {
-				order.add(new SearchSortOrder(attr.getName(), attr.getSortableTitle(), attr.getSortableType()));
+				final SortableType sortableType = attr.getSortableType();
+				
+				final String sortOrderName = attr.getName();
+				final String sortOrderDisplayName = attr.getSortableTitle();
+				
+				if (sortableType == SortableType.NUMERICAL || sortableType == SortableType.TIME) {
+					order.add(new SearchSortOrder(sortOrderName + "_lowtohigh", sortOrderDisplayName + " - low to high"));
+					order.add(new SearchSortOrder(sortOrderName + "_highttolow", sortOrderDisplayName + " - high to low"));
+				}
+				else {
+					order.add(new SearchSortOrder(sortOrderName, sortOrderDisplayName));
+				}
 			}
 		});
 		

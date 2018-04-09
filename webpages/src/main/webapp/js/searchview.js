@@ -124,18 +124,9 @@ function SearchView(
 		for (var i = 0; i < sortOrders.length; ++ i) {
 			var sortOrder = sortOrders[i];
 			
-			if (sortOrder.type == 'NUMERICAL' || sortOrder.type == 'DATE') {
-				var option1 = this._createOptionElement(sortOrder.name + '_lowtohigh', sortOrder.displayName + ' - low to high');
-				var option2 = this._createOptionElement(sortOrder.name + '_highttolow', sortOrder.displayName + ' - high to low');
+			var option = this._createOptionElement(sortOrder.name, sortOrder.displayName);
 
-				append(this.sortListboxElement, option1);
-				append(this.sortListboxElement, option2);
-			}
-			else {
-				var option = this._createOptionElement(sortOrder.name, sortOrder.displayName);
-
-				append(this.sortListboxElement, option);
-			}
+			append(this.sortListboxElement, option);
 		}
 	}
 	

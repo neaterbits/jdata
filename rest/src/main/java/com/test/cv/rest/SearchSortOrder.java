@@ -6,13 +6,12 @@ public class SearchSortOrder {
 
 	private String name;
 	private String displayName;
-	private SortableType type;
 
 	public SearchSortOrder() {
 		
 	}
 	
-	public SearchSortOrder(String name, String displayName, SortableType type) {
+	public SearchSortOrder(String name, String displayName) {
 		
 		if (name == null) {
 			throw new IllegalArgumentException("name == null");
@@ -22,13 +21,8 @@ public class SearchSortOrder {
 			throw new IllegalArgumentException("displayName == null");
 		}
 
-		if (type == null) {
-			throw new IllegalArgumentException("type == null");
-		}
-
 		this.name = name;
 		this.displayName = displayName;
-		this.type = type;
 	}
 
 	public String getName() {
@@ -47,14 +41,6 @@ public class SearchSortOrder {
 		this.displayName = displayName;
 	}
 	
-	public SortableType getType() {
-		return type;
-	}
-
-	public void setType(SortableType type) {
-		this.type = type;
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
