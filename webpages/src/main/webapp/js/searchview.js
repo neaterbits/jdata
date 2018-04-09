@@ -36,6 +36,7 @@ function SearchView(
 
 	this.searchUrl = searchUrl;
 	this.thumbsUrl = thumbsUrl;
+	this.facetView = facetView;
 	this.facetModel = facetModel;
 	this.facetController = facetController;
 	this.gallery = _initGallery(this, galleryDivId);
@@ -45,6 +46,14 @@ function SearchView(
 
 	this.searchHitsCountElement = document.getElementById(searchHitsCountId);
 	this.sortListboxElement = document.getElementById(sortListboxId);
+	
+	this.sortListboxElement.onchange = function(e) {
+		// Updated sort order, change sort order of result
+		// Call for new result set from server
+		if (t.curResponse != null) {
+			t.refresh(false);
+		}
+	}
 
 	this._getInitial = function(onsuccess) {
 
@@ -60,7 +69,7 @@ function SearchView(
 			t.gallery.refresh(response.items.length)
 
 			t._updateSearchHitsCount(response);
-			t._updateSortOrder(response.sortOrders);
+			t._updateSortOrderFromResponse(response.sortOrders);
 		});
 	}
 
@@ -70,6 +79,12 @@ function SearchView(
 
 	this.setSearchUrl = function(url) {
 		this.searchUrl = url;
+	}
+
+	this._getCurrentSortOrder = function() {
+		var index = this.sortListboxElement.selectedIndex;
+		
+		return index >= 0 ? this.sortListboxElement.options[index].value : null;
 	}
 
 	this._refreshFromCriteria = function(types, criteria, onsuccess) {
@@ -85,7 +100,7 @@ function SearchView(
 		}
 		
 		// Get currently selected sort attribute
-		var sortOrder = this.sortListboxElement.options[this.sortListboxElement.selectedIndex].value;
+		var sortOrder = this._getCurrentSortOrder();
 		
 		if (sortOrder != null && sortOrder !== '') {
 			url += "&sortOrder=" + sortOrder;
@@ -101,7 +116,7 @@ function SearchView(
 			t.gallery.refresh(response.items.length);
 			
 			t._updateSearchHitsCount(response);
-			t._updateSortOrder(response.sortOrders);
+			t._updateSortOrderFromResponse(response.sortOrders);
 		});
 	}
 	
@@ -109,18 +124,31 @@ function SearchView(
 		this.searchHitsCountElement.innerHTML = '' + response.totalItemMatchCount;
 	}
 	
-	this._updateSortOrder = function(sortOrders) {
+	this._updateSortOrderFromResponse = function(sortOrders) {
 		
+		var existingSelection = this._getCurrentSortOrder();
+
 		while (this.sortListboxElement.firstChild) {
 			this.sortListboxElement.removeChild(this.sortListboxElement.firstChild);
 		}
+
+		var indexOfExistingSelection = -1;
 
 		for (var i = 0; i < sortOrders.length; ++ i) {
 			var sortOrder = sortOrders[i];
 			
 			var option = this._createOptionElement(sortOrder.name, sortOrder.displayName);
 
+			if (sortOrder.name === existingSelection) {
+				indexOfExistingSelection = i;
+			}
+			
 			append(this.sortListboxElement, option);
+		}
+		
+		if (indexOfExistingSelection != -1) {
+			// Existing selection still available, set that
+			this.sortListboxElement.selectedIndex = indexOfExistingSelection;
 		}
 	}
 	
@@ -148,7 +176,7 @@ function SearchView(
 
 		if (!completeRefresh && this.hasPerformedInitialSearch) {
 			// Get selected criteria from facet controller
-			var criteria = this.facetController.collectCriteriaAndTypesFromSelections();
+			var criteria = t.facetView.collectCriteriaAndTypesFromSelections();
 
 			this._refreshFromCriteria(criteria.types, criteria.criteria, function() {});
 		}
