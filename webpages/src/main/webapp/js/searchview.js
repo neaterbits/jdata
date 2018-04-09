@@ -11,7 +11,8 @@ function SearchView(
 		thumbsUrl,
 		facetsDiv,
 		galleryDivId,
-		searchHitsCountId) {
+		searchHitsCountId,
+		sortListboxId) {
 
 	var facetModel = new FacetModel();
 
@@ -43,6 +44,7 @@ function SearchView(
 	this.curResponse = null;
 
 	this.searchHitsCountElement = document.getElementById(searchHitsCountId);
+	this.sortListboxElement = document.getElementById(sortListboxId);
 
 	/*
 	var buf = new ArrayBuffer(4);
@@ -73,6 +75,7 @@ function SearchView(
 			t.gallery.refresh(response.items.length)
 
 			t._updateSearchHitsCount(response);
+			t._updateSortOrder(response.sortOrders);
 		});
 	}
 
@@ -104,11 +107,45 @@ function SearchView(
 			//t._refreshGallery(response.items);
 			
 			t._updateSearchHitsCount(response);
+			t._updateSortOrder(response.sortOrders);
 		});
 	}
 	
 	this._updateSearchHitsCount = function(response) {
 		this.searchHitsCountElement.innerHTML = '' + response.totalItemMatchCount;
+	}
+	
+	this._updateSortOrder = function(sortOrders) {
+		
+		while (this.sortListboxElement.firstChild) {
+			this.sortListboxElement.removeChild(this.sortListboxElement.firstChild);
+		}
+
+		for (var i = 0; i < sortOrders.length; ++ i) {
+			var sortOrder = sortOrders[i];
+			
+			if (sortOrder.type == 'NUMERICAL' || sortOrder.type == 'DATE') {
+				var option1 = this._createOptionElement(sortOrder.name + '_lowtohigh', sortOrder.displayName + ' - low to high');
+				var option2 = this._createOptionElement(sortOrder.name + '_highttolow', sortOrder.displayName + ' - high to low');
+
+				append(this.sortListboxElement, option1);
+				append(this.sortListboxElement, option2);
+			}
+			else {
+				var option = this._createOptionElement(sortOrder.name, sortOrder.displayName);
+
+				append(this.sortListboxElement, option);
+			}
+		}
+	}
+	
+	this._createOptionElement = function(name, text) {
+		var option = document.createElement('option');
+		
+		option.value = name;
+		option.innerHTML = text;
+		
+		return option;
 	}
 
 	this._updateFacets = function(facets, onsuccess) {
@@ -566,4 +603,15 @@ function SearchView(
 		return s;
 	}
 		
+	function append(parent, element) {
+
+		if (typeof parent === 'undefined') {
+			throw 'append: parent == undefined';
+		}
+
+		if (typeof parent.appendChild === 'undefined') {
+			throw 'append: not an element';
+		}
+		parent.appendChild(element);
+	}
 }

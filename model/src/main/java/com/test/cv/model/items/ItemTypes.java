@@ -1,5 +1,6 @@
 package com.test.cv.model.items;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,14 +23,16 @@ import com.test.cv.model.items.vehicular.Car;
 
 public class ItemTypes {
 	
+	private static final List<Class<? extends Item>> baseTypes = Arrays.asList(Item.class);
 	
 	private static final List<Class<? extends Item>> types = Arrays.asList(
 			Snowboard.class,
 			Ski.class,
 			Boat.class,
 			Car.class,
-			RentalApartment.class,
-			Item.class);
+			RentalApartment.class);
+	
+	private static final List<Class<? extends Item>> jaxbTypes;
 	
 	private static final List<String> typeNames;
 	
@@ -40,10 +43,14 @@ public class ItemTypes {
 	static {
 		typeNames = types.stream().map(t -> getTypeName(t)).collect(Collectors.toList());
 		typesSet = Collections.unmodifiableSet(new HashSet<>(types));
+		
+		jaxbTypes = new ArrayList<>(baseTypes.size() + types.size());
+		jaxbTypes.addAll(baseTypes);
+		jaxbTypes.addAll(types);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Class<? extends Item> [] getTypeClasses() {
+	public static Class<? extends Item> [] getJAXBTypeClasses() {
 		return types.toArray(new Class[types.size()]);
 	}
 	

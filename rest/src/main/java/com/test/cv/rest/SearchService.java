@@ -9,7 +9,10 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -27,6 +30,7 @@ import com.test.cv.integrationtest.IntegrationTestHelper;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.attributes.AttributeType;
+import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.TypeInfo;
 import com.test.cv.search.SearchItem;
@@ -35,7 +39,6 @@ import com.test.cv.search.criteria.DecimalInCriterium;
 import com.test.cv.search.criteria.DecimalRange;
 import com.test.cv.search.criteria.DecimalRangesCriterium;
 import com.test.cv.search.criteria.EnumInCriterium;
-import com.test.cv.search.criteria.InCriterium;
 import com.test.cv.search.criteria.InCriteriumValue;
 import com.test.cv.search.criteria.IntegerInCriterium;
 import com.test.cv.search.criteria.IntegerRange;
@@ -49,7 +52,6 @@ import com.test.cv.search.facets.IndexSingleValueFacetedAttributeResult;
 import com.test.cv.search.facets.ItemsFacets;
 import com.test.cv.search.facets.TypeFacets;
 
-import static com.test.cv.common.ArrayUtil.convertArray;
 
 @Path("/search")
 public class SearchService extends BaseService {
@@ -170,11 +172,26 @@ public class SearchService extends BaseService {
 			result.setTotalItemMatchCount(totalMatchCount);
 			
 			final SearchItemResult [] items = new SearchItemResult[numFound];
+
+			final Set<Class<? extends Item>> sortOrderTypes = new HashSet<>(types);
 			
+
 			if (cursor.getFacets() != null) {
+				
+				// If facets, only add types from facet result
+				final List<Class<? extends Item>> facetTypes = cursor.getFacets().getTypes()
+						.stream()
+						.filter(facetType -> !facetType.getAttributes().isEmpty())
+						.map(facetType -> facetType.getType())
+						.collect(Collectors.toList());
+				
+				sortOrderTypes.retainAll(facetTypes);
+				
 				result.setFacets(convertFacets(cursor.getFacets()));
 			}
-			
+
+			result.setSortOrders(computePossibleSortOrders(sortOrderTypes));
+
 			for (int i = 0; i < numFound; ++ i) {
 				final SearchItem foundItem = found.get(i);
 				
@@ -197,6 +214,54 @@ public class SearchService extends BaseService {
 		}
 
 		return result;
+	}
+
+
+	private static List<SearchSortOrder> getSortOrdersFromType(Class<? extends Item> type) {
+		final ClassAttributes attrs = ItemTypes.getTypeInfo(type).getAttributes();
+
+		final List<SearchSortOrder> order = new ArrayList<>();
+
+		attrs.forEach(attr -> {
+			if (attr.isSortable()) {
+				order.add(new SearchSortOrder(attr.getName(), attr.getFacetDisplayName(), attr.getSortableType()));
+			}
+		});
+		
+		return order;
+	}
+
+	private static SearchSortOrder [] computePossibleSortOrders(Collection<Class<? extends Item>> types) {
+
+		final SearchSortOrder [] sortOrders;
+		
+		if (types.isEmpty()) {
+			sortOrders = new SearchSortOrder[0];
+		}
+		else if (types.size() == 1) {
+			final List<SearchSortOrder> orders = getSortOrdersFromType(types.iterator().next());
+
+			sortOrders = orders.toArray(new SearchSortOrder[orders.size()]);
+		}
+		else {
+			// Only return those that are common to all types?
+			final Set<SearchSortOrder> commonSearchOrders = new HashSet<>();
+
+			for (Class<? extends Item> type : types) {
+				final List<SearchSortOrder> orders = getSortOrdersFromType(type);
+				
+				if (commonSearchOrders.isEmpty()) {
+					commonSearchOrders.addAll(orders);
+				}
+				else {
+					commonSearchOrders.retainAll(orders);
+				}
+			}
+
+			sortOrders = commonSearchOrders.toArray(new SearchSortOrder[commonSearchOrders.size()]);
+		}
+
+		return sortOrders;
 	}
 	
 	private static List<Criterium> convertCriteria(SearchCriterium [] searchCriteria) {

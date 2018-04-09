@@ -1061,7 +1061,7 @@ public class ElasticSearchIndex implements ItemIndex {
 
 		boolean firstType = true;
 
-		for (String typeName : TYPE_HANDLING.getCreateIndexTypes(ItemTypes.getTypeClasses())) {
+		for (String typeName : TYPE_HANDLING.getCreateIndexTypes(ItemTypes.getAllTypesSet())) {
 			if (firstType) {
 				firstType = false;
 			}

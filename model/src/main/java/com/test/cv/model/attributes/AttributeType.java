@@ -3,15 +3,27 @@ package com.test.cv.model.attributes;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import com.test.cv.model.annotations.SortableType;
+
 public enum AttributeType {
-	STRING,
-	INTEGER,
-	LONG,
-	DECIMAL,
-	ENUM,
-	BOOLEAN,
-	DATE;
+	STRING(SortableType.ALPHABETICAL),
+	INTEGER(SortableType.NUMERICAL),
+	LONG(SortableType.NUMERICAL),
+	DECIMAL(SortableType.NUMERICAL),
+	ENUM(SortableType.ALPHABETICAL),
+	BOOLEAN(SortableType.BOOLEAN),
+	DATE(SortableType.TIME);
 	
+	AttributeType(SortableType sortableType) {
+		this.sortableType = sortableType;
+	}
+	
+	private final SortableType sortableType;
+	
+	public SortableType getSortableType() {
+		return sortableType;
+	}
+
 	public static AttributeType fromClass(Class<?> propertyType) {
 		final AttributeType attributeType;
 		

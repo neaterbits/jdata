@@ -1,6 +1,5 @@
 package com.test.cv.index.elasticsearch;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -16,8 +15,8 @@ public abstract class ESTypeHandling {
 	// Filter down to ES types that exist in index
 	abstract Set<String> getESIndexTypes(Collection<Class<? extends Item>> allTypes);
 	
-	final Set<String> getCreateIndexTypes(Class<? extends Item> [] allTypes) {
-		return getESIndexTypes(Arrays.asList(allTypes));
+	final Set<String> getCreateIndexTypes(Collection<Class<? extends Item>> allTypes) {
+		return getESIndexTypes(allTypes);
 	}
 	
 	// Get all attributes that belong to an ES type

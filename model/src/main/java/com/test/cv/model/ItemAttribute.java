@@ -7,6 +7,7 @@ import java.util.Date;
 
 import com.test.cv.model.annotations.DecimalRange;
 import com.test.cv.model.annotations.IntegerRange;
+import com.test.cv.model.annotations.SortableType;
 import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.attributes.facets.FacetedAttributeDecimalRange;
 import com.test.cv.model.attributes.facets.FacetedAttributeIntegerRange;
@@ -212,6 +213,10 @@ public final class ItemAttribute {
 
 	public boolean isSortable() {
 		return isSortable;
+	}
+	
+	public SortableType getSortableType() {
+		return getAttributeType().getSortableType();
 	}
 
 	public boolean isFreetext() {

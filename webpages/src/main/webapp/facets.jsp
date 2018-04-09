@@ -49,8 +49,6 @@
 							</div>
 			
 							<select id="sortListBox">
-								<option>Price - low to high</option>
-								<option>Price - high to low</option>
 							</select>
 					 	</div>
 					 	
@@ -87,7 +85,8 @@
 					getThumbsUrl(useTestData),
 					'facets',
 					'gallery',
-					'numberOfItemsCount');
+					'numberOfItemsCount',
+					'sortListBox');
 
 		searchView.refresh(true);
 	}
