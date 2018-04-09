@@ -158,8 +158,24 @@ public class ClassAttributes {
 			}
 
 			final boolean isFreetext = findAnnotation(Freetext.class, type, propertyDescriptor) != null;
-			final boolean isSortable = findAnnotation(Sortable.class, type, propertyDescriptor) != null;
 
+			final Sortable sortableAnnotation = findAnnotation(Sortable.class, type, propertyDescriptor);
+
+			final boolean isSortable;
+			final String sortableTitle;
+
+			
+			if (sortableAnnotation != null) {
+				isSortable = true;
+				
+				final String trimmed = sortableAnnotation.value().trim();
+				sortableTitle = trimmed.isEmpty() ? null : trimmed;
+			}
+			else {
+				isSortable = false;
+				sortableTitle = null;
+			}
+					
 			final boolean isFacet;
 			final String facetDisplayName;
 			final String facetSuperAttribute;
@@ -202,7 +218,7 @@ public class ClassAttributes {
 					falseString = null;
 				}
 			}
-			
+
 			final boolean storeFieldInIndex;
 			
 			// Depends on attribute annotation
@@ -233,6 +249,7 @@ public class ClassAttributes {
 					storeFieldInIndex,
 					isFreetext,
 					isSortable,
+					sortableTitle,
 					isFacet,
 					facetDisplayName,
 					facetSuperAttribute != null ? (facetSuperAttribute.trim().isEmpty() ? null : facetSuperAttribute.trim()) : null,

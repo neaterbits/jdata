@@ -23,6 +23,7 @@ public final class ItemAttribute {
 	private final boolean storeValueInSearchIndex;
 
 	private final boolean isSortable;
+	private final String sortableTitle;
 	private final boolean isFreetext;
 	
 	// Does this attribute have facets?
@@ -45,6 +46,7 @@ public final class ItemAttribute {
 				boolean storeValueInSearchIndex,
 				boolean isFreetext,
 				boolean isSortable,
+				String sortableTitle,
 				boolean isFaceted,
 				String facetDisplayName,
 				String facetSuperAttribute,
@@ -58,7 +60,7 @@ public final class ItemAttribute {
 		if (property == null) {
 			throw new IllegalArgumentException("property == null");
 		}
-
+		
 		this.itemType = itemType;
 		this.property = property;
 		
@@ -66,6 +68,7 @@ public final class ItemAttribute {
 
 		this.isFreetext = isFreetext;
 		this.isSortable = isSortable;
+		this.sortableTitle = sortableTitle;
 		
 		if (isFaceted && !storeValueInSearchIndex) {
 			// TODO is this the case for elasticsearch?
@@ -214,7 +217,24 @@ public final class ItemAttribute {
 	public boolean isSortable() {
 		return isSortable;
 	}
-	
+
+	public String getSortableTitle() {
+
+		final String result;
+
+		if (this.sortableTitle != null) {
+			result = this.sortableTitle;
+		}
+		else if (this.getFacetDisplayName() != null) {
+			result = this.getFacetDisplayName();
+		}
+		else {
+			result = this.getName();
+		}
+		
+		return result;
+	}
+
 	public SortableType getSortableType() {
 		return getAttributeType().getSortableType();
 	}

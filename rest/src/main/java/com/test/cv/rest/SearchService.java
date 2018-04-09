@@ -224,7 +224,7 @@ public class SearchService extends BaseService {
 
 		attrs.forEach(attr -> {
 			if (attr.isSortable()) {
-				order.add(new SearchSortOrder(attr.getName(), attr.getFacetDisplayName(), attr.getSortableType()));
+				order.add(new SearchSortOrder(attr.getName(), attr.getSortableTitle(), attr.getSortableType()));
 			}
 		});
 		
