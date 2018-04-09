@@ -63,8 +63,8 @@
 
 #fulltextDiv {
 	margin-left: 0.5em;
-	
-	width : 75%;
+
+	width : 95%;
 	display: inline-block;
 }
 
@@ -87,7 +87,6 @@
 }
 
 #fulltextInput {
-	width: 60%;
 	vertical-align: middle;
 
 	flex-grow: 1;
@@ -107,7 +106,9 @@
 	font-size: 0.7em;
 	*/
 
-	display: inline-block;
+	/* display: inline-block; */
+	
+	display: none;
 }
 
 
