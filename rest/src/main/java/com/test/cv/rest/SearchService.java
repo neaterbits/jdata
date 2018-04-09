@@ -30,6 +30,7 @@ import com.test.cv.dao.index.IndexSearchDAO;
 import com.test.cv.integrationtest.IntegrationTestHelper;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
+import com.test.cv.model.SortAttribute;
 import com.test.cv.model.annotations.SortableType;
 import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.attributes.ClassAttributes;
@@ -234,24 +235,22 @@ public class SearchService extends BaseService {
 		return sortAttributes;
 	}
 	
-	private static SearchSortOrder [] getSortOrdersFromAttributes(List<ItemAttribute> attributes) {
+	private static SearchSortOrder [] getSortOrdersFromAttributes(List<SortAttribute> attributes) {
 		
 		final List<SearchSortOrder> order = new ArrayList<>();
 
 		attributes.forEach(attr -> {
-			if (attr.isSortable()) {
-				final SortableType sortableType = attr.getSortableType();
-				
-				final String sortOrderName = attr.getName();
-				final String sortOrderDisplayName = attr.getSortableTitle();
-				
-				if (sortableType == SortableType.NUMERICAL || sortableType == SortableType.TIME) {
-					order.add(new SearchSortOrder(sortOrderName + "_lowtohigh", sortOrderDisplayName + " - low to high"));
-					order.add(new SearchSortOrder(sortOrderName + "_highttolow", sortOrderDisplayName + " - high to low"));
-				}
-				else {
-					order.add(new SearchSortOrder(sortOrderName, sortOrderDisplayName));
-				}
+			final SortableType sortableType = attr.getSortableType();
+			
+			final String sortOrderName = attr.getAttributeName();
+			final String sortOrderDisplayName = attr.getSortableTitle();
+			
+			if (sortableType == SortableType.NUMERICAL || sortableType == SortableType.TIME) {
+				order.add(new SearchSortOrder(sortOrderName + "_lowtohigh", sortOrderDisplayName + " - low to high"));
+				order.add(new SearchSortOrder(sortOrderName + "_highttolow", sortOrderDisplayName + " - high to low"));
+			}
+			else {
+				order.add(new SearchSortOrder(sortOrderName, sortOrderDisplayName));
 			}
 		});
 		
@@ -266,24 +265,33 @@ public class SearchService extends BaseService {
 
 		return array;
 	}
+	
+	
+	// Need to hash on declaring-class for attribute
+	// so that base class attributes are only counted once no matter the subclass (eg 'Title' is in baseclass
+	// for both Car and Snowboard)
 
 	private static SearchSortOrder [] computeAndSortPossibleSortOrders(Collection<Class<? extends Item>> types) {
 
-		final List<ItemAttribute> attributes;
+		final List<SortAttribute> attributes;
 		
 		if (types.isEmpty()) {
 			attributes = Collections.emptyList();
 		}
 		else if (types.size() == 1) {
-			 attributes = getSortableAttributesFromType(types.iterator().next());
+			 attributes = getSortableAttributesFromType(types.iterator().next()).stream()
+					 .map(a -> a.makeSortAttribute())
+					 .collect(Collectors.toList());
 		}
 		else {
 		
 			// Only return those that are common to all types?
-			final Set<ItemAttribute> commonSortableAttributes = new HashSet<>();
+			final Set<SortAttribute> commonSortableAttributes = new HashSet<>();
 
 			for (Class<? extends Item> type : types) {
-				final List<ItemAttribute> typeAttributes = getSortableAttributesFromType(type);
+				final List<SortAttribute> typeAttributes = getSortableAttributesFromType(type).stream()
+						.map(a -> a.makeSortAttribute())
+						.collect(Collectors.toList());
 				
 				if (commonSortableAttributes.isEmpty()) {
 					commonSortableAttributes.addAll(typeAttributes);
@@ -297,7 +305,7 @@ public class SearchService extends BaseService {
 		}
 
 		if (attributes.size() > 1) {
-			Collections.sort(attributes, ItemAttribute.SORTABLE_PRIORITY_COMPARATOR);
+			Collections.sort(attributes, SortAttribute.SORTABLE_PRIORITY_COMPARATOR);
 		}
 		
 		// Convert to sort orders
