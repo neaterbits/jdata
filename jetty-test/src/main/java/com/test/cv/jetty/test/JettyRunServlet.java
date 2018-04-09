@@ -122,6 +122,7 @@ public class JettyRunServlet {
 					freeText,
 					types,
 					searchCriteria,
+					null,
 					pageNo,
 					itemsPerPage,
 					testdata,

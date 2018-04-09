@@ -88,8 +88,9 @@ public class SearchService extends BaseService {
 	@GET
 	@Path("search")
 	// TODO check that we adhere to best practices for pageNo and itemsPerPage
-	public SearchResult search(String freeText, String [] types, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, Boolean testdata, HttpServletRequest request) {
+	public SearchResult search(String freeText, String [] types, SearchCriterium [] criteria, String [] sortOrder, Integer pageNo, Integer itemsPerPage, Boolean testdata, HttpServletRequest request) {
 
+		
 		if (types == null) {
 			// No types selected, ought to return empty resultset
 			types = new String[0];  
@@ -98,6 +99,7 @@ public class SearchService extends BaseService {
 			// Hack to get all types at the start and separate this case from the "no types" case above
 			types = ItemTypes.getTypeNames();
 		}
+		
 		
 		final List<Class<? extends Item>> typesList = new ArrayList<>(types.length);
 		
@@ -110,6 +112,15 @@ public class SearchService extends BaseService {
 
 			typesList.add(typeInfo.getType());
 		}
+		
+		final List<SortAttribute> sortAttributes;
+		if (sortOrder != null) {
+			sortAttributes = null; // TODO user specified sort order
+		}
+		else {
+			// Get sort order from common denominator among types
+			sortAttributes = computeAndSortPossibleSortAttributes(typesList);
+		}
 
 		final SearchResult result;
 		if (testdata != null && testdata && isTest()) {
@@ -117,14 +128,21 @@ public class SearchService extends BaseService {
 			result = makeTestResult();
 		}
 		else {
-			result = searchInDB(typesList, freeText, criteria, pageNo, itemsPerPage, request);
+			result = searchInDB(typesList, freeText, criteria, sortAttributes, pageNo, itemsPerPage, request);
 		}
 
 		return result;
 	}
 
-	private SearchResult searchInDB(List<Class<? extends Item>> types, String freeText, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, HttpServletRequest request) {
+	private SearchResult searchInDB(
+			List<Class<? extends Item>> types,
+			String freeText,
+			SearchCriterium [] criteria,
+			List<SortAttribute> sortAttributes,
+			Integer pageNo, Integer itemsPerPage,
+			HttpServletRequest request) {
 		
+
 		final List<Criterium> daoCriteria; 
 		if (criteria != null) {
 			daoCriteria = convertCriteria(criteria);
@@ -143,7 +161,7 @@ public class SearchService extends BaseService {
 		try {
 			final ISearchCursor cursor;
 			try {
-				cursor = searchDAO.search(types, daoCriteria, null, ItemTypes.getFacetAttributes(types));
+				cursor = searchDAO.search(types, daoCriteria, sortAttributes, ItemTypes.getFacetAttributes(types));
 			} catch (SearchException ex) {
 				throw new IllegalStateException("Failed to search", ex);
 			}
@@ -265,13 +283,11 @@ public class SearchService extends BaseService {
 
 		return array;
 	}
-	
-	
+
 	// Need to hash on declaring-class for attribute
 	// so that base class attributes are only counted once no matter the subclass (eg 'Title' is in baseclass
 	// for both Car and Snowboard)
-
-	private static SearchSortOrder [] computeAndSortPossibleSortOrders(Collection<Class<? extends Item>> types) {
+	private static List<SortAttribute> computeAndSortPossibleSortAttributes(Collection<Class<? extends Item>> types) {
 
 		final List<SortAttribute> attributes;
 		
@@ -308,6 +324,13 @@ public class SearchService extends BaseService {
 			Collections.sort(attributes, SortAttribute.SORTABLE_PRIORITY_COMPARATOR);
 		}
 		
+		return attributes;
+	}
+
+	private static SearchSortOrder [] computeAndSortPossibleSortOrders(Collection<Class<? extends Item>> types) {
+	
+		final List<SortAttribute> attributes = computeAndSortPossibleSortAttributes(types);
+
 		// Convert to sort orders
 		return getSortOrdersFromAttributes(attributes);
 	}
@@ -596,13 +619,14 @@ public class SearchService extends BaseService {
 		return facetAttributesResult;
 	}
 	
-	public byte[] searchReturnCompressed(String freeText, String [] types, SearchCriterium [] criteria, Integer pageNo, Integer itemsPerPage, HttpServletRequest request) {
+	public byte[] searchReturnCompressed(String freeText, String [] types, SearchCriterium [] criteria, String[] sortOrder, Integer pageNo, Integer itemsPerPage, HttpServletRequest request) {
+
 		// Return result as a compressed array (non JSON) of
 		// - IDs, in order
 		// titles, in order
 		// thumbnail sizes (byte width, byte height), in order
-		
-		final SearchResult searchResult = this.search(freeText, types, criteria, pageNo, itemsPerPage, false, request);
+
+		final SearchResult searchResult = this.search(freeText, types, criteria, sortOrder, pageNo, itemsPerPage, false, request);
 
 		// Add information to compression stream
 		
