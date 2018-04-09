@@ -3,12 +3,12 @@ package com.test.cv.search.facets;
 import java.util.Comparator;
 import java.util.List;
 
-import com.test.cv.model.ItemAttribute;
+import com.test.cv.model.SortAttribute;
 
 public class SortUtils {
 
 	public interface SortFunctions<D> {
-		Comparable<?> getValue(D document, ItemAttribute attribute);
+		Comparable<?> getValue(D document, SortAttribute attribute);
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -31,7 +31,7 @@ public class SortUtils {
 		return result;
 	}
 	
-	public static <D> Comparator<D> makeSortItemsComparator(List<ItemAttribute> sortOrder, SortFunctions<D> sortFunctions) {
+	public static <D> Comparator<D> makeSortItemsComparator(List<SortAttribute> sortOrder, SortFunctions<D> sortFunctions) {
 
 		final Comparator<D> comparator;
 		
@@ -39,7 +39,7 @@ public class SortUtils {
 			comparator = null;
 		}
 		else if (sortOrder.size() == 1) {
-			final ItemAttribute attribute = sortOrder.get(0);
+			final SortAttribute attribute = sortOrder.get(0);
 
 			comparator = (d1, d2) -> compareValues(sortFunctions.getValue(d1, attribute), sortFunctions.getValue(d2, attribute));
 		}
@@ -51,7 +51,7 @@ public class SortUtils {
 
 					int result = 0;
 					
-					for (ItemAttribute attribute : sortOrder) {
+					for (SortAttribute attribute : sortOrder) {
 						final int value = compareValues(sortFunctions.getValue(d1, attribute), sortFunctions.getValue(d2, attribute));
 						
 						if (value != 0) {

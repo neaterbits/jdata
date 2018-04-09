@@ -11,6 +11,8 @@ import com.test.cv.common.ItemId;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.ItemAttributeValue;
+import com.test.cv.model.PropertyAttribute;
+import com.test.cv.model.SortAttribute;
 import com.test.cv.search.criteria.Criterium;
 
 /**
@@ -44,11 +46,11 @@ public interface ItemIndex extends AutoCloseable {
 	/**
 	 * Search for values in an index based on types
 	 */
-	IndexSearchCursor search(List<Class<? extends Item>> types, String freeText, List<Criterium> criteria, List<ItemAttribute> sortOrder, Set<ItemAttribute> facetAttributes) throws ItemIndexException;
+	IndexSearchCursor search(List<Class<? extends Item>> types, String freeText, List<Criterium> criteria, List<SortAttribute> sortOrder, Set<ItemAttribute> facetAttributes) throws ItemIndexException;
 	
 	void deleteItem(String itemId, Class<? extends Item> type) throws ItemIndexException;
 	
-	public static String fieldName(ItemAttribute attribute) {
+	public static String fieldName(PropertyAttribute attribute) {
 		return attribute.getName();
 	}
 

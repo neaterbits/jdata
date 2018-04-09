@@ -8,18 +8,15 @@ import java.util.Date;
 import com.test.cv.model.annotations.DecimalRange;
 import com.test.cv.model.annotations.IntegerRange;
 import com.test.cv.model.annotations.SortableType;
-import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.attributes.facets.FacetedAttributeDecimalRange;
 import com.test.cv.model.attributes.facets.FacetedAttributeIntegerRange;
 
 // A searchable attribute for an item and accessor methods
-public final class ItemAttribute {
+public final class ItemAttribute extends PropertyAttribute {
 	
 	private final Class<? extends Item> itemType;
 	private final PropertyDescriptor property;
 	
-	private final String fieldNameOverride;
-
 	private final boolean storeValueInSearchIndex;
 
 	private final boolean isSortable;
@@ -54,6 +51,8 @@ public final class ItemAttribute {
 				String facetSuperAttribute,
 				IntegerRange [] integerRanges, DecimalRange [] decimalRanges,
 				String trueString, String falseString) {
+		
+		super(property, fieldNameOverride);
 	
 		if (itemType == null) {
 			throw new IllegalArgumentException("itemType == null");
@@ -66,8 +65,6 @@ public final class ItemAttribute {
 		this.itemType = itemType;
 		this.property = property;
 		
-		this.fieldNameOverride = fieldNameOverride;
-
 		this.isFreetext = isFreetext;
 		this.isSortable = isSortable;
 		this.sortableTitle = sortableTitle;
@@ -120,10 +117,6 @@ public final class ItemAttribute {
 
 	public Class<? extends Item> getItemType() {
 		return itemType;
-	}
-	
-	public String getName() {
-		return fieldNameOverride != null ? fieldNameOverride : property.getName();
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -200,23 +193,6 @@ public final class ItemAttribute {
 
 		return itemAttributeValue;
 	}
-
-	public AttributeType getAttributeType() {
-		final Class<?> propertyType = property.getPropertyType();
-
-		final AttributeType attributeType = AttributeType.fromClass(propertyType);
-
-		if (attributeType == null) {
-			throw new IllegalStateException("Unknown property type " + propertyType + " of attribute " + getName() + " of " + itemType.getSimpleName());
-		}
-
-		return attributeType;
-	}
-	
-	public Class<?> getAttributeValueClass() {
-		return property.getPropertyType();
-	}
-
 	
 	public boolean shouldStoreValueInSearchIndex() {
 		return storeValueInSearchIndex;

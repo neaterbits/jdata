@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
+import com.test.cv.model.SortAttribute;
 import com.test.cv.search.criteria.Criterium;
 
 /**
@@ -30,7 +31,7 @@ public interface ISearchDAO extends AutoCloseable {
 			List<Class<? extends Item>> types
 			/*, String freeText */,
 			List<Criterium> criteria,
-			List<ItemAttribute>sortOrder,
+			List<SortAttribute> sortOrder,
 			Set<ItemAttribute> facetAttributes) throws SearchException;
 	
 }

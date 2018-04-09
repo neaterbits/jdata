@@ -11,6 +11,7 @@ import com.test.cv.index.ItemIndex;
 import com.test.cv.index.ItemIndexException;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
+import com.test.cv.model.SortAttribute;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.Criterium;
 import com.test.cv.search.facets.ItemsFacets;
@@ -32,7 +33,11 @@ public class IndexSearchDAO implements ISearchDAO {
 	}
 
 	@Override
-	public ISearchCursor search(List<Class<? extends Item>> types, List<Criterium> criteria, List<ItemAttribute> sortOrder, Set<ItemAttribute> facetAttributes) throws SearchException {
+	public ISearchCursor search(
+			List<Class<? extends Item>> types,
+			List<Criterium> criteria,
+			List<SortAttribute> sortOrder,
+			Set<ItemAttribute> facetAttributes) throws SearchException {
 
 		if (types == null) {
 			throw new IllegalArgumentException("types == null");

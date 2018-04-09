@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import javax.persistence.MapKeyEnumerated;
-
 import com.test.cv.dao.IItemDAO;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
@@ -659,7 +657,11 @@ public abstract class SearchDAOTest extends TestCase {
 		
 		checkSnowboard(snowboard1, snowboard2, (userId, itemDAO, searchDAO, itemId1, itemId2) -> {
 
-			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), null, Arrays.asList(makeAttribute), null);
+			final ISearchCursor cursor = searchDAO.search(
+					Arrays.asList(Snowboard.class),
+					null,
+					Arrays.asList(makeAttribute.makeSortAttribute()),
+					null);
 			
 			final List<String> itemIds = cursor.getAllItemIDs();
 			
@@ -691,8 +693,11 @@ public abstract class SearchDAOTest extends TestCase {
 		
 		checkSnowboard(snowboard1, snowboard2, (userId, itemDAO, searchDAO, itemId1, itemId2) -> {
 
-			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), null,
-					Arrays.asList(makeAttribute, modelAttribute), null);
+			final ISearchCursor cursor = searchDAO.search(
+					Arrays.asList(Snowboard.class),
+					null,
+					Arrays.asList(makeAttribute.makeSortAttribute(), modelAttribute.makeSortAttribute()),
+					null);
 			
 			final List<String> itemIds = cursor.getAllItemIDs();
 			

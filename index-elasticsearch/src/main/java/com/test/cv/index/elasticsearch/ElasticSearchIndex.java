@@ -56,6 +56,7 @@ import com.test.cv.index.ItemIndexException;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.ItemAttributeValue;
+import com.test.cv.model.SortAttribute;
 import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.attributes.facets.FacetedAttributeDecimalRange;
 import com.test.cv.model.attributes.facets.FacetedAttributeIntegerRange;
@@ -403,7 +404,11 @@ public class ElasticSearchIndex implements ItemIndex {
 	}
 
 	@Override
-	public IndexSearchCursor search(List<Class<? extends Item>> types, String freeText, List<Criterium> criteria, List<ItemAttribute> sortOrder, Set<ItemAttribute> facetAttributes)
+	public IndexSearchCursor search(
+			List<Class<? extends Item>> types,
+			String freeText, List<Criterium> criteria,
+			List<SortAttribute> sortOrder,
+			Set<ItemAttribute> facetAttributes)
 			throws ItemIndexException {
 
 		// Must add both query and also aggregations if necessary

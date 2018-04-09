@@ -242,7 +242,7 @@ public class SearchService extends BaseService {
 		attributes.forEach(attr -> {
 			final SortableType sortableType = attr.getSortableType();
 			
-			final String sortOrderName = attr.getAttributeName();
+			final String sortOrderName = attr.getName();
 			final String sortOrderDisplayName = attr.getSortableTitle();
 			
 			if (sortableType == SortableType.NUMERICAL || sortableType == SortableType.TIME) {

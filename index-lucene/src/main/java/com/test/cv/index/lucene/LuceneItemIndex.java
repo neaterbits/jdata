@@ -64,6 +64,8 @@ import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.ItemAttributeValue;
 import com.test.cv.model.LongAttributeValue;
+import com.test.cv.model.PropertyAttribute;
+import com.test.cv.model.SortAttribute;
 import com.test.cv.model.StringAttributeValue;
 import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.items.ItemTypes;
@@ -517,7 +519,7 @@ public class LuceneItemIndex implements ItemIndex {
 			List<Class<? extends Item>> types,
 			String freeText,
 			List<Criterium> criteria,
-			List<ItemAttribute> sortOrder,
+			List<SortAttribute> sortOrder,
 			Set<ItemAttribute> facetAttributes) throws ItemIndexException {
 		
 		refreshReader();
@@ -1229,12 +1231,12 @@ public class LuceneItemIndex implements ItemIndex {
 		return field.numericValue().intValue() != 0 ? true : false;
 	}
 	
-	private static Comparable<?> getObjectValueFromDocument(Document document, ItemAttribute attribute) {
+	private static Comparable<?> getObjectValueFromDocument(Document document, PropertyAttribute attribute) {
 		return getObjectValueFromField(attribute, document.getField(ItemIndex.fieldName(attribute)));
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static Comparable<?> getObjectValueFromField(ItemAttribute attribute, IndexableField field) {
+	private static Comparable<?> getObjectValueFromField(PropertyAttribute attribute, IndexableField field) {
 		final AttributeType attributeType = attribute.getAttributeType();
 		
 		final Comparable<?> result;

@@ -11,7 +11,7 @@ import com.test.cv.model.annotations.SortableType;
  * since resides in baseclass.
  * 
  */
-public final class SortAttribute {
+public final class SortAttribute extends PropertyAttribute {
 
 	public static Comparator<SortAttribute> SORTABLE_PRIORITY_COMPARATOR = new Comparator<SortAttribute>() {
 		
@@ -37,15 +37,13 @@ public final class SortAttribute {
 	private final Class<? extends Item> attributeDeclaringClass;
 	
 	SortAttribute(ItemAttribute attribute) {
+		super(attribute);
+		
 		this.attributeName = attribute.getName();
 		this.sortableTitle = attribute.getSortableTitle();
 		this.sortableType = attribute.getSortableType();
 		this.sortablePriority = attribute.getSortablePriority();
 		this.attributeDeclaringClass = attribute.getDeclaringClass();
-	}
-
-	public String getAttributeName() {
-		return attributeName;
 	}
 
 	public String getSortableTitle() {
@@ -86,5 +84,4 @@ public final class SortAttribute {
 			return false;
 		return true;
 	}
-
 }
