@@ -22,11 +22,12 @@ public abstract class BaseItem extends Item {
 	@Column
 	private String make;
 
+	@Sortable(priority=3)
 	@Facet(value = "Model", superAttribute="make")
 	@Column
 	private String model;
 	
-	@Sortable(priority=4)
+	@Sortable(priority=2)
 	@Facet("Production year")
 	@Column
 	private Integer productionYear;
