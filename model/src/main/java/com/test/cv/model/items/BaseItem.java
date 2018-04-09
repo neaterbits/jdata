@@ -17,7 +17,7 @@ import com.test.cv.model.annotations.Sortable;
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public abstract class BaseItem extends Item {
 
-	@Sortable
+	@Sortable(priority=4)
 	@Facet("Make")
 	@Column
 	private String make;
@@ -26,7 +26,7 @@ public abstract class BaseItem extends Item {
 	@Column
 	private String model;
 	
-	@Sortable
+	@Sortable(priority=4)
 	@Facet("Production year")
 	@Column
 	private Integer productionYear;

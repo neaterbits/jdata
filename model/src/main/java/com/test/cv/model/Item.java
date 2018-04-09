@@ -32,7 +32,7 @@ public abstract class Item {
 	@IndexItemAttribute(name="id", storeValue=true)
 	private String idString;
 	
-	@Sortable("Title")
+	@Sortable(value="Title", priority=5)
 	@Freetext
 	@IndexItemAttribute(storeValue=true) // must store for quick-lookup in search results
 	@Column(nullable=false)

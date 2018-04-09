@@ -9,4 +9,14 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Sortable {
 	public String value() default "";
+	
+	/**
+	 * Higher value means will appear earlier in list over sort alternatives
+	 * and will be applied before in list of search orders for initial result.
+	 * Attributes with same priority will be sorted alphabetically on property name.
+	 * 
+	 * @return sort order
+	 */
+
+	public int priority() default 1;
 }

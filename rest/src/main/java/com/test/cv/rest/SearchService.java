@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -175,7 +176,6 @@ public class SearchService extends BaseService {
 			final SearchItemResult [] items = new SearchItemResult[numFound];
 
 			final Set<Class<? extends Item>> sortOrderTypes = new HashSet<>(types);
-			
 
 			if (cursor.getFacets() != null) {
 				
@@ -191,7 +191,7 @@ public class SearchService extends BaseService {
 				result.setFacets(convertFacets(cursor.getFacets()));
 			}
 
-			result.setSortOrders(computePossibleSortOrders(sortOrderTypes));
+			result.setSortOrders(computeAndSortPossibleSortOrders(sortOrderTypes));
 
 			for (int i = 0; i < numFound; ++ i) {
 				final SearchItem foundItem = found.get(i);
@@ -218,12 +218,27 @@ public class SearchService extends BaseService {
 	}
 
 
-	private static List<SearchSortOrder> getSortOrdersFromType(Class<? extends Item> type) {
+	private static List<ItemAttribute> getSortableAttributesFromType(Class<? extends Item> type) {
+		
 		final ClassAttributes attrs = ItemTypes.getTypeInfo(type).getAttributes();
 
-		final List<SearchSortOrder> order = new ArrayList<>();
+		final List<ItemAttribute> sortAttributes = new ArrayList<>();
 
 		attrs.forEach(attr -> {
+			if (attr.isSortable()) {
+				sortAttributes.add(attr);
+			}
+				
+		});
+		
+		return sortAttributes;
+	}
+	
+	private static SearchSortOrder [] getSortOrdersFromAttributes(List<ItemAttribute> attributes) {
+		
+		final List<SearchSortOrder> order = new ArrayList<>();
+
+		attributes.forEach(attr -> {
 			if (attr.isSortable()) {
 				final SortableType sortableType = attr.getSortableType();
 				
@@ -240,40 +255,53 @@ public class SearchService extends BaseService {
 			}
 		});
 		
-		return order;
-	}
-
-	private static SearchSortOrder [] computePossibleSortOrders(Collection<Class<? extends Item>> types) {
-
-		final SearchSortOrder [] sortOrders;
+		final SearchSortOrder [] array;
 		
-		if (types.isEmpty()) {
-			sortOrders = new SearchSortOrder[0];
-		}
-		else if (types.size() == 1) {
-			final List<SearchSortOrder> orders = getSortOrdersFromType(types.iterator().next());
-
-			sortOrders = orders.toArray(new SearchSortOrder[orders.size()]);
+		if (order.isEmpty()) {
+			array = new SearchSortOrder[0];
 		}
 		else {
+			array = order.toArray(new SearchSortOrder[order.size()]);
+		}
+
+		return array;
+	}
+
+	private static SearchSortOrder [] computeAndSortPossibleSortOrders(Collection<Class<? extends Item>> types) {
+
+		final List<ItemAttribute> attributes;
+		
+		if (types.isEmpty()) {
+			attributes = Collections.emptyList();
+		}
+		else if (types.size() == 1) {
+			 attributes = getSortableAttributesFromType(types.iterator().next());
+		}
+		else {
+		
 			// Only return those that are common to all types?
-			final Set<SearchSortOrder> commonSearchOrders = new HashSet<>();
+			final Set<ItemAttribute> commonSortableAttributes = new HashSet<>();
 
 			for (Class<? extends Item> type : types) {
-				final List<SearchSortOrder> orders = getSortOrdersFromType(type);
+				final List<ItemAttribute> typeAttributes = getSortableAttributesFromType(type);
 				
-				if (commonSearchOrders.isEmpty()) {
-					commonSearchOrders.addAll(orders);
+				if (commonSortableAttributes.isEmpty()) {
+					commonSortableAttributes.addAll(typeAttributes);
 				}
 				else {
-					commonSearchOrders.retainAll(orders);
+					commonSortableAttributes.retainAll(typeAttributes);
 				}
 			}
 
-			sortOrders = commonSearchOrders.toArray(new SearchSortOrder[commonSearchOrders.size()]);
+			attributes = new ArrayList<>(commonSortableAttributes);
 		}
 
-		return sortOrders;
+		if (attributes.size() > 1) {
+			Collections.sort(attributes, ItemAttribute.SORTABLE_PRIORITY_COMPARATOR);
+		}
+		
+		// Convert to sort orders
+		return getSortOrdersFromAttributes(attributes);
 	}
 	
 	private static List<Criterium> convertCriteria(SearchCriterium [] searchCriteria) {

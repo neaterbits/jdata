@@ -163,17 +163,19 @@ public class ClassAttributes {
 
 			final boolean isSortable;
 			final String sortableTitle;
+			final int sortablePriority;
 
-			
 			if (sortableAnnotation != null) {
 				isSortable = true;
 				
 				final String trimmed = sortableAnnotation.value().trim();
 				sortableTitle = trimmed.isEmpty() ? null : trimmed;
+				sortablePriority = sortableAnnotation.priority();
 			}
 			else {
 				isSortable = false;
 				sortableTitle = null;
+				sortablePriority = -1;
 			}
 					
 			final boolean isFacet;
@@ -250,6 +252,7 @@ public class ClassAttributes {
 					isFreetext,
 					isSortable,
 					sortableTitle,
+					sortablePriority,
 					isFacet,
 					facetDisplayName,
 					facetSuperAttribute != null ? (facetSuperAttribute.trim().isEmpty() ? null : facetSuperAttribute.trim()) : null,

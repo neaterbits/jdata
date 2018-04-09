@@ -3,6 +3,7 @@ package com.test.cv.model;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Date;
 
 import com.test.cv.model.annotations.DecimalRange;
@@ -15,6 +16,31 @@ import com.test.cv.model.attributes.facets.FacetedAttributeIntegerRange;
 // A searchable attribute for an item and accessor methods
 public final class ItemAttribute {
 
+	public static Comparator<ItemAttribute> SORTABLE_PRIORITY_COMPARATOR = new Comparator<ItemAttribute>() {
+		
+		@Override
+		public int compare(ItemAttribute attr1, ItemAttribute attr2) {
+			
+			if (!attr1.isSortable) {
+				throw new IllegalArgumentException("Attr not sortable: " + attr1.getName());
+			}
+
+			if (!attr2.isSortable) {
+				throw new IllegalArgumentException("Attr not sortable: " + attr2.getName());
+			}
+			
+			// - first since higher value means higher pri
+			int result = - Integer.compare(attr1.sortablePriority, attr2.sortablePriority);
+			
+			if (result == 0) {
+				// Same priority, order by name
+				result = attr1.getSortableTitle().compareTo(attr2.getSortableTitle());
+			}
+			
+			return result;
+		}
+	};
+	
 	private final Class<? extends Item> itemType;
 	private final PropertyDescriptor property;
 	
@@ -24,6 +50,7 @@ public final class ItemAttribute {
 
 	private final boolean isSortable;
 	private final String sortableTitle;
+	private final int sortablePriority;
 	private final boolean isFreetext;
 	
 	// Does this attribute have facets?
@@ -47,6 +74,7 @@ public final class ItemAttribute {
 				boolean isFreetext,
 				boolean isSortable,
 				String sortableTitle,
+				int sortablePriority,
 				boolean isFaceted,
 				String facetDisplayName,
 				String facetSuperAttribute,
@@ -69,7 +97,8 @@ public final class ItemAttribute {
 		this.isFreetext = isFreetext;
 		this.isSortable = isSortable;
 		this.sortableTitle = sortableTitle;
-		
+		this.sortablePriority = sortablePriority;
+
 		if (isFaceted && !storeValueInSearchIndex) {
 			// TODO is this the case for elasticsearch?
 			throw new IllegalArgumentException("Ought always store faceted attribute values in index");
@@ -237,6 +266,10 @@ public final class ItemAttribute {
 
 	public SortableType getSortableType() {
 		return getAttributeType().getSortableType();
+	}
+
+	public int getSortablePriority() {
+		return sortablePriority;
 	}
 
 	public boolean isFreetext() {
