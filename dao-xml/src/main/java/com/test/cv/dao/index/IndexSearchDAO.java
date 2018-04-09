@@ -12,6 +12,7 @@ import com.test.cv.index.ItemIndexException;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.SortAttribute;
+import com.test.cv.model.SortAttributeAndOrder;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.Criterium;
 import com.test.cv.search.facets.ItemsFacets;
@@ -36,7 +37,7 @@ public class IndexSearchDAO implements ISearchDAO {
 	public ISearchCursor search(
 			List<Class<? extends Item>> types,
 			List<Criterium> criteria,
-			List<SortAttribute> sortOrder,
+			List<SortAttributeAndOrder> sortOrder,
 			Set<ItemAttribute> facetAttributes) throws SearchException {
 
 		if (types == null) {

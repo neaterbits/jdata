@@ -1,13 +1,11 @@
-package com.test.cv.xmlstorage.api;
+package com.test.cv.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import junit.framework.TestCase;
-
-public class BaseXMLStorageTest extends TestCase {
+public class StringUtilTest {
 
 	public void testSplit() {
-		final String [] parts = BaseXMLStorage.split("this.is.a.string", '.');
+		final String [] parts = StringUtil.split("this.is.a.string", '.');
 		
 		assertThat(parts.length).isEqualTo(4);
 		

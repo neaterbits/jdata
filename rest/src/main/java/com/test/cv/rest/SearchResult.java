@@ -10,7 +10,7 @@ public class SearchResult {
 	private int pageItemCount; // number of items returned, same as item array length
 	
 	
-	private SearchSortOrder [] sortOrders;
+	private SearchSortOrderAlternative [] sortOrders;
 	
 	private SearchFacetsResult facets;
 	
@@ -43,11 +43,11 @@ public class SearchResult {
 		this.pageItemCount = pageItemCount;
 	}
 	
-	public SearchSortOrder[] getSortOrders() {
+	public SearchSortOrderAlternative[] getSortOrders() {
 		return sortOrders;
 	}
 
-	public void setSortOrders(SearchSortOrder[] sortOrders) {
+	public void setSortOrders(SearchSortOrderAlternative[] sortOrders) {
 		this.sortOrders = sortOrders;
 	}
 

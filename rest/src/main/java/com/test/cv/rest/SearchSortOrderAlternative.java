@@ -1,17 +1,15 @@
 package com.test.cv.rest;
 
-import com.test.cv.model.annotations.SortableType;
-
-public class SearchSortOrder {
+public class SearchSortOrderAlternative {
 
 	private String name;
 	private String displayName;
 
-	public SearchSortOrder() {
+	public SearchSortOrderAlternative() {
 		
 	}
 	
-	public SearchSortOrder(String name, String displayName) {
+	public SearchSortOrderAlternative(String name, String displayName) {
 		
 		if (name == null) {
 			throw new IllegalArgumentException("name == null");
@@ -57,7 +55,7 @@ public class SearchSortOrder {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		SearchSortOrder other = (SearchSortOrder) obj;
+		SearchSortOrderAlternative other = (SearchSortOrderAlternative) obj;
 		if (name == null) {
 			if (other.name != null)
 				return false;

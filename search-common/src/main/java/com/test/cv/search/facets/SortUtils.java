@@ -4,6 +4,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.test.cv.model.SortAttribute;
+import com.test.cv.model.SortAttributeAndOrder;
+import com.test.cv.model.SortOrder;
 
 public class SortUtils {
 
@@ -31,7 +33,7 @@ public class SortUtils {
 		return result;
 	}
 	
-	public static <D> Comparator<D> makeSortItemsComparator(List<SortAttribute> sortOrder, SortFunctions<D> sortFunctions) {
+	public static <D> Comparator<D> makeSortItemsComparator(List<SortAttributeAndOrder> sortOrder, SortFunctions<D> sortFunctions) {
 
 		final Comparator<D> comparator;
 		
@@ -39,9 +41,16 @@ public class SortUtils {
 			comparator = null;
 		}
 		else if (sortOrder.size() == 1) {
-			final SortAttribute attribute = sortOrder.get(0);
+			
+			final SortAttributeAndOrder attributeAndOrder = sortOrder.get(0);
+			
+			final SortAttribute attribute = attributeAndOrder.getAttribute();
 
-			comparator = (d1, d2) -> compareValues(sortFunctions.getValue(d1, attribute), sortFunctions.getValue(d2, attribute));
+			comparator = (d1, d2) -> {
+				final int result = compareValues(sortFunctions.getValue(d1, attribute), sortFunctions.getValue(d2, attribute));
+				
+				return attributeAndOrder.getSortOrder() == SortOrder.ASCENDING ? result : - result;
+			};
 		}
 		else {
 			comparator = new Comparator<D>() {
@@ -51,11 +60,14 @@ public class SortUtils {
 
 					int result = 0;
 					
-					for (SortAttribute attribute : sortOrder) {
-						final int value = compareValues(sortFunctions.getValue(d1, attribute), sortFunctions.getValue(d2, attribute));
+					for (SortAttributeAndOrder attributeAndOrder : sortOrder) {
 						
+						final SortAttribute attribute = attributeAndOrder.getAttribute();
+						
+						final int value = compareValues(sortFunctions.getValue(d1, attribute), sortFunctions.getValue(d2, attribute));
+
 						if (value != 0) {
-							result = value;
+							result = attributeAndOrder.getSortOrder() == SortOrder.ASCENDING ? value : - value;
 							break;
 						}
 					}

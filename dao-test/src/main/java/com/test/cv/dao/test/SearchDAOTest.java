@@ -16,6 +16,8 @@ import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
 import com.test.cv.dao.SearchException;
 import com.test.cv.model.ItemAttribute;
+import com.test.cv.model.SortAttributeAndOrder;
+import com.test.cv.model.SortOrder;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.items.sports.Snowboard;
 import com.test.cv.model.items.sports.SnowboardProfile;
@@ -660,7 +662,7 @@ public abstract class SearchDAOTest extends TestCase {
 			final ISearchCursor cursor = searchDAO.search(
 					Arrays.asList(Snowboard.class),
 					null,
-					Arrays.asList(makeAttribute.makeSortAttribute()),
+					Arrays.asList(new SortAttributeAndOrder(makeAttribute.makeSortAttribute(), SortOrder.ASCENDING)),
 					null);
 			
 			final List<String> itemIds = cursor.getAllItemIDs();
@@ -696,7 +698,9 @@ public abstract class SearchDAOTest extends TestCase {
 			final ISearchCursor cursor = searchDAO.search(
 					Arrays.asList(Snowboard.class),
 					null,
-					Arrays.asList(makeAttribute.makeSortAttribute(), modelAttribute.makeSortAttribute()),
+					Arrays.asList(
+							new SortAttributeAndOrder(makeAttribute.makeSortAttribute(), SortOrder.ASCENDING),
+							new SortAttributeAndOrder(modelAttribute.makeSortAttribute(), SortOrder.ASCENDING)),
 					null);
 			
 			final List<String> itemIds = cursor.getAllItemIDs();

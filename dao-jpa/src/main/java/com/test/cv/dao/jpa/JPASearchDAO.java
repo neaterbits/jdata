@@ -20,6 +20,7 @@ import com.test.cv.dao.ISearchDAO;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.SortAttribute;
+import com.test.cv.model.SortAttributeAndOrder;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.TypeInfo;
 import com.test.cv.search.criteria.ComparisonCriterium;
@@ -42,7 +43,12 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 
 	// Search for criteria on all attributes on a particular type
 	@Override
-	public ISearchCursor search(List<Class<? extends Item>> types /*, String freeText */, List<Criterium> criteria, List<SortAttribute> sortOrder, Set<ItemAttribute> facetAttributes) {
+	public ISearchCursor search(
+			List<Class<? extends Item>> types
+			/*, String freeText */,
+			List<Criterium> criteria,
+			List<SortAttributeAndOrder> sortOrder,
+			Set<ItemAttribute> facetAttributes) {
 
 		// Must dynamically construct criteria from database by mapping to table
 		final LinkedHashMap<EntityType<?>, String> typeToVarName = new LinkedHashMap<>(types.size());

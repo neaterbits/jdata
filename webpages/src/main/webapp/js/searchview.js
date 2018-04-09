@@ -98,6 +98,13 @@ function SearchView(
 			url += "itemType=";
 			url += types[i];
 		}
+		
+		// Get currently selected sort attribute
+		var sortOrder = this.sortListboxElement.options[this.sortListboxElement.selectedIndex].value;
+		
+		if (sortOrder != null && sortOrder !== '') {
+			url += "&sortOrder=" + sortOrder;
+		}
 
 		// Call REST service with criteria
 		this._sendAjax(url, 'POST', 'json', 'application/json', JSON.stringify(criteria), function(response) {

@@ -22,6 +22,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 import com.test.cv.common.IOUtil;
+import com.test.cv.common.StringUtil;
 import com.test.cv.dao.ISearchCursor;
 import com.test.cv.dao.ISearchDAO;
 import com.test.cv.dao.ItemStorageException;
@@ -31,6 +32,8 @@ import com.test.cv.integrationtest.IntegrationTestHelper;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.SortAttribute;
+import com.test.cv.model.SortAttributeAndOrder;
+import com.test.cv.model.SortOrder;
 import com.test.cv.model.annotations.SortableType;
 import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.attributes.ClassAttributes;
@@ -58,6 +61,9 @@ import com.test.cv.search.facets.TypeFacets;
 
 @Path("/search")
 public class SearchService extends BaseService {
+	
+	private static final String ASCENDING = "ascending";
+	private static final String DESCENDING = "descending";
 	
 	private ISearchDAO getSearchDAO(HttpServletRequest request) {
 		
@@ -113,13 +119,15 @@ public class SearchService extends BaseService {
 			typesList.add(typeInfo.getType());
 		}
 		
-		final List<SortAttribute> sortAttributes;
+		final List<SortAttributeAndOrder> sortAttributes;
 		if (sortOrder != null) {
-			sortAttributes = null; // TODO user specified sort order
+			sortAttributes = decodeSortOrders(typesList, sortOrder);
 		}
 		else {
 			// Get sort order from common denominator among types
-			sortAttributes = computeAndSortPossibleSortAttributes(typesList);
+			sortAttributes = computeAndSortPossibleSortAttributes(typesList)
+					.stream().map(a -> new SortAttributeAndOrder(a, SortOrder.ASCENDING))
+					.collect(Collectors.toList());
 		}
 
 		final SearchResult result;
@@ -138,7 +146,7 @@ public class SearchService extends BaseService {
 			List<Class<? extends Item>> types,
 			String freeText,
 			SearchCriterium [] criteria,
-			List<SortAttribute> sortAttributes,
+			List<SortAttributeAndOrder> sortAttributes,
 			Integer pageNo, Integer itemsPerPage,
 			HttpServletRequest request) {
 		
@@ -252,33 +260,34 @@ public class SearchService extends BaseService {
 		
 		return sortAttributes;
 	}
+
 	
-	private static SearchSortOrder [] getSortOrdersFromAttributes(List<SortAttribute> attributes) {
+	private static SearchSortOrderAlternative [] getSortOrdersFromAttributes(List<SortAttribute> attributes) {
 		
-		final List<SearchSortOrder> order = new ArrayList<>();
+		final List<SearchSortOrderAlternative> order = new ArrayList<>();
 
 		attributes.forEach(attr -> {
 			final SortableType sortableType = attr.getSortableType();
 			
-			final String sortOrderName = attr.getName();
+			final String sortOrderName = attr.encodeToString();
 			final String sortOrderDisplayName = attr.getSortableTitle();
 			
 			if (sortableType == SortableType.NUMERICAL || sortableType == SortableType.TIME) {
-				order.add(new SearchSortOrder(sortOrderName + "_lowtohigh", sortOrderDisplayName + " - low to high"));
-				order.add(new SearchSortOrder(sortOrderName + "_highttolow", sortOrderDisplayName + " - high to low"));
+				order.add(new SearchSortOrderAlternative(sortOrderName + '_' + ASCENDING, sortOrderDisplayName + " - low to high"));
+				order.add(new SearchSortOrderAlternative(sortOrderName + '_' + DESCENDING, sortOrderDisplayName + " - high to low"));
 			}
 			else {
-				order.add(new SearchSortOrder(sortOrderName, sortOrderDisplayName));
+				order.add(new SearchSortOrderAlternative(sortOrderName, sortOrderDisplayName));
 			}
 		});
 		
-		final SearchSortOrder [] array;
+		final SearchSortOrderAlternative [] array;
 		
 		if (order.isEmpty()) {
-			array = new SearchSortOrder[0];
+			array = new SearchSortOrderAlternative[0];
 		}
 		else {
-			array = order.toArray(new SearchSortOrder[order.size()]);
+			array = order.toArray(new SearchSortOrderAlternative[order.size()]);
 		}
 
 		return array;
@@ -327,12 +336,58 @@ public class SearchService extends BaseService {
 		return attributes;
 	}
 
-	private static SearchSortOrder [] computeAndSortPossibleSortOrders(Collection<Class<? extends Item>> types) {
+	private static SearchSortOrderAlternative [] computeAndSortPossibleSortOrders(Collection<Class<? extends Item>> types) {
 	
 		final List<SortAttribute> attributes = computeAndSortPossibleSortAttributes(types);
 
 		// Convert to sort orders
 		return getSortOrdersFromAttributes(attributes);
+	}
+	
+	private static List<SortAttributeAndOrder> decodeSortOrders(Collection<Class<? extends Item>> types, String [] sortOrders) {
+		
+		final List<SortAttributeAndOrder> result = new ArrayList<>(sortOrders.length);
+		
+		for (String sortOrder : sortOrders) {
+			final String [] parts = StringUtil.split(sortOrder, '_');
+
+			final SortAttributeAndOrder attributeAndOrder;
+			
+			if (parts.length == 1) {
+				// Only classname:attrname
+				final SortAttribute attribute = SortAttribute.decode(types, parts[0]);
+			
+				attributeAndOrder = new SortAttributeAndOrder(attribute, SortOrder.ASCENDING);
+			}
+			else if (parts.length == 2) {
+				// sort order specified as well
+				final SortAttribute attribute = SortAttribute.decode(types, parts[0]);
+				
+				final SortOrder sortOrderEnum;
+				
+				switch (parts[1]) {
+				case ASCENDING:
+					sortOrderEnum = SortOrder.ASCENDING;
+					break;
+					
+				case DESCENDING:
+					sortOrderEnum = SortOrder.DESCENDING;
+					break;
+					
+				default:
+					throw new IllegalArgumentException("Unknown sort order " + parts[1]);
+				}
+
+				attributeAndOrder = new SortAttributeAndOrder(attribute, sortOrderEnum);
+			}
+			else {
+				throw new IllegalArgumentException("Unable to parse sort order " + sortOrder);
+			}
+			
+			result.add(attributeAndOrder);
+		}
+
+		return result;
 	}
 	
 	private static List<Criterium> convertCriteria(SearchCriterium [] searchCriteria) {

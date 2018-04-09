@@ -27,6 +27,11 @@ public abstract class PropertyAttribute {
 	public final String getName() {
 		return fieldNameOverride != null ? fieldNameOverride : property.getName();
 	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public final Class<? extends Item> getDeclaringClass() {
+		return (Class)property.getReadMethod().getDeclaringClass();
+	}
 
 	public final AttributeType getAttributeType() {
 		final Class<?> propertyType = property.getPropertyType();

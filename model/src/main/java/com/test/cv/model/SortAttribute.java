@@ -1,8 +1,14 @@
 package com.test.cv.model;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import com.test.cv.common.StringUtil;
 import com.test.cv.model.annotations.SortableType;
+import com.test.cv.model.attributes.ClassAttributes;
 
 /**
  * SortAttributes are different from item attributes in that
@@ -44,6 +50,50 @@ public final class SortAttribute extends PropertyAttribute {
 		this.sortableType = attribute.getSortableType();
 		this.sortablePriority = attribute.getSortablePriority();
 		this.attributeDeclaringClass = attribute.getDeclaringClass();
+	}
+
+	public String encodeToString() {
+		return getDeclaringClass().getSimpleName() + ':' + attributeName;
+	}
+	
+	public static SortAttribute decode(Collection<Class<? extends Item>> allTypes, String s) {
+		
+		final String [] parts = StringUtil.split(s, ':');
+		
+		if (parts.length != 2) {
+			throw new IllegalArgumentException("parts.length != 2: " + Arrays.toString(parts));
+		}
+		
+		final String className = parts[0];
+		
+		final List<Class<? extends Item>> classes = allTypes.stream()
+				.filter(cl -> cl.getSimpleName().equals(className))
+				.collect(Collectors.toList());
+		
+		if (classes.isEmpty()) {
+			throw new IllegalArgumentException("No class name for encoded class name " + className);
+		}
+		else if (classes.size() > 1) {
+			throw new IllegalArgumentException("More than one class for class name " + className);
+		}
+
+		final String attributeName = parts[1];
+
+		// Find the matching item attribute
+		final ClassAttributes classAttributes = ClassAttributes.getFromClass(classes.get(0));
+		
+		final List<ItemAttribute> attributes = classAttributes.asSet().stream()
+				.filter(a -> a.getName().equals(attributeName))
+				.collect(Collectors.toList());
+		
+		if (attributes.size() == 0) {
+			throw new IllegalArgumentException("No attribute found from " + s);
+		}
+		else if (attributes.size() > 1) {
+			throw new IllegalArgumentException("More than one attribute found from " + s);
+		}
+
+		return attributes.get(0).makeSortAttribute();
 	}
 
 	public String getSortableTitle() {

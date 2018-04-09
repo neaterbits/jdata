@@ -119,11 +119,6 @@ public final class ItemAttribute extends PropertyAttribute {
 		return itemType;
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Class<? extends Item> getDeclaringClass() {
-		return (Class)property.getReadMethod().getDeclaringClass();
-	}
-	
 	public boolean isSingleValue() {
 		return integerRanges == null && decimalRanges == null;
 	}

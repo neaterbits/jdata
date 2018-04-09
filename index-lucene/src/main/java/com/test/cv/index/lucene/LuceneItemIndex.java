@@ -66,6 +66,7 @@ import com.test.cv.model.ItemAttributeValue;
 import com.test.cv.model.LongAttributeValue;
 import com.test.cv.model.PropertyAttribute;
 import com.test.cv.model.SortAttribute;
+import com.test.cv.model.SortAttributeAndOrder;
 import com.test.cv.model.StringAttributeValue;
 import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.items.ItemTypes;
@@ -519,7 +520,7 @@ public class LuceneItemIndex implements ItemIndex {
 			List<Class<? extends Item>> types,
 			String freeText,
 			List<Criterium> criteria,
-			List<SortAttribute> sortOrder,
+			List<SortAttributeAndOrder> sortOrder,
 			Set<ItemAttribute> facetAttributes) throws ItemIndexException {
 		
 		refreshReader();

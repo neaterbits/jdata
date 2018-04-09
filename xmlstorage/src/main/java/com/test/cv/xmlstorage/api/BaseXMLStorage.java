@@ -17,6 +17,8 @@ import javax.xml.bind.Unmarshaller;
 
 import com.test.cv.common.IOUtil;
 import com.test.cv.common.ItemId;
+import com.test.cv.common.StringUtil;
+import com.test.cv.common.StringUtilTest;
 import com.test.cv.xmlstorage.model.images.Image;
 import com.test.cv.xmlstorage.model.images.ImageData;
 import com.test.cv.xmlstorage.model.images.Images;
@@ -71,36 +73,10 @@ public abstract class BaseXMLStorage implements IItemStorage {
 
 		return result;
 	}
-
-	static String [] split(String s, char splitChar) {
-		
-		int lastSplit = -1;
-		final List<String> strings = new ArrayList<>();
-		
-		for (int i = 0; i < s.length(); ++ i) {
-			final char c = s.charAt(i);
-			
-			if (c == splitChar) {
-				if (i != 0 && lastSplit < i - 1) {
-					strings.add(s.substring(lastSplit + 1, i));
-					lastSplit = i;
-				}
-			}
-		}
-		
-		if (lastSplit == -1) {
-			strings.add(s);
-		}
-		else if (lastSplit < s.length() - 1) {
-			strings.add(s.substring(lastSplit + 1, s.length()));
-		}
-		
-		return strings.toArray(new String[strings.size()]);
-	}
 	
 	private String [] getFileNameParts(String fileName) {
 		// Cannot split with String.split() since FILE_NAME_SEPARATOR might be regex reserved char
-		return split(fileName, FILE_NAME_SEPARATOR);
+		return StringUtil.split(fileName, FILE_NAME_SEPARATOR);
 	}
 	
 	protected final String allocateFileName(String userId, String itemId, ItemFileType itemFileType, String mimeType) {
