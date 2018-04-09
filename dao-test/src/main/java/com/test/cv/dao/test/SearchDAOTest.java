@@ -76,7 +76,7 @@ public abstract class SearchDAOTest extends TestCase {
 		try (ISearchDAO searchDAO = getSearchDAO()) {
 
 			try {
-				searchDAO.search(null, null, null, null);
+				searchDAO.search(null, null, null, null, null);
 				
 				fail("Expected IllegalArgumentException because of types == null");
 			}
@@ -88,7 +88,7 @@ public abstract class SearchDAOTest extends TestCase {
 
 	public void testSearchWithNullValueForCriteriumIsOk() throws Exception {
 		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {
-			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), null, null, null);
+			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), null, null, null, null);
 
 			final List<String> itemIds = cursor.getAllItemIDs();
 			assertThat(itemIds.size()).isEqualTo(2);
@@ -100,7 +100,7 @@ public abstract class SearchDAOTest extends TestCase {
 	// Test with empty types list ought to give empty result set
 	public void testSearchWithEmptyTypeListGivesEmptyResult() throws Exception {
 		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {
-			final ISearchCursor cursor = searchDAO.search(new ArrayList<>(), null, null, null);
+			final ISearchCursor cursor = searchDAO.search(new ArrayList<>(), null, null, null, null);
 
 			final List<String> itemIds = cursor.getAllItemIDs();
 			assertThat(itemIds.size()).isEqualTo(0);
@@ -131,7 +131,7 @@ public abstract class SearchDAOTest extends TestCase {
 
 			try (ISearchDAO searchDAO = getSearchDAO()) {
 
-				final ISearchCursor cursor = searchDAO.search(Arrays.asList(Car.class), null, null, null);
+				final ISearchCursor cursor = searchDAO.search(Arrays.asList(Car.class), null, null, null, null);
 				final List<String> itemIds = cursor.getAllItemIDs();
 
 				assertThat(itemIds.size()).isEqualTo(1);
@@ -145,6 +145,7 @@ public abstract class SearchDAOTest extends TestCase {
 		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {
 			final ISearchCursor search = searchDAO.search(
 					Arrays.asList(Snowboard.class),
+					null,
 					null,
 					null,
 					null);
@@ -164,6 +165,7 @@ public abstract class SearchDAOTest extends TestCase {
 		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {
 			final ISearchCursor search = searchDAO.search(
 					Arrays.asList(Snowboard.class),
+					null,
 					null,
 					null,
 					null);
@@ -205,6 +207,7 @@ public abstract class SearchDAOTest extends TestCase {
 			
 			final ISearchCursor search = searchDAO.search(
 					Arrays.asList(Snowboard.class),
+					null,
 					Arrays.asList(widthCriteria),
 					null,
 					null);
@@ -227,6 +230,7 @@ public abstract class SearchDAOTest extends TestCase {
 			
 			final ISearchCursor search = searchDAO.search(
 					Arrays.asList(Snowboard.class),
+					null,
 					Arrays.asList(widthCriteria),
 					null,
 					null);
@@ -249,6 +253,7 @@ public abstract class SearchDAOTest extends TestCase {
 			
 			ISearchCursor search = searchDAO.search(
 					Arrays.asList(Snowboard.class),
+					null,
 					Arrays.asList(widthCriterium),
 					null,
 					null);
@@ -264,6 +269,7 @@ public abstract class SearchDAOTest extends TestCase {
 			
 			search = searchDAO.search(
 					Arrays.asList(Snowboard.class),
+					null,
 					Arrays.asList(widthCriterium),
 					null,
 					null);
@@ -307,6 +313,7 @@ public abstract class SearchDAOTest extends TestCase {
 
 				final ISearchCursor search = searchDAO.search(
 						Arrays.asList(Snowboard.class),
+						null,
 						null,
 						null,
 						facetedAttributes);
@@ -401,7 +408,7 @@ public abstract class SearchDAOTest extends TestCase {
 		final List<Criterium> criteria = Arrays.asList(makeCriterium);
 
 		checkSnowboard(snowboard1, snowboard2, (userId, itemDAO, searchDAO, itemId1, itemId2) -> {
-			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), criteria, null, facetedAttributes);
+			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), null, criteria, null, facetedAttributes);
 			
 			assertThat(cursor.getItemIDs(0, Integer.MAX_VALUE).size()).isEqualTo(1);
 			assertThat(cursor.getItemIDs(0, Integer.MAX_VALUE).get(0)).isEqualTo(itemId1);
@@ -461,7 +468,7 @@ public abstract class SearchDAOTest extends TestCase {
 		
 
 		checkSnowboard(snowboard1, snowboard2, (userId, itemDAO, searchDAO, itemId1, itemId2) -> {
-			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), Arrays.asList(makeCriterium), null, facetedAttributes);
+			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), null, Arrays.asList(makeCriterium), null, facetedAttributes);
 
 			final List<String> itemIds = cursor.getItemIDs(0, Integer.MAX_VALUE);
 
@@ -501,7 +508,7 @@ public abstract class SearchDAOTest extends TestCase {
 		final NoValueCriterium makeCriterium = new NoValueCriterium(makeAttribute);
 		
 		checkSnowboard(snowboard1, snowboard2, (userId, itemDAO, searchDAO, itemId1, itemId2) -> {
-			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), Arrays.asList(makeCriterium), null, facetedAttributes);
+			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), null, Arrays.asList(makeCriterium), null, facetedAttributes);
 
 			final List<String> itemIds = cursor.getItemIDs(0, Integer.MAX_VALUE);
 
@@ -549,7 +556,7 @@ public abstract class SearchDAOTest extends TestCase {
 				false);
 		
 		checkSnowboard(snowboard1, snowboard2, (userId, itemDAO, searchDAO, itemId1, itemId2) -> {
-			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), Arrays.asList(makeCriterium), null, facetedAttributes);
+			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), null, Arrays.asList(makeCriterium), null, facetedAttributes);
 
 			final List<String> itemIds = cursor.getItemIDs(0, Integer.MAX_VALUE);
 			
@@ -613,7 +620,7 @@ public abstract class SearchDAOTest extends TestCase {
 		
 
 		checkSnowboard(snowboard1, snowboard2, (userId, itemDAO, searchDAO, itemId1, itemId2) -> {
-			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), Arrays.asList(makeCriterium), null, facetedAttributes);
+			final ISearchCursor cursor = searchDAO.search(Arrays.asList(Snowboard.class), null, Arrays.asList(makeCriterium), null, facetedAttributes);
 
 			final List<String> itemIds = cursor.getItemIDs(0, Integer.MAX_VALUE);
 
@@ -662,6 +669,7 @@ public abstract class SearchDAOTest extends TestCase {
 			final ISearchCursor cursor = searchDAO.search(
 					Arrays.asList(Snowboard.class),
 					null,
+					null,
 					Arrays.asList(new SortAttributeAndOrder(makeAttribute.makeSortAttribute(), SortOrder.ASCENDING)),
 					null);
 			
@@ -698,6 +706,7 @@ public abstract class SearchDAOTest extends TestCase {
 			final ISearchCursor cursor = searchDAO.search(
 					Arrays.asList(Snowboard.class),
 					null,
+					null,
 					Arrays.asList(
 							new SortAttributeAndOrder(makeAttribute.makeSortAttribute(), SortOrder.ASCENDING),
 							new SortAttributeAndOrder(modelAttribute.makeSortAttribute(), SortOrder.ASCENDING)),
@@ -713,6 +722,34 @@ public abstract class SearchDAOTest extends TestCase {
 			assertThat(items.size()).isEqualTo(2);
 			assertThat(items.get(0).getItemId()).isEqualTo(itemId2);
 			assertThat(items.get(1).getItemId()).isEqualTo(itemId1);
+		});
+	}
+
+	public void testFreetextSearchOnContent() throws Exception {
+
+		final Snowboard snowboard1 = makeSnowboard1();
+		final Snowboard snowboard2 = makeSnowboard2();
+
+		snowboard1.setDescriptionHtml("This is description for first snowboard");
+		snowboard2.setDescriptionHtml("This is description for second snowboard");
+		
+		checkSnowboard(snowboard1, snowboard2, (userId, itemDAO, searchDAO, itemId1, itemId2) -> {
+
+			final ISearchCursor cursor = searchDAO.search(
+					Arrays.asList(Snowboard.class),
+					"first",
+					null,
+					null,
+					null);
+			
+			final List<String> itemIds = cursor.getAllItemIDs();
+			
+			assertThat(itemIds.size()).isEqualTo(1);
+			assertThat(itemIds.get(0)).isEqualTo(itemId1);
+
+			final List<SearchItem> items = cursor.getAllItemIDsAndTitles();
+			assertThat(items.size()).isEqualTo(1);
+			assertThat(items.get(0).getItemId()).isEqualTo(itemId1);
 		});
 	}
 

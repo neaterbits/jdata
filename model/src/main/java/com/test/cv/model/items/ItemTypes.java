@@ -9,10 +9,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.test.cv.model.DistinctAttribute;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
+import com.test.cv.model.SortAttribute;
 import com.test.cv.model.annotations.FacetEntity;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.housing.RentalApartment;
@@ -94,18 +98,33 @@ public class ItemTypes {
 	public static Set<ItemAttribute> getFacetAttributes(Collection<Class<? extends Item>> types) {
 		final Set<ItemAttribute> facetAttributes = new HashSet<>();
 
+		getAttributes(types, facetAttributes, a -> a.isFaceted(), a -> a);
+		
+		return facetAttributes;
+	}
+
+	public static Set<DistinctAttribute> getFreetextAttributes(Collection<Class<? extends Item>> types) {
+		final Set<DistinctAttribute> attributes = new HashSet<>();
+
+		getAttributes(types, attributes, a -> a.isFreetext(), a -> new DistinctAttribute(a));
+		
+		return attributes;
+	}
+
+	private static <T> void getAttributes(Collection<Class<? extends Item>> types, Collection<T> collection, Predicate<ItemAttribute> filter, Function<ItemAttribute, T> convert) {
+
 		for (Class<? extends Item> type : types) {
 			final TypeInfo typeInfo = getTypeInfo(type);
 			
 			typeInfo.getAttributes().forEach(itemAttribute -> {
-				if (itemAttribute.isFaceted()) {
-					facetAttributes.add(itemAttribute);
+				if (filter.test(itemAttribute)) {
+					
+					collection.add(convert.apply(itemAttribute));
 				}
 			});
 		}
-		
-		return facetAttributes;
 	}
+
 	
 	
 	static {

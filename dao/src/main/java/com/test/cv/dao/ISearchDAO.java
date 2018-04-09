@@ -29,8 +29,8 @@ public interface ISearchDAO extends AutoCloseable {
 	 * @todo add freetext
 	 */
 	ISearchCursor search(
-			List<Class<? extends Item>> types
-			/*, String freeText */,
+			List<Class<? extends Item>> types,
+			String freeText,
 			List<Criterium> criteria,
 			List<SortAttributeAndOrder> sortOrder,
 			Set<ItemAttribute> facetAttributes) throws SearchException;

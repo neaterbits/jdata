@@ -28,6 +28,7 @@ import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -58,6 +59,7 @@ import com.test.cv.index.ItemIndexException;
 import com.test.cv.model.BooleanAttributeValue;
 import com.test.cv.model.DateAttributeValue;
 import com.test.cv.model.DecimalAttributeValue;
+import com.test.cv.model.DistinctAttribute;
 import com.test.cv.model.EnumAttributeValue;
 import com.test.cv.model.IntegerAttributeValue;
 import com.test.cv.model.Item;
@@ -180,6 +182,15 @@ public class LuceneItemIndex implements ItemIndex {
 					throw new IllegalArgumentException("Trying to index string no-value");
 				}
 				
+				
+				if (attribute.isFreetext()) {
+					// Index freetext field
+					final String freetextFieldName = ItemIndex.freetextFieldName(attribute);
+
+					document.add(new TextField(freetextFieldName, value, Field.Store.NO));
+				}
+				
+				// If not freetext or has sorting or faceting then store as StringField
 				field = new StringField(fieldName, value,  storeValue ? Field.Store.YES : Field.Store.NO);
 			}
 			else if (attributeValue instanceof IntegerAttributeValue) {
@@ -528,23 +539,53 @@ public class LuceneItemIndex implements ItemIndex {
 		final IndexSearcher searcher = new IndexSearcher(reader);
 		
 		final Query query;
+		
+		String trimmedFreetext;
+		if (freeText != null) {
+			trimmedFreetext = freeText.trim();
+			
+			if (trimmedFreetext.isEmpty()) {
+				trimmedFreetext = null;
+			}
+		}
+		else {
+			trimmedFreetext = null;
+		}
 
 		if (types == null) {
 			throw new IllegalArgumentException("types == null");
 		}
-		else if (types.isEmpty()) {
+		else if (types.isEmpty() && trimmedFreetext == null) {
 			// Optimization, no types specified so just return no docs since
 			// does not have any matches no matter what criterium is passed in
 			query = new MatchNoDocsQuery();
 		}
 		else{
-			if (criteria != null && !criteria.isEmpty()) {
+			if ((criteria != null && !criteria.isEmpty()) || trimmedFreetext != null) {
+				
+				// Criteria or freetext
+				
 				final BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
 	
-				final Query criteriaQuery = createQueryFromCriteria(criteria, queryBuilder);
+				final List<Query> appendQueries = new ArrayList<>();
 				
-				// Must add criterias for types
-				query = makeTypesQuery(types, criteriaQuery, Occur.MUST); // Occur.MUST for criteriaQuery
+				if (criteria != null && !criteria.isEmpty()) {
+					final Query criteriaQuery = createQueryFromCriteria(criteria, queryBuilder);
+					
+					appendQueries.add(criteriaQuery);
+				}
+				
+				if (trimmedFreetext != null) {
+					// Make freetext query over all fields that are marked as freetext for all the types specified
+					final Query freetextQuery = createFreetextQuery(types, trimmedFreetext);
+					
+					if (freetextQuery != null) {
+						appendQueries.add(freetextQuery);
+					}
+				}
+				
+				// Must add criteria for types
+				query = makeTypesQuery(types, Occur.MUST, appendQueries.toArray(new Query[appendQueries.size()])); // Occur.MUST for criteriaQuery
 			}
 			else {
 				final Set<Class<? extends Item>> typesSet = new HashSet<>(types);
@@ -677,7 +718,7 @@ public class LuceneItemIndex implements ItemIndex {
 		return makeTypesQuery(types, null, null);
 	}
 
-	private static Query makeTypesQuery(Collection<Class<? extends Item>> types, Query appendQuery, Occur appendOccur) {
+	private static Query makeTypesQuery(Collection<Class<? extends Item>> types, Occur appendOccur, Query [] appendQuery) {
 
 		if (types == null) {
 			throw new IllegalArgumentException("types == null");
@@ -702,12 +743,14 @@ public class LuceneItemIndex implements ItemIndex {
 				typesQueryBuilder.add(oneTypeQuery, Occur.SHOULD);
 			}
 
-			if (appendQuery == null) {
+			if (appendQuery == null || appendQuery.length == 0) {
 				query = typesQueryBuilder.build();
 			}
 			else {
 				// Append query, either should or must
-				typesQueryBuilder.add(appendQuery, appendOccur);
+				for (Query aq : appendQuery) {
+					typesQueryBuilder.add(aq, appendOccur);
+				}
 				
 				query = typesQueryBuilder.build();
 			}
@@ -729,6 +772,40 @@ public class LuceneItemIndex implements ItemIndex {
 			this.query = query;
 			this.occur = occur;
 		}
+	}
+	
+	private static Query createFreetextQuery(Collection<Class<? extends Item>> types, String freeText) {
+		
+		// Get SortAttribute since this has equals() and hashCode() on base class,
+		// this makes us find distinct attributes
+		final Set<DistinctAttribute> distinctAttributes = ItemTypes.getFreetextAttributes(types);
+		
+		final Query query;
+		
+		if (distinctAttributes.isEmpty()) {
+			query = null;
+		}
+		else if (distinctAttributes.size() == 1) {
+			final String fieldName = ItemIndex.freetextFieldName(distinctAttributes.iterator().next());
+
+			query = new TermQuery(new Term(fieldName, freeText));
+		}
+		else {
+		
+			final BooleanQuery.Builder booleanQuery = new BooleanQuery.Builder();
+		
+			for (DistinctAttribute attribute : distinctAttributes) {
+				final String fieldName = ItemIndex.freetextFieldName(attribute);
+				
+				final TermQuery termQuery = new TermQuery(new Term(fieldName, freeText));
+				
+				booleanQuery.add(termQuery, Occur.SHOULD);
+			}
+			
+			query = booleanQuery.build();
+		}
+		
+		return query;
 	}
 
 	private static Query createQueryFromCriteria(List<Criterium> criteria, BooleanQuery.Builder queryBuilder) {

@@ -17,7 +17,7 @@ import com.test.cv.model.attributes.ClassAttributes;
  * since resides in baseclass.
  * 
  */
-public final class SortAttribute extends PropertyAttribute {
+public final class SortAttribute extends DistinctAttribute {
 
 	public static Comparator<SortAttribute> SORTABLE_PRIORITY_COMPARATOR = new Comparator<SortAttribute>() {
 		
@@ -36,24 +36,20 @@ public final class SortAttribute extends PropertyAttribute {
 		}
 	};
 
-	private final String attributeName;
 	private final String sortableTitle;
 	private final SortableType sortableType;
 	private final int sortablePriority;
-	private final Class<? extends Item> attributeDeclaringClass;
 	
 	SortAttribute(ItemAttribute attribute) {
 		super(attribute);
 		
-		this.attributeName = attribute.getName();
 		this.sortableTitle = attribute.getSortableTitle();
 		this.sortableType = attribute.getSortableType();
 		this.sortablePriority = attribute.getSortablePriority();
-		this.attributeDeclaringClass = attribute.getDeclaringClass();
 	}
 
 	public String encodeToString() {
-		return getDeclaringClass().getSimpleName() + ':' + attributeName;
+		return getDeclaringClass().getSimpleName() + ':' + getName();
 	}
 	
 	public static SortAttribute decode(Collection<Class<? extends Item>> allTypes, String s) {
@@ -102,36 +98,5 @@ public final class SortAttribute extends PropertyAttribute {
 	
 	public SortableType getSortableType() {
 		return sortableType;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((attributeDeclaringClass == null) ? 0 : attributeDeclaringClass.hashCode());
-		result = prime * result + ((attributeName == null) ? 0 : attributeName.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SortAttribute other = (SortAttribute) obj;
-		if (attributeDeclaringClass == null) {
-			if (other.attributeDeclaringClass != null)
-				return false;
-		} else if (!attributeDeclaringClass.equals(other.attributeDeclaringClass))
-			return false;
-		if (attributeName == null) {
-			if (other.attributeName != null)
-				return false;
-		} else if (!attributeName.equals(other.attributeName))
-			return false;
-		return true;
 	}
 }

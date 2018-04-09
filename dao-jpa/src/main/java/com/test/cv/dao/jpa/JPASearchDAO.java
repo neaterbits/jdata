@@ -44,8 +44,8 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 	// Search for criteria on all attributes on a particular type
 	@Override
 	public ISearchCursor search(
-			List<Class<? extends Item>> types
-			/*, String freeText */,
+			List<Class<? extends Item>> types,
+			String freeText,
 			List<Criterium> criteria,
 			List<SortAttributeAndOrder> sortOrder,
 			Set<ItemAttribute> facetAttributes) {

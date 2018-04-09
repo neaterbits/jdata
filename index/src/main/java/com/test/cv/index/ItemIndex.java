@@ -55,6 +55,10 @@ public interface ItemIndex extends AutoCloseable {
 		return attribute.getName();
 	}
 
+	public static String freetextFieldName(PropertyAttribute attribute) {
+		return attribute.getName() + "_freetext";
+	}
+
 	public default boolean isIdAttribute(ItemAttribute attribute) {
 		return attribute.getName().equals("id");
 	}
