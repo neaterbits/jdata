@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.test.cv.gallery.wrappers.GalleryCacheItems;
 import com.test.cv.jsutils.ConstructRequest;
 import com.test.cv.jsutils.JSFunction;
 import com.test.cv.jsutils.JSInvocable;

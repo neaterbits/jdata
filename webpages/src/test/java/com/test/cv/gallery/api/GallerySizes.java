@@ -1,4 +1,4 @@
-package com.test.cv.gallery;
+package com.test.cv.gallery.api;
 
 /**
  * For computing various gallery dimensions from sizes

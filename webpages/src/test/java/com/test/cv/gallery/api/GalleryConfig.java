@@ -1,11 +1,11 @@
-package com.test.cv.gallery;
+package com.test.cv.gallery.api;
 
 public abstract class GalleryConfig {
 
 	private final int columnSpacing;
 	private final int rowSpacing;
 	
-	GalleryConfig(int columnSpacing, int rowSpacing) {
+	protected GalleryConfig(int columnSpacing, int rowSpacing) {
 		this.columnSpacing = columnSpacing;
 		this.rowSpacing = rowSpacing;
 	}

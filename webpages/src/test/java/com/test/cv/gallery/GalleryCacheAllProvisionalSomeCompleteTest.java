@@ -8,6 +8,11 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.test.cv.gallery.api.GalleryConfig;
+import com.test.cv.gallery.api.GalleryModel;
+import com.test.cv.gallery.api.GalleryView;
+import com.test.cv.gallery.api.HintGalleryConfig;
+import com.test.cv.gallery.wrappers.GalleryCacheAllProvisionalSomeComplete;
 import com.test.cv.jsutils.ConstructRequest;
 import com.test.cv.jsutils.JSInvocable;
 

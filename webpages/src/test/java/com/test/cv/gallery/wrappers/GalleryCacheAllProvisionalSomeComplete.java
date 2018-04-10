@@ -1,5 +1,7 @@
-package com.test.cv.gallery;
+package com.test.cv.gallery.wrappers;
 
+import com.test.cv.gallery.api.GalleryModel;
+import com.test.cv.gallery.api.GalleryView;
 import com.test.cv.jsutils.JSInvocable;
 
 /**
@@ -10,7 +12,7 @@ public class GalleryCacheAllProvisionalSomeComplete extends GalleryCacheBase {
 	private final GalleryModel galleryModel;
 	private final GalleryView<?, ?> galleryView;
 
-	GalleryCacheAllProvisionalSomeComplete(
+	public GalleryCacheAllProvisionalSomeComplete(
 			JSInvocable runtime,
 			Object jsObject,
 			GalleryModel galleryModel,
@@ -35,7 +37,7 @@ public class GalleryCacheAllProvisionalSomeComplete extends GalleryCacheBase {
 		this.galleryView = galleryView;
 	}
 	
-	void refresh(int totalNumberOfItems) {
+	public void refresh(int totalNumberOfItems) {
 		
 		invokeMethod("refresh", 0, totalNumberOfItems);
 		
@@ -48,7 +50,7 @@ public class GalleryCacheAllProvisionalSomeComplete extends GalleryCacheBase {
 	 * @param heightMode
 	 */
 
-	void refreshWithJSObjs(int totalNumberOfItems) {
+	public void refreshWithJSObjs(int totalNumberOfItems) {
 		
 		invokeMethod("refresh", 0, totalNumberOfItems);
 		

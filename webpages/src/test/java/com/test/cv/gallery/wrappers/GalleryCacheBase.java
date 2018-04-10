@@ -1,4 +1,4 @@
-package com.test.cv.gallery;
+package com.test.cv.gallery.wrappers;
 
 import com.test.cv.jsutils.JSInvocable;
 import com.test.cv.jsutils.JavaWrapper;
@@ -17,7 +17,7 @@ public class GalleryCacheBase extends JavaWrapper {
 	 * 
 	 */
 	
-	void setGalleryDivs(Object outer, Object inner) {
+	public void setGalleryDivs(Object outer, Object inner) {
 		invokeMethod("setGalleryDivs", outer, inner);
 	}
 }

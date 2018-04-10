@@ -1,4 +1,4 @@
-package com.test.cv.gallery;
+package com.test.cv.gallery.api;
 
 public interface HeightMode {
 

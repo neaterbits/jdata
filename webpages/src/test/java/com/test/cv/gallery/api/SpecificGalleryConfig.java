@@ -1,11 +1,11 @@
-package com.test.cv.gallery;
+package com.test.cv.gallery.api;
 
 public class SpecificGalleryConfig extends GalleryConfig {
 	
 	private final int width;
 	private final int height;
 
-	SpecificGalleryConfig(int columnSpacing, int rowSpacing, int width, int height) {
+	public SpecificGalleryConfig(int columnSpacing, int rowSpacing, int width, int height) {
 		super(columnSpacing, rowSpacing);
 		
 		this.width = width;

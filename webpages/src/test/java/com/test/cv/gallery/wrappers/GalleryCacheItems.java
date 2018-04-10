@@ -1,4 +1,4 @@
-package com.test.cv.gallery;
+package com.test.cv.gallery.wrappers;
 
 import com.test.cv.jsutils.JSInvocable;
 import com.test.cv.jsutils.JavaWrapper;
@@ -7,13 +7,13 @@ import com.test.cv.jsutils.JavaWrapper;
  * Java wrapper class for JS class for API typesafety and readability
  */
 
-final class GalleryCacheItems extends JavaWrapper {
+public final class GalleryCacheItems extends JavaWrapper {
 
-	GalleryCacheItems(JSInvocable invocable, Object jsObject) {
+	public GalleryCacheItems(JSInvocable invocable, Object jsObject) {
 		super(invocable, jsObject);
 	}
 
-	void updateVisibleArea(
+	public void updateVisibleArea(
 			int firstVisibleIndex,
 			int visibleCount,
 			int totalNumberOfItems,
