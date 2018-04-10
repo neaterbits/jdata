@@ -1,4 +1,4 @@
-package com.test.cv.gallery;
+package com.test.cv.gallery.stubs;
 
 import com.test.cv.jsutils.JSFunction;
 
@@ -7,21 +7,21 @@ public class DownloadInvocation {
 	private final int count;
 	private final JSFunction callback;
 	
-	DownloadInvocation(int startIndex, int count, JSFunction callback) {
+	public DownloadInvocation(int startIndex, int count, JSFunction callback) {
 		this.startIndex = startIndex;
 		this.count = count;
 		this.callback = callback;
 	}
 	
-	int getStartIndex() {
+	public int getStartIndex() {
 		return startIndex;
 	}
 
-	int getCount() {
+	public int getCount() {
 		return count;
 	}
 
-	void onDownloaded() {
+	public void onDownloaded() {
 		
 		// Just return an array of strings, this would be images or thumb sizes or similar for a real gallery
 		final String [] result = new String[count];
@@ -33,7 +33,7 @@ public class DownloadInvocation {
 		callback.callWithArray(result);
 	}
 
-	static final String dataString(int startIndex, int count, int arrayIndex) {
+	public static final String dataString(int startIndex, int count, int arrayIndex) {
 		 return "Downloaded-item at index " + (startIndex + arrayIndex) + " / " + arrayIndex + " out of " + count;
 	}
 

@@ -1,5 +1,6 @@
 package com.test.cv.gallery;
 
+import static com.test.cv.gallery.stubs.DownloadInvocation.dataString;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
@@ -10,12 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.test.cv.gallery.stubs.DownloadInvocation;
 import com.test.cv.gallery.wrappers.GalleryCacheItems;
 import com.test.cv.jsutils.ConstructRequest;
 import com.test.cv.jsutils.JSFunction;
 import com.test.cv.jsutils.JSInvocable;
-
-import static com.test.cv.gallery.DownloadInvocation.dataString;
 
 public class GalleryCacheItemsTest extends BaseGalleryTest {
 
