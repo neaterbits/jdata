@@ -12,7 +12,31 @@
 
 function GalleryCacheAllProvisionalSomeComplete(gallerySizes, galleryModel, galleryView, initialTotalNumberOfItems) {
 	GalleryCacheBase.call(this, gallerySizes, galleryModel, galleryView, initialTotalNumberOfItems);
-	
+
+	/**
+	 * visibleElements record keeps track of where we are in terms of what is rendered
+	 * right now. It is kept as a separate JS object so that it can be passed around and returned by functions/methods.
+	 * 
+	 * Note that there is no track of index of first visible item as this can be computed on the fly from
+	 * current y position.
+	 * 
+	 * It has the following fields:
+	 *
+	 * firstVisibleY  - y pos of first pixel visible into the scrollable area, so 100 if user scrolled 100 pixels down. Includes row spacing.
+	 * firstRenderedY - y pos into scrollable area that is rendered, ie rows has been added.So if user scrolls to 100
+	 *                  this will probably stay at 0 since we keep some rows before and after the visible area.
+	 * firstVisibleIndex - index into display of first visible item, ie. first item of which image or spacing is visible in the display.
+	 * firstRenderedIndex  -  index into virtual model array of first item that is rendered (not visible) eg the element at firstRenderedY.
+	 *                        This might be completely outside of visible area.
+	 *
+	 * lastVisibleY - firstVisibleY + visibleHeight - 1, eg. the y position within scroll area of the last visible line in the viewport.
+	 *                If user has scrolled to 100 and viewport is 300px of height, this would be 399.
+	 * lastRenderedY - y pos of last pixel of last rendered element, including row spacing.
+	 * lastVisibleIndex - index into virtual model array of last visible item, ie. item or spacing within visible display area.
+	 * lastRenderedIndex - index into virtual array og last rendered element, will always be the last element on a row since all items on a row are aligned
+	 *                     and always add a complete row div with all of them.
+	 */
+
 	this.visibleElements = null;
 }
 
