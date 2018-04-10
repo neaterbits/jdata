@@ -44,7 +44,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 				galleryModel, galleryView);
 	}
 	
-	public void testSimple() throws IOException {
+	public void testInitialDownload() throws IOException {
 
 		final GalleryConfig config = new HintGalleryConfig(20, 20, 240, 240);
 
@@ -81,7 +81,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		initialProvisional.onDownloaded();
 
 		// Should try to download complete-items as well
-		assertThat(galleryModel.getCompleteRequestCount()).isEqualTo(0);
+		assertThat(galleryModel.getCompleteRequestCount()).isEqualTo(1);
 	}
 
 }
