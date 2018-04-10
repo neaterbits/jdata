@@ -353,9 +353,9 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 				function (element, indexInRow) {
 					t.galleryView.appendToContainer(rowDiv, element);
 				});
-		
+
 		this.log(level, 'Added row no ' + rowNo + ', first elem ' + i + ' at y pos ' + y + ' of height ' + rowHeight);
-		
+
 		++ rowsAdded;
 		
 		this.galleryView.applyRowContainerStyling(rowDiv, y, this.width, rowHeight);
@@ -509,12 +509,14 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 		for (var i = 0; i < rowHTMLElements.length; ++ i) {
 			var elem = rowHTMLElements[i];
 			
-			// console.log('## computed client width: ' + elem.clientWidth + ', height:' + elem.clientHeight + ': ' + elem.parentNode + ', ' + elem.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode);
+			// console.log('## computed client width: ' + this.galleryView.getElementWidth(elem) + ', height:' + this.galleryView.getElementHeight(elem) + ': ' + elem.parentNode + ', ' + elem.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode);
 			
-			totalRowItemsWidth += elem.clientWidth;
+			totalRowItemsWidth += this.galleryView.getElementWidth(elem);
 			
-			if (elem.clientHeight > largestItemHeight) {
-				largestItemHeight = elem.clientHeight;
+			var elemHeight = this.galleryView.getElementHeight(elem);
+			
+			if (elemHeight > largestItemHeight) {
+				largestItemHeight = elemHeight;
 			}
 		}
 		
@@ -534,7 +536,7 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 		for (var i = 0; i < rowHTMLElements.length; ++ i) {
 			var elem = rowHTMLElements[i];
 
-			var width = itemWidth == null ? elem.clientWidth : itemWidth;
+			var width = itemWidth == null ? this.galleryView.getElementWidth(elem) : itemWidth;
 			var height = largestItemHeight;
 			
 			this._applyItemStyles(elem, rowHeight, width, height, spacing, visible);

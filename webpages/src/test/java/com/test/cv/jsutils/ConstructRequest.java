@@ -1,5 +1,7 @@
 package com.test.cv.jsutils;
 
+import java.util.Arrays;
+
 // Request for constructing an instance of some class
 public class ConstructRequest {
 	private final String jsClass;
@@ -39,5 +41,10 @@ public class ConstructRequest {
 		}
 
 		this.instance = instance;
+	}
+
+	@Override
+	public String toString() {
+		return "ConstructRequest [jsClass=" + jsClass + ", params=" + Arrays.toString(params) + "]";
 	}
 }

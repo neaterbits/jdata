@@ -1,3 +1,4 @@
+
 /**
  * Downloads all provisional data on complete refresh (eg. titles and thumb sizes)
  * then download complete-data (eg. image thumbs) on demand, eg keep 3 pages of images above and below the
@@ -10,7 +11,7 @@
  * 
  */
 
-function GalleryCacheAllProvisionalSomeComplete(gallerySizes, galleryModel, galleryView, initialTotalNumberOfItems) {
+function GalleryCacheAllProvisionalSomeComplete(gallerySizes, galleryModel, galleryView, galleryCacheItemsFactory, initialTotalNumberOfItems) {
 	GalleryCacheBase.call(this, gallerySizes, galleryModel, galleryView, initialTotalNumberOfItems);
 
 	/**
@@ -38,6 +39,8 @@ function GalleryCacheAllProvisionalSomeComplete(gallerySizes, galleryModel, gall
 	 */
 
 	this.displayState = null;
+	
+	this.galleryCacheItemsFactory = galleryCacheItemsFactory;
 }
 
 GalleryCacheAllProvisionalSomeComplete.prototype = Object.create(GalleryCacheBase.prototype);
@@ -51,7 +54,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 	var t = this;
 	
 	// Mechanism for downloading complete-data on the fly as user scrolls
-	this.cacheItems = new GalleryCacheItems(20, function(index, count, onDownloaded) {
+	this.cacheItems = this.galleryCacheItemsFactory.createCacheItems(20, function(index, count, onDownloaded) {
 		t.galleryModel.getCompleteData(index, count, onDownloaded);
 	});
 	
@@ -459,8 +462,12 @@ GalleryCacheAllProvisionalSomeComplete.prototype._getRowItemDivHeights = functio
 		var div = itemElement.getElementsByTagName('div')[0];
 		
 		var html = typeof div === 'undefined' ? '<undefined>' : div.innerHTML;
-		
-		rowWidthHeights.push({ width : itemElement.clientWidth, height : itemElement.clientHeight, html : html })
+
+		rowWidthHeights.push({
+				width 	: this.galleryView.getElementWidth(itemElement),
+				height 	: this.galleryView.getElementHeight(itemElement),
+				html 	: html
+		});
 	}
 	
 	return rowWidthHeights;

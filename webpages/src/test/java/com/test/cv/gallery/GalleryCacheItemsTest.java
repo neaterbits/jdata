@@ -53,8 +53,6 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		// The function that is called back when completed download of all items
 		final Function<Object[], Object> updateVisibleAreaComplete = (params) -> {
 			
-			System.out.println("## updateVisibleAreaComplete");
-
 			final int startIndexDouble = (Integer)params[0];
 			final int countDouble = (Integer)params[1];
 
@@ -84,7 +82,6 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		// final Object galleryCacheItems = 
 			// jsRuntime.invokeConstructor("GalleryCacheItems", 20, modelDownloadItems);
 		
-		
 		// No download requests until item downloaded
 		assertThat(downloadRequests.size()).isEqualTo(0);
 
@@ -92,7 +89,7 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		final int visibleCount = 4;
 		final int totalNumberOfItems = 20;
 		
-		cacheItems.updateVisibleArea(firstVisibleIndex, visibleCount, totalNumberOfItems, updateVisibleAreaCompleteCallback);
+		cacheItems.updateVisibleArea(0, firstVisibleIndex, visibleCount, totalNumberOfItems, updateVisibleAreaCompleteCallback);
 		
 		// Should now have one download request
 		assertThat(downloadRequests.size()).isEqualTo(1);

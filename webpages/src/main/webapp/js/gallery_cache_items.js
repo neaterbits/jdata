@@ -25,6 +25,13 @@
  * 
  */
 
+
+function GalleryCacheItemsFactory() {
+	this.createCacheItems = function(cachedBeforeAndAfter, onDownloaded) {
+		return new GalleryCacheItems(cachedBeforeAndAfter, onDownloaded);
+	}
+};
+
 /**
  * Constructor
  *  - cachedBeforeAndAfter - cache this number before and after visible area, ie if == 20, then we will download in total 40 elements for outside visible area.

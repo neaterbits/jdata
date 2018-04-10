@@ -181,9 +181,17 @@ function Gallery(divId, config, galleryModel, galleryView) {
 
 		// TODO here we could choose cache implementations, eg if showing far fewer or far more items
 		if (this.cache == null) {
+
 			// Initial refresh
-			this.cache = new GalleryCacheAllProvisionalSomeComplete(this.gallerySizes, this.galleryModel, this.galleryView, totalNumberOfItems);
-			
+			var cacheItemsFactory = new GalleryCacheItemsFactory();
+
+			this.cache = new GalleryCacheAllProvisionalSomeComplete(
+					this.gallerySizes,
+					this.galleryModel,
+					this.galleryView,
+					cacheItemsFactory,
+					totalNumberOfItems);
+
 			this.cache.setGalleryDivs(this.outerDiv, this.innerDiv);
 		}
 		else {

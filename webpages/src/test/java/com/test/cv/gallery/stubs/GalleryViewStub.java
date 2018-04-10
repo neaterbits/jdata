@@ -3,6 +3,7 @@ package com.test.cv.gallery.stubs;
 import com.test.cv.gallery.api.GalleryView;
 import com.test.cv.gallery.stubs.html.Div;
 import com.test.cv.gallery.stubs.html.Element;
+import com.test.cv.gallery.stubs.html.ElementSize;
 
 public class GalleryViewStub implements GalleryView<Div, Element> {
 
@@ -52,8 +53,19 @@ public class GalleryViewStub implements GalleryView<Div, Element> {
 		if (data == null) {
 			throw new IllegalArgumentException("data == null");
 		}
+		
+		final Element element;
+		if (data instanceof ElementSize) {
 
-		return new Element();
+			final ElementSize size = (ElementSize)data;
+
+			element = new Element(size.getWidth(), size.getHeight());
+		}
+		else {
+			element = new Element();
+		}
+		
+		return element;
 	}
 
 	@Override
@@ -71,9 +83,7 @@ public class GalleryViewStub implements GalleryView<Div, Element> {
 
 	@Override
 	public void applyRowContainerStyling(Div rowContainer, int y, int width, int height) {
-
 		rowContainer.setWidth(width);
 		rowContainer.setHeight(height);
-		
 	}
 }
