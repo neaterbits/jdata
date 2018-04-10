@@ -48,6 +48,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype = Object.create(GalleryCacheBas
 //returns approximate complete size of view
 GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, totalNumberOfItems) {
 	
+	this.enter(level, 'refresh', ['totalNumberOfItems', totalNumberOfItems]);
+	
 	// Remove any added divs
 	this._clear(level + 1);
 
@@ -80,6 +82,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 		// completed metadata build, now compute and re-render with provisional data
 		t._render(level + 1);
 	});
+	
+	this.exit(level, 'refresh');
 }
 
 GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level) {
@@ -197,9 +201,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateHeightIfApproximation = 
 //visible line
 GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level, yPos) {
 	
-	this.enter(level, 'updateOnScroll', ['yPos', yPos], ['this.firstY', this.firstY]);
-	
-	// var curFirstY = this.firstY;
+	this.enter(level, 'updateOnScroll', ['yPos', yPos], ['this.displayState', JSON.stringify(this.displayState)]);
 	
 	var lastDisplayState = this.displayState;
 	
@@ -284,7 +286,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 
 	this.enter(level, '_updateOnScroll',
 			[ 'curY', curY, 'prevDisplayed', JSON.stringify(prevDisplayed)],
-			[ 'firstY',  this.firstY,  'lastY', this.lastY, '_getVisibleHeight()', this._getVisibleHeight() ]);
+			[ 'displayState', JSON.stringify(this.displayState), '_getVisibleHeight()', this._getVisibleHeight() ]);
 	
 	// See if we have something that was not visible earlier scrolled into view
 	var initialUpdate;
@@ -347,7 +349,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 	}
 	else if (curY > prevDisplayed.lastVisibleY) { 
 		// We are scrolling downwards totally out of visible area, just add items for the pos in question
-		this.log(level, 'Scrolled to completely below previous curY ' + curY + ' visibleHeight ' + this._getVisibleHeight() + ' > lastY ' + this.lastY);
+		this.log(level, 'Scrolled to completely below previous curY ' + curY + ' visibleHeight ' + this._getVisibleHeight() + ' > lastVisibleY ' + prevDisplayed.lastVisibleY);
 
 		lastRendered = this._redrawCompletelyAt(level + 1, curY, posAndIndex);
 
@@ -596,7 +598,6 @@ GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(
 	this.cachedRowDivs = new Array();
 
 	this.firstCachedIndex = posAndIndex.rowItemIndex;
-	this.firstY = curY;
 
 	var lastRendered = this._addProvisionalDivs(level + 1, posAndIndex.rowItemIndex, posAndIndex.rowYPos, this.numColumns, this._getVisibleHeight());
 	

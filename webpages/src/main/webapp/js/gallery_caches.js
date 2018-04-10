@@ -172,7 +172,7 @@ GalleryCacheBase.prototype._addProvisionalDivs = function(level, startIndex, sta
 	
 	var t = this;
 	
-	var result = this._addDivs(level, startIndex, startPos, numColumns, heightToAdd, function(index, itemWidth, itemHeight) {
+	var result = this._addDivs(level + 1, startIndex, startPos, numColumns, heightToAdd, function(index, itemWidth, itemHeight) {
 		return t._makeProvisionalElement(index, itemWidth, itemHeight);
 	});
 
