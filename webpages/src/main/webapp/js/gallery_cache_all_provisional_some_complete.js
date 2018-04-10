@@ -203,7 +203,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 	// Updates first and last cached item index base on y position
 	this.displayState = this._updateOnScroll(level + 1, yPos, this.displayState);
 	
-	if (lastDisplayState == this.displayState) {
+	if (lastDisplayState === this.displayState) {
 		throw "Expected updated displayState instance to be returned";
 	}
 	
@@ -310,17 +310,21 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 	var posAndIndex = this._findElementYPosAndItemIndex(level + 1, curY);
 	
 	var lastRendered;
-	
+
+	var displayed;
+
 	if (curY + this._getVisibleHeight() < prevDisplayed.firstVisibleY) {
 		this.log(level, 'Scrolled to view completely above previous');
 
 		// We are scrolling upwards totally out of current area
 		lastRendered = this._redrawCompletelyAt(level + 1, curY, posAndIndex);
-		
-		firstRenderedY = posAndIndex.rowYPos;
-		lastRenderedY = lastRendered.yPos;
-		firstVisibleIndex = posAndIndex.rowItemIndex;
-		lastVisibleIndex = lastRendered.index;
+
+		displayed = this._addCurYToDisplayState(curY, {
+			firstRenderedY		: posAndIndex.rowYPos,
+			lastRenderedY		: lastRendered.yPos,
+			firstVisibleIndex	: posAndIndex.rowItemIndex,
+			lastVisibleIndex	: lastRendered.index
+		});
 	}
 	else if (curY < prevDisplayed.firstVisibleY) {
 		// Scrolling partly above visible area
@@ -344,10 +348,12 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 
 		lastRendered = this._redrawCompletelyAt(level + 1, curY, posAndIndex);
 
-		firstRenderedY = posAndIndex.rowYPos;
-		lastRenderedY = lastRendered.yPos;
-		firstVisibleIndex = posAndIndex.rowItemIndex;
-		lastVisibleIndex = lastRendered.index;
+		displayed = this._addCurYToDisplayState(curY, {
+			firstRenderedY		: posAndIndex.rowYPos,
+			lastRenderedY		: lastRendered.yPos,
+			firstVisibleIndex	: posAndIndex.rowItemIndex,
+			lastVisibleIndex	: lastRendered.index
+		});
 	}
 	else if (curY > prevDisplayed.firstVisibleY) { // Scrolled downwards but not completely out, since that was tested on above
 		// Scrolling down partly out of visible area
@@ -361,37 +367,40 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 		// just add new ones below current ones.
 
 		// Start-index to add is the one immediately after last-index
-		// unless this is initial update, in which case we should update from index 0
+		// unless this is initial update, in which case we should update from index 0 (startIndex would be 1 if not testing for this)
 		var startIndex = initialUpdate ? 0 : prevDisplayed.lastVisibleIndex + 1;
+
+		// TODO we must look at lastRenderedIndex here to see if items already added, if so there is no need to add
 
 		lastRendered = this._addProvisionalDivs(level + 1, startIndex, prevDisplayed.lastVisibleY, this.numColumns, heightToAdd);
 
 		if (lastRendered == null) {
 			// Nothing was rendered, ie. did not scroll any new items into display
 			// so just return old values
-			firstRenderedY 		= prevDisplayed.firstRenderedY;
-			lastRenderedY 		= prevDisplayed.lastRenderedY;
-			firstVisibleIndex 	= prevDisplayed.firstVisibleIndex;
-			lastVisibleIndex 	= prevDisplayed.lastVisibleIndex;
+			displayed = this._sameDisplayStateWithUpdatedDisplayArea(curY, prevDisplayed);
 		}
 		else {
-			firstRenderedY = posAndIndex.rowYPos;
-			lastRenderedY = lastRendered.yPos;
-			firstVisibleIndex = posAndIndex.rowItemIndex;
-			lastVisibleIndex = lastRendered.index;
+			// Scrolled downwards a bit, update based on downwards scroll
+			displayed = {
+				firstRenderedY		: posAndIndex.rowYPos, // computed from curY above
+				lastRenderedY		: (prevDisplayed.lastRenderedY > lastRendered.yPos ? prevDisplayed.lastRenderedY : lastRendered.yPos),
+				
+				firstVisibleIndex	: posAndIndex.rowItemIndex, // computed from curY above
+				lastVisibleIndex	: lastRendered.index // TODO this is not always correct since we might be rendered preloaded?
+ 			};
 		}
 	}
 	else if (curY === prevDisplayed.firstVisibleY) {
 		// Scroll called without any change in coordinates
-		firstRenderedY 		= prevDisplayed.firstRenderedY;
-		lastRenderedY 		= prevDisplayed.lastRenderedY;
-		firstVisibleIndex 	= prevDisplayed.firstVisibleIndex;
-		lastVisibleIndex 	= prevDisplayed.lastVisibleIndex;
+		displayed = this._sameDisplayStateWithUpdatedDisplayArea(curY, prevDisplayed);
 	}
 	else {
-		this.log(level, 'Did not match any test');
+		console.log('## _updateOnScroll: Did not match any test');
+
+		displayed = this._sameDisplayStateWithUpdatedDisplayArea(curY, prevDisplayed);
 	}
-	
+
+	/*
 	var displayed = {
 		firstVisibleY : curY,
 		firstRenderedY : firstRenderedY,
@@ -400,13 +409,33 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 		lastRenderedY : lastRenderedY,
 		lastVisibleIndex : lastVisibleIndex
 	};
+	*/
 
-	this.exit(level, '_updateOnScroll', JSON.stringify(displayed));
+	this.exit(level, '_updateOnScroll', '' + displayed + '/' + JSON.stringify(displayed));
 	
 	return displayed;
 };
 
+GalleryCacheAllProvisionalSomeComplete.prototype._addCurYToDisplayState = function(curY, displayState) {
+	displayState.firstVisibleY 	= curY;
+	displayState.lastVisibleY	= curY + this._getVisibleHeight() - 1;
+}
 
+GalleryCacheAllProvisionalSomeComplete.prototype._sameDisplayStateWithUpdatedDisplayArea = function(curY, prevDisplayed) {
+	var updated = {
+			firstRenderedY 		: prevDisplayed.firstRenderedY,
+			firstVisibleIndex 	: prevDisplayed.firstVisibleIndex,
+			firstRenderedIndex	: prevDisplayed.firstRenderedIndex,
+			
+			lastRenderedY 		: prevDisplayed.lastRenderedY,
+			lastVisibleIndex 	: prevDisplayed.lastVisibleIndex,
+			lastRenderedIndex	: prevDisplayed.lastRenderedIndex
+	};
+
+	this._addCurYToDisplayState(curY, updated);
+
+	return updated;
+}
 
 
 /**
