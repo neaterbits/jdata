@@ -42,7 +42,7 @@ GalleryModeWidthBase.prototype._computeNumberOfColumns = function(itemWidth, col
 	for (var numColumns = 1;; ++ numColumns) {
 		if (itemWidth * numColumns + columnSpacing * (numColumns + 1) > displayAreaWidth) {
 			if (numColumns == 1) {
-				throw "Not enough space for one column";
+				throw "Not enough space for one column from width " + displayAreaWidth;
 			}
 			
 			found = numColumns - 1;

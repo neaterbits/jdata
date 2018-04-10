@@ -442,6 +442,14 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 		'rowWidth', rowWidth])
 	*/
 	
+	// Make sure first in row is indeed at first
+	var numColumns = this._computeNumColumns();
+	var indexIntoRow = indexOfFirstInRow % numColumns;
+	
+	if (indexIntoRow != 0) {
+		throw "First item not at start of row: " + indexIntoRow;
+	}
+
 	var itemWidth = this.gallerySizes.getSpecificWidthOrNull();
 	var itemHeight = this.gallerySizes.getSpecificHeightOrNull();
 	
@@ -538,6 +546,10 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 	// this.exit(level, '_addRowItems', rowHeight);
 
 	return rowHeight;
+}
+
+GalleryCacheBase.prototype._computeNumColumns = function() {
+	return this.gallerySizes.computeNumColumns(this._getVisibleWidth());
 }
 
 // Apply necessary styling to set dimensions and placement of an item

@@ -82,7 +82,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level) {
 
 	// Get the width of element to compute how many elements there are room for
-	var numColumns = this.gallerySizes.computeNumColumns(this._getVisibleWidth());
+	var numColumns = this._computeNumColumns();
 	
 	this.numColumns = numColumns;
 	
@@ -453,9 +453,14 @@ GalleryCacheAllProvisionalSomeComplete.prototype._getRowItemDivHeights = functio
 	// Store new elements in array and then replace all at once
 	var rowWidthHeights = [];
 	for (var j = 0; j < itemsThisRow; ++ j) {
+
 		var itemElement = rowDiv.childNodes[j];
 
-		rowWidthHeights.push({ width : itemElement.clientWidth, height : itemElement.clientHeight })
+		var div = itemElement.getElementsByTagName('div')[0];
+		
+		var html = typeof div === 'undefined' ? '<undefined>' : div.innerHTML;
+		
+		rowWidthHeights.push({ width : itemElement.clientWidth, height : itemElement.clientHeight, html : html })
 	}
 	
 	return rowWidthHeights;
@@ -501,24 +506,25 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 	var rowWidth = this._getRowWidth();
 	var numRows = this.cachedRowDivs.length;
 	var numRowsTotal = ((this._getTotalNumberOfItems() - 1) / this.numColumns) + 1;
-	
+
 	for (var row = 0, i = firstModelItemIndex; row < numRows && i < itemCount; ++ row) {
-		
+
 		var rowDiv = this.cachedRowDivs[row];
 		var itemsThisRow = rowDiv.childNodes.length;
+
 
 		// Store new elements in array and then replace all at once
 		var rowWidthHeights = this._getRowItemDivHeights(rowDiv);
 
 		var t = this;
 
-		// Replace row items
+		// Replace row items, even if says _addRowItems() it does replace items
 		this._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
 				function (index, itemWidth, itemHeight) {
-			
+
 					var completeData = completeDataArray[index - firstModelItemIndex];
 					var item;
-					
+
 					if (completeData == null) {
 						item = rowDiv.childNodes[index - i];
 					}
@@ -536,9 +542,9 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 	
 	//					newRowItems.push(element);
 				});
-		
+
 		var updatedRowWidthHeights = this._getRowItemDivHeights(rowDiv);
-	
+
 		for (var j = 0; j < itemsThisRow; ++ j) {
 			var prevDim = rowWidthHeights[j];
 			var curDim  = updatedRowWidthHeights[j];
@@ -546,13 +552,14 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 			if (prevDim.width !== curDim.width || prevDim.height !== curDim.height) {
 				
 				var itemIndex = i + j;
-				
+
 				var provisionalData = this.provisionalDataArray[itemIndex];
 				var completeData = this.cacheItems._debugGetCachedDataAtIndex(itemIndex);
-				
-				throw "Gallery item dimensions changed between provisional and updated for " + itemIndex + ", row " + j
+
+				console.log("## Gallery item dimensions changed between provisional and updated for " + itemIndex + ", row " + j
 					+ " : prev=" + JSON.stringify(prevDim) + ", cur=" + JSON.stringify(curDim) + ", provisional data " + JSON.stringify(provisionalData)
-					;
+					);
+				throw "throw exception"
 			}
 		}
 
@@ -594,20 +601,27 @@ GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(
 
 GalleryCacheAllProvisionalSomeComplete.prototype._findElementYPosAndItemIndex = function(level, yPos) {
 	
-	this.enter(level, 'findElementPos', [ 'yPos', yPos ])
+	this.enter(level, '_findElementYPosAndItemIndex', [ 'yPos', yPos ])
 
 	// Go though heights list until we find the one that intersects with this y pos
 	var y = 0;
 
 	var elem = null;
 	
+	// TODO this is not entirely correct since rows might be separate heights
+
 	// We do not know item heights, only an approximation in case of heightHint
 	// so just figure out by multiplying
 	var heightOfOneElement = this.gallerySizes.getHeightOfOneElement();
 	
+	var numColumns = this._computeNumColumns();
+	
 	// Now we have can divide to find start
-	var itemIndex = Math.floor(yPos / heightOfOneElement);
-	var rowYPos = heightOfOneElement * itemIndex;
+	var row = Math.floor(yPos / heightOfOneElement);
+	
+	var itemIndex = row * numColumns;
+	
+	var rowYPos = heightOfOneElement * row;
 	
 	elem = { 'rowYPos' : rowYPos, 'rowItemIndex' : itemIndex };
 
@@ -634,7 +648,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._findElementYPosAndItemIndex = 
 	}
 	*/
 
-	this.exit(level, 'findElementPos', JSON.stringify(elem));
+	this.exit(level, '_findElementYPosAndItemIndex', JSON.stringify(elem));
 	
 	return elem;
 }
