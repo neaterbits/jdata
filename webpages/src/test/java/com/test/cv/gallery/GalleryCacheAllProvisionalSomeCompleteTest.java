@@ -1,9 +1,7 @@
 package com.test.cv.gallery;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,27 +61,27 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 
 		cache.setGalleryDivs(outer, inner);
 		
-		assertThat(galleryModel.downloadProvisional.size()).isEqualTo(0);
+		assertThat(galleryModel.getProvisionalRequestCount()).isEqualTo(0);
 
 		final int totalNumberOfItems = 20;
 		
 		cache.refreshWithJSObjs(totalNumberOfItems);
 		
 		// Should get initial reqest for provisional data
-		assertThat(galleryModel.downloadProvisional.size()).isEqualTo(1);
+		assertThat(galleryModel.getProvisionalRequestCount()).isEqualTo(1);
 		
 		// Call back with provisional
-		final DownloadInvocation initialProvisional = galleryModel.downloadProvisional.get(0);
-		galleryModel.downloadProvisional.clear();
+		final DownloadInvocation initialProvisional = galleryModel.getProvisionalRequestAt(0);
+		galleryModel.clearProvisionalRequests();
 		
 		assertThat(initialProvisional.getStartIndex()).isEqualTo(0);
 		assertThat(initialProvisional.getCount()).isEqualTo(totalNumberOfItems);
 		
 		// Call back with data, will generate strings to send back
 		initialProvisional.onDownloaded();
-		
+
 		// Should try to download complete-items as well
-		assertThat(galleryModel.downloadComplete.size()).isEqualTo(0);
+		assertThat(galleryModel.getCompleteRequestCount()).isEqualTo(0);
 	}
 
 }

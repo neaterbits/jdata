@@ -9,8 +9,8 @@ import com.test.cv.jsutils.JSFunction;
 
 public class GalleryModelStub implements GalleryModel {
 	
-	public final List<DownloadInvocation> downloadProvisional  = new ArrayList<>();
-	public final List<DownloadInvocation> downloadComplete = new ArrayList<>();
+	private final List<DownloadInvocation> downloadProvisional  = new ArrayList<>();
+	private final List<DownloadInvocation> downloadComplete = new ArrayList<>();
 
 	private final Function<Object, JSFunction> getJSFunction;
 
@@ -22,6 +22,21 @@ public class GalleryModelStub implements GalleryModel {
 		this.getJSFunction = getJSFunction;
 	}
 	
+	public int getProvisionalRequestCount() {
+		return downloadProvisional.size();
+	}
+	
+	public DownloadInvocation getProvisionalRequestAt(int index) {
+		return downloadProvisional.get(index);
+	}
+	
+	public void clearProvisionalRequests() {
+		downloadProvisional.clear();
+	}
+	
+	public int getCompleteRequestCount() {
+		return downloadComplete.size();
+	}
 
 	@Override
 	public void getProvisionalData(int index, int count, Object onSuccess) {
