@@ -14,7 +14,7 @@ function GalleryCacheAllProvisionalSomeComplete(gallerySizes, galleryModel, gall
 	GalleryCacheBase.call(this, gallerySizes, galleryModel, galleryView, initialTotalNumberOfItems);
 
 	/**
-	 * visibleElements record keeps track of where we are in terms of what is rendered
+	 * displayState record keeps track of where we are in terms of what is rendered
 	 * right now. It is kept as a separate JS object so that it can be passed around and returned by functions/methods.
 	 * 
 	 * Note that there is no track of index of first visible item as this can be computed on the fly from
@@ -37,7 +37,7 @@ function GalleryCacheAllProvisionalSomeComplete(gallerySizes, galleryModel, gall
 	 *                     and always add a complete row div with all of them.
 	 */
 
-	this.visibleElements = null;
+	this.displayState = null;
 }
 
 GalleryCacheAllProvisionalSomeComplete.prototype = Object.create(GalleryCacheBase.prototype);
@@ -112,24 +112,26 @@ GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level) {
 	
 	this.log(level, 'Visible height: ' + visibleHeight);
 	
-	// Start at the current ones
+	// Start at index 0 and render on
 	var rendered = this._addProvisionalDivs(level + 1, 0, 0, numColumns, visibleHeight);
 
 	if (rendered != null) {
-		this.visibleElements = {
+		this.displayState = {
 			firstVisibleY : 0,
 			firstRenderedY : 0, // renders a bit outside of display since adding complete rows
 			firstVisibleIndex : 0,
+			firstRenderedIndex : 0,
 			lastVisibleY : visibleHeight - 1,
 			lastRenderedY : rendered.yPos, // renders a bit outside of display since adding complete rows
-			lastVisibleIndex : rendered.index
+			lastVisibleIndex : rendered.index,
+			lastRenderedIndex : rendered.index
 		};
 
 		// Update complete-rendering as well
-		this._downloadAndRenderComplete(level, this.visibleElements);
+		this._downloadAndRenderComplete(level, this.displayState);
 	}
 
-	this._updateHeightIfApproximation(level + 1, this.visibleElements);
+	this._updateHeightIfApproximation(level + 1, this.displayState);
 }
 
 /**
@@ -138,16 +140,16 @@ GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level) {
  * 
  */
 
-GalleryCacheAllProvisionalSomeComplete.prototype._updateHeightIfApproximation = function(level, visibleElements) {
+GalleryCacheAllProvisionalSomeComplete.prototype._updateHeightIfApproximation = function(level, displayState) {
 	
-	this.enter(level, '_updateHeightIfApproximation', ['visibleElements', JSON.stringify(visibleElements)]);
+	this.enter(level, '_updateHeightIfApproximation', ['displayState', JSON.stringify(displayState)]);
 
 	if (this.gallerySizes.getSpecificHeightOrNull() == null) {
 		
 		// Only height hint, must update remaning height as has not been set accurately
 		
 		var currentHeight = this._getScrollableHeight();
-		var lastRenderedY = visibleElements.lastRenderedY;
+		var lastRenderedY = displayState.lastRenderedY;
 		
 		if (currentHeight < lastRenderedY) {
 			throw "currentHeight < lastRenderedY";
@@ -156,7 +158,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateHeightIfApproximation = 
 		// Computes height after last-rendered element
 		var remainingElements
 			= this._getTotalNumberOfItems()
-				- visibleElements.lastVisibleIndex
+				- displayState.lastVisibleIndex
 				- 1; // since last visible is index, so if 3 elements total, last element is index 2
 
 		// Now divide up remaining space on those elements
@@ -196,13 +198,13 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 	
 	// var curFirstY = this.firstY;
 	
-	var lastVisibleElements = this.visibleElements;
+	var lastDisplayState = this.displayState;
 	
 	// Updates first and last cached item index base on y position
-	this.visibleElements = this._updateOnScroll(level + 1, yPos, this.visibleElements);
+	this.displayState = this._updateOnScroll(level + 1, yPos, this.displayState);
 	
-	if (lastVisibleElements == this.visibleElements) {
-		throw "Expected updated visibleElements instance to be returned";
+	if (lastDisplayState == this.displayState) {
+		throw "Expected updated displayState instance to be returned";
 	}
 	
 	// Start a timer to check whether user has stopped scrolling,
@@ -230,36 +232,36 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 	*/
 	
 	// Only call cache to load items if display has changed
-	if (   lastVisibleElements == null
-		|| lastVisibleElements.firstVisibleIndex != this.visibleElements.firstVisibleIndex
-		|| lastVisibleElements.lastVisibleIndex != this.visibleElements.lastVisibleIndex) {
+	if (   lastDisplayState == null
+		|| lastDisplayState.firstVisibleIndex != this.displayState.firstVisibleIndex
+		|| lastDisplayState.lastVisibleIndex != this.displayState.lastVisibleIndex) {
 	
 		// Update cache view to point to new display area, it will also preload elements around display area
-		this._downloadAndRenderComplete(level + 1, this.visibleElements);
+		this._downloadAndRenderComplete(level + 1, this.displayState);
 	}
 
-	this._updateHeightIfApproximation(level + 1, this.visibleElements);
+	this._updateHeightIfApproximation(level + 1, this.displayState);
 
 	this.exit(level, 'updateOnScroll');
 }
 
-GalleryCacheAllProvisionalSomeComplete.prototype._downloadAndRenderComplete = function(level, visibleElements) {
-	var visibleCount = visibleElements.lastVisibleIndex - visibleElements.firstVisibleIndex + 1;
+GalleryCacheAllProvisionalSomeComplete.prototype._downloadAndRenderComplete = function(level, displayState) {
+	var visibleCount = displayState.lastVisibleIndex - displayState.firstVisibleIndex + 1;
 	
 	var t = this;
 	
 	// TODO also add callback for preload data since we would want to precreate divs? Test whether is good enough without
 	this.cacheItems.updateVisibleArea(
 			level + 1,
-			this.visibleElements.firstVisibleIndex,
+			this.displayState.firstVisibleIndex,
 			visibleCount,
 			this.totalNumberOfItems,
 			
 			function (index, count, downloadedData) {
 				
 				// Only called when haven't scrolled (eg no other call to updateVisibleArea)
-				if (index !== visibleElements.firstVisibleIndex) {
-					throw "Index mismatch: requested=" + visibleElements.firstVisibleIndex + ", retrieved: " + index;
+				if (index !== displayState.firstVisibleIndex) {
+					throw "Index mismatch: requested=" + displayState.firstVisibleIndex + ", retrieved: " + index;
 				}
 				if (count !== visibleCount) {
 					throw "Count mismatch: " + count + "/" + visibleCount;
@@ -403,6 +405,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 	
 	return displayed;
 };
+
 
 
 
