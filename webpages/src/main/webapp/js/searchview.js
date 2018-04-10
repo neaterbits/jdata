@@ -321,7 +321,7 @@ function SearchView(
 
 		var provisionalImage = document.createElement('div');
 		
-		div.setAttribute('class', 'provisionalImage');
+		provisionalImage.setAttribute('class', 'provisionalImage');
 
 		provisionalImage.style.width = data.thumbWidth;
 		provisionalImage.style.height = data.thumbHeight;
