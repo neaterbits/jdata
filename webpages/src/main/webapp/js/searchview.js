@@ -82,13 +82,15 @@ function SearchView(
 		this._postAjax(this.searchUrl + '?itemType=_all_', function(response) {
 			t.curResponse = response;
 
-			t._updateFacets(response.facets, onsuccess);
+			t._updateFacets(response.facets);
 
 			// Refresh gallery, will call back to galleryModel (ie. in this file) that were passed to Gallery constructor
 			t.gallery.refresh(response.items.length)
 
 			t._updateSearchHitsCount(response);
 			t._updateSortOrderFromResponse(response.sortOrders);
+
+			onsuccess();
 		});
 	}
 
@@ -136,12 +138,14 @@ function SearchView(
 			
 			t.curResponse = response;
 			
-			t._updateFacets(response.facets, onsuccess);
+			t._updateFacets(response.facets);
 
 			t.gallery.refresh(response.items.length);
 			
 			t._updateSearchHitsCount(response);
 			t._updateSortOrderFromResponse(response.sortOrders);
+			
+			onsuccess();
 		});
 	}
 	
@@ -186,12 +190,10 @@ function SearchView(
 		return option;
 	}
 
-	this._updateFacets = function(facets, onsuccess) {
+	this._updateFacets = function(facets) {
 		this.facetModel.updateFacets(facets);
 
 		this.facetController.refresh(false); // TODO true if caused by full-search update, must pass search criteria in response? Or some userData
-
-		onsuccess();
 	}
 	
 	// Search based on current criteria
