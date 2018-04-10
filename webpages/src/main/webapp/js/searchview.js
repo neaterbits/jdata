@@ -16,6 +16,13 @@ function SearchView(
 		searchHitsCountId,
 		sortListboxId) {
 
+	// Reasons for refreshing
+	var REFRESH_INITIAL = 0; 			// Initial refresh, ie. when retrieving initial model
+	var REFRESH_SEARCH_TEXT_CHANGE = 1; // Search button pressed
+	var REFRESH_API_TRIGGERED = 2; 		// Refresh called from outside
+	var REFRESH_FACET_SELECTION = 3; 	// User selected checkbox in facets
+	var REFRESH_SORT_CHANGE = 4;		// User selected other sort order
+	
 	var facetModel = new FacetModel();
 
 	// creates HTML elements
@@ -26,7 +33,7 @@ function SearchView(
 	// View related logic
 	var facetView = new FacetView(facetsDiv, viewElements, function(criteria) {
 		console.log("Criteria updated: " + criteria);
-		t._refreshFromCriteria(criteria.types, criteria.criteria, function () {
+		t._refreshFromCriteria(criteria.types, criteria.criteria, REFRESH_FACET_SELECTION, function () {
 			console.log('refresh done');
 		});
 
@@ -54,7 +61,7 @@ function SearchView(
 	
 	searchButtonElement.onclick = function(e) {
 		if (t.curResponse != null) {
-			t.refresh(false);
+			t._refresh(REFRESH_SEARCH_TEXT_CHANGE);
 		}
 	}
 	
@@ -70,11 +77,11 @@ function SearchView(
 		// Updated sort order, change sort order of result
 		// Call for new result set from server
 		if (t.curResponse != null) {
-			t.refresh(false);
+			t._refresh(REFRESH_SORT_CHANGE);
 		}
 	};
 
-	this._getInitial = function(onsuccess) {
+	this._downloadAll = function(onsuccess) {
 
 		var t = this;
 
@@ -82,7 +89,7 @@ function SearchView(
 		this._postAjax(this.searchUrl + '?itemType=_all_', function(response) {
 			t.curResponse = response;
 
-			t._updateFacets(response.facets);
+			t._updateFacets(response.facets, REFRESH_INITIAL);
 
 			// Refresh gallery, will call back to galleryModel (ie. in this file) that were passed to Gallery constructor
 			t.gallery.refresh(response.items.length)
@@ -108,7 +115,7 @@ function SearchView(
 		return index >= 0 ? this.sortListboxElement.options[index].value : null;
 	}
 
-	this._refreshFromCriteria = function(types, criteria, onsuccess) {
+	this._refreshFromCriteria = function(types, criteria, reason, onsuccess) {
 		
 		var t = this;
 		
@@ -138,7 +145,7 @@ function SearchView(
 			
 			t.curResponse = response;
 			
-			t._updateFacets(response.facets);
+			t._updateFacets(response.facets, reason);
 
 			t.gallery.refresh(response.items.length);
 			
@@ -190,25 +197,37 @@ function SearchView(
 		return option;
 	}
 
-	this._updateFacets = function(facets) {
+	this._updateFacets = function(facets, reason) {
+		
+		console.log('## updateFacets, reason=' + reason);
+		
 		this.facetModel.updateFacets(facets);
-
-		this.facetController.refresh(false); // TODO true if caused by full-search update, must pass search criteria in response? Or some userData
+		
+		// If this is not a facet selecton or just a sort order change, we will have to update facets completely
+		var isFullUpdate = reason != REFRESH_FACET_SELECTION && reason != REFRESH_SORT_CHANGE;
+		
+		this.facetController.refresh(isFullUpdate);
 	}
 	
 	// Search based on current criteria
-	this.refresh = function(completeRefresh) {
+	this.refresh = function() {
+		this._refresh(REFRESH_API_TRIGGERED);
+	}
+
+	this._refresh = function(reason) {
 
 		var t = this;
+		var completeRefresh =    reason === REFRESH_API_TRIGGERED
+							  || reason === REFRESH_INITIAL;
 
 		if (!completeRefresh && this.hasPerformedInitialSearch) {
 			// Get selected criteria from facet controller
 			var criteria = t.facetView.collectCriteriaAndTypesFromSelections();
 
-			this._refreshFromCriteria(criteria.types, criteria.criteria, function() {});
+			this._refreshFromCriteria(criteria.types, criteria.criteria, reason, function() {});
 		}
 		else {
-			this._getInitial(function() {
+			this._downloadAll(function() {
 				t.hasPerformedInitialSearch = true;
 			});
 		}

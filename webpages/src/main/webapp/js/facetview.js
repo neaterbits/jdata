@@ -423,11 +423,11 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	 * We do that without rebuilding the whole thing, this way current selection state is maintained
 	 */
 	
-	this.refreshFromNewModel = function(model, causedByFullTextSearchUpdate) {
+	this.refreshFromNewModel = function(model, isFullUpdate) {
 
 		var facetUpdate = new FacetUpdateShowHide();
 		
-		if (causedByFullTextSearchUpdate) {
+		if (isFullUpdate) {
 			// Caused by fulltext update, that means we are going to remove elements
 			// from the viewmodel if they are no longer in the datamodel
 			// and add items to the view model if there are new ones in the datamodel
