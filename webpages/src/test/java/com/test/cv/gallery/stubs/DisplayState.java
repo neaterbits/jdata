@@ -1,5 +1,7 @@
 package com.test.cv.gallery.stubs;
 
+import java.util.Map;
+
 import com.test.cv.jsutils.JSInvocable;
 import com.test.cv.jsutils.JavaWrapper;
 
@@ -56,7 +58,19 @@ public final class DisplayState extends JavaWrapper {
 		return getIntProperty("lastVisibleY");
 	}
 
-	public final boolean hasRenderStateComplete(int index) {
+	public DisplayState setRenderStateComplete(int index, int count) {
+		final Object jsObj = invokeMethod("setRenderStateComplete", index, count);
+
+		return new DisplayState(getInvocable(), jsObj);
+	}
+
+	public boolean hasRenderStateComplete(int index) {
 		return (Boolean)invokeMethod("hasRenderStateComplete", index);
+	}
+
+	public DisplayState addCurYToDisplayState(int curY, int visibleHeight, Map<String, Object> displayStateFields) {
+		final Object jsObj = invokeMethod("addCurYToDisplayState", curY, visibleHeight, displayStateFields);
+		
+		return new DisplayState(getInvocable(), jsObj);
 	}
 }

@@ -34,19 +34,21 @@ var DisplayState = function () {
 
 }
 
+DisplayState.prototype = Object.create(GalleryBase.prototype);
+
 // For renderState[] items
 var RENDER_STATE_PROVISIONAL = 1;
 var RENDER_STATE_COMPLETE = 2;
 
 DisplayState._fields = [
-	'firstVisibleY',
-	'firstRenderedY',
 	'firstVisibleIndex',
-	'firstRenderedIndex',
-	'lastVisibleY',
-	'lastRenderedY',
 	'lastVisibleIndex',
-	'lastRenderedIndex'
+	'firstRenderedIndex',
+	'lastRenderedIndex',
+	'firstVisibleY',
+	'lastVisibleY',
+	'firstRenderedY',
+	'lastRenderedY'
 ];
 
 
@@ -108,13 +110,28 @@ DisplayState.createFromFields = function(fieldsToApply) {
 	return displayState;
 }
 
-DisplayState.addCurYToDisplayState = function(curY, visibleHeight, prevDisplayed, displayStateFields) {
+DisplayState.prototype.addCurYToDisplayState = function(curY, visibleHeight, displayStateFields) {
 
-	var copy = prevDisplayed._makeCopy();
+	var copy = this._makeCopy();
 
 	copy._applyFields(displayStateFields)
 	copy._addCurYToDisplayState(curY, visibleHeight);
 
+	copy._checkRenderState();
+	
+	var prevFirstRenderedIndex = this.firstRenderedIndex;
+	var prevLastRenderedIndex = this.lastRenderedIndex;
+
+	var prevNumRendered = prevLastRenderedIndex - prevFirstRenderedIndex + 1;
+
+	var newFirstRenderedIndex = displayStateFields.firstRenderedIndex;
+	var newLastRenderedIndex = displayStateFields.lastRenderedIndex;
+
+	var newNumRendered = newLastRenderedIndex - newFirstRenderedIndex + 1;
+
+	// Must look for overlap and move over any items that overlap between the two arrays into a new array,
+	// maintaining indices and any already set items as we scroll
+	
 	return copy;
 }
 
@@ -226,6 +243,8 @@ DisplayState.prototype.sameWithUpdateVisibleIndices - function(firstVisibleIndex
 	updated.firstVisibleIndex = firstVisibleIndex;
 	updated.lastVisibleIndex = lastVisibleIndex;
 
+	updated._checkRenderState();
+
 	return updated;
 }
 
@@ -233,7 +252,7 @@ DisplayState.prototype._checkRenderState = function(index) {
 	var numRendered = this.lastRenderedIndex - this.firstRenderedIndex + 1;
 	
 	if (numRendered !== this.renderState.length) {
-		throw "numRendered !== renderState.length";
+		throw "numRendered !== renderState.length: " + numRendered + "/" + this.renderState.length;
 	}
 }
 
@@ -245,24 +264,29 @@ DisplayState._checkRenderStateIndex = function(index) {
 	if (index > this.lastRenderedIndex) {
 		throw "index > this.lastRenderedIndex";
 	}
-	
 }
 
 DisplayState.prototype.setRenderStateComplete = function(index, count) {
 
-	this._checkRenderState();
+	var copy = this._makeCopy();
+	
+	copy._checkRenderState();
 
 	DisplayState._checkRenderStateIndex(index);
 
-	if (index + count > this.lastRenderedIndex) {
-		throw "index + count > this.lastRenderedIndex";
+	if (index + count - 1> copy.lastRenderedIndex) {
+		throw "index + count > this.lastRenderedIndex: " + index + "/" + count + "/" + copy.lastRenderedIndex;
 	}
 	
 	for (var i = 0; i < count; ++ i) {
-		var offset = index - this.firstRenderedIndex;
-		
-		this.renderState[offset] = RENDER_STATE_COMPLETE;
+		var offset = index - copy.firstRenderedIndex;
+
+		copy.renderState[offset + i] = RENDER_STATE_COMPLETE;
 	}
+
+	copy._checkRenderState();
+
+	return copy;
 }
 
 DisplayState.prototype.hasRenderStateComplete = function(index) {

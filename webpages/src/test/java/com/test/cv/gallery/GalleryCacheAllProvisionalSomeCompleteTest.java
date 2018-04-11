@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,7 +24,6 @@ import com.test.cv.gallery.stubs.MakeDownloadData;
 import com.test.cv.gallery.stubs.UpdateVisibleAreaRequest;
 import com.test.cv.gallery.stubs.html.Div;
 import com.test.cv.gallery.stubs.html.Element;
-import com.test.cv.gallery.stubs.modeldata.ElementSize;
 import com.test.cv.gallery.stubs.modeldata.GalleryItemData;
 import com.test.cv.gallery.stubs.modeldata.ProvisionalData;
 import com.test.cv.gallery.wrappers.GalleryCacheAllProvisionalSomeComplete;
@@ -190,12 +190,26 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(ds.getLastRenderedY()).isEqualTo(lastRenderedY);
 	}
 	
-	private void checkDisplayStateIsAllProvisional(GalleryCacheAllProvisionalSomeComplete cache) {
+	
+	private void checkDisplayStateIs(GalleryCacheAllProvisionalSomeComplete cache, int firstIndex, int lastIndex, Predicate<Boolean> predicate) {
 		final DisplayState ds = cache.whiteboxGetDisplayState();
 		
-		for (int i = ds.getFirstRenderedIndex(); i <= ds.getLastRenderedIndex(); ++ i) {
-			assertThat(ds.hasRenderStateComplete(i)).isFalse();
+		for (int i = firstIndex; i <= lastIndex; ++ i) {
+			final boolean complete = ds.hasRenderStateComplete(i);
+			
+			assertThat(predicate.test(complete)).isTrue();
 		}
+	}
+	
+	
+	private void checkDisplayStateIsComplete(GalleryCacheAllProvisionalSomeComplete cache, int firstIndex, int lastIndex) {
+		checkDisplayStateIs(cache, firstIndex, lastIndex, complete -> complete);
+	}
+	
+	private void checkDisplayStateIsAllProvisional(GalleryCacheAllProvisionalSomeComplete cache) {
+		final DisplayState ds = cache.whiteboxGetDisplayState();
+
+		checkDisplayStateIs(cache, ds.getFirstRenderedIndex(), ds.getLastRenderedIndex(), complete -> !complete);
 	}
 	
 	public void testComputeIndexOfLastOnRow() throws IOException {
@@ -234,12 +248,13 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(request.getFirstVisibleIndex()).isEqualTo(0);
 		assertThat(request.getVisibleCount()).isEqualTo(9); // 9 elements since (240 + 20) * 2 = 520 < 600
 		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
-		
+
 		checkDisplayState(cm.cache, 0, 8, 0, 8, 0, 599, 0, 749);
 		checkDisplayStateIsAllProvisional(cm.cache);
-		
+
 		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
-		
+		checkDisplayStateIsComplete(cm.cache, 0, 8); // 0-8 is complete, ie. all rendered 
+
 		// Scroll cache and check that calls for correct update of visible area
 
 		// Clear list
@@ -252,6 +267,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(0);
 		
 		checkDisplayState(cm.cache, 0, 8, 0, 8, 20, 619, 0, 749);
+		checkDisplayStateIsComplete(cm.cache, 0, 8); // 0-8 is complete, ie. all rendered 
 
 		
 		// Scroll to 400, ought to be necessary to download new items
@@ -269,6 +285,9 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 
 		checkDisplayState(cm.cache, 3, 11, 0, 11, 400, 999, 0, 999);
 
+		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
+		checkDisplayStateIsComplete(cm.cache, 0, 11);
+		
 		// Is now at 750 + 250 = 1000, scroll to 900
 		cacheItems.clearUpdateRequests();
 		

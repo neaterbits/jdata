@@ -1,5 +1,7 @@
 package com.test.cv.jsutils;
 
+import java.lang.reflect.Array;
+
 import javax.script.CompiledScript;
 import javax.script.Invocable;
 import javax.script.ScriptContext;
@@ -57,6 +59,16 @@ final class JSRuntime implements JSInvocable {
 	}
 	
 	@Override
+	public Object invokeFunctionObject(Object function, Object... args) {
+		return ((JSObject)function).call(null, args);
+	}
+
+	@Override
+	public Object getVariable(String name) {
+		return scriptContext.getAttribute(name);
+	}
+
+	@Override
 	public Object invokeMethod(Object obj, String method, Object ... args) {
 		
 		if (obj == null) {
@@ -94,4 +106,27 @@ final class JSRuntime implements JSInvocable {
 
 		return jsObj.getMember(property);
 	}
+
+	@Override
+	public <T> T[] getJSArray(Object jsArrayObject, Class<T> memberClass) {
+	
+		final JSObject jsObject = (JSObject)jsArrayObject;
+		
+		if (!jsObject.isArray()) {
+			throw new IllegalArgumentException("Not an array");
+		}
+		
+		final int arrayLength = jsObject.values().size();
+		
+		@SuppressWarnings("unchecked")
+		final T[] resultArray =(T[]) Array.newInstance(memberClass, arrayLength);
+		
+		for (int i = 0; i < arrayLength; ++ i) {
+			resultArray[i] = (T)jsObject.getSlot(i);
+		}
+		
+		return resultArray;
+	}
+
+	
 }

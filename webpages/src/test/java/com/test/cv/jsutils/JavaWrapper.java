@@ -25,6 +25,10 @@ public abstract class JavaWrapper {
 		return invocable.getProperty(jsObject, property);
 	}
 	
+	protected final <T> T[] getJSArray(Object jsArrayObject, Class<T> memberClass) {
+		return invocable.getJSArray(jsArrayObject, memberClass);
+	}
+	
 	protected final JSInvocable getInvocable() {
 		return invocable;
 	}

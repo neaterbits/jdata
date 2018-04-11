@@ -259,7 +259,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._downloadAndRenderComplete = fu
 				}
 
 				// Can now update rows from data
-				t._showCompleteForRows(0, index, count, downloadedData);
+				t.displayState = t._showCompleteForRows(0, index, count, downloadedData, t.displayState);
 			});
 	
 	this.exit(level, '_downloadAndRenderComplete');
@@ -442,10 +442,9 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 
 GalleryCacheAllProvisionalSomeComplete.prototype._addCurYToDisplayState = function(curY, prevDisplayed, displayStateFields) {
 
-	var displayState = DisplayState.addCurYToDisplayState(
+	var displayState = prevDisplayed.addCurYToDisplayState(
 			curY,
 			this._getVisibleHeight(),
-			prevDisplayed,
 			displayStateFields);
 	
 	return displayState;
@@ -544,12 +543,13 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showComplete = function(level,
  * - completeDataArray - array of complete-data for items, contains only itemCount entries 
  * 
  */
-GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function(level, firstModelItemIndex, itemCount, completeDataArray) {
+GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function(level, firstModelItemIndex, itemCount, completeDataArray, prevDisplayed) {
 	
 	this.enter(level, '_showCompleteForRows', [
 		'firstModelItemIndex', firstModelItemIndex,
 		'itemCount', itemCount,
-		'completeDataArray', completeDataArray.length
+		'completeDataArray', completeDataArray.length,
+		'prevDisplayed', prevDisplayed.toDebugString()
 	]);
 
 	if (completeDataArray.length !== itemCount) {
@@ -622,7 +622,11 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 		i += itemsThisRow;
 	}
 
-	this.exit(level, '_showCompleteForRows');
+	var updatedDisplayState = prevDisplayed.setRenderStateComplete(firstModelItemIndex, itemCount);
+
+	this.exit(level, '_showCompleteForRows', updatedDisplayState.toDebugString());
+	
+	return updatedDisplayState;
 }
 
 GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(level, curY, posAndIndex) {

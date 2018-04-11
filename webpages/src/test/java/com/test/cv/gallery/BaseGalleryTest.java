@@ -20,7 +20,7 @@ public class BaseGalleryTest extends BaseJSTest {
 	 * @throws IOException
 	 */
 
-	final JSInvocable prepareGalleryRuntime(Map<String, Object> bindings, ConstructRequest ... constructRequests) throws IOException {
+	protected final JSInvocable prepareGalleryRuntime(Map<String, Object> bindings, ConstructRequest ... constructRequests) throws IOException {
 
 		final JSInvocable jsRuntime = super.prepareMavenWebAppScripts(bindings, constructRequests,
 				"gallery_base.js",

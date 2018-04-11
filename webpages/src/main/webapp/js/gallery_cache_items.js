@@ -201,7 +201,12 @@ GalleryCacheItems.prototype.updateVisibleArea = function(level, firstVisibleInde
 		this.log(level, "Look for overlapping area after scroll: firstVisibleIndex=" + firstVisibleIndex +
 				", curFirstCachedIndex=" + curFirstCachedIndex + ", lastVisibleIndex=" + lastVisibleIndex + ", curLastCachedIndex=" + curLastCachedIndex);
 
-		this.cachedData = this._copyOverAnyOverlapping(level + 1, layout, firstVisibleIndex, curFirstCachedIndex, lastVisibleIndex, curLastCachedIndex);
+		this.cachedData = this.scrollVirtualArrayView(level + 1,
+				this.cachedData,
+				curFirstCachedIndex, curLastCachedIndex,
+				firstVisibleIndex, lastVisibleIndex,
+				layout.firstCachedIndex, layout.lastCachedIndex,
+				null);
 
 		this._downloadForVisibleAndPreloadAreas(level + 1, layout, firstVisibleIndex, visibleCount, totalNumberOfItems, onAllVisibleDownloaded);
 	}
@@ -254,108 +259,6 @@ GalleryCacheItems.prototype._allocateCacheArray = function(level, firstVisibleIn
 	this.exit(level, '_allocateCacheArray', array.length);
 
 	return array;
-}
-
-GalleryCacheItems.prototype._copyOverAnyOverlapping = function(level, layout, firstVisibleIndex, curFirstCachedIndex, lastVisibleIndex, curLastCachedIndex) {
-	
-	this.enter(level, '_copyOverAnyOverlapping', [
-		'layout', JSON.stringify(layout),
-		'firstVisibleIndex', firstVisibleIndex,
-		'curFirstCachedIndex', curFirstCachedIndex,
-		'lastVisibleIndex', lastVisibleIndex,
-		'curLastCachedIndex', curLastCachedIndex
-	]);
-	
-	var overlapFirstIndex;
-	var overlapLastIndex;
-
-	if (firstVisibleIndex >= curFirstCachedIndex && lastVisibleIndex <= curLastCachedIndex) {
-		overlapFirstIndex = firstVisibleIndex;
-		overlapLastIndex = lastVisibleIndex;
-	}
-	else if (firstVisibleIndex < curFirstCachedIndex && lastVisibleIndex >= curFirstCachedIndex && lastVisibleIndex <= curLastCachedIndex) {
-		overlapFirstIndex = curFirstCachedIndex;
-		overlapLastIndex = lastVisibleIndex;
-	}
-	else if (firstVisibleIndex > curFirstCachedIndex && firstVisibleIndex <= curLastCachedIndex && lastVisibleIndex > curLastCachedIndex) {
-		overlapFirstIndex = firstVisibleIndex;
-		overlapLastIndex = curLastCachedIndex;
-	}
-	else if (firstVisibleIndex < curFirstCachedIndex && lastVisibleIndex > curLastCachedIndex) {
-		throw "!! visible area superset of cached area !!";
-	}
-	else {
-		throw "Unhandled area state";
-	}
-	
-	if (overlapLastIndex < overlapFirstIndex) {
-		throw "overlapLastIndex < overlapFirstIndex: overlapLastIndex=" + overlapLastIndex + ", overlapFirstIndex=" + overlapFirstIndex;
-	}
-
-	var newArrayLength = layout.lastCachedIndex - layout.firstCachedIndex + 1;
-	var newArray;
-
-	if (overlapFirstIndex != -1 && overlapLastIndex != -1) {
-		// Overlap at some coordinate in the virtual array.
-		// Create a new array and jus copy the overlapping area over, fill the rest with null
-		
-		newArray = new Array(newArrayLength);
-
-		var numOverlapping = overlapLastIndex - overlapFirstIndex + 1;
-		
-		// First cache array index of overlapping
-		this.log(level, 'Found number of overlapping ' + numOverlapping + ' from ' + overlapFirstIndex + ' to ' + overlapLastIndex);
-		
-		var dstFirstOverlapping = overlapFirstIndex - layout.firstCachedIndex;
-		
-		// null value for all up to overlap
-		
-		this.log(level, 'Adding null entries up to ' + dstFirstOverlapping);
-
-		for (var i = 0; i < dstFirstOverlapping; ++ i) {
-			newArray[i] = null;
-		}
-		
-		// Copy all overlapping items' refs from current array
-		var srcFirstOverlapping = overlapFirstIndex - curFirstCachedIndex;
-
-		this.log(level, 'Adding overlapping entries to dst from ' + dstFirstOverlapping + ", src " + srcFirstOverlapping + ', count ' + numOverlapping);
-
-		for (var i = 0; i < numOverlapping; ++ i) {
-
-			var srcIdx = srcFirstOverlapping + i;
-			var dstIdx = dstFirstOverlapping + i;
-
-			this.log(level + 1, 'Copying from array indices ' + srcIdx + ' to ' + dstIdx + ' : ' + this.cachedData[srcIdx]);
-
-			newArray[dstIdx] = this.cachedData[srcIdx];
-		}
-		
-		var dstIdxAfterOverlapping = dstFirstOverlapping + numOverlapping;
-		
-		this.log(level, 'Adding null entries to dst from ' + dstIdxAfterOverlapping + ', up to ' + (newArray.length - 1));
-
-		// null value for remaining items
-		for (var i = dstIdxAfterOverlapping; i < newArray.length; ++ i) {
-			newArray[i] = null;
-		}
-	}
-	else if (overlapFirstIndex != -1 || overlapLastIndex != -1) {
-		throw "One of overlapFirstIndx and overlapLastIndex set, must set both";
-	}
-	else {
-		// No overlap, just create a new empty array with all nulls
-		
-		newArray = new Array(newArrayLength);
-		
-		for (var i = 0; i < newArrayLength; ++ i) {
-			this.cachedData[i] = null;
-		}
-	}
-
-	this.exit(level, '_copyOverAnyOverlapping', printArray(newArray));
-	
-	return newArray;
 }
 
 GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level, layout, firstVisibleIndex, visibleCount, totalNumberOfItems, onAllVisibleDownloaded) {
