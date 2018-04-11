@@ -37,4 +37,11 @@ public class UpdateVisibleAreaRequest {
 	public JSFunction getUpdateVisibleAreaCompleteCallback() {
 		return updateVisibleAreaCompleteCallback;
 	}
+
+	@Override
+	public String toString() {
+		return "UpdateVisibleAreaRequest [firstVisibleIndex=" + firstVisibleIndex + ", visibleCount=" + visibleCount
+				+ ", totalNumberOfItems=" + totalNumberOfItems + ", updateVisibleAreaCompleteCallback="
+				+ updateVisibleAreaCompleteCallback + "]";
+	}
 }

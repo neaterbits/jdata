@@ -13,7 +13,6 @@ public final class DisplayState extends JavaWrapper {
 	}
 	
 	private int getIntProperty(String property) {
-		final int result;
 		final Object o = super.getProperty(property);
 		
 		// Sometimes Double and sometimes Integer
@@ -21,23 +20,8 @@ public final class DisplayState extends JavaWrapper {
 		if (o == null) {
 			throw new IllegalStateException("Property " + property + " is null");
 		}
-		else if (o instanceof Double) {
-			final Double d = (Double)o;
-
-			if (Math.round(d) != d) {
-				throw new IllegalStateException("Not an integer");
-			}
-			
-			result = d.intValue();
-		}
-		else if (o instanceof Integer) {
-			result = (Integer)o;
-		}
-		else {
-			throw new IllegalStateException("Unknown type for " + o.getClass());
-		}
 		
-		return result;
+		return nonNullNumberToExactInt(o);
 	}
 	
 	public int getFirstRenderedY() {

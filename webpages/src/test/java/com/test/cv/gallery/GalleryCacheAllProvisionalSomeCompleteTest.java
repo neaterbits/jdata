@@ -167,6 +167,20 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(ds.getFirstRenderedY()).isEqualTo(firstRenderedY);
 		assertThat(ds.getLastRenderedY()).isEqualTo(lastRenderedY);
 	}
+	
+	public void testComputeIndexOfLastOnRow() throws IOException {
+		final GalleryConfig config = new HintGalleryConfig(20, 20, 240, 240);
+
+		final CacheAndModel cm = createCache(config, null);
+		
+		assertThat(cm.cache.computeIndexOfLastOnRowStartingWithIndexWithArgs(0, 1, 3)).isEqualTo(0);
+		assertThat(cm.cache.computeIndexOfLastOnRowStartingWithIndexWithArgs(1, 1, 3)).isEqualTo(1);
+		assertThat(cm.cache.computeIndexOfLastOnRowStartingWithIndexWithArgs(2, 1, 3)).isEqualTo(2);
+
+		assertThat(cm.cache.computeIndexOfLastOnRowStartingWithIndexWithArgs(0, 2, 3)).isEqualTo(1);
+		assertThat(cm.cache.computeIndexOfLastOnRowStartingWithIndexWithArgs(2, 2, 3)).isEqualTo(2);
+		assertThat(cm.cache.computeIndexOfLastOnRowStartingWithIndexWithArgs(2, 2, 4)).isEqualTo(3);
+	}
 
 	public void testScrollingWithStubbedCacheItemsAndHeightHintAll240x240() throws IOException {
 
@@ -238,7 +252,6 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		checkDisplayState(cm.cache, 9, 17, 0, 17, 900, 1499, 0, 1499);
 
 		cacheItems.clearUpdateRequests();
-
 		cm.cache.updateOnScroll(950);
 
 		// Ought to require two new items
@@ -250,5 +263,17 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
 
 		checkDisplayState(cm.cache, 9, 20, 0, 20, 950, 1549, 0, 1749);
+		
+		// Scroll up again a bit to 850
+		cacheItems.clearUpdateRequests();
+		cm.cache.updateOnScroll(850);
+
+		System.out.println("## update request: " + cacheItems.getRequestAt(0));
+		
+		// Ought to require no new items since already within firstRendered/lastRendered range
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(0);
+
+		// 850-1000, 1000-1250, 1250-1450
+		checkDisplayState(cm.cache, 9, 17, 0, 17, 850, 1449, 0, 1799);
 	}
 }

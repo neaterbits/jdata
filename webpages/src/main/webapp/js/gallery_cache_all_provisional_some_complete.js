@@ -353,19 +353,28 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 	}
 	else if (curY < prevDisplayed.firstVisibleY) {
 		// Scrolling partly above visible area
-		var heightToAdd = prevDisplayed.firstVisibleY - curY;
+		var heightFromCurYToFirstRendered = curY - prevDisplayed.firstRenderedY;
+		var visibleHeight = this._getVisibleHeight();
 
-		this.log(level, 'Scrolled to view partly above previous, must add ' + heightToAdd);
+		this.log(level, 'Scrolled to view partly above previous, must add ? Height from first rendered to curY ' + heightFromCurYToFirstRendered + ', visible ' + visibleHeight);
 
-		// Must add items before this one, so must be prepended to the divs already shown
-		lastRendered = this._prependDivs(level + 1, prevDisplayed.firstVisibleIndex - 1, prevDisplayed.firstVisibleY, this.numColumns, heightToAdd);
+		if (heightFromCurYToFirstRendered > visibleHeight) {
+			// Already rendered, so no need to add rows upwards
+			displayed = this._updatedDisplayAreaAndVisibleIndices(curY, prevDisplayed);
+		}
+		else {
+			var heightToAdd = prevDisplayed.firstVisibleY - curY;
 
-		firstRenderedY = lastRendered.rowYPos;
-		firstVisibleIndex = lastRendered.rowItemIndex;
-
-		throw "TODO figure out last rendered after prepending"
-		lastRenderedY = lastRendered.yPos;
-		lastVisibleIndex = lastRendered.index;
+			// Must add items before this one, so must be prepended to the divs already shown
+			lastRendered = this._prependDivs(level + 1, prevDisplayed.firstVisibleIndex - 1, prevDisplayed.firstVisibleY, this.numColumns, heightToAdd);
+	
+			firstRenderedY = lastRendered.rowYPos;
+			firstVisibleIndex = lastRendered.rowItemIndex;
+	
+			throw "TODO figure out last rendered after prepending"
+			lastRenderedY = lastRendered.yPos;
+			lastVisibleIndex = lastRendered.index;
+		}
 	}
 	else if (curY > prevDisplayed.lastVisibleY) { 
 		// We are scrolling downwards totally out of visible area, just add items for the pos in question
@@ -392,7 +401,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 
 		if (visibleHeight < heightFromCurYToLastRendered) {
 			// We have added rows outside new visible-area so we do not have to add any rows
-			displayed = this._sameDisplayStateWithUpdatedDisplayArea(curY, prevDisplayed);
+			displayed = this._updatedDisplayAreaAndVisibleIndices(curY, prevDisplayed);
 		}
 		else {
 			var heightToAdd = visibleHeight - heightFromCurYToLastRendered;
@@ -485,6 +494,22 @@ GalleryCacheAllProvisionalSomeComplete.prototype._sameDisplayStateWithUpdatedDis
 	return updated;
 }
 
+GalleryCacheAllProvisionalSomeComplete.prototype._updatedDisplayAreaAndVisibleIndices = function(curY, prevDisplayed) {
+
+	// First just adjust for curY, ie firstVisibleY and lastVisibleY
+	var updated = this._sameDisplayStateWithUpdatedDisplayArea(curY, prevDisplayed);
+
+	// Then find indices of elements
+	updated.firstVisibleIndex = this._findElementYPosAndItemIndex(0, updated.firstVisibleY).rowItemIndex;
+	
+	var lastPos = this._findElementYPosAndItemIndex(0, updated.lastVisibleY);
+	
+	var indexOfLastOnRow = this._computeIndexOfLastOnRowStartingWithIndex(lastPos.rowItemIndex);
+
+	updated.lastVisibleIndex = indexOfLastOnRow;
+
+	return updated;
+}
 
 /**
  * Download and show complete items in a certain model range, provisional items
@@ -557,7 +582,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 
 	var rowWidth = this._getRowWidth();
 	var numRows = this.cachedRowDivs.length;
-	var numRowsTotal = ((this._getTotalNumberOfItems() - 1) / this.numColumns) + 1;
+	var numRowsTotal = this._computeRowsTotal();
 
 	for (var row = 0, i = firstModelItemIndex; row < numRows && i < itemCount; ++ row) {
 
@@ -674,7 +699,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._findElementYPosAndItemIndex = 
 	
 	var rowYPos = heightOfOneElement * row;
 	
-	elem = { 'rowYPos' : rowYPos, 'rowItemIndex' : itemIndex };
+	elem = { 'rowYPos' : rowYPos, 'rowItemIndex' : itemIndex, 'row' : row };
 
 	/*
 	var y = yPos

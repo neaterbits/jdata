@@ -554,6 +554,44 @@ GalleryCacheBase.prototype._computeNumColumns = function() {
 	return this.gallerySizes.computeNumColumns(this._getVisibleWidth());
 }
 
+GalleryCacheBase.prototype._computeNumRowsTotalFromNumColumns = function(numColumns) {
+	return ((this._getTotalNumberOfItems() - 1) / numColumns) + 1;
+	
+}
+
+GalleryCacheBase.prototype._computeNumRowsTotal = function() {
+	return this._computeNumRowsTotalFromNumColumns(this._computeNumColumns());
+}
+
+GalleryCacheBase.prototype._computeIndexOfLastOnRowStartingWithIndex = function(indexOfFirstOnRow) {
+	var numColumns = this._computeNumColumns();
+	var total = this._getTotalNumberOfItems();
+
+	return this._computeIndexOfLastOnRowStartingWithIndexWithArgs(indexOfFirstOnRow, numColumns, total);
+}
+
+GalleryCacheBase.prototype._computeIndexOfLastOnRowStartingWithIndexWithArgs = function(indexOfFirstOnRow, numColumns, total) {
+
+	if (indexOfFirstOnRow % numColumns !== 0) {
+		throw "Not first index on row";
+	}
+
+	var indexOfLastOnRow;
+
+	// Last row might not be complete
+	var remainder = total - indexOfFirstOnRow;
+
+	if (remainder < numColumns) {
+		// Last row
+		indexOfLastOnRow = indexOfFirstOnRow + remainder - 1;
+	}
+	else {
+		indexOfLastOnRow = indexOfFirstOnRow + numColumns - 1;
+	}
+
+	return indexOfLastOnRow;
+}
+
 // Apply necessary styling to set dimensions and placement of an item
 GalleryCacheBase.prototype._applyItemStyles = function(itemElement, rowHeight, itemWidth, itemHeight, spacing, visible) {
 	this.galleryView.applyItemStyles(itemElement, rowHeight, itemWidth, itemHeight, spacing, visible);

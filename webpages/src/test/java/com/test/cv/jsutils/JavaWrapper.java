@@ -28,4 +28,29 @@ public abstract class JavaWrapper {
 	protected final JSInvocable getInvocable() {
 		return invocable;
 	}
+
+	protected static int nonNullNumberToExactInt(Object o) {
+		final int result;
+
+		if (o == null) {
+			throw new IllegalStateException("o is null");
+		}
+		else if (o instanceof Double) {
+			final Double d = (Double)o;
+
+			if (Math.round(d) != d) {
+				throw new IllegalStateException("Not an integer");
+			}
+			
+			result = d.intValue();
+		}
+		else if (o instanceof Integer) {
+			result = (Integer)o;
+		}
+		else {
+			throw new IllegalStateException("Unknown type for " + o.getClass());
+		}
+
+		return result;
+	}
 }
