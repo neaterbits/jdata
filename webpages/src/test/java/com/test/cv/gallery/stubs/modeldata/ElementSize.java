@@ -1,4 +1,4 @@
-package com.test.cv.gallery.stubs.html;
+package com.test.cv.gallery.stubs.modeldata;
 
 public class ElementSize {
 	private final Integer width;

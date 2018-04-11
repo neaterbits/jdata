@@ -55,4 +55,8 @@ public final class DisplayState extends JavaWrapper {
 	public int getLastVisibleY() {
 		return getIntProperty("lastVisibleY");
 	}
+
+	public final boolean hasRenderStateComplete(int index) {
+		return (Boolean)invokeMethod("hasRenderStateComplete", index);
+	}
 }

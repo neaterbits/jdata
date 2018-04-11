@@ -11,14 +11,20 @@ public class GalleryCacheItemsStub implements CacheItems {
 
 	private final Function<Object, JSFunction> getJSFunction;
 	private final List<UpdateVisibleAreaRequest> updateRequests;
+	private final MakeDownloadData makeDownloadData;
 	
-	public GalleryCacheItemsStub(Function<Object, JSFunction> getJSFunction) {
+	public GalleryCacheItemsStub(Function<Object, JSFunction> getJSFunction, MakeDownloadData makeDownloadData) {
 		if (getJSFunction == null) {
 			throw new IllegalArgumentException("getJSFunction == null");
 		}
 
+		if (makeDownloadData == null) {
+			throw new IllegalArgumentException("makeDownloadData == null");
+		}
+
 		this.getJSFunction = getJSFunction;
 		this.updateRequests = new ArrayList<>();
+		this.makeDownloadData = makeDownloadData;
 	}
 
 	@Override
@@ -34,7 +40,8 @@ public class GalleryCacheItemsStub implements CacheItems {
 						firstVisibleIndex,
 						visibleCount,
 						totalNumberOfItems,
-						getJSFunction.apply(updateVisibleAreaCompleteCallback));
+						getJSFunction.apply(updateVisibleAreaCompleteCallback),
+						makeDownloadData);
 
 		this.updateRequests.add(request);
 	}

@@ -13,15 +13,17 @@ public class GalleryModelStub implements GalleryModel {
 	private final List<DownloadInvocation> downloadComplete = new ArrayList<>();
 
 	private final Function<Object, JSFunction> getJSFunction;
-	private final MakeDownloadData makeDownloadData;
+	private final MakeDownloadData makeProvisionalData;
+	private final MakeDownloadData makeCompleteData;
 
-	public GalleryModelStub(Function<Object, JSFunction> getJSFunction, MakeDownloadData makeDownloadData) {
+	public GalleryModelStub(Function<Object, JSFunction> getJSFunction, MakeDownloadData makeProvisionalData, MakeDownloadData makeCompleteData) {
 		if (getJSFunction == null) {
 			throw new IllegalArgumentException("getJSFunction == null");
 		}
 
 		this.getJSFunction = getJSFunction;
-		this.makeDownloadData = makeDownloadData;
+		this.makeProvisionalData = makeProvisionalData;
+		this.makeCompleteData = makeCompleteData;
 	}
 	
 	public int getProvisionalRequestCount() {
@@ -42,12 +44,12 @@ public class GalleryModelStub implements GalleryModel {
 
 	@Override
 	public void getProvisionalData(int index, int count, Object onSuccess) {
-		downloadProvisional.add(new DownloadInvocation(index, count, getJSFunction.apply(onSuccess), makeDownloadData));
+		downloadProvisional.add(new DownloadInvocation(index, count, getJSFunction.apply(onSuccess), makeProvisionalData));
 	}
 
 	@Override
 	public void getCompleteData(int index, int count, Object onSuccess) {
-		downloadComplete.add(new DownloadInvocation(index, count, getJSFunction.apply(onSuccess), makeDownloadData));
+		downloadComplete.add(new DownloadInvocation(index, count, getJSFunction.apply(onSuccess), makeCompleteData));
 	}
 }
 

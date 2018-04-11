@@ -23,7 +23,9 @@ import com.test.cv.gallery.stubs.MakeDownloadData;
 import com.test.cv.gallery.stubs.UpdateVisibleAreaRequest;
 import com.test.cv.gallery.stubs.html.Div;
 import com.test.cv.gallery.stubs.html.Element;
-import com.test.cv.gallery.stubs.html.ElementSize;
+import com.test.cv.gallery.stubs.modeldata.ElementSize;
+import com.test.cv.gallery.stubs.modeldata.GalleryItemData;
+import com.test.cv.gallery.stubs.modeldata.ProvisionalData;
 import com.test.cv.gallery.wrappers.GalleryCacheAllProvisionalSomeComplete;
 import com.test.cv.jsutils.ConstructRequest;
 import com.test.cv.jsutils.JSInvocable;
@@ -81,16 +83,25 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 			this.galleryModel = model;
 		}
 	}
-	
-	private CacheAndModel createCache(GalleryConfig config, CacheItemsFactory cacheItemsFactory) throws IOException {
+
+	private CacheAndModel createCache(GalleryConfig config, CacheItemsFactory cacheItemsFactory, GalleryItemData [] itemData) throws IOException {
+
+		return createCache(
+				config,
+				cacheItemsFactory,
+				(firstIndex, count, indexInSet) -> itemData[firstIndex].getProvisionalData(),
+				(firstIndex, count, indexInSet) -> itemData[firstIndex].getCompleteData());
+	}
+
+	private CacheAndModel createCache(GalleryConfig config, CacheItemsFactory cacheItemsFactory, MakeDownloadData makeProvisionalData, MakeDownloadData makeCompleteData) throws IOException {
 		// Represent the divs added to the webpage
 		final Div outer = new Div(800, 600);
 		final Div inner = new Div(800, null); // height unknown, must be set by gallery
 		
-		final MakeDownloadData makeProvisionalData = (startIndex, count, index) -> new ElementSize(240, 240);
+		makeProvisionalData = (startIndex, count, index) -> new ProvisionalData(240, 240);
 		
 		final GalleryView<Div, Element> galleryView = new GalleryViewStub();
-		final GalleryModelStub galleryModel = new GalleryModelStub(this::getJSFunction, makeProvisionalData);
+		final GalleryModelStub galleryModel = new GalleryModelStub(this::getJSFunction, makeProvisionalData, makeCompleteData);
 
 		final GalleryCacheAllProvisionalSomeComplete cache = prepareRuntime(config, galleryModel, galleryView, cacheItemsFactory);
 
@@ -99,15 +110,26 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		return new CacheAndModel(cache, galleryModel);
 	}
 	
+	private static GalleryItemData [] createGalleryItemData(int totalNumberOfItems, int itemWidth, int itemHeight) {
+		final GalleryItemData[] items = new GalleryItemData[totalNumberOfItems];
+		
+		for (int i = 0; i < items.length; ++ i) {
+			items[i] = new GalleryItemData(itemHeight, itemHeight);
+		}
+		
+		return items;
+	}
+	
 	public void testInitialDownloadWithCacheItems() throws IOException {
 
+		final int totalNumberOfItems = 20;
 		final GalleryConfig config = new HintGalleryConfig(20, 20, 240, 240);
-
-		final CacheAndModel cm = createCache(config, null);
+		final GalleryItemData [] items = createGalleryItemData(totalNumberOfItems, 240, 240);
+		
+		final CacheAndModel cm = createCache(config, null, items);
 		
 		assertThat(cm.galleryModel.getProvisionalRequestCount()).isEqualTo(0);
 
-		final int totalNumberOfItems = 20;
 		
 		cm.cache.refreshWithJSObjs(totalNumberOfItems);
 		
@@ -168,10 +190,19 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(ds.getLastRenderedY()).isEqualTo(lastRenderedY);
 	}
 	
+	private void checkDisplayStateIsAllProvisional(GalleryCacheAllProvisionalSomeComplete cache) {
+		final DisplayState ds = cache.whiteboxGetDisplayState();
+		
+		for (int i = ds.getFirstRenderedIndex(); i <= ds.getLastRenderedIndex(); ++ i) {
+			assertThat(ds.hasRenderStateComplete(i)).isFalse();
+		}
+	}
+	
 	public void testComputeIndexOfLastOnRow() throws IOException {
 		final GalleryConfig config = new HintGalleryConfig(20, 20, 240, 240);
+		final GalleryItemData [] items = createGalleryItemData(20, 240, 240);
 
-		final CacheAndModel cm = createCache(config, null);
+		final CacheAndModel cm = createCache(config, null, items);
 		
 		assertThat(cm.cache.computeIndexOfLastOnRowStartingWithIndexWithArgs(0, 1, 3)).isEqualTo(0);
 		assertThat(cm.cache.computeIndexOfLastOnRowStartingWithIndexWithArgs(1, 1, 3)).isEqualTo(1);
@@ -185,11 +216,13 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 	public void testScrollingWithStubbedCacheItemsAndHeightHintAll240x240() throws IOException {
 
 		final GalleryConfig config = new HintGalleryConfig(10, 10, 240, 240);
-		final GalleryCacheItemsStub cacheItems = new GalleryCacheItemsStub(this::getJSFunction);
+		final GalleryItemData [] items = createGalleryItemData(100, 240, 240);
 
-		final CacheAndModel cm = createCache(config, new GalleryCacheItemsFactoryStub(cacheItems));
+		final GalleryCacheItemsStub cacheItems = new GalleryCacheItemsStub(this::getJSFunction, (firstIndex, count, i) -> items[firstIndex].getCompleteData());
 
-		cm.cache.refresh(100);
+		final CacheAndModel cm = createCache(config, new GalleryCacheItemsFactoryStub(cacheItems), items);
+
+		cm.cache.refresh(items.length);
 
 		// Trigger download completion of all provisional data
 		cm.galleryModel.getProvisionalRequestAt(0).onDownloaded();
@@ -203,6 +236,9 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
 		
 		checkDisplayState(cm.cache, 0, 8, 0, 8, 0, 599, 0, 749);
+		checkDisplayStateIsAllProvisional(cm.cache);
+		
+		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
 		
 		// Scroll cache and check that calls for correct update of visible area
 
@@ -217,6 +253,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		
 		checkDisplayState(cm.cache, 0, 8, 0, 8, 20, 619, 0, 749);
 
+		
 		// Scroll to 400, ought to be necessary to download new items
 		// since has load 9 items = (240 + 10) * 3 = 750
 		// So scroll to 500 would overlap by 20 pixels to next row
@@ -263,13 +300,13 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
 
 		checkDisplayState(cm.cache, 9, 20, 0, 20, 950, 1549, 0, 1749);
-		
+
 		// Scroll up again a bit to 850
 		cacheItems.clearUpdateRequests();
 		cm.cache.updateOnScroll(850);
 
 		System.out.println("## update request: " + cacheItems.getRequestAt(0));
-		
+
 		// Ought to require no new items since already within firstRendered/lastRendered range
 		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(0);
 

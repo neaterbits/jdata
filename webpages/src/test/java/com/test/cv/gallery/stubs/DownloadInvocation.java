@@ -1,7 +1,5 @@
 package com.test.cv.gallery.stubs;
 
-import java.util.function.Function;
-
 import com.test.cv.jsutils.JSFunction;
 
 public class DownloadInvocation {

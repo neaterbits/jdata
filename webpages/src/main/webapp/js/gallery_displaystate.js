@@ -229,6 +229,52 @@ DisplayState.prototype.sameWithUpdateVisibleIndices - function(firstVisibleIndex
 	return updated;
 }
 
+DisplayState.prototype._checkRenderState = function(index) {
+	var numRendered = this.lastRenderedIndex - this.firstRenderedIndex + 1;
+	
+	if (numRendered !== this.renderState.length) {
+		throw "numRendered !== renderState.length";
+	}
+}
+
+DisplayState._checkRenderStateIndex = function(index) {
+	if (index < this.firstRenderedIndex) {
+		throw "index < this.firstRenderedIndex";
+	}
+
+	if (index > this.lastRenderedIndex) {
+		throw "index > this.lastRenderedIndex";
+	}
+	
+}
+
+DisplayState.prototype.setRenderStateComplete = function(index, count) {
+
+	this._checkRenderState();
+
+	DisplayState._checkRenderStateIndex(index);
+
+	if (index + count > this.lastRenderedIndex) {
+		throw "index + count > this.lastRenderedIndex";
+	}
+	
+	for (var i = 0; i < count; ++ i) {
+		var offset = index - this.firstRenderedIndex;
+		
+		this.renderState[offset] = RENDER_STATE_COMPLETE;
+	}
+}
+
+DisplayState.prototype.hasRenderStateComplete = function(index) {
+	this._checkRenderState();
+
+	DisplayState._checkRenderStateIndex(index);
+
+	var offset = index - this.firstRenderedIndex;
+
+	return this.renderState[offset] == RENDER_STATE_COMPLETE;
+}
+
 DisplayState.prototype.toDebugString = function() {
 	var s =
 		"{ " +
@@ -242,7 +288,7 @@ DisplayState.prototype.toDebugString = function() {
 		'lVY=' + this.lastVisibleY + ", " +
 	
 		'fRY=' + this.firstRenderedY + ", " +
-		'lRY=' + this.lastRenderedY + ", " +
+		'lRY=' + this.lastRenderedY +
 		' }';
 
 	return s;

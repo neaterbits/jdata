@@ -1,4 +1,3 @@
-
 /**
  * Downloads all provisional data on complete refresh (eg. titles and thumb sizes)
  * then download complete-data (eg. image thumbs) on demand, eg keep 3 pages of images above and below the
@@ -483,15 +482,24 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updatedDisplayAreaAndVisibleIn
  */
 
 GalleryCacheAllProvisionalSomeComplete.prototype._getRowItemDivHeights = function(rowDiv) {
-	var itemsThisRow = rowDiv.childNodes.length;
-	
+	var itemsThisRow = this.galleryView.getNumElements(rowDiv);
 	// Store new elements in array and then replace all at once
 	var rowWidthHeights = [];
+
 	for (var j = 0; j < itemsThisRow; ++ j) {
 
-		var itemElement = rowDiv.childNodes[j];
+		var itemElement = this.galleryView.getElement(rowDiv, j);
 
-		var div = itemElement.getElementsByTagName('div')[0];
+		var div;
+
+		var numElements = this.galleryView.getNumElements(itemElement);
+		if (numElements === 2) {
+			// Hack to get displayable text for element
+			// div with title text is last element
+			
+			div = this.galleryView.getElement(itemElement, 1);
+		}
+	
 		
 		var html = typeof div === 'undefined' ? '<undefined>' : div.innerHTML;
 
@@ -538,6 +546,12 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showComplete = function(level,
  */
 GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function(level, firstModelItemIndex, itemCount, completeDataArray) {
 	
+	this.enter(level, '_showCompleteForRows', [
+		'firstModelItemIndex', firstModelItemIndex,
+		'itemCount', itemCount,
+		'completeDataArray', completeDataArray.length
+	]);
+
 	if (completeDataArray.length !== itemCount) {
 		throw "Expected itemCount entries";
 	}
@@ -545,11 +559,12 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 	var rowWidth = this._getRowWidth();
 	var numRows = this.cachedRowDivs.length;
 	var numRowsTotal = this._computeNumRowsTotal();
-
+	
 	for (var row = 0, i = firstModelItemIndex; row < numRows && i < itemCount; ++ row) {
 
 		var rowDiv = this.cachedRowDivs[row];
-		var itemsThisRow = rowDiv.childNodes.length;
+		
+		var itemsThisRow = this.galleryView.getNumElements(rowDiv);
 
 
 		// Store new elements in array and then replace all at once
@@ -562,10 +577,11 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 				function (index, itemWidth, itemHeight) {
 
 					var completeData = completeDataArray[index - firstModelItemIndex];
+					
 					var item;
 
 					if (completeData == null) {
-						item = rowDiv.childNodes[index - i];
+						item = this.galleryView.getElement(rowDiv, index - i);
 					}
 					else if (typeof completeData === 'undefined') {
 						throw "Image data undefined at: " + index;
@@ -577,11 +593,12 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 					return item;
 				},
 				function (element, rowIndex) {
-					rowDiv.replaceChild(element, rowDiv.childNodes[rowIndex]);
+					t.galleryView.replaceElement(rowDiv, rowIndex, element);
 	
 	//					newRowItems.push(element);
 				});
 
+		
 		var updatedRowWidthHeights = this._getRowItemDivHeights(rowDiv);
 
 		for (var j = 0; j < itemsThisRow; ++ j) {
@@ -589,7 +606,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 			var curDim  = updatedRowWidthHeights[j];
 	
 			if (prevDim.width !== curDim.width || prevDim.height !== curDim.height) {
-				
+
 				var itemIndex = i + j;
 
 				var provisionalData = this.provisionalDataArray[itemIndex];
@@ -604,6 +621,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 
 		i += itemsThisRow;
 	}
+
+	this.exit(level, '_showCompleteForRows');
 }
 
 GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(level, curY, posAndIndex) {

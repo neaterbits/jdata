@@ -24,4 +24,24 @@ public final class Div extends Element {
 		
 		elements.add(element);
 	}
+	
+	public int getNumElements() {
+		return elements.size();
+	}
+
+	public Element getElement(int index) {
+		return elements.get(index);
+	}
+
+	public void replaceElement(int index, Element element) {
+		if (element == null) {
+			throw new IllegalArgumentException("element == null");
+		}
+
+		if (index >= elements.size()) {
+			throw new IllegalArgumentException("Index out of range");
+		}
+
+		elements.set(index, element);
+	}
 }

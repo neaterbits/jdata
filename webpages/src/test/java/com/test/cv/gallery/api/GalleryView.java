@@ -24,6 +24,12 @@ public interface GalleryView<CONTAINER, ELEMENT> {
 	 */
 	
 	void appendToContainer(CONTAINER container, ELEMENT toAdd);
+	
+	int getNumElements(CONTAINER container);
+
+	ELEMENT getElement(CONTAINER container, int index);
+	
+	void replaceElement(CONTAINER container, int index, ELEMENT element);
 
 	/**
 	 * Create eg. div element for keeping all elements in a row
@@ -41,7 +47,9 @@ public interface GalleryView<CONTAINER, ELEMENT> {
 	void setCSSClasses(ELEMENT element, String classes);
 	
 	ELEMENT makeProvisionalHTMLElement(int index, Object data);
-	
+
+	ELEMENT makeCompleteHTMLElement(int index, Object provisionalData, Object completeData);
+
 	void applyItemStyles(ELEMENT element, Integer rowHeight, Integer itemWidth, Integer itemHeight, int spacing, boolean visible);
 
 	void applyRowContainerStyling(CONTAINER rowContainer, int y, int width, int height);

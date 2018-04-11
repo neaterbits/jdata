@@ -3,7 +3,9 @@ package com.test.cv.gallery.stubs;
 import com.test.cv.gallery.api.GalleryView;
 import com.test.cv.gallery.stubs.html.Div;
 import com.test.cv.gallery.stubs.html.Element;
-import com.test.cv.gallery.stubs.html.ElementSize;
+import com.test.cv.gallery.stubs.modeldata.CompleteData;
+import com.test.cv.gallery.stubs.modeldata.ElementSize;
+import com.test.cv.gallery.stubs.modeldata.ProvisionalData;
 
 public class GalleryViewStub implements GalleryView<Div, Element> {
 
@@ -21,6 +23,25 @@ public class GalleryViewStub implements GalleryView<Div, Element> {
 	@Override
 	public void appendToContainer(Div container, Element toAdd) {
 		container.append(toAdd);
+	}
+
+	@Override
+	public int getNumElements(Div container) {
+		return container.getNumElements();
+	}
+
+	@Override
+	public Element getElement(Div container, int index) {
+		return container.getElement(index);
+	}
+
+	@Override
+	public void replaceElement(Div container, int index, Element element) {
+		if (element == null) {
+			throw new IllegalArgumentException("element == null");
+		}
+
+		container.replaceElement(index, element);
 	}
 
 	@Override
@@ -48,6 +69,20 @@ public class GalleryViewStub implements GalleryView<Div, Element> {
 		// Nothing for now, this is for reference from CSS
 	}
 
+	private static Div makeGalleryItemDiv(ElementSize size) {
+		return makeGalleryItemDiv(size.getWidth(), size.getHeight());
+	}
+
+	private static Div makeGalleryItemDiv(Integer width, Integer height) {
+		final Div div = new Div(width, height);
+		
+		// Simulate image div, adding an image and title element
+		div.append(new Element());
+		div.append(new Element());
+
+		return div;
+	}
+
 	@Override
 	public Element makeProvisionalHTMLElement(int index, Object data) {
 		if (data == null) {
@@ -55,17 +90,26 @@ public class GalleryViewStub implements GalleryView<Div, Element> {
 		}
 		
 		final Element element;
-		if (data instanceof ElementSize) {
+		if (data instanceof ProvisionalData) {
 
-			final ElementSize size = (ElementSize)data;
+			final ProvisionalData size = (ProvisionalData)data;
 
-			element = new Element(size.getWidth(), size.getHeight());
+			element = makeGalleryItemDiv(size);
 		}
 		else {
 			element = new Element();
 		}
 		
 		return element;
+	}
+
+	
+	@Override
+	public Element makeCompleteHTMLElement(int index, Object provisionalData, Object completeData) {
+
+		final CompleteData c = (CompleteData)completeData;
+
+		return makeGalleryItemDiv(c);
 	}
 
 	@Override
