@@ -307,6 +307,9 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 
 		checkDisplayState(cm.cache, 9, 17, 0, 17, 900, 1499, 0, 1499);
 
+		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
+		checkDisplayStateIsComplete(cm.cache, 0, 17);
+
 		cacheItems.clearUpdateRequests();
 		cm.cache.updateOnScroll(950);
 
@@ -319,6 +322,8 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
 
 		checkDisplayState(cm.cache, 9, 20, 0, 20, 950, 1549, 0, 1749);
+		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
+		checkDisplayStateIsComplete(cm.cache, 0, 20);
 
 		// Scroll up again a bit to 850
 		cacheItems.clearUpdateRequests();
