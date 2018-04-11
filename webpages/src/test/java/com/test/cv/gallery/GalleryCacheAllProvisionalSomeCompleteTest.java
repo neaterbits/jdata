@@ -333,6 +333,6 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(0);
 
 		// 850-1000, 1000-1250, 1250-1450
-		checkDisplayState(cm.cache, 9, 17, 0, 17, 850, 1449, 0, 1799);
+		checkDisplayState(cm.cache, 9, 17, 0, 20, 850, 1449, 0, 1749);
 	}
 }
