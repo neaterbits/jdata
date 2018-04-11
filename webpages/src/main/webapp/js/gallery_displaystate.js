@@ -116,18 +116,27 @@ DisplayState.prototype.addCurYToDisplayState = function(curY, visibleHeight, dis
 
 	copy._applyFields(displayStateFields)
 	copy._addCurYToDisplayState(curY, visibleHeight);
-
-	copy._checkRenderState();
 	
-	var prevFirstRenderedIndex = this.firstRenderedIndex;
-	var prevLastRenderedIndex = this.lastRenderedIndex;
-
-	var prevNumRendered = prevLastRenderedIndex - prevFirstRenderedIndex + 1;
-
-	var newFirstRenderedIndex = displayStateFields.firstRenderedIndex;
-	var newLastRenderedIndex = displayStateFields.lastRenderedIndex;
-
-	var newNumRendered = newLastRenderedIndex - newFirstRenderedIndex + 1;
+	// Must scroll render-state as well according to updated values
+	copy.renderState = this.scrollVirtualArrayView(
+			0,
+			this.renderState,
+			
+			// current index
+			this.firstRenderedIndex,
+			this.lastRenderedIndex,
+			
+			// overlap indices and new array indices, same values
+			displayStateFields.firstRenderedIndex,
+			displayStateFields.lastRenderedIndex,
+			
+			displayStateFields.firstRenderedIndex,
+			displayStateFields.lastRenderedIndex,
+			
+			RENDER_STATE_PROVISIONAL // default value for when scrolling to a new area
+	); 
+	
+	copy._checkRenderState();
 
 	// Must look for overlap and move over any items that overlap between the two arrays into a new array,
 	// maintaining indices and any already set items as we scroll
