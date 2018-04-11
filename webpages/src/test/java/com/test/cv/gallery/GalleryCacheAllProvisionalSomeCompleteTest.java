@@ -329,8 +329,6 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		cacheItems.clearUpdateRequests();
 		cm.cache.updateOnScroll(850);
 
-		System.out.println("## update request: " + cacheItems.getRequestAt(0));
-
 		// Ought to require no new items since already within firstRendered/lastRendered range
 		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(0);
 

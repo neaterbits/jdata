@@ -237,30 +237,61 @@ GalleryCacheAllProvisionalSomeComplete.prototype._downloadAndRenderComplete = fu
 	var visibleCount = displayState.lastVisibleIndex - displayState.firstVisibleIndex + 1;
 	
 	var t = this;
-	
-	// TODO also add callback for preload data since we would want to precreate divs? Test whether is good enough without
-	this.cacheItems.updateVisibleArea(
-			level + 1,
-			this.displayState.firstVisibleIndex,
-			visibleCount,
-			this.totalNumberOfItems,
-			
-			function (index, count, downloadedData) {
-				
-				// Only called when haven't scrolled (eg no other call to updateVisibleArea)
-				if (index !== displayState.firstVisibleIndex) {
-					throw "Index mismatch: requested=" + displayState.firstVisibleIndex + ", retrieved: " + index;
-				}
-				if (count !== visibleCount) {
-					throw "Count mismatch: " + count + "/" + visibleCount;
-				}
-				if (downloadedData.length !== visibleCount) {
-					throw "Number of items mismatch count, expected " + visibleCount + ", got " + downloadedData.length;
-				}
 
-				// Can now update rows from data
-				t.displayState = t._showCompleteForRows(0, index, count, downloadedData, t.displayState);
-			});
+	// Check whether we already have downloaded and displayed complete-data for whole visible area
+	var firstIndex = this.displayState.firstVisibleIndex;
+
+	// Look at displayState to see if all is downloaded, if not we just call to cache to download all
+	// since cache maintains its own state of what it has downloaded or not
+	// and will not download again something this has been downloaded before.
+	// This test is just here to assure that we will not call to cache if we already
+	// have added row <div> elements with complete-data (eg. full thumbnail)
+	// for all the now visible elements
+	var hasRenderedCompleteForAll = true;
+	
+	for (var i = 0; i < visibleCount; ++ i) {
+		var index = firstIndex + i; // virtual array index
+		
+		if (!this.displayState.hasRenderStateComplete(index)) {
+			// Found one item for which we do not have rendered complete-state
+			hasRenderedCompleteForAll = false;
+			break;
+		}
+	}
+	
+	if (hasRenderedCompleteForAll) {
+		// Already rendered completely for all (eg. thumbnail, not just title and default image frame)
+		// so no need to call on cache
+	}
+	else {
+		// At least one item in visible area was not rendered (and popbaly not downloaded)
+		// call onto cache to update and download asynchronously if necessary, we are called back below
+		// to update display, showing complete-data (eg. downloaded thumbnail image)
+		
+		// TODO also add callback for preload data since we would want to precreate divs? Test whether is good enough without
+		this.cacheItems.updateVisibleArea(
+				level + 1,
+				firstIndex,
+				visibleCount,
+				this.totalNumberOfItems,
+				
+				function (index, count, downloadedData) {
+					
+					// Only called when haven't scrolled (eg no other call to updateVisibleArea)
+					if (index !== displayState.firstVisibleIndex) {
+						throw "Index mismatch: requested=" + displayState.firstVisibleIndex + ", retrieved: " + index;
+					}
+					if (count !== visibleCount) {
+						throw "Count mismatch: " + count + "/" + visibleCount;
+					}
+					if (downloadedData.length !== visibleCount) {
+						throw "Number of items mismatch count, expected " + visibleCount + ", got " + downloadedData.length;
+					}
+	
+					// Can now update rows from data
+					t.displayState = t._showCompleteForRows(0, index, count, downloadedData, t.displayState);
+				});
+	}
 	
 	this.exit(level, '_downloadAndRenderComplete');
 }
@@ -594,8 +625,6 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 				},
 				function (element, rowIndex) {
 					t.galleryView.replaceElement(rowDiv, rowIndex, element);
-	
-	//					newRowItems.push(element);
 				});
 
 		
