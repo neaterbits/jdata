@@ -129,7 +129,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level) {
 			firstVisibleIndex : 0,
 			firstRenderedIndex : 0,
 			lastVisibleY : visibleHeight - 1,
-			lastRenderedY : rendered.yPos, // renders a bit outside of display since adding complete rows
+			lastRenderedY : rendered.yPos - 1, // renders a bit outside of display since adding complete rows. -1 since we should get last t pos
 			lastVisibleIndex : rendered.index,
 			lastRenderedIndex : rendered.index
 		};
@@ -139,6 +139,11 @@ GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level) {
 	}
 
 	this._updateHeightIfApproximation(level + 1, this.displayState);
+}
+
+// For unit test checkes
+GalleryCacheAllProvisionalSomeComplete.prototype.whiteboxGetDisplayState = function() {
+	return this.displayState;
 }
 
 /**
@@ -314,7 +319,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 
 	// Some checks
 	if (prevDisplayed.lastRenderedY < prevDisplayed.lastVisibleY) {
-		throw "prevDisplayed.lastRenderedY < prevDisplayed.lastVisibleY";
+		throw "prevDisplayed.lastRenderedY < prevDisplayed.lastVisibleY : "
+			+ prevDisplayed.lastRenderedY + "/" + prevDisplayed.lastVisibleY;
 	}
 
 	if (prevDisplayed.firstRenderedY > prevDisplayed.firstVisibleY) {
@@ -325,9 +331,9 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 	var lastRenderedY;
 	var firstVisibleIndex;
 	var lastVisibleIndex;
-	
+
 	var posAndIndex = this._findElementYPosAndItemIndex(level + 1, curY);
-	
+
 	var lastRendered;
 
 	var displayed;
@@ -402,23 +408,28 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 	
 			// TODO we must look at lastRenderedIndex here to see if items already added, if so there is no need to add
 	
-			lastRendered = this._addProvisionalDivs(level + 1, startIndex, prevDisplayed.lastRenderedY, this.numColumns, heightToAdd);
+			var startYPos = prevDisplayed.lastRenderedY + 1;
+			
+			lastRendered = this._addProvisionalDivs(level + 1, startIndex, startYPos, this.numColumns, heightToAdd);
 	
 			if (lastRendered == null) {
 				// Nothing was rendered, ie. did not scroll any new items into display
 				// so just return old values
+				this.log('No rows added so keeping same displayState');
 				displayed = this._sameDisplayStateWithUpdatedDisplayArea(curY, prevDisplayed);
 			}
 			else {
 				// Scrolled downwards a bit, update based on downwards scroll
+				this.log('Rows added below so updating displayState');
+
 				displayed = this._addCurYToDisplayState(curY, {
-					firstRenderedY		: posAndIndex.rowYPos, // computed from curY above
-					lastRenderedY		: (prevDisplayed.lastRenderedY > lastRendered.yPos ? prevDisplayed.lastRenderedY : lastRendered.yPos),
-					
+					firstRenderedY		: prevDisplayed.firstRenderedY, // until we remove some items at the from of list when scrolling downwards
+					lastRenderedY		: lastRendered.yPos - 1,
+
 					firstVisibleIndex	: posAndIndex.rowItemIndex, // computed from curY above
 					lastVisibleIndex	: lastRendered.index, // last visible is the same as rendered index if we got here, since we had to add divs
-					
-					firstRenderedIndex 	: posAndIndex.rowItemIndex,
+
+					firstRenderedIndex 	: prevDisplayed.firstRenderedIndex, // until we remove some items at the from of list when scrolling downwards
 					lastRenderedIndex	: lastRendered.index
 					// TODO this is not always correct since we might be rendered preloaded?
 	 			});

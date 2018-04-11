@@ -20,4 +20,12 @@ public abstract class JavaWrapper {
 	protected final Object invokeMethod(String method, Object ... params) {
 		return invocable.invokeMethod(jsObject, method, params);
 	}
+	
+	protected final Object getProperty(String property) {
+		return invocable.getProperty(jsObject, property);
+	}
+	
+	protected final JSInvocable getInvocable() {
+		return invocable;
+	}
 }

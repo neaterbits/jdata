@@ -82,4 +82,16 @@ final class JSRuntime implements JSInvocable {
 		
 		return result;
 	}
+
+	@Override
+	public Object getProperty(Object obj, String property) {
+
+		if (obj == null) {
+			throw new IllegalArgumentException("obj == null");
+		}
+		
+		final JSObject jsObj = (JSObject)obj;
+
+		return jsObj.getMember(property);
+	}
 }

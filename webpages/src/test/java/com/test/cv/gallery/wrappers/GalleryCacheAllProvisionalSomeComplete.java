@@ -2,6 +2,7 @@ package com.test.cv.gallery.wrappers;
 
 import com.test.cv.gallery.api.GalleryModel;
 import com.test.cv.gallery.api.GalleryView;
+import com.test.cv.gallery.stubs.DisplayState;
 import com.test.cv.jsutils.JSInvocable;
 
 /**
@@ -62,6 +63,12 @@ public class GalleryCacheAllProvisionalSomeComplete extends GalleryCacheBase {
 
 	public void updateOnScroll(int level, int yPos) {
 		invokeMethod("updateOnScroll", level, yPos);
+	}
+	
+	public DisplayState whiteboxGetDisplayState() {
+		final Object jsObj = invokeMethod("whiteboxGetDisplayState");
+
+		return new DisplayState(getInvocable(), jsObj);
 	}
 }
 

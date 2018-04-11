@@ -14,6 +14,7 @@ import com.test.cv.gallery.api.GalleryConfig;
 import com.test.cv.gallery.api.GalleryModel;
 import com.test.cv.gallery.api.GalleryView;
 import com.test.cv.gallery.api.HintGalleryConfig;
+import com.test.cv.gallery.stubs.DisplayState;
 import com.test.cv.gallery.stubs.DownloadInvocation;
 import com.test.cv.gallery.stubs.GalleryCacheItemsStub;
 import com.test.cv.gallery.stubs.GalleryModelStub;
@@ -148,6 +149,24 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 			return cacheItems;
 		}
 	}
+	
+	private void checkDisplayState(
+			GalleryCacheAllProvisionalSomeComplete cache,
+			int firstVisibleIndex, int lastVisibleIndex, int firstRenderedIndex, int lastRenderedIndex,
+			int firstVisibleY, int lastVisibleY, int firstRenderedY, int lastRenderedY) {
+		
+		final DisplayState ds = cache.whiteboxGetDisplayState();
+		
+		assertThat(ds.getFirstVisibleIndex()).isEqualTo(firstVisibleIndex);
+		assertThat(ds.getLastVisibleIndex()).isEqualTo(lastVisibleIndex);
+		assertThat(ds.getFirstRenderedIndex()).isEqualTo(firstRenderedIndex);
+		assertThat(ds.getLastRenderedIndex()).isEqualTo(lastRenderedIndex);
+		
+		assertThat(ds.getFirstVisibleY()).isEqualTo(firstVisibleY);
+		assertThat(ds.getLastVisibleY()).isEqualTo(lastVisibleY);
+		assertThat(ds.getFirstRenderedY()).isEqualTo(firstRenderedY);
+		assertThat(ds.getLastRenderedY()).isEqualTo(lastRenderedY);
+	}
 
 	public void testScrollingWithStubbedCacheItemsAndHeightHintAll240x240() throws IOException {
 
@@ -169,6 +188,8 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(request.getVisibleCount()).isEqualTo(9); // 9 elements since (240 + 20) * 2 = 520 < 600
 		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
 		
+		checkDisplayState(cm.cache, 0, 8, 0, 8, 0, 599, 0, 749);
+		
 		// Scroll cache and check that calls for correct update of visible area
 
 		// Clear list
@@ -180,6 +201,8 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		// Should not be necessary to perform any new downloads
 		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(0);
 		
+		checkDisplayState(cm.cache, 0, 8, 0, 8, 20, 619, 0, 749);
+
 		// Scroll to 400, ought to be necessary to download new items
 		// since has load 9 items = (240 + 10) * 3 = 750
 		// So scroll to 500 would overlap by 20 pixels to next row
@@ -193,8 +216,9 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(request.getVisibleCount()).isEqualTo(9);
 		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
 
+		checkDisplayState(cm.cache, 3, 11, 0, 11, 400, 999, 0, 999);
+
 		// Is now at 750 + 250 = 1000, scroll to 900
-		
 		cacheItems.clearUpdateRequests();
 		
 		cm.cache.updateOnScroll(900);
@@ -211,6 +235,8 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		// because for each row is 250 so for visible height of 600 there is
 		// 950-1000, 1000-1250, 1250-1500 and 1500-1550
 
+		checkDisplayState(cm.cache, 9, 17, 0, 17, 900, 1499, 0, 1499);
+
 		cacheItems.clearUpdateRequests();
 
 		cm.cache.updateOnScroll(950);
@@ -222,5 +248,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(request.getFirstVisibleIndex()).isEqualTo(3 * 3); // 3 rows scrolled out 
 		assertThat(request.getVisibleCount()).isEqualTo(12);
 		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
+
+		checkDisplayState(cm.cache, 9, 20, 0, 20, 950, 1549, 0, 1749);
 	}
 }

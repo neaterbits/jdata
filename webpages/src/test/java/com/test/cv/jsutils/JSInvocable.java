@@ -7,4 +7,6 @@ public interface JSInvocable {
 	Object invokeFunction(String function, Object ... args);
 	
 	Object invokeMethod(Object obj, String method, Object ... args);
+
+	Object getProperty(Object obj, String property);
 }
