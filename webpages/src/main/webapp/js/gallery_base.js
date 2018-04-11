@@ -4,7 +4,7 @@
  */
 
 function GalleryBase() {
-	
+
 }
 
 GalleryBase.prototype.enter = function(level, functionName, args, states) {
@@ -72,3 +72,16 @@ GalleryBase.prototype.indent = function(level) {
 	return s;
 }
 
+GalleryBase.prototype.isNotNull = function(obj) {
+	return typeof obj !== 'undefined' && obj != null;
+}
+
+GalleryBase.prototype.isUndefinedOrNull = function(obj) {
+	return typeof obj === 'undefined' || obj == null;
+}
+
+GalleryBase.prototype.checkNonNull = function(obj) {
+	if (this.isUndefinedOrNull(obj)) {
+		throw "obj not set: " + obj;
+	}
+}

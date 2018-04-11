@@ -39,6 +39,10 @@ function GalleryCacheItemsFactory() {
  */
 
 function GalleryCacheItems(cachedBeforeAndAfter, modelDownloadItems) {
+	
+	this.checkNonNull(cachedBeforeAndAfter);
+	this.checkNonNull(modelDownloadItems);
+	
 	this.totalNumberOfItems = 0;
 	
 	this.cachedBeforeAndAfter = cachedBeforeAndAfter;
@@ -158,6 +162,11 @@ GalleryCacheItems.prototype.updateVisibleArea = function(level, firstVisibleInde
 	this.enter(level, 'updateVisibleArea',
 			['firstVisibleIndex', firstVisibleIndex, 'visibleCount', visibleCount, 'totalNumberOfItems', totalNumberOfItems],
 			['this.curVisibleIndex', this.curVisibleIndex, 'this.curVisibleCount', this.curVisbleCount]);
+
+	this.checkNonNull(firstVisibleIndex);
+	this.checkNonNull(visibleCount);
+	this.checkNonNull(totalNumberOfItems);
+	this.checkNonNull(onAllVisibleDownloaded);
 
 	this.withinUpdateVisibleAreaFunction = true;
 	
