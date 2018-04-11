@@ -55,5 +55,13 @@ public class GalleryCacheAllProvisionalSomeComplete extends GalleryCacheBase {
 		invokeMethod("refresh", 0, totalNumberOfItems);
 		
 	}
+
+	public void updateOnScroll(int yPos) {
+		updateOnScroll(0, yPos);
+	}
+
+	public void updateOnScroll(int level, int yPos) {
+		invokeMethod("updateOnScroll", level, yPos);
+	}
 }
 

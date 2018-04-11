@@ -46,4 +46,8 @@ public class GalleryCacheItemsStub implements CacheItems {
 	public UpdateVisibleAreaRequest getRequestAt(int index) {
 		return this.updateRequests.get(index);
 	}
+
+	public void clearUpdateRequests() {
+		this.updateRequests.clear();
+	}
 }

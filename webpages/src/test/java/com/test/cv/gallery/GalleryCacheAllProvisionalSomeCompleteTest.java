@@ -149,24 +149,78 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		}
 	}
 
-	public void testScrollingWithStubbedCacheItemsAndHeightHint() throws IOException {
+	public void testScrollingWithStubbedCacheItemsAndHeightHintAll240x240() throws IOException {
 
-		final GalleryConfig config = new HintGalleryConfig(20, 20, 240, 240);
+		final GalleryConfig config = new HintGalleryConfig(10, 10, 240, 240);
 		final GalleryCacheItemsStub cacheItems = new GalleryCacheItemsStub(this::getJSFunction);
 
 		final CacheAndModel cm = createCache(config, new GalleryCacheItemsFactoryStub(cacheItems));
 
 		cm.cache.refresh(100);
 
-		// Trigger download completion of provisional data
+		// Trigger download completion of all provisional data
 		cm.galleryModel.getProvisionalRequestAt(0).onDownloaded();
 
 		// Should now have a request for updating visible area
 		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
-		final UpdateVisibleAreaRequest request = cacheItems.getRequestAt(0);
+		UpdateVisibleAreaRequest request = cacheItems.getRequestAt(0);
 
 		assertThat(request.getFirstVisibleIndex()).isEqualTo(0);
 		assertThat(request.getVisibleCount()).isEqualTo(9); // 9 elements since (240 + 20) * 2 = 520 < 600
+		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
+		
+		// Scroll cache and check that calls for correct update of visible area
+
+		// Clear list
+		cacheItems.clearUpdateRequests();
+
+		// Scroll 20 px down i area, should get new request
+		cm.cache.updateOnScroll(20);
+		
+		// Should not be necessary to perform any new downloads
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(0);
+		
+		// Scroll to 400, ought to be necessary to download new items
+		// since has load 9 items = (240 + 10) * 3 = 750
+		// So scroll to 500 would overlap by 20 pixels to next row
+		// thus should cause a call for update of display area
+		cm.cache.updateOnScroll(400);
+
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
+		request = cacheItems.getRequestAt(0);
+
+		assertThat(request.getFirstVisibleIndex()).isEqualTo(3);
+		assertThat(request.getVisibleCount()).isEqualTo(9);
+		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
+
+		// Is now at 750 + 250 = 1000, scroll to 900
+		
+		cacheItems.clearUpdateRequests();
+		
+		cm.cache.updateOnScroll(900);
+
+		// Ought to require two new items
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
+		request = cacheItems.getRequestAt(0);
+
+		assertThat(request.getFirstVisibleIndex()).isEqualTo(3 * 3); // 3 rows scrolled out 
+		assertThat(request.getVisibleCount()).isEqualTo(9);
+		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
+
+		// Scroll to 950, should be same first-index but now there are 12 visible items
+		// because for each row is 250 so for visible height of 600 there is
+		// 950-1000, 1000-1250, 1250-1500 and 1500-1550
+
+		cacheItems.clearUpdateRequests();
+
+		cm.cache.updateOnScroll(950);
+
+		// Ought to require two new items
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
+		request = cacheItems.getRequestAt(0);
+
+		assertThat(request.getFirstVisibleIndex()).isEqualTo(3 * 3); // 3 rows scrolled out 
+		assertThat(request.getVisibleCount()).isEqualTo(12);
 		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
 	}
 }

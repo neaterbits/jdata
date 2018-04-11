@@ -251,6 +251,9 @@ GalleryCacheAllProvisionalSomeComplete.prototype.updateOnScroll = function(level
 }
 
 GalleryCacheAllProvisionalSomeComplete.prototype._downloadAndRenderComplete = function(level, displayState) {
+	
+	this.enter(level, '_downloadAndRenderComplete', ['displayState', JSON.stringify(displayState)]);
+
 	var visibleCount = displayState.lastVisibleIndex - displayState.firstVisibleIndex + 1;
 	
 	var t = this;
@@ -278,6 +281,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype._downloadAndRenderComplete = fu
 				// Can now update rows from data
 				t._showCompleteForRows(0, index, count, downloadedData);
 			});
+	
+	this.exit(level, '_downloadAndRenderComplete');
 }
 
 
@@ -305,6 +310,15 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 	}
 	else {
 		initialUpdate = false;
+	}
+
+	// Some checks
+	if (prevDisplayed.lastRenderedY < prevDisplayed.lastVisibleY) {
+		throw "prevDisplayed.lastRenderedY < prevDisplayed.lastVisibleY";
+	}
+
+	if (prevDisplayed.firstRenderedY > prevDisplayed.firstVisibleY) {
+		throw "prevDisplay.firstRenderedY > prevDisplayed.firstVisibleY";
 	}
 
 	var firstRenderedY;
@@ -364,35 +378,51 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 		// Scrolling down partly out of visible area
 		// First figure out how much visible space that must be added
 		// + 1 because lastVisibleY is within visibleHeight. Eg after initial rendering of height 100 then lastVisibleY is 99
-		var heightToAdd = this._getVisibleHeight() - (prevDisplayed.lastVisibleY + 1 - curY);
 		
-		this.log(level, 'Scrolled to view partly below previous, must add ' + heightToAdd);
+		var heightFromCurYToLastRendered = prevDisplayed.lastRenderedY + 1 - curY;
+		var visibleHeight = this._getVisibleHeight();
 
-		// Do we need to add one or more rows? Should do so without removing existing rows,
-		// just add new ones below current ones.
+		this.log(level, 'Scrolled to view partly below previous, must add ? Height from curY to last rendered ' + heightFromCurYToLastRendered + ', visible ' + visibleHeight);
 
-		// Start-index to add is the one immediately after last-index
-		// unless this is initial update, in which case we should update from index 0 (startIndex would be 1 if not testing for this)
-		var startIndex = initialUpdate ? 0 : prevDisplayed.lastVisibleIndex + 1;
-
-		// TODO we must look at lastRenderedIndex here to see if items already added, if so there is no need to add
-
-		lastRendered = this._addProvisionalDivs(level + 1, startIndex, prevDisplayed.lastVisibleY, this.numColumns, heightToAdd);
-
-		if (lastRendered == null) {
-			// Nothing was rendered, ie. did not scroll any new items into display
-			// so just return old values
+		if (visibleHeight < heightFromCurYToLastRendered) {
+			// We have added rows outside new visible-area so we do not have to add any rows
 			displayed = this._sameDisplayStateWithUpdatedDisplayArea(curY, prevDisplayed);
 		}
 		else {
-			// Scrolled downwards a bit, update based on downwards scroll
-			displayed = {
-				firstRenderedY		: posAndIndex.rowYPos, // computed from curY above
-				lastRenderedY		: (prevDisplayed.lastRenderedY > lastRendered.yPos ? prevDisplayed.lastRenderedY : lastRendered.yPos),
-				
-				firstVisibleIndex	: posAndIndex.rowItemIndex, // computed from curY above
-				lastVisibleIndex	: lastRendered.index // TODO this is not always correct since we might be rendered preloaded?
- 			};
+			var heightToAdd = visibleHeight - heightFromCurYToLastRendered;
+
+			this.log(level, 'Scrolled to view partly below previous, must add ' + heightToAdd);
+	
+			// Do we need to add one or more rows? Should do so without removing existing rows,
+			// just add new ones below current ones.
+	
+			// Start-index to add is the one immediately after last-index
+			// unless this is initial update, in which case we should update from index 0 (startIndex would be 1 if not testing for this)
+			var startIndex = initialUpdate ? 0 : prevDisplayed.lastRenderedIndex + 1;
+	
+			// TODO we must look at lastRenderedIndex here to see if items already added, if so there is no need to add
+	
+			lastRendered = this._addProvisionalDivs(level + 1, startIndex, prevDisplayed.lastRenderedY, this.numColumns, heightToAdd);
+	
+			if (lastRendered == null) {
+				// Nothing was rendered, ie. did not scroll any new items into display
+				// so just return old values
+				displayed = this._sameDisplayStateWithUpdatedDisplayArea(curY, prevDisplayed);
+			}
+			else {
+				// Scrolled downwards a bit, update based on downwards scroll
+				displayed = this._addCurYToDisplayState(curY, {
+					firstRenderedY		: posAndIndex.rowYPos, // computed from curY above
+					lastRenderedY		: (prevDisplayed.lastRenderedY > lastRendered.yPos ? prevDisplayed.lastRenderedY : lastRendered.yPos),
+					
+					firstVisibleIndex	: posAndIndex.rowItemIndex, // computed from curY above
+					lastVisibleIndex	: lastRendered.index, // last visible is the same as rendered index if we got here, since we had to add divs
+					
+					firstRenderedIndex 	: posAndIndex.rowItemIndex,
+					lastRenderedIndex	: lastRendered.index
+					// TODO this is not always correct since we might be rendered preloaded?
+	 			});
+			}
 		}
 	}
 	else if (curY === prevDisplayed.firstVisibleY) {
@@ -424,6 +454,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 GalleryCacheAllProvisionalSomeComplete.prototype._addCurYToDisplayState = function(curY, displayState) {
 	displayState.firstVisibleY 	= curY;
 	displayState.lastVisibleY	= curY + this._getVisibleHeight() - 1;
+	
+	return displayState;
 }
 
 GalleryCacheAllProvisionalSomeComplete.prototype._sameDisplayStateWithUpdatedDisplayArea = function(curY, prevDisplayed) {
