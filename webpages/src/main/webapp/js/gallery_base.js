@@ -49,7 +49,7 @@ GalleryBase.prototype.scrollVirtualArrayView = function(level,
 	var numArrayEntries = prevLastViewIndex - prevFirstViewIndex + 1;
 	
 	if (numArrayEntries !== array.length) {
-		throw "numArrayEntries !== array.length";
+		throw "numArrayEntries !== array.length: " + numArrayEntries + "/" + array.length;
 	}
 
 	// Basic parameter checks

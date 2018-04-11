@@ -65,7 +65,8 @@ DisplayState.createEmptyDisplayState = function() {
 	displayState.lastVisibleIndex = 0;
 	displayState.lastRenderedIndex = 0;
 	
-	displayState.renderState = [];
+	// Must have one entry so that renderState.length == lastRenderedIndex - firstRenderedIndex + 1 above
+	displayState.renderState = [ RENDER_STATE_PROVISIONAL ];
 
 	return displayState;
 }
