@@ -25,6 +25,7 @@ public class BaseGalleryTest extends BaseJSTest {
 		final JSInvocable jsRuntime = super.prepareMavenWebAppScripts(bindings, constructRequests,
 				"gallery_base.js",
 				"gallery_sizes.js",
+				"gallery_displaystate.js",
 				"gallery_caches.js",
 				"gallery_cache_items.js",
 				"gallery_cache_all_provisional_some_complete.js",
