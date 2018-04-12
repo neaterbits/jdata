@@ -46,6 +46,13 @@ GalleryBase.prototype.scrollVirtualArrayView = function(level,
 		'defaultValue', defaultValue
 	]);
 	
+	this.checkNonNull(prevFirstViewIndex);
+	this.checkNonNull(prevLastViewIndex);
+	this.checkNonNull(firstOverlapCheckIndex);
+	this.checkNonNull(lastOverlapCheckIndex);
+	this.checkNonNull(newArrayFirstViewIndex);
+	this.checkNonNull(newArrayLastViewIndex);
+	
 	var numArrayEntries = prevLastViewIndex - prevFirstViewIndex + 1;
 	
 	if (numArrayEntries !== array.length) {

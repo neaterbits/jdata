@@ -43,6 +43,12 @@ public class GalleryViewStub implements GalleryView<Div, Element> {
 
 		container.replaceElement(index, element);
 	}
+	
+
+	@Override
+	public void removeElement(Div container, Element element) {
+		container.removeElement(element);
+	}
 
 	@Override
 	public Div createRowContainer() {

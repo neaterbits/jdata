@@ -265,7 +265,8 @@ function SearchView(
 					getElement : function(container, index) { return container.childNodes[index]; },
 					getElementWidth  : function(element) {  return element.clientWidth;  },
 					getElementHeight : function(element) {  return element.clientHeight; },
-					
+					removeElement : function(container, element) { container.removeChild(element); },
+
 					setElementHeight : function(element, heightPx) {
 						element.style.height = heightPx + 'px';
 					},

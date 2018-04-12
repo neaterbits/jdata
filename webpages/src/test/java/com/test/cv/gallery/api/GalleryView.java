@@ -30,6 +30,8 @@ public interface GalleryView<CONTAINER, ELEMENT> {
 	ELEMENT getElement(CONTAINER container, int index);
 	
 	void replaceElement(CONTAINER container, int index, ELEMENT element);
+	
+	void removeElement(CONTAINER container, ELEMENT element);
 
 	/**
 	 * Create eg. div element for keeping all elements in a row

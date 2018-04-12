@@ -44,4 +44,14 @@ public final class Div extends Element {
 
 		elements.set(index, element);
 	}
+	
+	public void removeElement(Element element) {
+		if (element == null) {
+			throw new IllegalArgumentException("element == null");
+		}
+
+		if (!elements.remove(element)) {
+			throw new IllegalStateException("Element was not in collection");
+		}
+	}
 }

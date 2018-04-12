@@ -350,11 +350,10 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 		else {
 			var heightFromCurYToFirstRendered = curY - prevDisplayed.firstRenderedY;
 	
-	
 			// We are scrolling upwards totally out of current area
 			lastRendered = this._redrawCompletelyAt(level + 1, curY, posAndIndex);
 	
-			displayed = this._addCurYToDisplayState(curY, prevDisplayed, {
+			displayed = this._addCurYToDisplayState(level + 1, curY, prevDisplayed, {
 				firstRenderedY		: posAndIndex.rowYPos,
 				lastRenderedY		: lastRendered.yPos,
 				firstVisibleIndex	: posAndIndex.rowItemIndex,
@@ -387,20 +386,34 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 			lastVisibleIndex = lastRendered.index;
 		}
 	}
-	else if (curY > prevDisplayed.lastVisibleY) { 
+	else if (curY > prevDisplayed.lastVisibleY) {
 		// We are scrolling downwards totally out of visible area, just add items for the pos in question
-		this.log(level, 'Scrolled to completely below previous curY ' + curY + ' visibleHeight ' + this._getVisibleHeight() + ' > lastVisibleY ' + prevDisplayed.lastVisibleY);
+		this.log(level, 'Scrolled to completely below previous curY ' + curY +
+				' visibleHeight ' + this._getVisibleHeight() + ' > lastVisibleY ' + prevDisplayed.lastVisibleY +
+				', posAndIndex=' + JSON.stringify(posAndIndex));
 
-		lastRendered = this._redrawCompletelyAt(level + 1, curY, posAndIndex);
-
-		displayed = this._addCurYToDisplayState(curY, prevDisplayed, {
-			firstRenderedY		: posAndIndex.rowYPos,
-			lastRenderedY		: lastRendered.yPos,
-			firstVisibleIndex	: posAndIndex.rowItemIndex,
-			lastVisibleIndex	: lastRendered.index
-		});
+		// Check if also below last rendered
+		var visibleHeight = this._getVisibleHeight();
+		
+		if (curY + visibleHeight <= prevDisplayed.lastRenderedY) {
+			// Still within rendered area
+			displayed = this._updatedDisplayAreaAndVisibleIndices(curY, prevDisplayed);
+		}
+		else {
+		
+			lastRendered = this._redrawCompletelyAt(level + 1, curY, posAndIndex);
+			
+			displayed = this._addCurYToDisplayState(level + 1, curY, prevDisplayed, {
+				firstRenderedY		: posAndIndex.rowYPos,
+				lastRenderedY		: lastRendered.yPos - 1,
+				firstVisibleIndex	: posAndIndex.rowItemIndex,
+				lastVisibleIndex	: lastRendered.index,
+				firstRenderedIndex	: posAndIndex.rowItemIndex,
+				lastRenderedIndex	: lastRendered.index
+			});
+		}
 	}
-	else if (curY > prevDisplayed.firstVisibleY) { // Scrolled downwards but not completely out, since that was tested on above
+	else if (curY > prevDisplayed.firstVisibleY) { // Scrolled downwards but not completely out of visible area, since that was tested on above
 		// Scrolling down partly out of visible area
 		// First figure out how much visible space that must be added
 		// + 1 because lastVisibleY is within visibleHeight. Eg after initial rendering of height 100 then lastVisibleY is 99
@@ -408,7 +421,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 		var heightFromCurYToLastRendered = prevDisplayed.lastRenderedY + 1 - curY;
 		var visibleHeight = this._getVisibleHeight();
 
-		this.log(level, 'Scrolled to view partly below previous, must add ? Height from curY to last rendered ' + heightFromCurYToLastRendered + ', visible ' + visibleHeight);
+		this.log(level, 'Scrolled to view partly below previous, must add ? Height from curY to last rendered ' + heightFromCurYToLastRendered +
+				', visible ' + visibleHeight);
 
 		if (visibleHeight < heightFromCurYToLastRendered) {
 			// We have added rows outside new visible-area so we do not have to add any rows
@@ -442,7 +456,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 				// Scrolled downwards a bit, update based on downwards scroll
 				this.log('Rows added below so updating displayState');
 
-				displayed = this._addCurYToDisplayState(curY, prevDisplayed, {
+				displayed = this._addCurYToDisplayState(level + 1, curY, prevDisplayed, {
 					firstRenderedY		: prevDisplayed.firstRenderedY, // until we remove some items at the from of list when scrolling downwards
 					lastRenderedY		: lastRendered.yPos - 1,
 
@@ -482,13 +496,14 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 	return displayed;
 };
 
-GalleryCacheAllProvisionalSomeComplete.prototype._addCurYToDisplayState = function(curY, prevDisplayed, displayStateFields) {
+GalleryCacheAllProvisionalSomeComplete.prototype._addCurYToDisplayState = function(level, curY, prevDisplayed, displayStateFields) {
 
 	var displayState = prevDisplayed.addCurYToDisplayState(
+			level, // same level since not printing debug for this one, just delegating
 			curY,
 			this._getVisibleHeight(),
 			displayStateFields);
-	
+
 	return displayState;
 }
 
@@ -672,10 +687,10 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(level, curY, posAndIndex) {
 
 	this.enter(level, 'redrawCompletelyAt', [ 'curY', curY ]);
-	
+
 	this.log(level, 'Element start index: ' + posAndIndex.rowItemIndex + ', removing all rows: ' + this.cachedRowDivs.length);
 
-	this.upperPlaceHolder.setAttribute('style', 'height : '+ curY + ';');
+	this.galleryView.setElementHeight(this.upperPlaceHolder, curY);
 
 	// Remove all row elements since we will just generate them anew after the initial div
 	// used for making sure the rows show up at the right virtual y index
@@ -685,7 +700,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(
 
 		this.log(level, 'Removing element ' + toRemove);
 
-		this._getRenderDiv().removeChild(toRemove);
+		this.galleryView.removeElement(this._getRenderDiv(), toRemove);
 	}
 
 	this.cachedRowDivs = new Array();

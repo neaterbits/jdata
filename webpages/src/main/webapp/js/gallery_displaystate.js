@@ -111,8 +111,14 @@ DisplayState.createFromFields = function(fieldsToApply) {
 	return displayState;
 }
 
-DisplayState.prototype.addCurYToDisplayState = function(curY, visibleHeight, displayStateFields) {
+DisplayState.prototype.addCurYToDisplayState = function(level, curY, visibleHeight, displayStateFields) {
 
+	this.enter(level, 'DisplayState.addCurYToDisplayState', [
+		'curY', curY,
+		'visibleHeight', visibleHeight,
+		'displayStateFields', JSON.stringify(displayStateFields)
+	]);
+	
 	var copy = this._makeCopy();
 
 	copy._applyFields(displayStateFields)
@@ -120,7 +126,7 @@ DisplayState.prototype.addCurYToDisplayState = function(curY, visibleHeight, dis
 	
 	// Must scroll render-state as well according to updated values
 	copy.renderState = this.scrollVirtualArrayView(
-			0,
+			level + 1,
 			this.renderState,
 			
 			// current index
@@ -142,6 +148,8 @@ DisplayState.prototype.addCurYToDisplayState = function(curY, visibleHeight, dis
 	// Must look for overlap and move over any items that overlap between the two arrays into a new array,
 	// maintaining indices and any already set items as we scroll
 	
+	this.exit(level, 'DisplayState.addCurYToDisplayState', copy.toDebugString());
+
 	return copy;
 }
 

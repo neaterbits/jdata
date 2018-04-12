@@ -69,7 +69,7 @@ public final class DisplayState extends JavaWrapper {
 	}
 
 	public DisplayState addCurYToDisplayState(int curY, int visibleHeight, Map<String, Object> displayStateFields) {
-		final Object jsObj = invokeMethod("addCurYToDisplayState", curY, visibleHeight, displayStateFields);
+		final Object jsObj = invokeMethod("addCurYToDisplayState", 0, curY, visibleHeight, displayStateFields);
 		
 		return new DisplayState(getInvocable(), jsObj);
 	}
