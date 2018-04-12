@@ -68,7 +68,7 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		return updateVisibleAreaCompleteCallback;
 	}
 
-	public void testScript() throws IOException {
+	public void testSingleUpdateRequest() throws IOException {
 
 		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
 
@@ -118,7 +118,7 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 
 	// Tests issue where responses from network occuring in reverse order,
 	// eg when scrolling view
-	public void testNetworkOrderSwitch() throws IOException {
+	public void testNetworkOrderSwitchOfUpdateResult() throws IOException {
 		
 		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
 
