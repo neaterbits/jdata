@@ -43,7 +43,7 @@ public abstract class JavaWrapper {
 			final Double d = (Double)o;
 
 			if (Math.round(d) != d) {
-				throw new IllegalStateException("Not an integer");
+				throw new IllegalStateException("Not an integer: ");
 			}
 			
 			result = d.intValue();

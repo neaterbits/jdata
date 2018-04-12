@@ -108,7 +108,7 @@ GalleryCacheBase.prototype._getTotalNumberOfItems = function() {
 }
 
 GalleryCacheBase.prototype._getVisibleWidth = function() {
-	return this.galleryView.getElementWidth(this.renderDiv);;
+	return this.galleryView.getElementWidth(this.renderDiv);
 };
 
 GalleryCacheBase.prototype._getVisibleHeight = function() {
@@ -553,8 +553,22 @@ GalleryCacheBase.prototype._computeNumColumns = function() {
 }
 
 GalleryCacheBase.prototype._computeNumRowsTotalFromNumColumns = function(numColumns) {
-	return ((this._getTotalNumberOfItems() - 1) / numColumns) + 1;
 	
+	if (typeof numColumns !== 'number') {
+		throw "numColumns is not a number";
+	}
+	
+	var totalNumberOfItems = this._getTotalNumberOfItems();
+	var numRows;
+
+	if (totalNumberOfItems === 0) {
+		numRows = 0;
+	}
+	else {
+		numRows = Math.floor((totalNumberOfItems - 1) / numColumns) + 1;
+	}
+
+	return numRows;
 }
 
 GalleryCacheBase.prototype._computeNumRowsTotal = function() {

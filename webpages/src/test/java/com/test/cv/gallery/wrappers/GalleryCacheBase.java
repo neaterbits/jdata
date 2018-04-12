@@ -5,7 +5,7 @@ import com.test.cv.jsutils.JavaWrapper;
 
 public class GalleryCacheBase extends JavaWrapper {
 	
-	GalleryCacheBase(JSInvocable invocable, Object jsObject) {
+	public GalleryCacheBase(JSInvocable invocable, Object jsObject) {
 		super(invocable, jsObject);
 	}
 
@@ -25,5 +25,13 @@ public class GalleryCacheBase extends JavaWrapper {
 		final Object o = invokeMethod("_computeIndexOfLastOnRowStartingWithIndexWithArgs", indexOfFirstInRow, numColumns, totalNumberOfItems);
 		
 		return nonNullNumberToExactInt(o);
+	}
+	
+	public int whiteboxGetTotalNumberOfItems() {
+		return nonNullNumberToExactInt(invokeMethod("_getTotalNumberOfItems"));
+	}
+	
+	public int whiteboxComputeNumRowsTotalFromNumColumns(int numColumns) {
+		return nonNullNumberToExactInt(invokeMethod("_computeNumRowsTotalFromNumColumns", numColumns));
 	}
 }
