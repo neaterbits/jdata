@@ -3,7 +3,7 @@ package com.test.cv.gallery.stubs.html;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Div extends Element {
+public class Div extends Element {
 	
 	private final List<Element> elements;
 	

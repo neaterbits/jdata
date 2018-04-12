@@ -11,13 +11,13 @@ import com.test.cv.jsutils.JSInvocable;
 public class GalleryCacheAllProvisionalSomeComplete extends GalleryCacheBase {
 
 	private final GalleryModel galleryModel;
-	private final GalleryView<?, ?> galleryView;
+	private final GalleryView<?, ?, ?, ?, ?, ?, ?> galleryView;
 
 	public GalleryCacheAllProvisionalSomeComplete(
 			JSInvocable runtime,
 			Object jsObject,
 			GalleryModel galleryModel,
-			GalleryView<?, ?> galleryView) {
+			GalleryView<?, ?, ?, ?, ?, ?, ?> galleryView) {
 		
 		super(runtime, jsObject);
 		

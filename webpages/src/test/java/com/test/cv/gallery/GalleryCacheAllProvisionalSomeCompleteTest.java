@@ -23,7 +23,6 @@ import com.test.cv.gallery.stubs.GalleryViewStub;
 import com.test.cv.gallery.stubs.MakeDownloadData;
 import com.test.cv.gallery.stubs.UpdateVisibleAreaRequest;
 import com.test.cv.gallery.stubs.html.Div;
-import com.test.cv.gallery.stubs.html.Element;
 import com.test.cv.gallery.stubs.modeldata.GalleryItemData;
 import com.test.cv.gallery.stubs.modeldata.ProvisionalData;
 import com.test.cv.gallery.wrappers.GalleryCacheAllProvisionalSomeComplete;
@@ -35,7 +34,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 	private GalleryCacheAllProvisionalSomeComplete prepareRuntime(
 			GalleryConfig config,
 			GalleryModel galleryModel,
-			GalleryView<?, ?> galleryView,
+			GalleryView<?, ?, ?, ?, ?, ?, ?> galleryView,
 			CacheItemsFactory galleryCacheItemsFactory
 			) throws IOException {
 		
@@ -100,7 +99,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		
 		makeProvisionalData = (startIndex, count, index) -> new ProvisionalData(240, 240);
 		
-		final GalleryView<Div, Element> galleryView = new GalleryViewStub();
+		final GalleryViewStub galleryView = new GalleryViewStub();
 		final GalleryModelStub galleryModel = new GalleryModelStub(this::getJSFunction, makeProvisionalData, makeCompleteData);
 
 		final GalleryCacheAllProvisionalSomeComplete cache = prepareRuntime(config, galleryModel, galleryView, cacheItemsFactory);
