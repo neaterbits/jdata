@@ -64,7 +64,14 @@ public interface GalleryView<CONTAINER, ELEMENT,
 	void applyItemStyles(ITEM element, Integer rowHeight, Integer itemWidth, Integer itemHeight, int spacing, boolean visible);
 
 	void applyRowContainerStyling(ROW rowContainer, int y, int width, int height);
-	
-	
+
+	/**
+	 * Replace provisional with complete when complete has loade
+	 * @param container container element
+	 * @param index the index into row for element to replace
+	 * @param element the element to be replaced
+	 */
+	void replaceProvisionalWithComplete(ROW container, int index, PROVISIONAL element);
+
 }
 

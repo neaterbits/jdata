@@ -111,4 +111,9 @@ public class GalleryViewStub extends GalleryViewElementsStub implements GalleryV
 		rowContainer.setWidth(width);
 		rowContainer.setHeight(height);
 	}
+
+	@Override
+	public void replaceProvisionalWithComplete(Row container, int index, Provisional element) {
+		replaceElement(container, index, element);
+	}
 }

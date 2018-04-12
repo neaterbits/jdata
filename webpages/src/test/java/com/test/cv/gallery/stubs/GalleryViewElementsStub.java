@@ -20,8 +20,7 @@ public class GalleryViewElementsStub implements GalleryViewElements<Div, Element
 		return container.getElement(index);
 	}
 
-	@Override
-	public void replaceElement(Div container, int index, Element element) {
+	final void replaceElement(Div container, int index, Element element) {
 		if (element == null) {
 			throw new IllegalArgumentException("element == null");
 		}

@@ -652,7 +652,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 					return item;
 				},
 				function (element, rowIndex) {
-					t.galleryView.replaceElement(rowDiv, rowIndex, element);
+					t.galleryView.replaceProvisionalWithComplete(rowDiv, rowIndex, element);
 				});
 
 		
