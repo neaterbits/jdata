@@ -212,20 +212,6 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		checkDisplayStateIs(cache, ds.getFirstRenderedIndex(), ds.getLastRenderedIndex(), complete -> !complete);
 	}
 	
-	public void testComputeIndexOfLastOnRow() throws IOException {
-		final GalleryConfig config = new HintGalleryConfig(20, 20, 240, 240);
-		final GalleryItemData [] items = createGalleryItemData(20, 240, 240);
-
-		final CacheAndModel cm = createCache(config, null, items);
-		
-		assertThat(cm.cache.computeIndexOfLastOnRowStartingWithIndexWithArgs(0, 1, 3)).isEqualTo(0);
-		assertThat(cm.cache.computeIndexOfLastOnRowStartingWithIndexWithArgs(1, 1, 3)).isEqualTo(1);
-		assertThat(cm.cache.computeIndexOfLastOnRowStartingWithIndexWithArgs(2, 1, 3)).isEqualTo(2);
-
-		assertThat(cm.cache.computeIndexOfLastOnRowStartingWithIndexWithArgs(0, 2, 3)).isEqualTo(1);
-		assertThat(cm.cache.computeIndexOfLastOnRowStartingWithIndexWithArgs(2, 2, 3)).isEqualTo(2);
-		assertThat(cm.cache.computeIndexOfLastOnRowStartingWithIndexWithArgs(2, 2, 4)).isEqualTo(3);
-	}
 
 	public void testScrollingWithStubbedCacheItemsAndHeightHintAll240x240() throws IOException {
 

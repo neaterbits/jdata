@@ -108,4 +108,17 @@ public class GalleryCacheBaseTest extends BaseGalleryTest {
 		assertThat(cacheBase.whiteboxComputeNumRowsTotalFromNumColumns(22)).isEqualTo(1);
 		assertThat(cacheBase.whiteboxComputeNumRowsTotalFromNumColumns(23)).isEqualTo(1);
 	}
+
+	public void testComputeIndexOfLastOnRow() throws IOException {
+
+		GalleryCacheBase cb = createGalleryCacheBase(GALLERY_CONFIG, 0);
+		
+		assertThat(cb.whiteboxComputeIndexOfLastOnRowStartingWithIndexWithArgs(0, 1, 3)).isEqualTo(0);
+		assertThat(cb.whiteboxComputeIndexOfLastOnRowStartingWithIndexWithArgs(1, 1, 3)).isEqualTo(1);
+		assertThat(cb.whiteboxComputeIndexOfLastOnRowStartingWithIndexWithArgs(2, 1, 3)).isEqualTo(2);
+
+		assertThat(cb.whiteboxComputeIndexOfLastOnRowStartingWithIndexWithArgs(0, 2, 3)).isEqualTo(1);
+		assertThat(cb.whiteboxComputeIndexOfLastOnRowStartingWithIndexWithArgs(2, 2, 3)).isEqualTo(2);
+		assertThat(cb.whiteboxComputeIndexOfLastOnRowStartingWithIndexWithArgs(2, 2, 4)).isEqualTo(3);
+	}
 }

@@ -21,7 +21,7 @@ public class GalleryCacheBase extends JavaWrapper {
 		invokeMethod("setGalleryDivs", outer, inner);
 	}
 	
-	public int computeIndexOfLastOnRowStartingWithIndexWithArgs(int indexOfFirstInRow, int numColumns, int totalNumberOfItems) {
+	public int whiteboxComputeIndexOfLastOnRowStartingWithIndexWithArgs(int indexOfFirstInRow, int numColumns, int totalNumberOfItems) {
 		final Object o = invokeMethod("_computeIndexOfLastOnRowStartingWithIndexWithArgs", indexOfFirstInRow, numColumns, totalNumberOfItems);
 		
 		return nonNullNumberToExactInt(o);
