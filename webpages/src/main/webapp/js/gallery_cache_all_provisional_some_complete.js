@@ -669,7 +669,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 				var provisionalData = this.provisionalDataArray[itemIndex];
 				var completeData = this.cacheItems._debugGetCachedDataAtIndex(itemIndex);
 
-				console.log("## Gallery item dimensions changed between provisional and updated for " + itemIndex + ", row " + j
+				console.log("## Gallery item dimensions changed between provisional and updated for " + itemIndex + ", index into row" + j
 					+ " : prev=" + JSON.stringify(prevDim) + ", cur=" + JSON.stringify(curDim) + ", provisional data " + JSON.stringify(provisionalData)
 					);
 				throw "throw exception"

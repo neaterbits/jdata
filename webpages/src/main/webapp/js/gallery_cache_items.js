@@ -706,7 +706,7 @@ GalleryCacheItems.prototype._processDownloadResponse = function(level, downloadR
 	
 	// track all outstanding request, when total is downloaded for some, must re-check completed downloads and add the newest one
 	// remove all others, eg just sort by sequence no
-	this.log(level, '_processDownloadResponse', '!! All downloaded for ' + downloadRequest + ' : ' + allDownloaded);
+	this.log(level, '!! All downloaded for ' + downloadRequest + ' : ' + allDownloaded);
 	
 	if (allDownloaded) {
 		// no null-entries in initially downloaded range, run callback on all data

@@ -434,13 +434,11 @@ GalleryCacheBase.prototype._getRowHeight = function(rowMaxHeight, rowNo, numRows
  */
 GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstInRow, itemsThisRow, numRowsTotal, rowWidth, makeElement, addElement) {
 
-	/*
 	this.enter(level, "_addRowItems", [
 		'indexOfFirstInRow', indexOfFirstInRow,
 		'itemsThisRow', itemsThisRow,
 		'numRowsTotal', numRowsTotal,
 		'rowWidth', rowWidth])
-	*/
 	
 	// Make sure first in row is indeed at first
 	var numColumns = this._computeNumColumns();
@@ -545,7 +543,7 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 		visible = true;
 	}
 	
-	// this.exit(level, '_addRowItems', rowHeight);
+	this.exit(level, '_addRowItems', rowHeight);
 
 	return rowHeight;
 }
