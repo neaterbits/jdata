@@ -364,5 +364,18 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		
 		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
 		checkDisplayStateIsComplete(cm.cache, 60, 68);
+
+		// ********************************* Scroll upwards onto not rendered at all *********************************
+		cacheItems.clearUpdateRequests();
+
+		cm.cache.updateOnScroll(2500); // 2500 / 250 == 10 rows ( * 3 columns = index 30)
+
+		// Should produce one single update request
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
+
+		checkDisplayState(cm.cache, 30, 38, 30, 38, 2500, 3099, 2500, 3249);
+		
+		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
+		checkDisplayStateIsComplete(cm.cache, 30, 38);
 	}
 }

@@ -355,9 +355,11 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 	
 			displayed = this._addCurYToDisplayState(level + 1, curY, prevDisplayed, {
 				firstRenderedY		: posAndIndex.rowYPos,
-				lastRenderedY		: lastRendered.yPos,
+				lastRenderedY		: lastRendered.yPos - 1,
 				firstVisibleIndex	: posAndIndex.rowItemIndex,
-				lastVisibleIndex	: lastRendered.index
+				lastVisibleIndex	: lastRendered.index,
+				firstRenderedIndex	: posAndIndex.rowItemIndex,
+				lastRenderedIndex	: lastRendered.index
 			});
 		}
 	}
