@@ -451,12 +451,12 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 			if (lastRendered == null) {
 				// Nothing was rendered, ie. did not scroll any new items into display
 				// so just return old values
-				this.log('No rows added so keeping same displayState');
+				this.log(level, 'No rows added so keeping same displayState');
 				displayed = this._sameDisplayStateWithUpdatedDisplayArea(curY, prevDisplayed);
 			}
 			else {
 				// Scrolled downwards a bit, update based on downwards scroll
-				this.log('Rows added below so updating displayState');
+				this.log(level, 'Rows added below so updating displayState');
 
 				displayed = this._addCurYToDisplayState(level + 1, curY, prevDisplayed, {
 					firstRenderedY		: prevDisplayed.firstRenderedY, // until we remove some items at the from of list when scrolling downwards
