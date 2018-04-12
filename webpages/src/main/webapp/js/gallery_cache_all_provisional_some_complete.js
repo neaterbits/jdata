@@ -69,10 +69,10 @@ GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level) {
 	this.numColumns = numColumns;
 	
 	this.log(level, 'Thumbs per row: ' + numColumns);
-	
+
 	// Have thumbs per row, now compute height
 	var height = this.gallerySizes.computeHeightFromNumColumns(this._getTotalNumberOfItems(), numColumns);
-	
+
 	// Set height of complete scrollable area, this might have to be adjusted as we scroll
 	// but must be set in order to have scrollbars appear correctly relative to number of elements in virtual array
 	this._setScrollableHeight(height);
@@ -341,15 +341,26 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 	if (curY + this._getVisibleHeight() < prevDisplayed.firstVisibleY) {
 		this.log(level, 'Scrolled to view completely above previous');
 
-		// We are scrolling upwards totally out of current area
-		lastRendered = this._redrawCompletelyAt(level + 1, curY, posAndIndex);
-
-		displayed = this._addCurYToDisplayState(curY, prevDisplayed, {
-			firstRenderedY		: posAndIndex.rowYPos,
-			lastRenderedY		: lastRendered.yPos,
-			firstVisibleIndex	: posAndIndex.rowItemIndex,
-			lastVisibleIndex	: lastRendered.index
-		});
+		// Check if is within rendered area
+		if (curY >= prevDisplayed.firstRenderedY) {
+			// Still within what we have rendered (eg. due to preloading)
+			// That means we can adjust current Y pos and return
+			displayed = this._updatedDisplayAreaAndVisibleIndices(curY, prevDisplayed);
+		}
+		else {
+			var heightFromCurYToFirstRendered = curY - prevDisplayed.firstRenderedY;
+	
+	
+			// We are scrolling upwards totally out of current area
+			lastRendered = this._redrawCompletelyAt(level + 1, curY, posAndIndex);
+	
+			displayed = this._addCurYToDisplayState(curY, prevDisplayed, {
+				firstRenderedY		: posAndIndex.rowYPos,
+				lastRenderedY		: lastRendered.yPos,
+				firstVisibleIndex	: posAndIndex.rowItemIndex,
+				lastVisibleIndex	: lastRendered.index
+			});
+		}
 	}
 	else if (curY < prevDisplayed.firstVisibleY) {
 		// Scrolling partly above visible area

@@ -325,6 +325,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
 		checkDisplayStateIsComplete(cm.cache, 0, 20);
 
+		// ********************************* Scroll upwards in already rendered *********************************
 		// Scroll up again a bit to 850
 		cacheItems.clearUpdateRequests();
 		cm.cache.updateOnScroll(850);
@@ -334,5 +335,16 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 
 		// 850-1000, 1000-1250, 1250-1450
 		checkDisplayState(cm.cache, 9, 17, 0, 20, 850, 1449, 0, 1749);
+
+		 
+		// *** Scroll upwards in already rendered but more than a complete page ***
+
+		// Scroll back up to top, should not cause any call to cache since already rendered
+		cm.cache.updateOnScroll(0);
+
+		// Ought to require no new items since already within firstRendered/lastRendered range
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(0);
+
+		checkDisplayState(cm.cache, 0, 8, 0, 20, 0, 599, 0, 1749);
 	}
 }
