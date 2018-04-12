@@ -7,11 +7,11 @@ package com.test.cv.gallery.stubs.galleryview;
 
 public class Complete extends Item {
 
-	public Complete() {
-
+	public Complete(int index) {
+		super(index);
 	}
 
-	public Complete(Integer width, Integer height) {
-		super(width, height);
+	public Complete(Integer width, Integer height, int index) {
+		super(width, height, index);
 	}
 }

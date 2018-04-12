@@ -7,11 +7,11 @@ package com.test.cv.gallery.stubs.galleryview;
 
 public class Provisional extends Item {
 
-	public Provisional() {
-
+	public Provisional(int index) {
+		super(index);
 	}
 
-	public Provisional(Integer width, Integer height) {
-		super(width, height);
+	public Provisional(Integer width, Integer height, int index) {
+		super(width, height, index);
 	}
 }

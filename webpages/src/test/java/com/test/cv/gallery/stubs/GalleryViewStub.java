@@ -1,7 +1,5 @@
 package com.test.cv.gallery.stubs;
 
-import java.util.function.BiFunction;
-
 import com.test.cv.gallery.api.GalleryView;
 import com.test.cv.gallery.stubs.galleryview.Complete;
 import com.test.cv.gallery.stubs.galleryview.Item;
@@ -49,13 +47,18 @@ public class GalleryViewStub extends GalleryViewElementsStub implements GalleryV
 	public void appendItemToRowContainer(Row row, Provisional item) {
 		super.appendToContainer(row, item);
 	}
-
-	private static <T extends Item> T makeGalleryItemDiv(ElementSize size, BiFunction<Integer, Integer, T> constructor) {
-		return makeGalleryItemDiv(size.getWidth(), size.getHeight(), constructor);
+	
+	@FunctionalInterface
+	interface ItemContructor<T> {
+		T construct(Integer width, Integer height, int index);
 	}
 
-	private static <T extends Item> T makeGalleryItemDiv(Integer width, Integer height, BiFunction<Integer, Integer, T> constructor) {
-		final T div = constructor.apply(width, height);
+	private static <T extends Item> T makeGalleryItemDiv(ElementSize size, int index, ItemContructor<T> constructor) {
+		return makeGalleryItemDiv(size.getWidth(), size.getHeight(), index, constructor);
+	}
+
+	private static <T extends Item> T makeGalleryItemDiv(Integer width, Integer height, int index, ItemContructor<T> constructor) {
+		final T div = constructor.construct(width, height, index);
 		
 		// Simulate image div, adding an image and title element
 		div.append(new Element());
@@ -75,10 +78,10 @@ public class GalleryViewStub extends GalleryViewElementsStub implements GalleryV
 
 			final ProvisionalData size = (ProvisionalData)data;
 
-			element = makeGalleryItemDiv(size, Provisional::new);
+			element = makeGalleryItemDiv(size, index, Provisional::new);
 		}
 		else {
-			element = new Provisional();
+			element = new Provisional(index);
 		}
 		
 		return element;
@@ -90,7 +93,7 @@ public class GalleryViewStub extends GalleryViewElementsStub implements GalleryV
 
 		final CompleteData c = (CompleteData)completeData;
 
-		return makeGalleryItemDiv(c, Complete::new);
+		return makeGalleryItemDiv(c, index, Complete::new);
 	}
 
 	@Override
@@ -113,7 +116,14 @@ public class GalleryViewStub extends GalleryViewElementsStub implements GalleryV
 	}
 
 	@Override
-	public void replaceProvisionalWithComplete(Row container, int index, Provisional element) {
-		replaceElement(container, index, element);
+	public void replaceProvisionalWithComplete(Row container, int indexIntoRow, Complete element) {
+		
+		final Provisional current = (Provisional)container.getElement(indexIntoRow);
+		
+		if (current.getIndex() != element.getIndex()) {
+			throw new IllegalArgumentException("Index mismatch in replacement: " + current.getIndex() + "/" + element.getIndex());
+		}
+
+		replaceElement(container, indexIntoRow, element);
 	}
 }

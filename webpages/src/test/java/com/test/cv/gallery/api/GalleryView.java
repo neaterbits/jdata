@@ -69,9 +69,9 @@ public interface GalleryView<CONTAINER, ELEMENT,
 	 * Replace provisional with complete when complete has loade
 	 * @param container container element
 	 * @param index the index into row for element to replace
-	 * @param element the element to be replaced
+	 * @param element the element the provisional is to be replaced with
 	 */
-	void replaceProvisionalWithComplete(ROW container, int index, PROVISIONAL element);
+	void replaceProvisionalWithComplete(ROW container, int index, COMPLETE element);
 
 }
 

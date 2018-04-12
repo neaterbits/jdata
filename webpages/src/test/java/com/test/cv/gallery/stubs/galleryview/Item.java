@@ -9,11 +9,19 @@ import com.test.cv.gallery.stubs.html.Div;
 
 public abstract class Item extends Div {
 
-	public Item() {
-
+	private final int index; // Index into virtual array of items
+	
+	public Item(int index) {
+		this.index = index;
 	}
 
-	public Item(Integer width, Integer height) {
+	public Item(Integer width, Integer height, int index) {
 		super(width, height);
+
+		this.index = index;
+	}
+
+	public int getIndex() {
+		return index;
 	}
 }
