@@ -5,8 +5,8 @@ import com.test.cv.gallery.stubs.html.Div;
 import com.test.cv.gallery.stubs.html.Element;
 
 public class GalleryViewElementsStub implements GalleryViewElements<Div, Element> {
-	@Override
-	public void appendToContainer(Div container, Element toAdd) {
+
+	final void appendToContainer(Div container, Element toAdd) {
 		container.append(toAdd);
 	}
 

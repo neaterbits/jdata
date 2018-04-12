@@ -7,6 +7,7 @@ import com.test.cv.gallery.stubs.galleryview.Complete;
 import com.test.cv.gallery.stubs.galleryview.Item;
 import com.test.cv.gallery.stubs.galleryview.Placeholder;
 import com.test.cv.gallery.stubs.galleryview.Provisional;
+import com.test.cv.gallery.stubs.galleryview.RenderDiv;
 import com.test.cv.gallery.stubs.galleryview.Row;
 import com.test.cv.gallery.stubs.html.Div;
 import com.test.cv.gallery.stubs.html.Element;
@@ -16,7 +17,7 @@ import com.test.cv.gallery.stubs.modeldata.ProvisionalData;
 
 public class GalleryViewStub extends GalleryViewElementsStub implements GalleryView<
 		Div, Element,
-		Placeholder, Row, Item, Provisional, Complete> {
+		RenderDiv, Placeholder, Row, Item, Provisional, Complete> {
 
 	private final Placeholder upperPlaceHolder;
 	
@@ -32,6 +33,21 @@ public class GalleryViewStub extends GalleryViewElementsStub implements GalleryV
 	@Override
 	public Row createRowContainer() {
 		return new Row();
+	}
+	
+	@Override
+	public void appendPlaceholderToRenderContainer(RenderDiv container, Placeholder placeholder) {
+		super.appendToContainer(container, placeholder);
+	}
+
+	@Override
+	public void appendRowToRenderContainer(RenderDiv container, Row row) {
+		super.appendToContainer(container, row);
+	}
+
+	@Override
+	public void appendItemToRowContainer(Row row, Provisional item) {
+		super.appendToContainer(row, item);
 	}
 
 	private static <T extends Item> T makeGalleryItemDiv(ElementSize size, BiFunction<Integer, Integer, T> constructor) {

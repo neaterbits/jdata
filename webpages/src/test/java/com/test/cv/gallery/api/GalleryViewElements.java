@@ -11,8 +11,6 @@ public interface GalleryViewElements<CONTAINER, ELEMENT> {
 	 * @param toAdd element to add
 	 */
 	
-	void appendToContainer(CONTAINER container, ELEMENT toAdd);
-	
 	int getNumElements(CONTAINER container);
 
 	ELEMENT getElement(CONTAINER container, int index);

@@ -238,6 +238,8 @@ function SearchView(
 	
 	function _initGallery(searchView, galleryDivId) {
 		
+		var appendToContainer = function(container, element) { container.append(element); };
+		
 		return new Gallery(
 				galleryDivId,
 				{
@@ -259,7 +261,10 @@ function SearchView(
 					createUpperPlaceHolder : function () { return document.createElement('div'); },
 					createRowContainer : function () { return document.createElement('div'); },
 					
-					appendToContainer : function(container, element) { container.append(element); },
+					appendPlaceholderToRenderContainer	: appendToContainer,
+					appendRowToRenderContainer 			: appendToContainer,
+					appendItemToRowContainer 			: appendToContainer,
+
 					getNumElements : function(container) { return container.childNodes.length; },
 					replaceElement : function(container, index, element) { container.replaceChild(element, container.childNodes[index]);  },
 					getElement : function(container, index) { return container.childNodes[index]; },

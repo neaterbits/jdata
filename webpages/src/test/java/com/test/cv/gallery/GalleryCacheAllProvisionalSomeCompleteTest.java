@@ -22,6 +22,7 @@ import com.test.cv.gallery.stubs.GalleryModelStub;
 import com.test.cv.gallery.stubs.GalleryViewStub;
 import com.test.cv.gallery.stubs.MakeDownloadData;
 import com.test.cv.gallery.stubs.UpdateVisibleAreaRequest;
+import com.test.cv.gallery.stubs.galleryview.RenderDiv;
 import com.test.cv.gallery.stubs.html.Div;
 import com.test.cv.gallery.stubs.modeldata.GalleryItemData;
 import com.test.cv.gallery.stubs.modeldata.ProvisionalData;
@@ -34,7 +35,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 	private GalleryCacheAllProvisionalSomeComplete prepareRuntime(
 			GalleryConfig config,
 			GalleryModel galleryModel,
-			GalleryView<?, ?, ?, ?, ?, ?, ?> galleryView,
+			GalleryView<?, ?, ?, ?, ?, ?, ?, ?> galleryView,
 			CacheItemsFactory galleryCacheItemsFactory
 			) throws IOException {
 		
@@ -95,7 +96,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 	private CacheAndModel createCache(GalleryConfig config, CacheItemsFactory cacheItemsFactory, MakeDownloadData makeProvisionalData, MakeDownloadData makeCompleteData) throws IOException {
 		// Represent the divs added to the webpage
 		final Div outer = new Div(800, 600);
-		final Div inner = new Div(800, null); // height unknown, must be set by gallery
+		final RenderDiv inner = new RenderDiv(800, null); // height unknown, must be set by gallery
 		
 		makeProvisionalData = (startIndex, count, index) -> new ProvisionalData(240, 240);
 		
@@ -128,7 +129,6 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		final CacheAndModel cm = createCache(config, null, items);
 		
 		assertThat(cm.galleryModel.getProvisionalRequestCount()).isEqualTo(0);
-
 		
 		cm.cache.refreshWithJSObjs(totalNumberOfItems);
 		

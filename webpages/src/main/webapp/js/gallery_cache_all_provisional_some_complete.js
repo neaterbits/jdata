@@ -45,7 +45,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 	
 	if (typeof this.upperPlaceHolder === 'undefined') {
 		this.upperPlaceHolder = t.galleryView.createUpperPlaceHolder();
-		this.galleryView.appendToContainer(this._getRenderDiv(), this.upperPlaceHolder);
+		this.galleryView.appendPlaceholderToRenderContainer(this._getRenderDiv(), this.upperPlaceHolder);
 	}
 
 	this.totalNumberOfItems = totalNumberOfItems;

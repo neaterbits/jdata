@@ -206,7 +206,7 @@ GalleryCacheBase.prototype._addDivs = function(level, startIndex, startPos, numC
 	
 	var addRowDiv = function (rowDiv) {
 		t.cachedRowDivs.push(rowDiv);
-		t.galleryView.appendToContainer(t.renderDiv, rowDiv);
+		t.galleryView.appendRowToRenderContainer(t.renderDiv, rowDiv);
 	};
 
 	var lastRendered = this._addDivsWithAddFunc(level + 1, startIndex, startPos, numColumns, heightToAdd, true, addRowDiv, makeElement);
@@ -259,7 +259,7 @@ GalleryCacheBase.prototype._prependDivs = function(level, startIndex, startPos, 
 			function (rowDiv) {
 				if (firstRowDiv == null) {
 					t.cachedRowDivs.push(rowDiv);
-					t.galleryView.appendToContainer(innerDiv, rowDiv);
+					t.galleryView.appendRowToRenderContainer(innerDiv, rowDiv);
 				}
 				else {
 					t.cachedRowDivs.splice(0, 0, rowDiv); // insert at beginning of row
@@ -351,7 +351,7 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 					return makeElement(index, itemWidth, itemHeight);
 				},
 				function (element, indexInRow) {
-					t.galleryView.appendToContainer(rowDiv, element);
+					t.galleryView.appendItemToRowContainer(rowDiv, element);
 				});
 
 		this.log(level, 'Added row no ' + rowNo + ', first elem ' + i + ' at y pos ' + y + ' of height ' + rowHeight);
