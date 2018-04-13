@@ -363,4 +363,58 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
 		checkDisplayStateIsComplete(cm.cache, 30, 38);
 	}
+
+	public void testReproduceIssueWithScrollingFewPixelsThenUp() throws IOException {
+
+		final GalleryConfig config = new HintGalleryConfig(10, 10, 240, 240);
+		final GalleryItemData [] items = createGalleryItemData(100, 240, 240);
+
+		final GalleryCacheItemsStub cacheItems = new GalleryCacheItemsStub(this::getJSFunction, (firstIndex, count, i) -> items[firstIndex].getCompleteData());
+
+		final CacheAndModel cm = createCache(config, new GalleryCacheItemsFactoryStub(cacheItems), items);
+
+		cm.cache.refresh(items.length);
+
+		// Trigger download completion of all provisional data
+		cm.galleryModel.getProvisionalRequestAt(0).onDownloaded();
+
+		// Should now have a request for updating visible area
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
+		UpdateVisibleAreaRequest request = cacheItems.getRequestAt(0);
+
+		assertThat(request.getFirstVisibleIndex()).isEqualTo(0);
+		assertThat(request.getVisibleCount()).isEqualTo(9); // 9 elements since (240 + 20) * 2 = 520 < 600
+		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
+
+		checkDisplayState(cm.cache, 0, 8, 0, 8, 0, 599, 0, 749);
+		checkDisplayStateIsAllProvisional(cm.cache);
+
+		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
+		checkDisplayStateIsComplete(cm.cache, 0, 8); // 0-8 is complete, ie. all rendered 
+
+		// Scroll cache and check that calls for correct update of visible area
+
+		// Clear list
+		cacheItems.clearUpdateRequests();
+
+		// Scroll 20 px down i area, should get new request
+		cm.cache.updateOnScroll(80);
+
+		// Should not be necessary to perform any new downloads
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(0);
+		
+		checkDisplayState(cm.cache, 0, 8, 0, 8, 80, 679, 0, 749);
+		checkDisplayStateIsComplete(cm.cache, 0, 8); // 0-8 is complete, ie. all rendered 
+
+
+		// Scroll back to 0 used to cause exception because of
+		// wrongly computing number of bytes necessary when scrolling back up
+		cm.cache.updateOnScroll(0);
+
+		// Should not be necessary to perform any new downloads
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(0);
+
+		checkDisplayState(cm.cache, 0, 8, 0, 8, 0, 599, 0, 749);
+		checkDisplayStateIsComplete(cm.cache, 0, 8); // 0-8 is complete, ie. all rendered 
+	}
 }

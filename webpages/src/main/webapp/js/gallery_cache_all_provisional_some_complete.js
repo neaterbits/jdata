@@ -365,17 +365,15 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 	}
 	else if (curY < prevDisplayed.firstVisibleY) {
 		// Scrolling partly above visible area
-		var heightFromCurYToFirstRendered = curY - prevDisplayed.firstRenderedY;
-		var visibleHeight = this._getVisibleHeight();
 
 		this.log(level, 'Scrolled to view partly above previous, must add ? Height from first rendered to curY ' + heightFromCurYToFirstRendered + ', visible ' + visibleHeight);
 
-		if (heightFromCurYToFirstRendered > visibleHeight) {
+		if (curY >= prevDisplayed.firstRenderedY) {
 			// Already rendered, so no need to add rows upwards
 			displayed = this._updatedDisplayAreaAndVisibleIndices(curY, prevDisplayed);
 		}
 		else {
-			var heightToAdd = prevDisplayed.firstVisibleY - curY;
+			var heightToAdd = prevDisplayed.firstRenderedY - curY;
 
 			// Must add items before this one, so must be prepended to the divs already shown
 			lastRendered = this._prependDivs(level + 1, prevDisplayed.firstVisibleIndex - 1, prevDisplayed.firstVisibleY, this.numColumns, heightToAdd);
