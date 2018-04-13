@@ -603,7 +603,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showComplete = function(level,
  * 
  */
 GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function(level, firstModelItemIndex, itemCount, completeDataArray, prevDisplayed) {
-	
+
 	this.enter(level, '_showCompleteForRows', [
 		'firstModelItemIndex', firstModelItemIndex,
 		'itemCount', itemCount,
@@ -630,6 +630,13 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 		var rowWidthHeights = this._getRowItemDivHeights(rowDiv);
 
 		var t = this;
+		
+		if (this.displayState.hasRenderStateComplete(i)) {
+			// Already completely rendered, we just got callback for update on this
+			// because we ask item cache for update on all visible elements whenever at least one element
+			// was not completely rendered (for simplicity)
+			continue;
+		}
 
 		// Replace row items, even if says _addRowItems() it does replace items
 		this._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
