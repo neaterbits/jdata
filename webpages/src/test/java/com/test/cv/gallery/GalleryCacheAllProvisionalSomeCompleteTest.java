@@ -497,6 +497,40 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
 		checkDisplayStateIsComplete(cm.cache, 60, 68);
 
+		checkViewOperations(cm, operations -> {
+			operations
+				// Placeholder height will be updated to position of first element
+				.setPlaceHolderHeight(5000)
+
+				// remove existing rows
+				.removeRowFromContainer(0)
+				.removeRowFromContainer(1)
+				.removeRowFromContainer(2)
+				.removeRowFromContainer(3)
+				.removeRowFromContainer(4)
+				.removeRowFromContainer(5)
+				.removeRowFromContainer(6)
+
+				.createRowContainer(20)
+				.appendRowToRenderContainer(20)
+				.appendItemToRowContainer(20, 0, 60)
+				.appendItemToRowContainer(20, 1, 61)
+				.appendItemToRowContainer(20, 2, 62)
+				
+				.createRowContainer(21)
+				.appendRowToRenderContainer(21)
+				.appendItemToRowContainer(21, 0, 63)
+				.appendItemToRowContainer(21, 1, 64)
+				.appendItemToRowContainer(21, 2, 65)
+
+				.createRowContainer(22)
+				.appendRowToRenderContainer(22)
+				.appendItemToRowContainer(22, 0, 66)
+				.appendItemToRowContainer(22, 1, 67)
+				.appendItemToRowContainer(22, 2, 68)
+				;
+		});
+
 		// ********************************* Scroll upwards onto not rendered at all *********************************
 		cacheItems.clearUpdateRequests();
 
@@ -509,6 +543,37 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		
 		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
 		checkDisplayStateIsComplete(cm.cache, 30, 38);
+
+		checkViewOperations(cm, operations -> {
+			operations
+				// Placeholder height will be updated to position of first element
+				.setPlaceHolderHeight(2500)
+
+				// remove existing rows
+				.removeRowFromContainer(20)
+				.removeRowFromContainer(21)
+				.removeRowFromContainer(22)
+
+				.createRowContainer(10)
+				.appendRowToRenderContainer(10)
+				.appendItemToRowContainer(10, 0, 30)
+				.appendItemToRowContainer(10, 1, 31)
+				.appendItemToRowContainer(10, 2, 32)
+				
+				.createRowContainer(11)
+				.appendRowToRenderContainer(11)
+				.appendItemToRowContainer(11, 0, 33)
+				.appendItemToRowContainer(11, 1, 34)
+				.appendItemToRowContainer(11, 2, 35)
+
+				.createRowContainer(12)
+				.appendRowToRenderContainer(12)
+				.appendItemToRowContainer(12, 0, 36)
+				.appendItemToRowContainer(12, 1, 37)
+				.appendItemToRowContainer(12, 2, 38)
+				;
+		});
+
 	}
 
 	public void testReproduceIssueWithScrollingFewPixelsThenUp() throws IOException {

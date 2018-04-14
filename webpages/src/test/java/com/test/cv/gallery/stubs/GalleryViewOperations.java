@@ -50,6 +50,18 @@ public final class GalleryViewOperations {
 
 		return this;
 	}
+	
+	public GalleryViewOperations removeRowFromContainer(int rowNo) {
+		add(new RemoveRowFromContainerOperation(rowNo));
+
+		return this;
+	}
+
+	public GalleryViewOperations setPlaceHolderHeight(int heightPx) {
+		add(new SetPlaceHolderHeightOperation(heightPx));
+
+		return this;
+	}
 
 	private void add(GalleryViewOperation operation) {
 		if (operation == null) {
@@ -248,6 +260,61 @@ public final class GalleryViewOperations {
 		public String toString() {
 			return "ProvisionalToComplete [" + rowNo + ", " + itemIndexInRow
 					+ ", " + itemIndex + "]";
+		}
+	}
+
+	private static class RemoveRowFromContainerOperation extends GalleryViewOperation {
+		private final int rowNo; // index into total number of rows (no matter hov many are rendered at any given moment)
+		
+		RemoveRowFromContainerOperation(int rowNo) {
+			this.rowNo = rowNo;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			RemoveRowFromContainerOperation other = (RemoveRowFromContainerOperation) obj;
+			if (rowNo != other.rowNo)
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "RemoveRow [" + rowNo +  "]";
+		}
+	}
+	
+	private static class SetPlaceHolderHeightOperation extends GalleryViewOperation {
+
+		private final int heightPx;
+
+		public SetPlaceHolderHeightOperation(int heightPx) {
+			this.heightPx = heightPx;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			SetPlaceHolderHeightOperation other = (SetPlaceHolderHeightOperation) obj;
+			if (heightPx != other.heightPx)
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "SetPlaceHolderHeight [" + heightPx +  "]";
 		}
 	}
 }
