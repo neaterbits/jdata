@@ -83,5 +83,9 @@ public interface GalleryView<CONTAINER, ELEMENT,
 	
 	void removeRowFromContainer(RENDER_CONTAINER container, ROW element);
 
+	void setRenderContainerHeight(RENDER_CONTAINER element, int heightPx);
+	
+	void setPlaceHolderHeight(PLACEHOLDER element, int heightPx);
+
 }
 

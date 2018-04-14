@@ -19,8 +19,6 @@ public interface GalleryViewElements<CONTAINER, ELEMENT> {
 	
 	int getElementHeight(ELEMENT element);
 	
-	void setElementHeight(ELEMENT element, int heightPx);
-	
 	void setCSSClasses(ELEMENT element, String classes);
 
 }

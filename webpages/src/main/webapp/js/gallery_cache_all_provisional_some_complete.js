@@ -721,7 +721,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(
 
 	this.log(level, 'Element start index: ' + posAndIndex.rowItemIndex + ', removing all rows: ' + this.cachedRowDivs.length);
 
-	this.galleryView.setElementHeight(this.upperPlaceHolder, curY);
+	this.galleryView.setPlaceHolderHeight(this.upperPlaceHolder, curY);
 
 	// Remove all row elements since we will just generate them anew after the initial div
 	// used for making sure the rows show up at the right virtual y index

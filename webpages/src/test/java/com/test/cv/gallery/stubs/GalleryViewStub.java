@@ -178,6 +178,17 @@ public final class GalleryViewStub extends GalleryViewElementsStub implements Ga
 		super.removeElement(container, element);
 	}
 
+	
+	@Override
+	public void setRenderContainerHeight(RenderDiv element, int heightPx) {
+		super.setElementHeight(element, heightPx);
+	}
+
+	@Override
+	public void setPlaceHolderHeight(Placeholder element, int heightPx) {
+		super.setElementHeight(element, heightPx);
+	}
+
 	public Row getRow(int rowNo) {
 		return rows.get(rowNo);
 	}

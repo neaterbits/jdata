@@ -239,6 +239,9 @@ function SearchView(
 	function _initGallery(searchView, galleryDivId) {
 		
 		var appendToContainer = function(container, element) { container.append(element); };
+		var setElementHeight = function(element, heightPx) {
+			element.style.height = heightPx + 'px';
+		};
 		
 		return new Gallery(
 				galleryDivId,
@@ -272,9 +275,8 @@ function SearchView(
 					getElementHeight : function(element) {  return element.clientHeight; },
 					removeRowFromContainer : function(container, element) { container.removeChild(element); },
 
-					setElementHeight : function(element, heightPx) {
-						element.style.height = heightPx + 'px';
-					},
+					setRenderContainerHeight : setElementHeight,
+					setPlaceHolderHeight : setElementHeight,
 
 					setCSSClasses : function(element, classes) {
 						element.setAttribute('class', classes);

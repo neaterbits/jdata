@@ -42,8 +42,7 @@ public class GalleryViewElementsStub implements GalleryViewElements<Div, Element
 		return element.getHeight();
 	}
 
-	@Override
-	public void setElementHeight(Element element, int heightPx) {
+	final void setElementHeight(Element element, int heightPx) {
 		element.setHeight(heightPx);
 	}
 
