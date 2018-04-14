@@ -314,7 +314,7 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 		throw "Start index not at start of column: " + startIndex + "/" + numColumns + ", total=" + this._getTotalNumberOfItems();
 	}
 
-	var rowNo = Math.floor(startIndex / numColumns);
+	var rowNo = this._computeRowNoFromNumColumns(startIndex, numColumns);
 
 	var rowWidth = this._getRowWidth();
 
@@ -608,3 +608,12 @@ GalleryCacheBase.prototype._computeIndexOfLastOnRowStartingWithIndexWithArgs = f
 GalleryCacheBase.prototype._applyItemStyles = function(itemElement, rowHeight, itemWidth, itemHeight, spacing, visible) {
 	this.galleryView.applyItemStyles(itemElement, rowHeight, itemWidth, itemHeight, spacing, visible);
 }
+
+GalleryCacheBase.prototype._computeRowNoFromNumColumns = function(index, numColumns) {
+	return Math.floor(index / numColumns);
+}
+
+GalleryCacheBase.prototype.computeRowNo = function(index, numColumns) {
+	return this._computeRowNoFromNumColumns(index, this._computeNumColumns());
+}
+

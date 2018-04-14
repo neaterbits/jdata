@@ -617,7 +617,15 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 	var numRows = this.cachedRowDivs.length;
 	var numRowsTotal = this._computeNumRowsTotal();
 	
-	for (var row = 0, i = firstModelItemIndex; row < numRows && i < itemCount; ++ row) {
+	var numColumns = this._computeNumColumns();
+	
+	if (firstModelItemIndex % numColumns !== 0) {
+		throw "Not first index on row";
+	}
+	
+	var firstRowNo = this._computeRowNoFromNumColumns(firstModelItemIndex, numColumns);
+
+	for (var row = firstRowNo, i = firstModelItemIndex; row < numRows && i < firstModelItemIndex + itemCount; ++ row) {
 
 		var rowDiv = this.cachedRowDivs[row];
 		
@@ -627,13 +635,26 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 		var rowWidthHeights = this._getRowItemDivHeights(rowDiv);
 
 		var t = this;
-		
-		if (this.displayState.hasRenderStateComplete(i)) {
+
+		var firstItemInRowCompletelyRendered = this.displayState.hasRenderStateComplete(i);
+
+		if (firstItemInRowCompletelyRendered) {
+
+			for (var j = 0; j < itemsThisRow; ++ j) {
+				if (!this.displayState.hasRenderStateComplete(i + j)) {
+					// Always updates render complete state of all items in one go
+					// since requesting all for download
+					throw "Expected all items on row to be in render state complete";
+				}
+			}
+			
+
 			// Already completely rendered, we just got callback for update on this
 			// because we ask item cache for update on all visible elements whenever at least one element
 			// was not completely rendered (for simplicity)
 		}
 		else {
+		
 			// Replace row items, even if says _addRowItems() it does replace items
 			this._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
 					function (index, itemWidth, itemHeight) {
