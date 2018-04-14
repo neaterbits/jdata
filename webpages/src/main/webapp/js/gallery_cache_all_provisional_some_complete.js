@@ -729,9 +729,9 @@ GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(
 		
 		var toRemove = this.cachedRowDivs[i];
 
-		this.log(level, 'Removing element ' + toRemove);
+		this.log(level, 'Removing row element ' + toRemove);
 
-		this.galleryView.removeElement(this._getRenderDiv(), toRemove);
+		this.galleryView.removeRowFromContainer(this._getRenderDiv(), toRemove);
 	}
 
 	this.cachedRowDivs = new Array();

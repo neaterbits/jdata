@@ -15,8 +15,6 @@ public interface GalleryViewElements<CONTAINER, ELEMENT> {
 
 	ELEMENT getElement(CONTAINER container, int index);
 	
-	void removeElement(CONTAINER container, ELEMENT element);
-
 	int getElementWidth(ELEMENT element);
 	
 	int getElementHeight(ELEMENT element);

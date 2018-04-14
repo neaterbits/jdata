@@ -173,6 +173,11 @@ public final class GalleryViewStub extends GalleryViewElementsStub implements Ga
 		replaceElement(container, indexIntoRow, element);
 	}
 
+	@Override
+	public void removeRowFromContainer(RenderDiv container, Row element) {
+		super.removeElement(container, element);
+	}
+
 	public Row getRow(int rowNo) {
 		return rows.get(rowNo);
 	}

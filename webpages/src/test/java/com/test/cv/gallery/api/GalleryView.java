@@ -73,5 +73,15 @@ public interface GalleryView<CONTAINER, ELEMENT,
 	 */
 	void replaceProvisionalWithComplete(ROW container, int index, COMPLETE element);
 
+	/**
+	 * Called whenever doing complete redraw or when scrolling and 
+	 * removing rows furthermost from visible area in order to keep scrolling fast
+	 * 
+	 * @param container render div container
+	 * @param element row
+	 */
+	
+	void removeRowFromContainer(RENDER_CONTAINER container, ROW element);
+
 }
 

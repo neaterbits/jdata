@@ -28,8 +28,7 @@ public class GalleryViewElementsStub implements GalleryViewElements<Div, Element
 		container.replaceElement(index, element);
 	}
 
-	@Override
-	public void removeElement(Div container, Element element) {
+	final void removeElement(Div container, Element element) {
 		container.removeElement(element);
 	}
 
