@@ -259,7 +259,7 @@ function SearchView(
 					
 					// Element access methods
 					createUpperPlaceHolder : function () { return document.createElement('div'); },
-					createRowContainer : function () { return document.createElement('div'); },
+					createRowContainer : function (rowNo) { return document.createElement('div'); },
 					
 					appendPlaceholderToRenderContainer	: appendToContainer,
 					appendRowToRenderContainer 			: appendToContainer,

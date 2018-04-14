@@ -29,7 +29,7 @@ public interface GalleryView<CONTAINER, ELEMENT,
 	 * 
 	 * @return div
 	 */
-	ROW createRowContainer();
+	ROW createRowContainer(int rowNo);
 
 	/**
 	 * Append the placeholder to scrollable render container

@@ -334,7 +334,7 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 			? this.totalNumberOfItems - i
 			: numColumns;
 		
-		var rowDiv = this.galleryView.createRowContainer();
+		var rowDiv = this.galleryView.createRowContainer(rowNo);
 
 		this.galleryView.setCSSClasses(rowDiv, 'gallery_row');
 

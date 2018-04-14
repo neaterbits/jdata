@@ -1,5 +1,8 @@
 package com.test.cv.gallery.stubs;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.test.cv.gallery.api.GalleryView;
 import com.test.cv.gallery.stubs.galleryview.Complete;
 import com.test.cv.gallery.stubs.galleryview.Item;
@@ -13,41 +16,82 @@ import com.test.cv.gallery.stubs.modeldata.CompleteData;
 import com.test.cv.gallery.stubs.modeldata.ElementSize;
 import com.test.cv.gallery.stubs.modeldata.ProvisionalData;
 
-public class GalleryViewStub extends GalleryViewElementsStub implements GalleryView<
+public final class GalleryViewStub extends GalleryViewElementsStub implements GalleryView<
 		Div, Element,
 		RenderDiv, Placeholder, Row, Item, Provisional, Complete> {
 
 	private final Placeholder upperPlaceHolder;
 	
+	// For test assertions on operations
+	private final GalleryViewOperations operations;
+	
+	private final List<Row> rows;
+	
 	public GalleryViewStub() {
 		this.upperPlaceHolder = new Placeholder();
+		
+		this.rows = new ArrayList<>();
+		this.operations = new GalleryViewOperations();
 	}
 	
 	@Override
 	public Placeholder createUpperPlaceHolder() {
+		
+		operations.createUpperPlaceHolder();
+		
 		return upperPlaceHolder;
 	}
 
 	@Override
-	public Row createRowContainer() {
-		return new Row();
+	public Row createRowContainer(int rowNo) {
+		
+		operations.createRowContainer(rowNo);
+		
+		final Row row = new Row(rowNo);
+		
+		if (rowNo >= rows.size()) {
+			final int toAdd = rowNo - rows.size() + 1;
+
+			for (int i = 0; i < toAdd; ++ i) {
+				rows.add(null);
+			}
+		}
+
+		// Should clear before adding new row at same position
+		if (rows.get(rowNo) != null) {
+			throw new IllegalStateException("Already has row at " + rowNo);
+		}
+		
+		this.rows.set(rowNo, row);
+		
+		return row;
 	}
 	
 	@Override
 	public void appendPlaceholderToRenderContainer(RenderDiv container, Placeholder placeholder) {
+		operations.appendPlaceholderToRenderContainer();
+
 		super.appendToContainer(container, placeholder);
 	}
 
 	@Override
 	public void appendRowToRenderContainer(RenderDiv container, Row row) {
+		operations.appendRowToRenderContainer(row.getRowNo());
+		
 		super.appendToContainer(container, row);
 	}
 
 	@Override
 	public void appendItemToRowContainer(Row row, Provisional item) {
+		operations.appendItemToRowContainer(row.getRowNo(), row.getNumElements(), item.getIndex());
+		
 		super.appendToContainer(row, item);
 	}
-	
+
+	public final GalleryViewOperations getOperations() {
+		return operations;
+	}
+
 	@FunctionalInterface
 	interface ItemContructor<T> {
 		T construct(Integer width, Integer height, int index);
@@ -118,6 +162,8 @@ public class GalleryViewStub extends GalleryViewElementsStub implements GalleryV
 	@Override
 	public void replaceProvisionalWithComplete(Row container, int indexIntoRow, Complete element) {
 		
+		operations.replaceProvisionalWithComplete(container.getRowNo(), indexIntoRow, element.getIndex());
+		
 		final Provisional current = (Provisional)container.getElement(indexIntoRow);
 		
 		if (current.getIndex() != element.getIndex()) {
@@ -125,5 +171,13 @@ public class GalleryViewStub extends GalleryViewElementsStub implements GalleryV
 		}
 
 		replaceElement(container, indexIntoRow, element);
+	}
+
+	public Row getRow(int rowNo) {
+		return rows.get(rowNo);
+	}
+	
+	public <T extends Item> List<T> getElements(int rowNo, Class<T> type) {
+		return getRow(rowNo).getElements(type);
 	}
 }

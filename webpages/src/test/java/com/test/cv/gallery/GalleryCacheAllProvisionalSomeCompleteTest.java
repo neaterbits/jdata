@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +20,7 @@ import com.test.cv.gallery.stubs.DisplayState;
 import com.test.cv.gallery.stubs.DownloadInvocation;
 import com.test.cv.gallery.stubs.GalleryCacheItemsStub;
 import com.test.cv.gallery.stubs.GalleryModelStub;
+import com.test.cv.gallery.stubs.GalleryViewOperations;
 import com.test.cv.gallery.stubs.GalleryViewStub;
 import com.test.cv.gallery.stubs.MakeDownloadData;
 import com.test.cv.gallery.stubs.UpdateVisibleAreaRequest;
@@ -73,14 +75,17 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 				galleryCache.getInstance(),
 				galleryModel, galleryView);
 	}
-	
+
 	private static class CacheAndModel {
+
 		private final GalleryCacheAllProvisionalSomeComplete cache;
 		private final GalleryModelStub galleryModel;
-		
-		CacheAndModel(GalleryCacheAllProvisionalSomeComplete cache, GalleryModelStub model) {
+		private final GalleryViewStub galleryView;
+
+		CacheAndModel(GalleryCacheAllProvisionalSomeComplete cache, GalleryModelStub model, GalleryViewStub view) {
 			this.cache = cache;
 			this.galleryModel = model;
+			this.galleryView = view;
 		}
 	}
 
@@ -107,7 +112,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 
 		cache.setGalleryDivs(outer, inner);
 		
-		return new CacheAndModel(cache, galleryModel);
+		return new CacheAndModel(cache, galleryModel, galleryView);
 	}
 	
 	private static GalleryItemData [] createGalleryItemData(int totalNumberOfItems, int itemWidth, int itemHeight) {
@@ -210,7 +215,17 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 
 		checkDisplayStateIs(cache, ds.getFirstRenderedIndex(), ds.getLastRenderedIndex(), complete -> !complete);
 	}
-	
+
+	// For checking what operations were done on view, eg. adding new elements
+	private void checkViewOperations(CacheAndModel cm,  Consumer<GalleryViewOperations> c) {
+		final GalleryViewOperations operations = new GalleryViewOperations();
+		
+		c.accept(operations);
+
+		assertThat(operations).isEqualTo(cm.galleryView.getOperations());
+
+		cm.galleryView.getOperations().clear(); // Clear again before next iteration
+	}
 
 	public void testScrollingWithStubbedCacheItemsAndHeightHintAll240x240() throws IOException {
 
@@ -222,6 +237,13 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		final CacheAndModel cm = createCache(config, new GalleryCacheItemsFactoryStub(cacheItems), items);
 
 		cm.cache.refresh(items.length);
+		
+		// Check what operations have been performed
+		checkViewOperations(cm, operations -> {
+			operations
+				.createUpperPlaceHolder()
+				.appendPlaceholderToRenderContainer();
+		});
 
 		// Trigger download completion of all provisional data
 		cm.galleryModel.getProvisionalRequestAt(0).onDownloaded();
@@ -237,8 +259,47 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		checkDisplayState(cm.cache, 0, 8, 0, 8, 0, 599, 0, 749);
 		checkDisplayStateIsAllProvisional(cm.cache);
 
+		// Check what operations have been performed
+		// creates three rows and adds items.
+		checkViewOperations(cm, operations -> {
+			operations
+				.createRowContainer(0)
+				.appendRowToRenderContainer(0)
+				.appendItemToRowContainer(0, 0, 0)
+				.appendItemToRowContainer(0, 1, 1)
+				.appendItemToRowContainer(0, 2, 2)
+				
+				.createRowContainer(1)
+				.appendRowToRenderContainer(1)
+				.appendItemToRowContainer(1, 0, 3)
+				.appendItemToRowContainer(1, 1, 4)
+				.appendItemToRowContainer(1, 2, 5)
+				
+				.createRowContainer(2)
+				.appendRowToRenderContainer(2)
+				.appendItemToRowContainer(2, 0, 6)
+				.appendItemToRowContainer(2, 1, 7)
+				.appendItemToRowContainer(2, 2, 8);
+		});
+
 		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
-		checkDisplayStateIsComplete(cm.cache, 0, 8); // 0-8 is complete, ie. all rendered 
+		checkDisplayStateIsComplete(cm.cache, 0, 8); // 0-8 is complete, ie. all rendered
+		checkViewOperations(cm, operations -> {
+			operations
+				.replaceProvisionalWithComplete(0, 0, 0)
+				.replaceProvisionalWithComplete(0, 1, 1)
+				.replaceProvisionalWithComplete(0, 2, 2)
+				
+				.replaceProvisionalWithComplete(1, 0, 3)
+				.replaceProvisionalWithComplete(1, 1, 4)
+				.replaceProvisionalWithComplete(1, 2, 5)
+				
+				.replaceProvisionalWithComplete(2, 0, 6)
+				.replaceProvisionalWithComplete(2, 1, 7)
+				.replaceProvisionalWithComplete(2, 2, 8);
+		});
+		
+		// Ought to have triggered replace-operations
 
 		// Scroll cache and check that calls for correct update of visible area
 
@@ -254,6 +315,9 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		checkDisplayState(cm.cache, 0, 8, 0, 8, 20, 619, 0, 749);
 		checkDisplayStateIsComplete(cm.cache, 0, 8); // 0-8 is complete, ie. all rendered 
 
+		checkViewOperations(cm, operations -> {
+			// No operations since only scrolled locally
+		});
 		
 		// Scroll to 400, ought to be necessary to download new items
 		// since has load 9 items = (240 + 10) * 3 = 750
@@ -269,10 +333,26 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
 
 		checkDisplayState(cm.cache, 3, 11, 0, 11, 400, 999, 0, 999);
-
+		checkViewOperations(cm, operations -> {
+			operations
+				.createRowContainer(3)
+				.appendRowToRenderContainer(3)
+				.appendItemToRowContainer(3, 0, 9)
+				.appendItemToRowContainer(3, 1, 10)
+				.appendItemToRowContainer(3, 2, 11);
+		});
+		
 		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
 		checkDisplayStateIsComplete(cm.cache, 0, 11);
-		
+
+		// download-complete causes replace operations in view
+		checkViewOperations(cm, operations -> {
+			operations
+				.replaceProvisionalWithComplete(3, 0, 9)
+				.replaceProvisionalWithComplete(3, 1, 10)
+				.replaceProvisionalWithComplete(3, 2, 11);
+		});
+	
 		// Is now at 750 + 250 = 1000, scroll to 900
 		cacheItems.clearUpdateRequests();
 		
