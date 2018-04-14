@@ -358,7 +358,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		
 		cm.cache.updateOnScroll(900);
 
-		// Ought to require two new items
+		// Ought to require two new rows
 		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
 		request = cacheItems.getRequestAt(0);
 
@@ -372,13 +372,40 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 
 		checkDisplayState(cm.cache, 9, 17, 0, 17, 900, 1499, 0, 1499);
 
+		checkViewOperations(cm, operations -> {
+			operations
+				.createRowContainer(4)
+				.appendRowToRenderContainer(4)
+				.appendItemToRowContainer(4, 0, 12)
+				.appendItemToRowContainer(4, 1, 13)
+				.appendItemToRowContainer(4, 2, 14)
+
+				.createRowContainer(5)
+				.appendRowToRenderContainer(5)
+				.appendItemToRowContainer(5, 0, 15)
+				.appendItemToRowContainer(5, 1, 16)
+				.appendItemToRowContainer(5, 2, 17);
+		});
+		
 		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
 		checkDisplayStateIsComplete(cm.cache, 0, 17);
 
+		// download-complete causes replace operations in view
+		checkViewOperations(cm, operations -> {
+			operations
+				.replaceProvisionalWithComplete(4, 0, 12)
+				.replaceProvisionalWithComplete(4, 1, 13)
+				.replaceProvisionalWithComplete(4, 2, 14)
+
+				.replaceProvisionalWithComplete(5, 0, 15)
+				.replaceProvisionalWithComplete(5, 1, 16)
+				.replaceProvisionalWithComplete(5, 2, 17);
+		});
+		
 		cacheItems.clearUpdateRequests();
 		cm.cache.updateOnScroll(950);
 
-		// Ought to require two new items
+		// Ought to require one new row
 		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
 		request = cacheItems.getRequestAt(0);
 
@@ -387,8 +414,26 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
 
 		checkDisplayState(cm.cache, 9, 20, 0, 20, 950, 1549, 0, 1749);
+		
+		checkViewOperations(cm, operations -> {
+			operations
+				.createRowContainer(6)
+				.appendRowToRenderContainer(6)
+				.appendItemToRowContainer(6, 0, 18)
+				.appendItemToRowContainer(6, 1, 19)
+				.appendItemToRowContainer(6, 2, 20);
+		});
+
 		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
 		checkDisplayStateIsComplete(cm.cache, 0, 20);
+
+		// download-complete causes replace operations in view
+		checkViewOperations(cm, operations -> {
+			operations
+				.replaceProvisionalWithComplete(6, 0, 18)
+				.replaceProvisionalWithComplete(6, 1, 19)
+				.replaceProvisionalWithComplete(6, 2, 20);
+		});
 
 		// ********************************* Scroll upwards in already rendered *********************************
 		// Scroll up again a bit to 850
@@ -401,6 +446,9 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		// 850-1000, 1000-1250, 1250-1450
 		checkDisplayState(cm.cache, 9, 17, 0, 20, 850, 1449, 0, 1749);
 
+		checkViewOperations(cm, operations -> {
+			// No view update necessary
+		});
 		 
 		// ***** Scroll upwards in already rendered but more than a complete page *****
 
@@ -410,13 +458,21 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		// Ought to require no new items since already within firstRendered/lastRendered range
 		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(0);
 		checkDisplayState(cm.cache, 0, 8, 0, 20, 0, 599, 0, 1749);
-		
+
+		checkViewOperations(cm, operations -> {
+			// No view update necessary
+		});
+
 		// ********************************* Scroll downwards again in already rendered *********************************
 		// ***** Scroll downwards in already rendered but more than a complete page *****
 		cm.cache.updateOnScroll(850);
 
 		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(0);
 		checkDisplayState(cm.cache, 9, 17, 0, 20, 850, 1449, 0, 1749);
+
+		checkViewOperations(cm, operations -> {
+			// No view update necessary
+		});
 
 		// ********************************* Scroll downwards onto not rendered at all *********************************
 
