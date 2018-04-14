@@ -284,8 +284,14 @@ DisplayState._checkRenderStateIndex = function(index) {
 	}
 }
 
-DisplayState.prototype.setRenderStateComplete = function(index, count) {
+DisplayState.prototype.setRenderStateComplete = function(level, index, count) {
 
+	this.enter(level, 'Display.setRenderStateComplete', [
+		'index', index,
+		'count', count
+	],
+	['this', this.toDebugString()]);
+	
 	var copy = this._makeCopy();
 	
 	copy._checkRenderState();
@@ -295,7 +301,7 @@ DisplayState.prototype.setRenderStateComplete = function(index, count) {
 	if (index + count - 1> copy.lastRenderedIndex) {
 		throw "index + count > this.lastRenderedIndex: " + index + "/" + count + "/" + copy.lastRenderedIndex;
 	}
-	
+
 	for (var i = 0; i < count; ++ i) {
 		var offset = index - copy.firstRenderedIndex;
 
@@ -303,6 +309,8 @@ DisplayState.prototype.setRenderStateComplete = function(index, count) {
 	}
 
 	copy._checkRenderState();
+
+	this.exit(level, 'Display.setRenderStateComplete', copy.toDebugString());
 
 	return copy;
 }

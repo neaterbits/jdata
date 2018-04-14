@@ -623,7 +623,6 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 		
 		var itemsThisRow = this.galleryView.getNumElements(rowDiv);
 
-
 		// Store new elements in array and then replace all at once
 		var rowWidthHeights = this._getRowItemDivHeights(rowDiv);
 
@@ -633,58 +632,58 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 			// Already completely rendered, we just got callback for update on this
 			// because we ask item cache for update on all visible elements whenever at least one element
 			// was not completely rendered (for simplicity)
-			continue;
 		}
-
-		// Replace row items, even if says _addRowItems() it does replace items
-		this._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
-				function (index, itemWidth, itemHeight) {
-
-					var completeData = completeDataArray[index - firstModelItemIndex];
-					
-					var item;
-
-					if (completeData == null) {
-						item = this.galleryView.getElement(rowDiv, index - i);
-					}
-					else if (typeof completeData === 'undefined') {
-						throw "Image data undefined at: " + index;
-					}
-					else {
-						item = t.galleryView.makeCompleteHTMLElement(index, t.provisionalDataArray[index], completeData);
-					}
-					
-					return item;
-				},
-				function (element, rowIndex) {
-					t.galleryView.replaceProvisionalWithComplete(rowDiv, rowIndex, element);
-				});
-
-		
-		var updatedRowWidthHeights = this._getRowItemDivHeights(rowDiv);
-
-		for (var j = 0; j < itemsThisRow; ++ j) {
-			var prevDim = rowWidthHeights[j];
-			var curDim  = updatedRowWidthHeights[j];
+		else {
+			// Replace row items, even if says _addRowItems() it does replace items
+			this._addRowItems(level + 1, rowDiv, i, itemsThisRow, numRowsTotal, rowWidth,
+					function (index, itemWidth, itemHeight) {
 	
-			if (prevDim.width !== curDim.width || prevDim.height !== curDim.height) {
-
-				var itemIndex = i + j;
-
-				var provisionalData = this.provisionalDataArray[itemIndex];
-				var completeData = this.cacheItems._debugGetCachedDataAtIndex(itemIndex);
-
-				console.log("## Gallery item dimensions changed between provisional and updated for " + itemIndex + ", index into row" + j
-					+ " : prev=" + JSON.stringify(prevDim) + ", cur=" + JSON.stringify(curDim) + ", provisional data " + JSON.stringify(provisionalData)
-					);
-				throw "throw exception"
+						var completeData = completeDataArray[index - firstModelItemIndex];
+						
+						var item;
+	
+						if (completeData == null) {
+							item = this.galleryView.getElement(rowDiv, index - i);
+						}
+						else if (typeof completeData === 'undefined') {
+							throw "Image data undefined at: " + index;
+						}
+						else {
+							item = t.galleryView.makeCompleteHTMLElement(index, t.provisionalDataArray[index], completeData);
+						}
+						
+						return item;
+					},
+					function (element, rowIndex) {
+						t.galleryView.replaceProvisionalWithComplete(rowDiv, rowIndex, element);
+					});
+	
+			
+			var updatedRowWidthHeights = this._getRowItemDivHeights(rowDiv);
+	
+			for (var j = 0; j < itemsThisRow; ++ j) {
+				var prevDim = rowWidthHeights[j];
+				var curDim  = updatedRowWidthHeights[j];
+		
+				if (prevDim.width !== curDim.width || prevDim.height !== curDim.height) {
+	
+					var itemIndex = i + j;
+	
+					var provisionalData = this.provisionalDataArray[itemIndex];
+					var completeData = this.cacheItems._debugGetCachedDataAtIndex(itemIndex);
+	
+					console.log("## Gallery item dimensions changed between provisional and updated for " + itemIndex + ", index into row" + j
+						+ " : prev=" + JSON.stringify(prevDim) + ", cur=" + JSON.stringify(curDim) + ", provisional data " + JSON.stringify(provisionalData)
+						);
+					throw "throw exception"
+				}
 			}
 		}
 
 		i += itemsThisRow;
 	}
 
-	var updatedDisplayState = prevDisplayed.setRenderStateComplete(firstModelItemIndex, itemCount);
+	var updatedDisplayState = prevDisplayed.setRenderStateComplete(level + 1, firstModelItemIndex, itemCount);
 
 	this.exit(level, '_showCompleteForRows', updatedDisplayState.toDebugString());
 	
