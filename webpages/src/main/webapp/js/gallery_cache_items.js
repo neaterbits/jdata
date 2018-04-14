@@ -721,7 +721,7 @@ GalleryCacheItems.prototype._addDownloadedDataToCacheIfStillOverlaps = function(
 	this.enter(level, '_addDownloadedDataToCacheIfStillOverlaps', [
 		'index', index,
 		'count', count,
-		'data-lenght', data.length,
+		'data-length', data.length,
 		'firstIndexInCache', firstIndexInCache,
 		'lastIndexInCache', lastIndexInCache
 	]);
