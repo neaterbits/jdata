@@ -1,7 +1,7 @@
 /**
  * A class for tracking cached item data, can be used for complete and provisional items
  * 
- * This caches data as it is read asynchronously, teh DOM elements
+ * This caches data as it is read asynchronously, the DOM elements
  * are tracked in the gallery cache.
  * 
  * 
@@ -637,7 +637,7 @@ GalleryCacheItems.prototype._startModelDownloadAndRemoveFromDownloadQueueWhenDon
 		// Make sure to remove from ongoing requests since we now have a response
 		var index = t.ongoingDownloads.indexOf(downloadRequest);
 		if (index < 0) {
-			throw "Downloadrequest not among on downloads";
+			throw "Downloadrequest not among ongoing downloads";
 		}
 		
 		var removed = t.ongoingDownloads.splice(index, 1);
@@ -646,7 +646,7 @@ GalleryCacheItems.prototype._startModelDownloadAndRemoveFromDownloadQueueWhenDon
 			throw "Item not removed: " + printArray(removed)  + '/' + downloadRequest;
 		}
 
-		t._processDownloadResponse(level + 1, downloadRequest, data);
+		t._processDownloadResponseAndCallUserIfAllDownloaded(level + 1, downloadRequest, data);
 
 		t.exit(level, 'onModelItemsDownloaded');
 	});
@@ -654,9 +654,9 @@ GalleryCacheItems.prototype._startModelDownloadAndRemoveFromDownloadQueueWhenDon
 	this.exit(level, '_startModelDownloadAndRemoveFromDownloadQueueWhenDone');
 }
 
-GalleryCacheItems.prototype._processDownloadResponse = function(level, downloadRequest, data) {
+GalleryCacheItems.prototype._processDownloadResponseAndCallUserIfAllDownloaded = function(level, downloadRequest, data) {
 	
-	this.enter(level, '_processDownloadResponse', [
+	this.enter(level, '_processDownloadResponseAndCallUserIfAllDownloaded', [
 		'downloadRequest', JSON.stringify(downloadRequest),
 		'data-length', data.length
 	]);
@@ -717,7 +717,7 @@ GalleryCacheItems.prototype._processDownloadResponse = function(level, downloadR
 		downloadRequest.onTotalDownloaded(downloadRequest.totalIndex, downloadRequest.totalCount, totalDownloadedArray);
 	}
 
-	this.exit(level, '_processDownloadResponse');
+	this.exit(level, '_processDownloadResponseAndCallUserIfAllDownloaded');
 }
 
 GalleryCacheItems.prototype._addDownloadedDataToCacheIfStillOverlaps = function(level, index, count, data, firstIndexInCache, lastIndexInCache) {
