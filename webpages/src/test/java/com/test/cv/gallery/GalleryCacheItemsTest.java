@@ -19,7 +19,7 @@ import com.test.cv.jsutils.JSInvocable;
 
 public class GalleryCacheItemsTest extends BaseGalleryTest {
 
-	private GalleryCacheItems prepareRuntime(List<DownloadInvocation> downloadRequests) throws IOException {
+	private GalleryCacheItems prepareRuntime(List<DownloadInvocation> downloadRequests, int cachedBeforeAndAfter) throws IOException {
 
 		final Map<String, Object> bindings = new HashMap<>();
 
@@ -42,7 +42,7 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		final Object callback = createJSFunctionCallback(modelDownloadItems);
 
 		
-		final ConstructRequest constructRequest = new ConstructRequest("GalleryCacheItems", 20, callback);
+		final ConstructRequest constructRequest = new ConstructRequest("GalleryCacheItems", cachedBeforeAndAfter, callback);
 		
 		final JSInvocable invocable = super.prepareGalleryRuntime(bindings, constructRequest);
 		
@@ -72,7 +72,7 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 
 		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
 
-		final GalleryCacheItems cacheItems = prepareRuntime(downloadRequests);
+		final GalleryCacheItems cacheItems = prepareRuntime(downloadRequests, 20);
 		
 		// List for tracking updated items
 		final List<UpdateCompletion> completedUpdates = new ArrayList<>();
@@ -102,7 +102,7 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		// Trigger downloaded (it. response from Ajax download)
 		downloadRequest.onDownloaded();
 		
-		// This ought to now have triggered complete display to be downloade
+		// This ought to now have triggered complete display to be downloaded
 		assertThat(completedUpdates.size()).isEqualTo(1);
 		
 		final UpdateCompletion completedUpdate = completedUpdates.get(0);
@@ -122,7 +122,7 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		
 		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
 
-		final GalleryCacheItems cacheItems = prepareRuntime(downloadRequests);
+		final GalleryCacheItems cacheItems = prepareRuntime(downloadRequests, 20);
 		
 		// List for tracking updated items
 		final List<UpdateCompletion> completedUpdates = new ArrayList<>();
@@ -171,6 +171,64 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		
 		assertThat(completedUpdate.data[2]).isEqualTo(dataString(4, 2, 0)); // Start at 4, index 0 out of count 2
 		assertThat(completedUpdate.data[3]).isEqualTo(dataString(4, 2, 1)); // Start at 4, index 1 out of count 2
+	}
+	
+	public void testScrollPreloadedBelowInitialElement() throws IOException {
+		// Fix issue for when updating visible area so that first row of virtual array
+		// no longer included in cached data
+		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
+
+		final GalleryCacheItems cacheItems = prepareRuntime(downloadRequests, 1);
+		
+		// List for tracking updated items
+		final List<UpdateCompletion> completedUpdates = new ArrayList<>();
+		final Object updateVisibleAreaCompleteCallback = prepareUpdateVisibleAreaCallback(completedUpdates);
+
+		// Create cache loader
+		// final Object galleryCacheItems = 
+			// jsRuntime.invokeConstructor("GalleryCacheItems", 20, modelDownloadItems);
+		
+		// No download requests until item downloaded
+		assertThat(downloadRequests.size()).isEqualTo(0);
+
+		final int firstVisibleIndex = 0;
+		final int visibleCount = 4;
+		final int totalNumberOfItems = 20;
+		
+		cacheItems.updateVisibleArea(0, firstVisibleIndex, visibleCount, totalNumberOfItems, updateVisibleAreaCompleteCallback);
+		// Should now have one download request
+		assertThat(downloadRequests.size()).isEqualTo(1);
+
+		DownloadInvocation downloadRequest = downloadRequests.get(0);
+		assertThat(downloadRequest.getStartIndex()).isEqualTo(0);
+		assertThat(downloadRequest.getCount()).isEqualTo(4);
+		
+		assertThat(completedUpdates.size()).isEqualTo(0);
+		// Trigger downloaded (it. response from Ajax download)
+		downloadRequest.onDownloaded();
+
+		// This ought to now have triggered complete display to be downloaded
+		assertThat(completedUpdates.size()).isEqualTo(1);
+		
+		downloadRequests.clear();
+		completedUpdates.clear();
+		
+		// Here comes the real test, scroll down more so that first preloaded index > 0
+		cacheItems.updateVisibleArea(0, firstVisibleIndex + 2, visibleCount, totalNumberOfItems, updateVisibleAreaCompleteCallback);
+		assertThat(downloadRequests.size()).isEqualTo(1);
+		
+		downloadRequest = downloadRequests.get(0);
+		assertThat(downloadRequest.getStartIndex()).isEqualTo(4); // since already download 2-3
+		assertThat(downloadRequest.getCount()).isEqualTo(2);
+		
+		assertThat(completedUpdates.size()).isEqualTo(0);
+		
+		downloadRequest.onDownloaded();
+		assertThat(completedUpdates.size()).isEqualTo(1);
+		
+		// Once more to trigger bug since now this.curVisibleIndex is not in sync with size of cached data
+		cacheItems.updateVisibleArea(0, firstVisibleIndex + 4, visibleCount, totalNumberOfItems, updateVisibleAreaCompleteCallback);
+				
 	}
 
 	private static class UpdateCompletion {

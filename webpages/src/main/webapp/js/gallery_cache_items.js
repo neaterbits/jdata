@@ -114,11 +114,15 @@ GalleryCacheItems.prototype._debugGetCachedDataAtIndex = function(index) {
 
 GalleryCacheItems.prototype._getFirstIndexInCache = function(level, visibleIndex) {
 	
-	this.enter(level, '_getFirstIndexInCache', ['visibleIndex', visibleIndex]);
+	this.enter(level, '_getFirstIndexInCache', [
+			'visibleIndex', visibleIndex
+		], [
+			'this.cachedBeforeAndAfter', this.cachedBeforeAndAfter
+		]);
 	
 	var firstCachedIndex;
 	
-	firstCachedIndex = this.curVisibleIndex - this.cachedBeforeAndAfter;
+	firstCachedIndex = visibleIndex - this.cachedBeforeAndAfter;
 	
 	if (firstCachedIndex < 0) {
 		firstCachedIndex = 0;
@@ -186,7 +190,7 @@ GalleryCacheItems.prototype.updateVisibleArea = function(level, firstVisibleInde
 
 	var layout = this._computeNewCacheArrayLayout(level + 1, firstVisibleIndex, visibleCount, totalNumberOfItems);
 
-	// Check for overlap can only be overlap if we had any items at all in the galery
+	// Check for overlap can only be overlap if we had any items at all in the gallery
 	if (this.totalNumberOfItems > 0) {
 		// First see if there is any overlap with current visible area and then figure what to download
 		var curFirstCachedIndex = this._getFirstIndexInCache(level + 1, this.curVisibleIndex);
