@@ -664,7 +664,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 						var item;
 	
 						if (completeData == null) {
-							item = this.galleryView.getElement(rowDiv, index - i);
+							item = t.galleryView.getElement(rowDiv, index - i);
 						}
 						else if (typeof completeData === 'undefined') {
 							throw "Image data undefined at: " + index;
@@ -676,7 +676,11 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 						return item;
 					},
 					function (element, rowIndex) {
-						t.galleryView.replaceProvisionalWithComplete(rowDiv, rowIndex, element);
+						if (element !== t.galleryView.getElement(rowDiv, rowIndex)) {
+							// Only replace if different item, see function above where just returns existing element
+							// when completeData == null
+							t.galleryView.replaceProvisionalWithComplete(rowDiv, rowIndex, element);
+						}
 					});
 	
 			

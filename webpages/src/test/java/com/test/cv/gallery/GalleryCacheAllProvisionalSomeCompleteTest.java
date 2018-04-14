@@ -94,8 +94,8 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		return createCache(
 				config,
 				cacheItemsFactory,
-				(firstIndex, count, indexInSet) -> itemData[firstIndex].getProvisionalData(),
-				(firstIndex, count, indexInSet) -> itemData[firstIndex].getCompleteData());
+				(firstIndex, count, indexInSet) -> itemData[firstIndex + indexInSet].getProvisionalData(),
+				(firstIndex, count, indexInSet) -> itemData[firstIndex + indexInSet].getCompleteData());
 	}
 
 	private CacheAndModel createCache(GalleryConfig config, CacheItemsFactory cacheItemsFactory, MakeDownloadData makeProvisionalData, MakeDownloadData makeCompleteData) throws IOException {
@@ -232,7 +232,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		final GalleryConfig config = new HintGalleryConfig(10, 10, 240, 240);
 		final GalleryItemData [] items = createGalleryItemData(100, 240, 240);
 
-		final GalleryCacheItemsStub cacheItems = new GalleryCacheItemsStub(this::getJSFunction, (firstIndex, count, i) -> items[firstIndex].getCompleteData());
+		final GalleryCacheItemsStub cacheItems = new GalleryCacheItemsStub(this::getJSFunction, (firstIndex, count, i) -> items[firstIndex + i].getCompleteData());
 
 		final CacheAndModel cm = createCache(config, new GalleryCacheItemsFactoryStub(cacheItems), items);
 
@@ -403,6 +403,11 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		});
 		
 		cacheItems.clearUpdateRequests();
+		
+		// Replace with a null completeData at first item in next row to test case where eg. is lacking thumbnail,
+		// should just keep provisional item rendered
+		items[18] = new GalleryItemData(items[18].getProvisionalData(), null);
+		
 		cm.cache.updateOnScroll(950);
 
 		// Ought to require one new row
@@ -424,13 +429,13 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 				.appendItemToRowContainer(6, 2, 20);
 		});
 
-		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
+		request.onComplete(); // Trigger all complete-data downloaded event
 		checkDisplayStateIsComplete(cm.cache, 0, 20);
 
 		// download-complete causes replace operations in view
 		checkViewOperations(cm, operations -> {
 			operations
-				.replaceProvisionalWithComplete(6, 0, 18)
+				// .replaceProvisionalWithComplete(6, 0, 18)   !! no complete-data
 				.replaceProvisionalWithComplete(6, 1, 19)
 				.replaceProvisionalWithComplete(6, 2, 20);
 		});
@@ -505,7 +510,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		final GalleryConfig config = new HintGalleryConfig(10, 10, 240, 240);
 		final GalleryItemData [] items = createGalleryItemData(100, 240, 240);
 
-		final GalleryCacheItemsStub cacheItems = new GalleryCacheItemsStub(this::getJSFunction, (firstIndex, count, i) -> items[firstIndex].getCompleteData());
+		final GalleryCacheItemsStub cacheItems = new GalleryCacheItemsStub(this::getJSFunction, (firstIndex, count, i) -> items[firstIndex + i].getCompleteData());
 
 		final CacheAndModel cm = createCache(config, new GalleryCacheItemsFactoryStub(cacheItems), items);
 

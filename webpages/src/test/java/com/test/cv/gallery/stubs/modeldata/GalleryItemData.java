@@ -11,6 +11,16 @@ public class GalleryItemData {
 		this.completeData = new CompleteData(width, height);
 	}
 
+	
+	public GalleryItemData(ProvisionalData provisionalData, CompleteData completeData) {
+		if (provisionalData == null) {
+			throw new IllegalArgumentException("provisionalData == null");
+		}
+
+		this.provisionalData = provisionalData;
+		this.completeData = completeData;
+	}
+
 	public ProvisionalData getProvisionalData() {
 		return provisionalData;
 	}
