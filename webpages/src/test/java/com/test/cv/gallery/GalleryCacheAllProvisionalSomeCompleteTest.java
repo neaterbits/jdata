@@ -90,18 +90,24 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 	}
 
 	private CacheAndModel createCache(GalleryConfig config, CacheItemsFactory cacheItemsFactory, GalleryItemData [] itemData) throws IOException {
+		return createCache(config, cacheItemsFactory, itemData, 800, 600);
+	}
+
+	private CacheAndModel createCache(GalleryConfig config, CacheItemsFactory cacheItemsFactory, GalleryItemData [] itemData, int displayWidth, int displayHeight) throws IOException {
 
 		return createCache(
 				config,
 				cacheItemsFactory,
+				displayWidth,
+				displayHeight,
 				(firstIndex, count, indexInSet) -> itemData[firstIndex + indexInSet].getProvisionalData(),
 				(firstIndex, count, indexInSet) -> itemData[firstIndex + indexInSet].getCompleteData());
 	}
 
-	private CacheAndModel createCache(GalleryConfig config, CacheItemsFactory cacheItemsFactory, MakeDownloadData makeProvisionalData, MakeDownloadData makeCompleteData) throws IOException {
+	private CacheAndModel createCache(GalleryConfig config, CacheItemsFactory cacheItemsFactory, int displayWidth, int displayHeight, MakeDownloadData makeProvisionalData, MakeDownloadData makeCompleteData) throws IOException {
 		// Represent the divs added to the webpage
-		final Div outer = new Div(800, 600);
-		final RenderDiv inner = new RenderDiv(800, null); // height unknown, must be set by gallery
+		final Div outer = new Div(displayWidth, displayHeight);
+		final RenderDiv inner = new RenderDiv(displayWidth, null); // height unknown, must be set by gallery
 		
 		makeProvisionalData = (startIndex, count, index) -> new ProvisionalData(240, 240);
 		
@@ -558,4 +564,70 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		checkDisplayState(cm.cache, 0, 8, 0, 8, 0, 599, 0, 749);
 		checkDisplayStateIsComplete(cm.cache, 0, 8); // 0-8 is complete, ie. all rendered 
 	}
+
+	public void testReproduceIssueWithScrollCompletePageRendersOnlyToStartOfRowPlusVisibleHight() throws IOException {
+
+		// Was a bug when redrawing complete where computing height to add from curY, then adding
+		// elements only from start of first visible row to visibleHeight. So if only half of first visible row is visible,
+		// then half of a rowheight would not be added to display
+		// To trigger exception, must scroll a bit more after complete redraw in order to trigger assertion
+		// on lasteRendereY < lastVisibleY
+		
+		final GalleryConfig config = new HintGalleryConfig(10, 10, 240, 240);
+		final GalleryItemData [] items = createGalleryItemData(100, 240, 240);
+
+		final GalleryCacheItemsStub cacheItems = new GalleryCacheItemsStub(this::getJSFunction, (firstIndex, count, i) -> items[firstIndex + i].getCompleteData());
+
+		final CacheAndModel cm = createCache(config, new GalleryCacheItemsFactoryStub(cacheItems), items, 800, 300);
+
+		cm.cache.refresh(items.length);
+
+		// Trigger download completion of all provisional data
+		cm.galleryModel.getProvisionalRequestAt(0).onDownloaded();
+
+		// Should now have a request for updating visible area
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
+		UpdateVisibleAreaRequest request = cacheItems.getRequestAt(0);
+
+		assertThat(request.getFirstVisibleIndex()).isEqualTo(0);
+		assertThat(request.getVisibleCount()).isEqualTo(6); // 6 elements since (240 + 10) * 2 = 520 > 300
+		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
+
+		checkDisplayState(cm.cache, 0, 5, 0, 5, 0, 299, 0, 499);
+		checkDisplayStateIsAllProvisional(cm.cache);
+
+		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
+		checkDisplayStateIsComplete(cm.cache, 0, 5);
+
+		// Scroll cache and check that calls for correct update of visible area
+
+		// Clear list
+		cacheItems.clearUpdateRequests();
+
+		// Scroll 850 px down i area, should trigger complete redraw
+		// Half of item is hidden, to trigger issue
+		cm.cache.updateOnScroll(970);
+
+		// Should not be necessary to perform any new downloads
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
+
+		request = cacheItems.getRequestAt(0);
+
+		assertThat(request.getFirstVisibleIndex()).isEqualTo(9);
+		assertThat(request.getVisibleCount()).isEqualTo(9);
+		assertThat(request.getTotalNumberOfItems()).isEqualTo(100);
+
+		// lastRenderY used to be 1249 here since we just added rows for 750 + visible height (300)
+		// but ought to be 970 up to visible height, which requires one more row., so up to 1499
+		checkDisplayState(cm.cache, 9, 17, 9, 17, 970, 1269, 750, 1499); // 1249);
+		checkDisplayStateIsAllProvisional(cm.cache);
+
+		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
+		checkDisplayStateIsComplete(cm.cache, 9, 17);
+		
+		// Call update to scroll 50 more, should trigger exception because of issue
+		cacheItems.clearUpdateRequests();
+		cm.cache.updateOnScroll(990);
+	}
+
 }

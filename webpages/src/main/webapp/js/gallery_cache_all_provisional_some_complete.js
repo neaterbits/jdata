@@ -717,7 +717,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 
 GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(level, curY, posAndIndex) {
 
-	this.enter(level, 'redrawCompletelyAt', [ 'curY', curY ]);
+	this.enter(level, 'redrawCompletelyAt', [ 'curY', curY, 'posAndIndex', JSON.stringify(posAndIndex) ]);
 
 	this.log(level, 'Element start index: ' + posAndIndex.rowItemIndex + ', removing all rows: ' + this.cachedRowDivs.length);
 
@@ -737,8 +737,17 @@ GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(
 	this.cachedRowDivs = new Array();
 
 	this.firstCachedIndex = posAndIndex.rowItemIndex;
+	
+	if (posAndIndex.rowYPos > curY) {
+		// posAndIndex ought to have been computed so that always < curY (start of visible area)
+		// since we are showing complete rows
+	}
+	var toAdd = curY - posAndIndex.rowYPos; // start adding vertical pixels at start of row (even if outside of display area)
+	
+	// Continue through visible height
+	toAdd += this._getVisibleHeight();
 
-	var lastRendered = this._addProvisionalDivs(level + 1, posAndIndex.rowItemIndex, posAndIndex.rowYPos, this.numColumns, this._getVisibleHeight());
+	var lastRendered = this._addProvisionalDivs(level + 1, posAndIndex.rowItemIndex, posAndIndex.rowYPos, this.numColumns, toAdd);
 	
 	this.exit(level, 'redrawCompletelyAt', JSON.stringify(lastRendered));
 	
