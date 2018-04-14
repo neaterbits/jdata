@@ -614,19 +614,34 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 	}
 
 	var rowWidth = this._getRowWidth();
-	var numRows = this.cachedRowDivs.length;
-	var numRowsTotal = this._computeNumRowsTotal();
-	
+	var numRowsInCache = this.cachedRowDivs.length;
+
 	var numColumns = this._computeNumColumns();
+
+	var numRenderedItems = prevDisplayed.lastRenderedIndex - prevDisplayed.firstRenderedIndex + 1;
+	var numRenderedRows = numRenderedItems / numColumns;
+
+	if (numRowsInCache !== numRenderedRows) {
+		throw "Cached rows mismatch";
+	}
+	
+	var numRowsTotal = this._computeNumRowsTotal();
 	
 	if (firstModelItemIndex % numColumns !== 0) {
 		throw "Not first index on row";
 	}
 	
-	var firstRowNo = this._computeRowNoFromNumColumns(firstModelItemIndex, numColumns);
+	var	rowNoOfModelItemInTotal = this._computeRowNoFromNumColumns(firstModelItemIndex, numColumns);
+	var	rowNoOfFirstCachedInTotal = this._computeRowNoFromNumColumns(prevDisplayed.firstRenderedIndex, numColumns);
+	
+	if (rowNoOfFirstCachedInTotal > rowNoOfModelItemInTotal) {
+		throw "rowNoOfFirstCachedInTotal > rowNoOfModelItemInTotal";
+	}
 
-	for (var row = firstRowNo, i = firstModelItemIndex; row < numRows && i < firstModelItemIndex + itemCount; ++ row) {
+	var firstRowInCache = rowNoOfModelItemInTotal - rowNoOfFirstCachedInTotal;
 
+	for (var row = firstRowInCache, i = firstModelItemIndex; row < numRowsInCache && i < firstModelItemIndex + itemCount; ++ row) {
+		
 		var rowDiv = this.cachedRowDivs[row];
 		
 		var itemsThisRow = this.galleryView.getNumElements(rowDiv);
@@ -717,7 +732,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 
 GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(level, curY, posAndIndex) {
 
-	this.enter(level, 'redrawCompletelyAt', [ 'curY', curY, 'posAndIndex', JSON.stringify(posAndIndex) ]);
+	this.enter(level, '_redrawCompletelyAt', [ 'curY', curY, 'posAndIndex', JSON.stringify(posAndIndex) ]);
 
 	this.log(level, 'Element start index: ' + posAndIndex.rowItemIndex + ', removing all rows: ' + this.cachedRowDivs.length);
 
@@ -749,7 +764,7 @@ GalleryCacheAllProvisionalSomeComplete.prototype._redrawCompletelyAt = function(
 
 	var lastRendered = this._addProvisionalDivs(level + 1, posAndIndex.rowItemIndex, posAndIndex.rowYPos, this.numColumns, toAdd);
 	
-	this.exit(level, 'redrawCompletelyAt', JSON.stringify(lastRendered));
+	this.exit(level, '_redrawCompletelyAt', JSON.stringify(lastRendered));
 	
 	return lastRendered;
 };

@@ -493,9 +493,6 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
 
 		checkDisplayState(cm.cache, 60, 68, 60, 68, 5000, 5599, 5000, 5749);
-		
-		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
-		checkDisplayStateIsComplete(cm.cache, 60, 68);
 
 		checkViewOperations(cm, operations -> {
 			operations
@@ -529,6 +526,24 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 				.appendItemToRowContainer(22, 1, 67)
 				.appendItemToRowContainer(22, 2, 68)
 				;
+			
+		});
+
+		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
+		checkDisplayStateIsComplete(cm.cache, 60, 68);
+
+		checkViewOperations(cm, operations -> {
+			operations
+				.replaceProvisionalWithComplete(20, 0, 60)
+				.replaceProvisionalWithComplete(20, 1, 61)
+				.replaceProvisionalWithComplete(20, 2, 62)
+				.replaceProvisionalWithComplete(21, 0, 63)
+				.replaceProvisionalWithComplete(21, 1, 64)
+				.replaceProvisionalWithComplete(21, 2, 65)
+				.replaceProvisionalWithComplete(22, 0, 66)
+				.replaceProvisionalWithComplete(22, 1, 67)
+				.replaceProvisionalWithComplete(22, 2, 68)
+				;
 		});
 
 		// ********************************* Scroll upwards onto not rendered at all *********************************
@@ -541,9 +556,6 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 
 		checkDisplayState(cm.cache, 30, 38, 30, 38, 2500, 3099, 2500, 3249);
 		
-		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
-		checkDisplayStateIsComplete(cm.cache, 30, 38);
-
 		checkViewOperations(cm, operations -> {
 			operations
 				// Placeholder height will be updated to position of first element
@@ -574,6 +586,22 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 				;
 		});
 
+		cacheItems.getRequestAt(0).onComplete(); // Trigger all complete-data downloaded event
+		checkDisplayStateIsComplete(cm.cache, 30, 38);
+
+		checkViewOperations(cm, operations -> {
+			operations
+				.replaceProvisionalWithComplete(10, 0, 30)
+				.replaceProvisionalWithComplete(10, 1, 31)
+				.replaceProvisionalWithComplete(10, 2, 32)
+				.replaceProvisionalWithComplete(11, 0, 33)
+				.replaceProvisionalWithComplete(11, 1, 34)
+				.replaceProvisionalWithComplete(11, 2, 35)
+				.replaceProvisionalWithComplete(12, 0, 36)
+				.replaceProvisionalWithComplete(12, 1, 37)
+				.replaceProvisionalWithComplete(12, 2, 38)
+				;
+		});
 	}
 
 	public void testReproduceIssueWithScrollingFewPixelsThenUp() throws IOException {
