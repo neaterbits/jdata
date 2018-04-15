@@ -488,7 +488,7 @@ GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIn
 
 				var completeArray = t._checkWhetherAllInCache(level + 1, downloadRequest);
 					
-				t.log(level, '!! All downloaded for ' + downloadRequest + ' : ' + completeArray != null);
+				t.log(level, '!! All downloaded for ' + JSON.stringify(downloadRequest) + ' : ' + (completeArray != null));
 
 				if (completeArray != null) {
 					// no null-entries in initially downloaded range, run callback on all data
