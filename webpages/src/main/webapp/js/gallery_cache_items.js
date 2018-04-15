@@ -484,8 +484,14 @@ GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIn
 			
 			t._startModelDownloadAndRemoveFromDownloadQueueWhenDone(level + 1, downloadRequest, function(i, c, downloadedData) {
 
-				// Immediate fetch for display area, call back to user
-				t._callOnTotalDownloadedIfAllInCache(level + 1, downloadRequest);
+				var completeArray = t._checkWhetherAllInCache(level + 1, downloadRequest);
+					
+				t.log(level, '!! All downloaded for ' + downloadRequest + ' : ' + completeArray != null);
+
+				if (completeArray != null) {
+					// no null-entries in initially downloaded range, run callback on all data
+					downloadRequest.onTotalDownloaded(downloadRequest.totalIndex, downloadRequest.totalCount, completeArray);
+				}
 				
 				// Schedule anything from download queue if necessary
 				// and no ongoing downloads
@@ -711,9 +717,9 @@ GalleryCacheItems.prototype._storeDownloadReponseInCache = function(level, downl
 	this.exit(level, '_storeDownloadReponseInCache');
 }
 
-GalleryCacheItems.prototype._callOnTotalDownloadedIfAllInCache = function(level, downloadRequest) {
+GalleryCacheItems.prototype._checkWhetherAllInCache = function(level, downloadRequest) {
 	
-	this.enter(level, '_callOnTotalDownloadedIfAllInCache', JSON.stringify(downloadRequest));
+	this.enter(level, '_checkWhetherAllInCache', [ 'downloadRequest', JSON.stringify(downloadRequest)]);
 	
 	// If anything falls outside of the visible area, we just ignore this and call back anyway since
 	// this is handled by caller by looking at sequence numbers, just skipping callbacks if user moved
@@ -736,6 +742,7 @@ GalleryCacheItems.prototype._callOnTotalDownloadedIfAllInCache = function(level,
 			
 			if (cached == null) {
 				allDownloaded = false;
+				totalDownloadedArray = null;
 				break;
 			}
 			
@@ -744,15 +751,9 @@ GalleryCacheItems.prototype._callOnTotalDownloadedIfAllInCache = function(level,
 	}
 	
 	// track all outstanding request, when total is downloaded for some, must re-check completed downloads and add the newest one
-	// remove all others, eg just sort by sequence no
-	this.log(level, '!! All downloaded for ' + downloadRequest + ' : ' + allDownloaded);
+	this.exit(level, '_checkWhetherAllInCache', totalDownloadedArray != null ? totalDownloadedArray.length : null);
 	
-	if (allDownloaded) {
-		// no null-entries in initially downloaded range, run callback on all data
-		downloadRequest.onTotalDownloaded(downloadRequest.totalIndex, downloadRequest.totalCount, totalDownloadedArray);
-	}
-
-	this.exit(level, '_callOnTotalDownloadedIfAllInCache');
+	return totalDownloadedArray;
 }
 
 GalleryCacheItems.prototype._addDownloadedDataToCacheIfStillOverlaps = function(level, index, count, data, firstIndexInCache, lastIndexInCache) {
