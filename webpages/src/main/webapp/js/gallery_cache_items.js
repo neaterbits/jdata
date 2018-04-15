@@ -310,7 +310,7 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 		
 		// If this can trigger the last entry in the update-request queue, then run it. Otherwise wait.
 		if (t.updateRequests.length == 0) {
-			throw "Empty update request queue";
+			throw "Empty update request queue whe called back from visible-area download";
 		}
 		
 		var newestUpdateRequest = t.updateRequests[t.updateRequests.length - 1];
@@ -484,19 +484,20 @@ GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIn
 			
 			t._startModelDownloadAndRemoveFromDownloadQueueWhenDone(level + 1, downloadRequest, function(i, c, downloadedData) {
 
+				// Immediate fetch for display area, call back to user
+				t._callOnTotalDownloadedIfAllInCache(level + 1, downloadRequest);
+				
 				// Schedule anything from download queue if necessary
 				// and no ongoing downloads
-				t._scheduleFromDownloadQueue(level + 1);
+				//t._scheduleFromDownloadQueue(level + 1);
 
-				// Call user callback
-				onDownloaded(i, c, downloadedData);
+				// Call user callback not necessary since done above
+				// onDownloaded(i, c, downloadedData);
 			});
 		};
 	}
 	else {
 		// Preloading, just add to download queue
-		
-		var t = this;
 		
 		fetchFunction = function(downloadRequest) {
 			t.downloadQueue.push(downloadRequest);
@@ -631,7 +632,10 @@ GalleryCacheItems.prototype._startModelDownloadAndRemoveFromDownloadQueueWhenDon
 		
 		t.enter(level, 'onModelItemsDownloaded',
 			[ 'downloadRequest', 		JSON.stringify(downloadRequest) ],
-			[ 'this.ongoingDownloads', 	JSON.stringify(t.ongoingDownloads) ]
+			[
+				'this.ongoingDownloads', 	JSON.stringify(t.ongoingDownloads),
+				'this.updateRequests', 		JSON.stringify(t.updateRequests.length)
+			]
 		);
 		
 		// Make sure to remove from ongoing requests since we now have a response
@@ -646,7 +650,10 @@ GalleryCacheItems.prototype._startModelDownloadAndRemoveFromDownloadQueueWhenDon
 			throw "Item not removed: " + printArray(removed)  + '/' + downloadRequest;
 		}
 
-		t._processDownloadResponseAndCallUserIfAllDownloaded(level + 1, downloadRequest, data);
+		t._storeDownloadReponseInCache(level + 1, downloadRequest, data);
+		
+		// Call the supplied callback so can do more other book-keeping tasks and schedule any preloading
+		onDownloaded(downloadRequest);
 
 		t.exit(level, 'onModelItemsDownloaded');
 	});
@@ -654,9 +661,9 @@ GalleryCacheItems.prototype._startModelDownloadAndRemoveFromDownloadQueueWhenDon
 	this.exit(level, '_startModelDownloadAndRemoveFromDownloadQueueWhenDone');
 }
 
-GalleryCacheItems.prototype._processDownloadResponseAndCallUserIfAllDownloaded = function(level, downloadRequest, data) {
+GalleryCacheItems.prototype._storeDownloadReponseInCache = function(level, downloadRequest, data) {
 	
-	this.enter(level, '_processDownloadResponseAndCallUserIfAllDownloaded', [
+	this.enter(level, '_storeDownloadReponseInCache', [
 		'downloadRequest', JSON.stringify(downloadRequest),
 		'data-length', data.length
 	]);
@@ -678,10 +685,12 @@ GalleryCacheItems.prototype._processDownloadResponseAndCallUserIfAllDownloaded =
 			data,
 			firstIndexInCache, lastIndexInCache);
 
-	// Check whether we now have received all data for the completed requested area, if so we can call back
-	// on download
+	this.exit(level, '_storeDownloadReponseInCache');
+}
 
-	var allDownloaded;
+GalleryCacheItems.prototype._callOnTotalDownloadedIfAllInCache = function(level, downloadRequest) {
+	
+	this.enter(level, '_callOnTotalDownloadedIfAllInCache', JSON.stringify(downloadRequest));
 	
 	// If anything falls outside of the visible area, we just ignore this and call back anyway since
 	// this is handled by caller by looking at sequence numbers, just skipping callbacks if user moved
@@ -690,6 +699,9 @@ GalleryCacheItems.prototype._processDownloadResponseAndCallUserIfAllDownloaded =
 	var allDownloaded = true;
 
 	var totalDownloadedArray = new Array(downloadRequest.totalCount);
+
+	var firstIndexInCache = this._getFirstIndexInCache(level + 1, this.curVisibleIndex);
+	var lastIndexInCache = this._getLastIndexInCache(level + 1, this.curVisibleIndex, this.curVisibleCount, this.totalNumberOfItems);
 	
 	for (var i = 0; i < downloadRequest.totalCount; ++ i) {
 		var index = i + downloadRequest.totalIndex;
@@ -717,7 +729,7 @@ GalleryCacheItems.prototype._processDownloadResponseAndCallUserIfAllDownloaded =
 		downloadRequest.onTotalDownloaded(downloadRequest.totalIndex, downloadRequest.totalCount, totalDownloadedArray);
 	}
 
-	this.exit(level, '_processDownloadResponseAndCallUserIfAllDownloaded');
+	this.exit(level, '_callOnTotalDownloadedIfAllInCache');
 }
 
 GalleryCacheItems.prototype._addDownloadedDataToCacheIfStillOverlaps = function(level, index, count, data, firstIndexInCache, lastIndexInCache) {
@@ -781,6 +793,7 @@ GalleryCacheItems.prototype._addDownloadedDataToCacheIfStillOverlaps = function(
 	this.exit(level, '_addDownloadedDataToCacheIfStillOverlaps');
 }
 
+
 GalleryCacheItems.prototype._setCachedDataItem = function(arrayIndex, item) {
 	if (typeof item === 'undefined') {
 		throw "Adding undefined at " + arrayIndex;
@@ -795,17 +808,17 @@ GalleryCacheItems.prototype._scheduleFromDownloadQueue = function(level) {
 	
 	if (this.ongoingDownloads.length == 0 && this.downloadQueue.length > 0) {
 		
-		var downloadRequest = this.queuedDownloads[0];
+		var downloadRequest = this.downloadQueue[0];
 
 		// Remove first element
-		this.queuedDownloads.splice(0, 1);
+		this.downloadQueue.splice(0, 1);
 		
 		var t = this;
 		
 		this._startModelDownloadAndRemoveFromDownloadQueueWhenDone(level + 1, downloadRequest, function (downloadRequest, downloadedData) {
 			
 			t._scheduleFromDownloadQueue();
-			
+
 			downloadRequest.onDownloaded(downloadRequest, downloadedData);
 		});
 	}
