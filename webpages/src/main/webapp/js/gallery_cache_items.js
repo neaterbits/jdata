@@ -736,10 +736,23 @@ GalleryCacheItems.prototype._checkWhetherAllInCache = function(level, downloadRe
 	var firstIndexInCache = this._getFirstIndexInCache(level + 1, this.curVisibleIndex);
 	var lastIndexInCache = this._getLastIndexInCache(level + 1, this.curVisibleIndex, this.curVisibleCount, this.totalNumberOfItems);
 	
+	
+	if (this.curVisibleCount == 0) {
+		throw "this.curVisibleCount == 0";
+	}
+
+	var firstVisibleInCache = this.curVisibleIndex;
+	var lastVisibleInCache = this.curVisibleIndex + this.curVisibleCount - 1;
+	
+	// Check intersection against this download and visible area
+	// since we are only interested in the latest visible area (which may differ from what was the case when request was scheduled)
+
+	// TODO look for only display area and not intersection ? 
+
 	for (var i = 0; i < downloadRequest.totalCount; ++ i) {
 		var index = i + downloadRequest.totalIndex;
 		
-		if (index >= firstIndexInCache && index < lastIndexInCache) {
+		if (index >= firstVisibleInCache && index <= lastVisibleInCache) {
 			var cacheArrayIndex = index - firstIndexInCache;
 			
 			var cached = this.cachedData[cacheArrayIndex];
@@ -794,24 +807,29 @@ GalleryCacheItems.prototype._addDownloadedDataToCacheIfStillOverlaps = function(
 		}
 	}
 	else if (index < firstIndexInCache) {
+
 		var srcOffset = firstIndexInCache - index;
+		var num = count - srcOffset;
 		
-		for (var i = 0; i < count; ++ i) {
+		for (var i = 0; i < num; ++ i) {
 			var srcIndex = index + srcOffset + i;
 				
 			if (srcIndex < firstIndexInCache) {
 				continue;
 			}
-			
+
 			if (firstIndexInCache + i > lastIndexInCache) {
-				throw "Out of range";
+				throw "Out of range: " + (firstIndexInCache + i) + "/" + lastIndexInCache;
 			}
 
-			var dataElement = data[srcOffset + i];
-			this.log(level, 'Copy from pre-overlapping data[' + i + '] to this.cachedData[' + dstIndex + '] at item index ' + (index + i)
+			var srcDataIndex = srcOffset + i;
+
+			this.log(level, 'Copy from pre-overlapping data[' + srcDataIndex + '] to this.cachedData[' + i + '] at item index ' + (index + i)
 					+ ': ' + (dataElement != null ? '<nonnull>' : '<null>'));
 
-			this._setCachedDataItem(cachedData[i], new GalleryCacheItem(dataElement));
+			var dataElement = data[srcDataIndex];
+
+			this._setCachedDataItem(i, new GalleryCacheItem(dataElement));
 		}
 	}
 	else {
