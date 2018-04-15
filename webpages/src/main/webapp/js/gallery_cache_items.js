@@ -474,12 +474,12 @@ GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIn
 		throw "Cached index and itemcount out of bounds for cache length " + this.cachedData.length;
 	}
 	
-	var fetchFunction;
+	var fetchChunkFunction;
 	
 	var t = this;
 	
 	if (fetchImmediately) {
-		fetchFunction = function(downloadRequest) {
+		fetchChunkFunction = function(downloadRequest) {
 			// Call on model to download
 			
 			t._startModelDownloadAndRemoveFromDownloadQueueWhenDone(level + 1, downloadRequest, function(i, c, downloadedData) {
@@ -499,7 +499,7 @@ GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIn
 	else {
 		// Preloading, just add to download queue
 		
-		fetchFunction = function(downloadRequest) {
+		fetchChunkFunction = function(downloadRequest) {
 			t.downloadQueue.push(downloadRequest);
 
 			// Schedule anything from download queue if necessary
@@ -507,7 +507,30 @@ GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIn
 			t._scheduleFromDownloadQueue(level + 1);
 		};
 	}
+	
+	// Call with above function to fetch chunks
+	this._scheduleDownloadInMultipleChunksIfNecessary(level + 1, fetchChunkFunction, sequenceNo, cacheIndex, itemIndex, itemCount, onDownloaded)
 
+	this.exit(level, '_downloadItems');
+}
+
+/**
+ * What is downloaded and what is not may be scattered in cache as user scrolls
+ * so this functions checks from itemIndex and itemIndex elements ahead
+ * and issues download requests whenever it finds one or more missing elements.
+ * On callback one might check whether after that callback, all requested data is now in cache.
+ * This makes it easier to handle different response order of chunks, failure responses etc.
+ * 
+ */
+GalleryCacheItems.prototype._scheduleDownloadInMultipleChunksIfNecessary = function(level, fetchChunkFunction, sequenceNo, cacheIndex, itemIndex, itemCount, onDownloaded) {
+
+	this.enter(level, '_scheduleDownloadInMultipleChunksIfNecessary', [
+		'sequenceNo', sequenceNo,
+		'cacheIndex', cacheIndex,
+		'itemIndex', itemIndex,
+		'itemCount', itemCount
+	]);
+	
 	// Check whether item already downloaded or has an ongoing download
 	var state = 'START';
 	var firstNotDownloaded;
@@ -562,7 +585,7 @@ GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIn
 				
 				var downloadRequest = new GalleryCacheDownloadRequest(sequenceNo, itemIndex, itemCount, subIndex, subCount, onDownloaded);
 				
-				fetchFunction(downloadRequest);
+				fetchChunkFunction(downloadRequest);
 			}
 			break;
 			
@@ -582,10 +605,10 @@ GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIn
 
 		var downloadRequest = new GalleryCacheDownloadRequest(sequenceNo, itemIndex, itemCount, subIndex, subCount, onDownloaded);
 
-		fetchFunction(downloadRequest);
+		fetchChunkFunction(downloadRequest);
 	}
 
-	this.exit(level, '_downloadItems');
+	this.exit(level, '_scheduleDownloadInMultipleChunksIfNecessary');
 }
 
 /**
