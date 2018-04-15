@@ -312,7 +312,7 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 		
 		// If this can trigger the last entry in the update-request queue, then run it. Otherwise wait.
 		if (t.updateRequests.length == 0) {
-			throw "Empty update request queue whe called back from visible-area download";
+			throw "Empty update request queue when called back from visible-area download";
 		}
 		
 		var newestUpdateRequest = t.updateRequests[t.updateRequests.length - 1];
