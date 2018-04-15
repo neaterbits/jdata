@@ -307,8 +307,12 @@ GalleryCacheItems.prototype._downloadForVisibleAndPreloadAreas = function(level,
 	
 	this.log(level, 'Scheduling download with sequence no ' + updateSequenceNoAtStartOfDownload + ' for index ' + firstVisibleIndex + ', count=' + visibleCount)
 	
-	this._downloadItems(level + 1, updateSequenceNoAtStartOfDownload, indexIntoCacheArray, firstVisibleIndex, visibleCount, true, function (index, count, data) {
-		
+	this._downloadItems(level + 1, updateSequenceNoAtStartOfDownload, indexIntoCacheArray, firstVisibleIndex, visibleCount, true, function () {
+
+		// We do not care about indices here, only about whether we now have retrieved all data
+		// for the latest request.
+		// Since a lot of requests can be generated even from a single scroll, we only need the newest one
+		// and can remove all others from the queue if we have received all data to respond to the latest one
 		
 		// If this can trigger the last entry in the update-request queue, then run it. Otherwise wait.
 		if (t.updateRequests.length == 0) {
@@ -459,7 +463,7 @@ GalleryCacheItems.prototype._computeNewCacheArrayLayout = function(level, firstV
  */
 
 
-GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIndex, itemIndex, itemCount, fetchImmediately, onDownloaded) {
+GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIndex, itemIndex, itemCount, fetchImmediately, onAnyDownloaded) {
 
 	this.enter(level, '_downloadItems', [
 		'cacheIndex', cacheIndex,
@@ -485,22 +489,16 @@ GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIn
 			// Call on model to download
 			
 			t._startModelDownloadAndRemoveFromDownloadQueueWhenDone(level + 1, downloadRequest, function(i, c, downloadedData) {
-
-				var completeArray = t._checkWhetherAllInCache(level + 1, downloadRequest);
-					
-				t.log(level, '!! All downloaded for ' + JSON.stringify(downloadRequest) + ' : ' + (completeArray != null));
-
-				if (completeArray != null) {
-					// no null-entries in initially downloaded range, run callback on all data
-					downloadRequest.onTotalDownloaded(downloadRequest.totalIndex, downloadRequest.totalCount, completeArray);
-				}
+				
+				// Call back without any checks for what is downloaded since we are always just interested
+				// in whether we have all items in currently displayed area, independent of response order
+				onAnyDownloaded();
 				
 				// Schedule anything from download queue if necessary
 				// and no ongoing downloads
 				//t._scheduleFromDownloadQueue(level + 1);
 
 				// Call user callback not necessary since done above
-				// onDownloaded(i, c, downloadedData);
 			});
 		};
 	}
@@ -519,7 +517,7 @@ GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIn
 	}
 	
 	// Call with above function to fetch chunks
-	this._scheduleDownloadInMultipleChunksIfNecessary(level + 1, fetchChunkFunction, sequenceNo, cacheIndex, itemIndex, itemCount, onDownloaded)
+	this._scheduleDownloadInMultipleChunksIfNecessary(level + 1, fetchChunkFunction, sequenceNo, cacheIndex, itemIndex, itemCount)
 
 	this.exit(level, '_downloadItems');
 }
@@ -532,7 +530,7 @@ GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIn
  * This makes it easier to handle different response order of chunks, failure responses etc.
  * 
  */
-GalleryCacheItems.prototype._scheduleDownloadInMultipleChunksIfNecessary = function(level, fetchChunkFunction, sequenceNo, cacheIndex, itemIndex, itemCount, onDownloaded) {
+GalleryCacheItems.prototype._scheduleDownloadInMultipleChunksIfNecessary = function(level, fetchChunkFunction, sequenceNo, cacheIndex, itemIndex, itemCount) {
 
 	this.enter(level, '_scheduleDownloadInMultipleChunksIfNecessary', [
 		'sequenceNo', sequenceNo,
@@ -593,7 +591,7 @@ GalleryCacheItems.prototype._scheduleDownloadInMultipleChunksIfNecessary = funct
 				var subIndex = itemIndex + firstNotDownloaded;
 				var subCount = i - firstNotDownloaded;
 				
-				var downloadRequest = new GalleryCacheDownloadRequest(sequenceNo, itemIndex, itemCount, subIndex, subCount, onDownloaded);
+				var downloadRequest = new GalleryCacheDownloadRequest(sequenceNo, itemIndex, itemCount, subIndex, subCount);
 				
 				fetchChunkFunction(downloadRequest);
 			}
@@ -613,7 +611,7 @@ GalleryCacheItems.prototype._scheduleDownloadInMultipleChunksIfNecessary = funct
 
 //		console.log('### download rest (' + subCount +') from ' + firstNotDownloaded + '/' + itemIndex);
 
-		var downloadRequest = new GalleryCacheDownloadRequest(sequenceNo, itemIndex, itemCount, subIndex, subCount, onDownloaded);
+		var downloadRequest = new GalleryCacheDownloadRequest(sequenceNo, itemIndex, itemCount, subIndex, subCount);
 
 		fetchChunkFunction(downloadRequest);
 	}
@@ -719,58 +717,6 @@ GalleryCacheItems.prototype._storeDownloadReponseInCache = function(level, downl
 			firstIndexInCache, lastIndexInCache);
 
 	this.exit(level, '_storeDownloadReponseInCache');
-}
-
-GalleryCacheItems.prototype._checkWhetherAllInCache = function(level, downloadRequest) {
-	
-	this.enter(level, '_checkWhetherAllInCache', [ 'downloadRequest', JSON.stringify(downloadRequest)]);
-	
-	// If anything falls outside of the visible area, we just ignore this and call back anyway since
-	// this is handled by caller by looking at sequence numbers, just skipping callbacks if user moved
-	// visible area
-	
-	var allDownloaded = true;
-
-	var totalDownloadedArray = new Array(downloadRequest.totalCount);
-
-	var firstIndexInCache = this._getFirstIndexInCache(level + 1, this.curVisibleIndex);
-	var lastIndexInCache = this._getLastIndexInCache(level + 1, this.curVisibleIndex, this.curVisibleCount, this.totalNumberOfItems);
-	
-	
-	if (this.curVisibleCount == 0) {
-		throw "this.curVisibleCount == 0";
-	}
-
-	var firstVisibleInCache = this.curVisibleIndex;
-	var lastVisibleInCache = this.curVisibleIndex + this.curVisibleCount - 1;
-	
-	// Check intersection against this download and visible area
-	// since we are only interested in the latest visible area (which may differ from what was the case when request was scheduled)
-
-	// TODO look for only display area and not intersection ? 
-
-	for (var i = 0; i < downloadRequest.totalCount; ++ i) {
-		var index = i + downloadRequest.totalIndex;
-		
-		if (index >= firstVisibleInCache && index <= lastVisibleInCache) {
-			var cacheArrayIndex = index - firstIndexInCache;
-			
-			var cached = this.cachedData[cacheArrayIndex];
-			
-			if (cached == null) {
-				allDownloaded = false;
-				totalDownloadedArray = null;
-				break;
-			}
-			
-			totalDownloadedArray[i] = cached.data;
-		}
-	}
-	
-	// track all outstanding request, when total is downloaded for some, must re-check completed downloads and add the newest one
-	this.exit(level, '_checkWhetherAllInCache', totalDownloadedArray != null ? totalDownloadedArray.length : null);
-	
-	return totalDownloadedArray;
 }
 
 GalleryCacheItems.prototype._addDownloadedDataToCacheIfStillOverlaps = function(level, index, count, data, firstIndexInCache, lastIndexInCache) {
@@ -883,16 +829,14 @@ GalleryCacheItems.prototype._scheduleFromDownloadQueue = function(level) {
  *  - totalCount - count for the case above, eg number of visible elements
  *  - subIndex - index into virtual array for this particular download (what we will query)
  *  - subCount - number of items to request
- *  - onDownloaded - callback for this particular chunk, will be called with this request as first parameter and data (an array of subCount elements)
  */
 
-function GalleryCacheDownloadRequest(sequenceNo, totalIndex, totalCount, subIndex, subCount, onDownloaded) {
+function GalleryCacheDownloadRequest(sequenceNo, totalIndex, totalCount, subIndex, subCount) {
 	this.sequenceNo = sequenceNo;
 	this.totalIndex = totalIndex;
 	this.totalCount = totalCount;
 	this.subIndex = subIndex; 
 	this.subCount = subCount;
-	this.onTotalDownloaded = onDownloaded;
 }
 
 /**

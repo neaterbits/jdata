@@ -230,7 +230,160 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		cacheItems.updateVisibleArea(0, firstVisibleIndex + 4, visibleCount, totalNumberOfItems, updateVisibleAreaCompleteCallback);
 				
 	}
+
+	/*
+	 * issue, retrieving entry 0-5,
+	 * while awaiting response, is scrolled to 2-5 which scrolls virtual array and 0-1 is removed since not in visible are
+	 * (and cachedBeforeAndAfter might be null).
+	 * This means that we will not find complete-array for initial response and second request was never run due to already ongoing request.
+
+	 * Fixes?
+
+	 * - scroll virtual array after retrieving initial response? Not very intuitive since visible area is updated immediately.
+	 * - keep a list of requests that have not been run because of overlapping requests and check those as well. Simpler solution probably.
+	 * 
+	 * - or just check state after any response request against cached items for *display area* ? Checking against first and last checked index
+	 * or first and last index of the request is not really relevant, we only need to know that we have the elements
+	 * for current display area (ie. from latest call to )
+	 * 
+	 */
+
+	public void testReproduceBugNotLoadingWhenScrollingDownBecauseOfInitialNotCopiedInScrollVirtualArray() throws IOException {
+		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
+
+		// Preload 2 items before and after
+		final GalleryCacheItems cacheItems = prepareRuntime(downloadRequests, 20); // preload triggers issue
+		
+		// List for tracking updated items
+		final List<UpdateCompletion> completedUpdates = new ArrayList<>();
+		final Object updateVisibleAreaCompleteCallback = prepareUpdateVisibleAreaCallback(completedUpdates);
+
+		// Download initial 0-3
+		cacheItems.updateVisibleArea(0, 4, 20, updateVisibleAreaCompleteCallback);
+		assertThat(downloadRequests.size()).isEqualTo(1);
+		DownloadInvocation downloadRequest = downloadRequests.get(0);
+		
+		assertThat(downloadRequest.getStartIndex()).isEqualTo(0);
+		assertThat(downloadRequest.getCount()).isEqualTo(4);
+
+		downloadRequest.onDownloaded();
+		
+		assertThat(completedUpdates.size()).isEqualTo(1);
+		completedUpdates.clear();
+		downloadRequests.clear();
+
+		// Update 0 - 5 to trigger download from 4-5
+		cacheItems.updateVisibleArea(0, 6, 20, updateVisibleAreaCompleteCallback);
+		
+		assertThat(downloadRequests.size()).isEqualTo(1);
+		downloadRequest = downloadRequests.get(0);
+		
+		assertThat(downloadRequest.getStartIndex()).isEqualTo(4);
+		assertThat(downloadRequest.getCount()).isEqualTo(2);
+
+		downloadRequests.clear();
+		
+		// Run another update for 2-5, this will scroll cache and set index 0-2 to null
+		cacheItems.updateVisibleArea(2, 4, 20, updateVisibleAreaCompleteCallback);
+		
+		// This should not have triggered any download request since is overlapping
+		assertThat(downloadRequests.size()).isEqualTo(0);
+		
+		downloadRequest.onDownloaded();
+		
+		// Should now have a complete-update even if download-request is mapped to the initial update for 4-5
+		// but would not pass check of complete scroll-area since 0-1 is null
+		assertThat(completedUpdates.size()).isEqualTo(1);
+	}
+
+	/* 
+	 * The issue above was not triggered in the case below where we have no cached before and after (0 passed to prepareRuntime())
+	 * since this.cachedData would only consist items from visible area and therefore with existing code (checking for all set from firstCached to lastCached)
+	 * have all elements loaded.
+	 */
+	public void testReproduceBugNotLoadingWhenScrollingDownBecauseOfInitialNotCopiedInScrollVirtualArray_NoCachedBeforAndAfter() throws IOException {
+		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
+
+		// Preload 2 items before and after
+		final GalleryCacheItems cacheItems = prepareRuntime(downloadRequests, 0);
+		
+		// List for tracking updated items
+		final List<UpdateCompletion> completedUpdates = new ArrayList<>();
+		final Object updateVisibleAreaCompleteCallback = prepareUpdateVisibleAreaCallback(completedUpdates);
+
+		// Download initial
+		cacheItems.updateVisibleArea(0, 4, 20, updateVisibleAreaCompleteCallback);
+		assertThat(downloadRequests.size()).isEqualTo(1);
+		DownloadInvocation downloadRequest = downloadRequests.get(0);
+		
+		assertThat(downloadRequest.getStartIndex()).isEqualTo(0);
+		assertThat(downloadRequest.getCount()).isEqualTo(4);
+
+		downloadRequest.onDownloaded();
+
+		assertThat(completedUpdates.size()).isEqualTo(1);
+		completedUpdates.clear();
+
+		downloadRequests.clear();
+		
+		// Update 0 - 6 to trigger download
+		cacheItems.updateVisibleArea(0, 6, 20, updateVisibleAreaCompleteCallback);
+		
+		assertThat(downloadRequests.size()).isEqualTo(1);
+		downloadRequest = downloadRequests.get(0);
+		
+		assertThat(downloadRequest.getStartIndex()).isEqualTo(4);
+		assertThat(downloadRequest.getCount()).isEqualTo(2);
+
+		downloadRequests.clear();
+		
+		// Run another update for 2-5, this will scroll cache and set index 0-2 to null
+		cacheItems.updateVisibleArea(2, 4, 20, updateVisibleAreaCompleteCallback);
+		
+		// This should not have triggered any download request since is overlapping
+		assertThat(downloadRequests.size()).isEqualTo(0);
+		
+		downloadRequest.onDownloaded();
+		
+		// Should now have a complete-update even if download-request is mapped to the initial update for 0-5
+		assertThat(completedUpdates.size()).isEqualTo(1);
+	}
 	
+
+	public void testDownloadResponseOutOfOrder_NoCachedBeforeAndAfter() throws IOException {
+		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
+
+		// Preload 2 items before and after
+		final GalleryCacheItems cacheItems = prepareRuntime(downloadRequests, 0);
+		
+		// List for tracking updated items
+		final List<UpdateCompletion> completedUpdates = new ArrayList<>();
+		final Object updateVisibleAreaCompleteCallback = prepareUpdateVisibleAreaCallback(completedUpdates);
+
+		// Update 0 - 6 to trigger download
+		cacheItems.updateVisibleArea(0, 6, 20, updateVisibleAreaCompleteCallback);
+		
+		assertThat(downloadRequests.size()).isEqualTo(1);
+		final DownloadInvocation downloadRequest = downloadRequests.get(0);
+		
+		assertThat(downloadRequest.getStartIndex()).isEqualTo(0);
+		assertThat(downloadRequest.getCount()).isEqualTo(6);
+
+		downloadRequests.clear();
+		
+		// Run another update for 2-5, this will scroll cache and set index 0-2 to null
+		cacheItems.updateVisibleArea(2, 4, 20, updateVisibleAreaCompleteCallback);
+		
+		// This should not have triggered any download request since is overlapping
+		assertThat(downloadRequests.size()).isEqualTo(0);
+		
+		downloadRequest.onDownloaded();
+		
+		// Should now have a complete-update even if download-request is mapped to the initial update for 0-5
+		assertThat(completedUpdates.size()).isEqualTo(1);
+	}
+	
+
 	public void testPreloadBeforeAndAfter() throws IOException {
 		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
 
@@ -248,7 +401,6 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		
 		// Should now have one download request
 		assertThat(downloadRequests.size()).isEqualTo(1);
-		
 		final DownloadInvocation downloadRequest = downloadRequests.get(0);
 		
 		downloadRequests.clear();
