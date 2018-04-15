@@ -302,7 +302,11 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 
 	this.enter(level, '_updateOnScroll',
 			[ 'curY', curY, 'prevDisplayed', prevDisplayed.toDebugString()],
-			[ 'displayState', this.displayState.toDebugString(), '_getVisibleHeight()', this._getVisibleHeight() ]);
+			[
+				'displayState', this.displayState.toDebugString(),
+				'_getVisibleHeight()', this._getVisibleHeight(),
+				'_getScrollableHeight', this._getScrollableHeight()
+			]);
 	
 	// See if we have something that was not visible earlier scrolled into view
 	var initialUpdate;
