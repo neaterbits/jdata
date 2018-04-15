@@ -378,16 +378,34 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateOnScroll = function(leve
 		}
 		else {
 			var heightToAdd = prevDisplayed.firstRenderedY - curY;
-
+			
 			// Must add items before this one, so must be prepended to the divs already shown
 			lastRendered = this._prependDivs(level + 1, prevDisplayed.firstVisibleIndex - 1, prevDisplayed.firstVisibleY, this.numColumns, heightToAdd);
-	
-			firstRenderedY = lastRendered.rowYPos;
-			firstVisibleIndex = lastRendered.rowItemIndex;
-	
-			throw "TODO figure out last rendered after prepending"
-			lastRenderedY = lastRendered.yPos;
-			lastVisibleIndex = lastRendered.index;
+
+			// Must update placeholder height to before added items
+			this.galleryView.setPlaceHolderHeight(this.upperPlaceHolder, lastRendered.yPos);
+
+			var lastVisibleY = curY + this._getVisibleHeight() - 1;
+			
+			displayed = this._addCurYToDisplayState(level + 1, curY, prevDisplayed, {
+
+				// lastRendered is upmost prepended since prepend happens in reverse order
+				firstRenderedIndex	: lastRendered.index,
+				firstRenderedY		: lastRendered.yPos,
+
+				// first visible is same as first rendered since we prepended because of no already rendered elements in visible area
+				firstVisibleIndex	: lastRendered.index,
+				firstVisibleY		: lastRendered.yPos,
+				
+				lastVisibleIndex 	: this._computeLastVisibleIndex(lastVisibleY),
+				
+				// last-rendered is the same as before since we have only prepended items
+				lastRenderedIndex	: prevDisplayed.lastRenderedIndex,
+				lastRenderedY		: prevDisplayed.lastRenderedY
+			});
+			
+			// 
+			
 		}
 	}
 	else if (curY > prevDisplayed.lastVisibleY) {
@@ -522,14 +540,20 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updatedDisplayAreaAndVisibleIn
 
 	// Then find indices of elements
 	var firstVisibleIndex = this._findElementYPosAndItemIndex(0, updated.firstVisibleY).rowItemIndex;
+
+	var lastVisibleIndex = this._computeLastVisibleIndex(updated.lastVisibleY);
 	
-	var lastPos = this._findElementYPosAndItemIndex(0, updated.lastVisibleY);
+	return updated.sameWithUpdatedVisibleIndices(firstVisibleIndex, lastVisibleIndex);
+}
+
+GalleryCacheAllProvisionalSomeComplete.prototype._computeLastVisibleIndex = function(lastVisibleY) {
+	var lastPos = this._findElementYPosAndItemIndex(0, lastVisibleY);
 	
 	var indexOfLastOnRow = this._computeIndexOfLastOnRowStartingWithIndex(lastPos.rowItemIndex);
 
 	var lastVisibleIndex = indexOfLastOnRow;
 
-	return updated.sameWithUpdatedVisibleIndices(firstVisibleIndex, lastVisibleIndex);
+	return lastVisibleIndex;
 }
 
 /**

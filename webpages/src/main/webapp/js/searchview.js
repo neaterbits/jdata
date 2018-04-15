@@ -267,6 +267,8 @@ function SearchView(
 					appendPlaceholderToRenderContainer	: appendToContainer,
 					appendRowToRenderContainer 			: appendToContainer,
 					appendItemToRowContainer 			: appendToContainer,
+					
+					prependRowToRenderContainer : function(container, row, curFirstRow) { container.insertBefore(row, curFirstRow); },
 
 					getNumElements : function(container) { return container.childNodes.length; },
 					replaceProvisionalWithComplete : function(container, index, element) { container.replaceChild(element, container.childNodes[index]);  },
@@ -326,6 +328,10 @@ function SearchView(
 				}
 		);
 	}
+	
+	function _makeTitle(index, title) {
+		return '' + index + ': ' + title;
+	}
 
 	function _makeGalleryProvisionalItem(index, data) {
 		var div = document.createElement('div');
@@ -344,7 +350,7 @@ function SearchView(
 		// Add index as a text to the element
 		var textSpan = document.createElement('span');
 		
-		textSpan.innerHTML = data.title;
+		textSpan.innerHTML = _makeTitle(index, data.title);
 
 		// Don't make text wider that thumb
 		textDiv.style.width = data.thumbWidth;
@@ -392,7 +398,7 @@ function SearchView(
 		// Add index as a text to the element
 		var textSpan = document.createElement('span');
 		
-		textSpan.innerHTML = provisionalData.title;
+		textSpan.innerHTML = _makeTitle(index, provisionalData.title);
 
 		textDiv.style.width = provisionalData.thumbWidth;
 		textDiv.style['text-align'] = 'center';

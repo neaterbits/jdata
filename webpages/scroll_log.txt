@@ -1,0 +1,1580 @@
+gallery_base.js:250 ENTER refresh(totalNumberOfItems=50)
+gallery_base.js:250   ENTER refresh(totalNumberOfItems=50)
+gallery_base.js:250       Thumbs per row: 2
+gallery_base.js:250       Height: 8000
+gallery_base.js:250       Visible height: 443
+gallery_base.js:250       ENTER _addProvisionalDivs(startIndex=0, startPos=0, numColumns=2, heightToAdd=443)
+gallery_base.js:250         ENTER addDivs(level=4, startIndex=0, startPos=0, numColumns=2, heightToAdd=443)
+gallery_base.js:250           ENTER addDivsWithAddFunc(startIndex=0, startPos=0, numColumns=2, heightToAdd=443, downwards=true)
+gallery_base.js:250             ENTER _addRowItems(indexOfFirstInRow=0, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250               mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250             EXIT _addRowItems() = 304
+gallery_base.js:250             Added row no 1, first elem 0 at y pos 0 of height 304
+gallery_base.js:250             ENTER _addRowItems(indexOfFirstInRow=2, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250               mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250             EXIT _addRowItems() = 304
+gallery_base.js:250             Added row no 2, first elem 2 at y pos 304 of height 304
+gallery_base.js:250             addDivsWithAddFunc added 2 rows
+gallery_base.js:250           EXIT addDivsWithAddFunc() = [object Object]
+gallery_base.js:250         EXIT addDivs() = {"index":3,"yPos":608}
+gallery_base.js:250       EXIT _addProvisionalDivs() = {"index":3,"yPos":608}
+gallery_base.js:250     ENTER _downloadAndRenderComplete(displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=0, lVY=442, fRY=0, lRY=607 })
+gallery_base.js:250       ENTER updateVisibleArea(firstVisibleIndex=0, visibleCount=4, totalNumberOfItems=50) state=[this.curVisibleIndex=0, this.curVisibleCount=undefined]
+gallery_base.js:250         ENTER _allocateCacheArray(firstVisibleIndex=0, visibleCount=4, totalNumberOfItems=50)
+gallery_base.js:250           ENTER _getFirstIndexInCache(visibleIndex=0) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250           EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250           ENTER _getLastIndexInCache(visibleIndex=0, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250           EXIT _getLastIndexInCache() = 23
+gallery_base.js:250         EXIT _allocateCacheArray() = 24
+gallery_base.js:250         ENTER _computeNewCacheArrayLayout(firstVisibleIndex=0, visibleCount=4)
+gallery_base.js:250           ENTER _getFirstIndexInCache(visibleIndex=0) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250           EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250           ENTER _getLastIndexInCache(visibleIndex=0, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250           EXIT _getLastIndexInCache() = 23
+gallery_base.js:250         EXIT _computeNewCacheArrayLayout() = {"firstCachedIndex":0,"numBeforeVisible":0,"lastCachedIndex":23,"numAfterVisible":20}
+gallery_base.js:250         Re-allocate cache array since no overlap
+gallery_base.js:250         ENTER _allocateCacheArray(firstVisibleIndex=0, visibleCount=4, totalNumberOfItems=50)
+gallery_base.js:250           ENTER _getFirstIndexInCache(visibleIndex=0) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250           EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250           ENTER _getLastIndexInCache(visibleIndex=0, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250           EXIT _getLastIndexInCache() = 23
+gallery_base.js:250         EXIT _allocateCacheArray() = 24
+gallery_base.js:250         ENTER _downloadForVisibleAndPreloadAreas(layout={"firstCachedIndex":0,"numBeforeVisible":0,"lastCachedIndex":23,"numAfterVisible":20}, firstVisibleIndex=0, visibleCount=4, totalNumberOfItems=50)
+gallery_base.js:250           Scheduling download with sequence no 1 for index 0, count=4
+gallery_base.js:250           ENTER _downloadItems(cacheIndex=0, itemIndex=0, itemCount=4, fetchImmediately=true) state=[this.ongoingDownloads=[]]
+gallery_base.js:250             ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=1, cacheIndex=0, itemIndex=0, itemCount=4)
+gallery_base.js:250             ENTER _startModelDownloadAndRemoveFromDownloadQueueWhenDone(downloadRequest={"sequenceNo":1,"totalIndex":0,"totalCount":4,"subIndex":0,"subCount":4})
+gallery_base.js:250             EXIT _startModelDownloadAndRemoveFromDownloadQueueWhenDone()
+gallery_base.js:250             EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250           EXIT _downloadItems()
+gallery_base.js:250           ENTER _downloadItems(cacheIndex=0, itemIndex=0, itemCount=0, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":1,"totalIndex":0,"totalCount":4,"subIndex":0,"subCount":4}]]
+gallery_base.js:250             ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=1, cacheIndex=0, itemIndex=0, itemCount=0)
+gallery_base.js:250             EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250           EXIT _downloadItems()
+gallery_base.js:250           ENTER _downloadItems(cacheIndex=4, itemIndex=4, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":1,"totalIndex":0,"totalCount":4,"subIndex":0,"subCount":4}]]
+gallery_base.js:250             ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=1, cacheIndex=4, itemIndex=4, itemCount=20)
+gallery_base.js:250             EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250           EXIT _downloadItems()
+gallery_base.js:250         EXIT _downloadForVisibleAndPreloadAreas()
+gallery_base.js:250       EXIT updateVisibleArea()
+gallery_base.js:250     EXIT _downloadAndRenderComplete()
+gallery_base.js:250       ENTER _updateHeightIfApproximation(displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=0, lVY=442, fRY=0, lRY=607 })
+gallery_base.js:250         remainingElements: 46, remainingSpace: 7393, recomputedHeight: 7360
+gallery_base.js:250         Computed new height from current 8000 and diff -33: 7967
+gallery_base.js:250       EXIT _updateHeightIfApproximation()
+gallery_base.js:250   EXIT refresh()
+gallery_base.js:250 EXIT refresh()
+gallery_base.js:250 ENTER onModelItemsDownloaded(downloadRequest={"sequenceNo":1,"totalIndex":0,"totalCount":4,"subIndex":0,"subCount":4}) state=[this.ongoingDownloads=[{"sequenceNo":1,"totalIndex":0,"totalCount":4,"subIndex":0,"subCount":4}], this.updateRequests=1]
+gallery_base.js:250   ENTER _storeDownloadReponseInCache(downloadRequest={"sequenceNo":1,"totalIndex":0,"totalCount":4,"subIndex":0,"subCount":4}, data-length=4)
+gallery_base.js:250     ENTER _getFirstIndexInCache(visibleIndex=0) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250     ENTER _getLastIndexInCache(visibleIndex=0, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getLastIndexInCache() = 23
+gallery_base.js:250     ENTER _addDownloadedDataToCacheIfStillOverlaps(index=0, count=4, data-length=4, firstIndexInCache=0, lastIndexInCache=23)
+gallery_base.js:250       Copy from post-overlapping data[0] to this.cachedData[0] at item index 0: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[1] to this.cachedData[1] at item index 1: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[2] to this.cachedData[2] at item index 2: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[3] to this.cachedData[3] at item index 3: <nonnull>
+gallery_base.js:250     EXIT _addDownloadedDataToCacheIfStillOverlaps()
+gallery_base.js:250   EXIT _storeDownloadReponseInCache()
+gallery_base.js:250             ENTER _checkWhetherAllInCache(downloadRequest={"sequenceNo":1,"totalIndex":0,"totalCount":4,"subIndex":0,"subCount":4})
+gallery_base.js:250               ENTER _getFirstIndexInCache(visibleIndex=0) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250               EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250               ENTER _getLastIndexInCache(visibleIndex=0, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250               EXIT _getLastIndexInCache() = 23
+gallery_base.js:250             EXIT _checkWhetherAllInCache() = 4
+gallery_base.js:250             true
+gallery_base.js:250           ENTER _getFirstIndexInCache(visibleIndex=0) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250           EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250 ENTER _showCompleteForRows(firstModelItemIndex=0, itemCount=4, completeDataArray=4, prevDisplayed={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=0, lVY=442, fRY=0, lRY=607 })
+gallery_base.js:250   ENTER _addRowItems(indexOfFirstInRow=0, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250     mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250   EXIT _addRowItems() = 304
+gallery_base.js:250   ENTER _addRowItems(indexOfFirstInRow=2, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250     mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250   EXIT _addRowItems() = 304
+gallery_base.js:250   ENTER Display.setRenderStateComplete(index=0, count=4) state=[this={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=0, lVY=442, fRY=0, lRY=607 }]
+gallery_base.js:250   EXIT Display.setRenderStateComplete() = { fVI=0, lVI=3, fRI=0, lRI=3, fVY=0, lVY=442, fRY=0, lRY=607 }
+gallery_base.js:250 EXIT _showCompleteForRows() = { fVI=0, lVI=3, fRI=0, lRI=3, fVY=0, lVY=442, fRY=0, lRY=607 }
+gallery_base.js:250 EXIT onModelItemsDownloaded()
+gallery_base.js:250 ENTER updateOnScroll(yPos=22) state=[this.displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=0, lVY=442, fRY=0, lRY=607 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=22, prevDisplayed={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=0, lVY=442, fRY=0, lRY=607 }) state=[displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=0, lVY=442, fRY=0, lRY=607 }, _getVisibleHeight()=443, _getScrollableHeight=7967]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=22)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":0,"rowItemIndex":0,"row":0}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 586, visible 443
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=22)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":0,"rowItemIndex":0,"row":0}
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=464)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":320,"rowItemIndex":2,"row":1}
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=0, lVI=3, fRI=0, lRI=3, fVY=22, lVY=464, fRY=0, lRY=607 }
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=22, lVY=464, fRY=0, lRY=607 })
+gallery_base.js:250     remainingElements: 46, remainingSpace: 7360, recomputedHeight: 7360
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=40) state=[this.displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=22, lVY=464, fRY=0, lRY=607 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=40, prevDisplayed={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=22, lVY=464, fRY=0, lRY=607 }) state=[displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=22, lVY=464, fRY=0, lRY=607 }, _getVisibleHeight()=443, _getScrollableHeight=7967]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=40)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":0,"rowItemIndex":0,"row":0}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 568, visible 443
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=40)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":0,"rowItemIndex":0,"row":0}
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=482)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":320,"rowItemIndex":2,"row":1}
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=0, lVI=3, fRI=0, lRI=3, fVY=40, lVY=482, fRY=0, lRY=607 }
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=40, lVY=482, fRY=0, lRY=607 })
+gallery_base.js:250     remainingElements: 46, remainingSpace: 7360, recomputedHeight: 7360
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=54) state=[this.displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=40, lVY=482, fRY=0, lRY=607 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=54, prevDisplayed={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=40, lVY=482, fRY=0, lRY=607 }) state=[displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=40, lVY=482, fRY=0, lRY=607 }, _getVisibleHeight()=443, _getScrollableHeight=7967]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=54)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":0,"rowItemIndex":0,"row":0}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 554, visible 443
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=54)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":0,"rowItemIndex":0,"row":0}
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=496)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":320,"rowItemIndex":2,"row":1}
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=0, lVI=3, fRI=0, lRI=3, fVY=54, lVY=496, fRY=0, lRY=607 }
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=54, lVY=496, fRY=0, lRY=607 })
+gallery_base.js:250     remainingElements: 46, remainingSpace: 7360, recomputedHeight: 7360
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=126) state=[this.displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=54, lVY=496, fRY=0, lRY=607 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=126, prevDisplayed={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=54, lVY=496, fRY=0, lRY=607 }) state=[displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=54, lVY=496, fRY=0, lRY=607 }, _getVisibleHeight()=443, _getScrollableHeight=7967]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=126)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":0,"rowItemIndex":0,"row":0}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 482, visible 443
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=126)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":0,"rowItemIndex":0,"row":0}
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=568)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":320,"rowItemIndex":2,"row":1}
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=0, lVI=3, fRI=0, lRI=3, fVY=126, lVY=568, fRY=0, lRY=607 }
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=126, lVY=568, fRY=0, lRY=607 })
+gallery_base.js:250     remainingElements: 46, remainingSpace: 7360, recomputedHeight: 7360
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=270) state=[this.displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=126, lVY=568, fRY=0, lRY=607 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=270, prevDisplayed={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=126, lVY=568, fRY=0, lRY=607 }) state=[displayState={ fVI=0, lVI=3, fRI=0, lRI=3, fVY=126, lVY=568, fRY=0, lRY=607 }, _getVisibleHeight()=443, _getScrollableHeight=7967]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=270)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":0,"rowItemIndex":0,"row":0}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 338, visible 443
+gallery_base.js:250     Scrolled to view partly below previous, must add 105
+gallery_base.js:250     ENTER _addProvisionalDivs(startIndex=4, startPos=608, numColumns=2, heightToAdd=105)
+gallery_base.js:250       ENTER addDivs(level=3, startIndex=4, startPos=608, numColumns=2, heightToAdd=105)
+gallery_base.js:250         ENTER addDivsWithAddFunc(startIndex=4, startPos=608, numColumns=2, heightToAdd=105, downwards=true)
+gallery_base.js:250           ENTER _addRowItems(indexOfFirstInRow=4, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250             mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250           EXIT _addRowItems() = 322
+gallery_base.js:250           Added row no 3, first elem 4 at y pos 608 of height 322
+gallery_base.js:250           addDivsWithAddFunc added 1 rows
+gallery_base.js:250         EXIT addDivsWithAddFunc() = [object Object]
+gallery_base.js:250       EXIT addDivs() = {"index":5,"yPos":930}
+gallery_base.js:250     EXIT _addProvisionalDivs() = {"index":5,"yPos":930}
+gallery_base.js:250     Rows added below so updating displayState
+gallery_base.js:250     ENTER DisplayState.addCurYToDisplayState(curY=270, visibleHeight=443, displayStateFields={"firstRenderedY":0,"lastRenderedY":929,"firstVisibleIndex":0,"lastVisibleIndex":5,"firstRenderedIndex":0,"lastRenderedIndex":5})
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=0, prevLastViewIndex=3, firstOverlapCheckIndex=0, lastOverlapCheckIndex=5, newArrayFirstViewIndex=0, newArrayLastViewIndex=5, defaultValue=1)
+gallery_base.js:250         Found number of overlapping 4 from 0 to 3
+gallery_base.js:250         Adding default value entries up to 0
+gallery_base.js:250         Adding overlapping entries to dst from 0, src 0, count 4
+gallery_base.js:250           Copying from array indices 0 to 0 : 2
+gallery_base.js:250           Copying from array indices 1 to 1 : 2
+gallery_base.js:250           Copying from array indices 2 to 2 : 2
+gallery_base.js:250           Copying from array indices 3 to 3 : 2
+gallery_base.js:250         Adding default value entries to dst from 4, up to 5
+gallery_base.js:250       EXIT scrollVirtualArrayView() = 2,2,2,2,1,1
+gallery_base.js:250     EXIT DisplayState.addCurYToDisplayState() = { fVI=0, lVI=5, fRI=0, lRI=5, fVY=270, lVY=712, fRY=0, lRY=929 }
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=0, lVI=5, fRI=0, lRI=5, fVY=270, lVY=712, fRY=0, lRY=929 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=0, lVI=5, fRI=0, lRI=5, fVY=270, lVY=712, fRY=0, lRY=929 })
+gallery_base.js:250     ENTER updateVisibleArea(firstVisibleIndex=0, visibleCount=6, totalNumberOfItems=50) state=[this.curVisibleIndex=0, this.curVisibleCount=undefined]
+gallery_base.js:250       ENTER _computeNewCacheArrayLayout(firstVisibleIndex=0, visibleCount=6)
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=0) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250         ENTER _getLastIndexInCache(visibleIndex=0, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getLastIndexInCache() = 25
+gallery_base.js:250       EXIT _computeNewCacheArrayLayout() = {"firstCachedIndex":0,"numBeforeVisible":0,"lastCachedIndex":25,"numAfterVisible":20}
+gallery_base.js:250       ENTER _getFirstIndexInCache(visibleIndex=0) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250       ENTER _getLastIndexInCache(visibleIndex=0, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getLastIndexInCache() = 23
+gallery_base.js:250       Look for overlapping area after scroll: firstVisibleIndex=0, curFirstCachedIndex=0, lastVisibleIndex=5, curLastCachedIndex=23
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=0, prevLastViewIndex=23, firstOverlapCheckIndex=0, lastOverlapCheckIndex=5, newArrayFirstViewIndex=0, newArrayLastViewIndex=25, defaultValue=null)
+gallery_base.js:250         Found number of overlapping 6 from 0 to 5
+gallery_base.js:250         Adding default value entries up to 0
+gallery_base.js:250         Adding overlapping entries to dst from 0, src 0, count 6
+gallery_base.js:250           Copying from array indices 0 to 0 : [object Object]
+gallery_base.js:250           Copying from array indices 1 to 1 : [object Object]
+gallery_base.js:250           Copying from array indices 2 to 2 : [object Object]
+gallery_base.js:250           Copying from array indices 3 to 3 : [object Object]
+gallery_base.js:250           Copying from array indices 4 to 4 : null
+gallery_base.js:250           Copying from array indices 5 to 5 : null
+gallery_base.js:250         Adding default value entries to dst from 6, up to 25
+gallery_base.js:250       EXIT scrollVirtualArrayView() = [object Object],[object Object],[object Object],[object Object],null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+gallery_base.js:250       ENTER _downloadForVisibleAndPreloadAreas(layout={"firstCachedIndex":0,"numBeforeVisible":0,"lastCachedIndex":25,"numAfterVisible":20}, firstVisibleIndex=0, visibleCount=6, totalNumberOfItems=50)
+gallery_base.js:250         Scheduling download with sequence no 2 for index 0, count=6
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=0, itemIndex=0, itemCount=6, fetchImmediately=true) state=[this.ongoingDownloads=[]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=2, cacheIndex=0, itemIndex=0, itemCount=6)
+gallery_base.js:250           ENTER _startModelDownloadAndRemoveFromDownloadQueueWhenDone(downloadRequest={"sequenceNo":2,"totalIndex":0,"totalCount":6,"subIndex":4,"subCount":2})
+gallery_base.js:250           EXIT _startModelDownloadAndRemoveFromDownloadQueueWhenDone()
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=0, itemIndex=0, itemCount=0, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":2,"totalIndex":0,"totalCount":6,"subIndex":4,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=2, cacheIndex=0, itemIndex=0, itemCount=0)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=6, itemIndex=6, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":2,"totalIndex":0,"totalCount":6,"subIndex":4,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=2, cacheIndex=6, itemIndex=6, itemCount=20)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250       EXIT _downloadForVisibleAndPreloadAreas()
+gallery_base.js:250     EXIT updateVisibleArea()
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=0, lVI=5, fRI=0, lRI=5, fVY=270, lVY=712, fRY=0, lRY=929 })
+gallery_base.js:250     remainingElements: 44, remainingSpace: 7038, recomputedHeight: 7040
+gallery_base.js:250     Computed new height from current 7967 and diff 2: 7969
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=758) state=[this.displayState={ fVI=0, lVI=5, fRI=0, lRI=5, fVY=270, lVY=712, fRY=0, lRY=929 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=758, prevDisplayed={ fVI=0, lVI=5, fRI=0, lRI=5, fVY=270, lVY=712, fRY=0, lRY=929 }) state=[displayState={ fVI=0, lVI=5, fRI=0, lRI=5, fVY=270, lVY=712, fRY=0, lRY=929 }, _getVisibleHeight()=443, _getScrollableHeight=7969]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=758)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":640,"rowItemIndex":4,"row":2}
+gallery_base.js:250     Scrolled to completely below previous curY 758 visibleHeight 443 > lastVisibleY 712, posAndIndex={"rowYPos":640,"rowItemIndex":4,"row":2}
+gallery_base.js:250     ENTER _redrawCompletelyAt(curY=758, posAndIndex={"rowYPos":640,"rowItemIndex":4,"row":2})
+gallery_base.js:250       Element start index: 4, removing all rows: 3
+3gallery_base.js:250       Removing row element [object HTMLDivElement]
+gallery_base.js:250       ENTER _addProvisionalDivs(startIndex=4, startPos=640, numColumns=2, heightToAdd=561)
+gallery_base.js:250         ENTER addDivs(level=4, startIndex=4, startPos=640, numColumns=2, heightToAdd=561)
+gallery_base.js:250           ENTER addDivsWithAddFunc(startIndex=4, startPos=640, numColumns=2, heightToAdd=561, downwards=true)
+gallery_base.js:250             ENTER _addRowItems(indexOfFirstInRow=4, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250               mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250             EXIT _addRowItems() = 322
+gallery_base.js:250             Added row no 3, first elem 4 at y pos 640 of height 322
+gallery_base.js:250             ENTER _addRowItems(indexOfFirstInRow=6, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250               mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250             EXIT _addRowItems() = 244
+gallery_base.js:250             Added row no 4, first elem 6 at y pos 962 of height 244
+gallery_base.js:250             addDivsWithAddFunc added 2 rows
+gallery_base.js:250           EXIT addDivsWithAddFunc() = [object Object]
+gallery_base.js:250         EXIT addDivs() = {"index":7,"yPos":1206}
+gallery_base.js:250       EXIT _addProvisionalDivs() = {"index":7,"yPos":1206}
+gallery_base.js:250     EXIT _redrawCompletelyAt() = {"index":7,"yPos":1206}
+gallery_base.js:250     ENTER DisplayState.addCurYToDisplayState(curY=758, visibleHeight=443, displayStateFields={"firstRenderedY":640,"lastRenderedY":1205,"firstVisibleIndex":4,"lastVisibleIndex":7,"firstRenderedIndex":4,"lastRenderedIndex":7})
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=0, prevLastViewIndex=5, firstOverlapCheckIndex=4, lastOverlapCheckIndex=7, newArrayFirstViewIndex=4, newArrayLastViewIndex=7, defaultValue=1)
+gallery_base.js:250         Found number of overlapping 2 from 4 to 5
+gallery_base.js:250         Adding default value entries up to 0
+gallery_base.js:250         Adding overlapping entries to dst from 0, src 4, count 2
+gallery_base.js:250           Copying from array indices 4 to 0 : 1
+gallery_base.js:250           Copying from array indices 5 to 1 : 1
+gallery_base.js:250         Adding default value entries to dst from 2, up to 3
+gallery_base.js:250       EXIT scrollVirtualArrayView() = 1,1,1,1
+gallery_base.js:250     EXIT DisplayState.addCurYToDisplayState() = { fVI=4, lVI=7, fRI=4, lRI=7, fVY=758, lVY=1200, fRY=640, lRY=1205 }
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=4, lVI=7, fRI=4, lRI=7, fVY=758, lVY=1200, fRY=640, lRY=1205 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=4, lVI=7, fRI=4, lRI=7, fVY=758, lVY=1200, fRY=640, lRY=1205 })
+gallery_base.js:250     ENTER updateVisibleArea(firstVisibleIndex=4, visibleCount=4, totalNumberOfItems=50) state=[this.curVisibleIndex=0, this.curVisibleCount=undefined]
+gallery_base.js:250       ENTER _computeNewCacheArrayLayout(firstVisibleIndex=4, visibleCount=4)
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=4) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250         ENTER _getLastIndexInCache(visibleIndex=4, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getLastIndexInCache() = 27
+gallery_base.js:250       EXIT _computeNewCacheArrayLayout() = {"firstCachedIndex":0,"numBeforeVisible":4,"lastCachedIndex":27,"numAfterVisible":20}
+gallery_base.js:250       ENTER _getFirstIndexInCache(visibleIndex=0) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250       ENTER _getLastIndexInCache(visibleIndex=0, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getLastIndexInCache() = 25
+gallery_base.js:250       Look for overlapping area after scroll: firstVisibleIndex=4, curFirstCachedIndex=0, lastVisibleIndex=7, curLastCachedIndex=25
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=0, prevLastViewIndex=25, firstOverlapCheckIndex=4, lastOverlapCheckIndex=7, newArrayFirstViewIndex=0, newArrayLastViewIndex=27, defaultValue=null)
+gallery_base.js:250         Found number of overlapping 4 from 4 to 7
+gallery_base.js:250         Adding default value entries up to 4
+gallery_base.js:250         Adding overlapping entries to dst from 4, src 4, count 4
+gallery_base.js:250           Copying from array indices 4 to 4 : null
+gallery_base.js:250           Copying from array indices 5 to 5 : null
+gallery_base.js:250           Copying from array indices 6 to 6 : null
+gallery_base.js:250           Copying from array indices 7 to 7 : null
+gallery_base.js:250         Adding default value entries to dst from 8, up to 27
+gallery_base.js:250       EXIT scrollVirtualArrayView() = null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+gallery_base.js:250       ENTER _downloadForVisibleAndPreloadAreas(layout={"firstCachedIndex":0,"numBeforeVisible":4,"lastCachedIndex":27,"numAfterVisible":20}, firstVisibleIndex=4, visibleCount=4, totalNumberOfItems=50)
+gallery_base.js:250         Scheduling download with sequence no 3 for index 4, count=4
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=4, itemIndex=4, itemCount=4, fetchImmediately=true) state=[this.ongoingDownloads=[{"sequenceNo":2,"totalIndex":0,"totalCount":6,"subIndex":4,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=3, cacheIndex=4, itemIndex=4, itemCount=4)
+gallery_base.js:250               Found in-progress download for item index: 4, {"sequenceNo":2,"totalIndex":0,"totalCount":6,"subIndex":4,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 5, {"sequenceNo":2,"totalIndex":0,"totalCount":6,"subIndex":4,"subCount":2}
+gallery_base.js:250           ENTER _startModelDownloadAndRemoveFromDownloadQueueWhenDone(downloadRequest={"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2})
+gallery_base.js:250           EXIT _startModelDownloadAndRemoveFromDownloadQueueWhenDone()
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=0, itemIndex=0, itemCount=4, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":2,"totalIndex":0,"totalCount":6,"subIndex":4,"subCount":2},{"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=3, cacheIndex=0, itemIndex=0, itemCount=4)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=8, itemIndex=8, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":2,"totalIndex":0,"totalCount":6,"subIndex":4,"subCount":2},{"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=3, cacheIndex=8, itemIndex=8, itemCount=20)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250       EXIT _downloadForVisibleAndPreloadAreas()
+gallery_base.js:250     EXIT updateVisibleArea()
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=4, lVI=7, fRI=4, lRI=7, fVY=758, lVY=1200, fRY=640, lRY=1205 })
+gallery_base.js:250     remainingElements: 42, remainingSpace: 6764, recomputedHeight: 6720
+gallery_base.js:250     Computed new height from current 7969 and diff -44: 7925
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER onModelItemsDownloaded(downloadRequest={"sequenceNo":2,"totalIndex":0,"totalCount":6,"subIndex":4,"subCount":2}) state=[this.ongoingDownloads=[{"sequenceNo":2,"totalIndex":0,"totalCount":6,"subIndex":4,"subCount":2},{"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2}], this.updateRequests=2]
+gallery_base.js:250   ENTER _storeDownloadReponseInCache(downloadRequest={"sequenceNo":2,"totalIndex":0,"totalCount":6,"subIndex":4,"subCount":2}, data-length=2)
+gallery_base.js:250     ENTER _getFirstIndexInCache(visibleIndex=4) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250     ENTER _getLastIndexInCache(visibleIndex=4, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getLastIndexInCache() = 27
+gallery_base.js:250     ENTER _addDownloadedDataToCacheIfStillOverlaps(index=4, count=2, data-length=2, firstIndexInCache=0, lastIndexInCache=27)
+gallery_base.js:250       Copy from post-overlapping data[0] to this.cachedData[4] at item index 4: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[1] to this.cachedData[5] at item index 5: <nonnull>
+gallery_base.js:250     EXIT _addDownloadedDataToCacheIfStillOverlaps()
+gallery_base.js:250   EXIT _storeDownloadReponseInCache()
+gallery_base.js:250           ENTER _checkWhetherAllInCache(downloadRequest={"sequenceNo":2,"totalIndex":0,"totalCount":6,"subIndex":4,"subCount":2})
+gallery_base.js:250             ENTER _getFirstIndexInCache(visibleIndex=4) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250             ENTER _getLastIndexInCache(visibleIndex=4, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getLastIndexInCache() = 27
+gallery_base.js:250           EXIT _checkWhetherAllInCache() = null
+gallery_base.js:250           true
+gallery_base.js:250 EXIT onModelItemsDownloaded()
+gallery_base.js:250 ENTER updateOnScroll(yPos=1453) state=[this.displayState={ fVI=4, lVI=7, fRI=4, lRI=7, fVY=758, lVY=1200, fRY=640, lRY=1205 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=1453, prevDisplayed={ fVI=4, lVI=7, fRI=4, lRI=7, fVY=758, lVY=1200, fRY=640, lRY=1205 }) state=[displayState={ fVI=4, lVI=7, fRI=4, lRI=7, fVY=758, lVY=1200, fRY=640, lRY=1205 }, _getVisibleHeight()=443, _getScrollableHeight=7925]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=1453)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":1280,"rowItemIndex":8,"row":4}
+gallery_base.js:250     Scrolled to completely below previous curY 1453 visibleHeight 443 > lastVisibleY 1200, posAndIndex={"rowYPos":1280,"rowItemIndex":8,"row":4}
+gallery_base.js:250     ENTER _redrawCompletelyAt(curY=1453, posAndIndex={"rowYPos":1280,"rowItemIndex":8,"row":4})
+gallery_base.js:250       Element start index: 8, removing all rows: 2
+2gallery_base.js:250       Removing row element [object HTMLDivElement]
+gallery_base.js:250       ENTER _addProvisionalDivs(startIndex=8, startPos=1280, numColumns=2, heightToAdd=616)
+gallery_base.js:250         ENTER addDivs(level=4, startIndex=8, startPos=1280, numColumns=2, heightToAdd=616)
+gallery_base.js:250           ENTER addDivsWithAddFunc(startIndex=8, startPos=1280, numColumns=2, heightToAdd=616, downwards=true)
+gallery_base.js:250             ENTER _addRowItems(indexOfFirstInRow=8, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250               mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250             EXIT _addRowItems() = 226
+gallery_base.js:250             Added row no 5, first elem 8 at y pos 1280 of height 226
+gallery_base.js:250             ENTER _addRowItems(indexOfFirstInRow=10, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250               mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250             EXIT _addRowItems() = 286
+gallery_base.js:250             Added row no 6, first elem 10 at y pos 1506 of height 286
+gallery_base.js:250             ENTER _addRowItems(indexOfFirstInRow=12, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250               mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250             EXIT _addRowItems() = 226
+gallery_base.js:250             Added row no 7, first elem 12 at y pos 1792 of height 226
+gallery_base.js:250             addDivsWithAddFunc added 3 rows
+gallery_base.js:250           EXIT addDivsWithAddFunc() = [object Object]
+gallery_base.js:250         EXIT addDivs() = {"index":13,"yPos":2018}
+gallery_base.js:250       EXIT _addProvisionalDivs() = {"index":13,"yPos":2018}
+gallery_base.js:250     EXIT _redrawCompletelyAt() = {"index":13,"yPos":2018}
+gallery_base.js:250     ENTER DisplayState.addCurYToDisplayState(curY=1453, visibleHeight=443, displayStateFields={"firstRenderedY":1280,"lastRenderedY":2017,"firstVisibleIndex":8,"lastVisibleIndex":13,"firstRenderedIndex":8,"lastRenderedIndex":13})
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=4, prevLastViewIndex=7, firstOverlapCheckIndex=8, lastOverlapCheckIndex=13, newArrayFirstViewIndex=8, newArrayLastViewIndex=13, defaultValue=1)
+gallery_base.js:250       EXIT scrollVirtualArrayView() = 1,1,1,1,1,1
+gallery_base.js:250     EXIT DisplayState.addCurYToDisplayState() = { fVI=8, lVI=13, fRI=8, lRI=13, fVY=1453, lVY=1895, fRY=1280, lRY=2017 }
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=8, lVI=13, fRI=8, lRI=13, fVY=1453, lVY=1895, fRY=1280, lRY=2017 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=8, lVI=13, fRI=8, lRI=13, fVY=1453, lVY=1895, fRY=1280, lRY=2017 })
+gallery_base.js:250     ENTER updateVisibleArea(firstVisibleIndex=8, visibleCount=6, totalNumberOfItems=50) state=[this.curVisibleIndex=4, this.curVisibleCount=undefined]
+gallery_base.js:250       ENTER _computeNewCacheArrayLayout(firstVisibleIndex=8, visibleCount=6)
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=8) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250         ENTER _getLastIndexInCache(visibleIndex=8, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getLastIndexInCache() = 33
+gallery_base.js:250       EXIT _computeNewCacheArrayLayout() = {"firstCachedIndex":0,"numBeforeVisible":8,"lastCachedIndex":33,"numAfterVisible":20}
+gallery_base.js:250       ENTER _getFirstIndexInCache(visibleIndex=4) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250       ENTER _getLastIndexInCache(visibleIndex=4, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getLastIndexInCache() = 27
+gallery_base.js:250       Look for overlapping area after scroll: firstVisibleIndex=8, curFirstCachedIndex=0, lastVisibleIndex=13, curLastCachedIndex=27
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=0, prevLastViewIndex=27, firstOverlapCheckIndex=8, lastOverlapCheckIndex=13, newArrayFirstViewIndex=0, newArrayLastViewIndex=33, defaultValue=null)
+gallery_base.js:250         Found number of overlapping 6 from 8 to 13
+gallery_base.js:250         Adding default value entries up to 8
+gallery_base.js:250         Adding overlapping entries to dst from 8, src 8, count 6
+gallery_base.js:250           Copying from array indices 8 to 8 : null
+gallery_base.js:250           Copying from array indices 9 to 9 : null
+gallery_base.js:250           Copying from array indices 10 to 10 : null
+gallery_base.js:250           Copying from array indices 11 to 11 : null
+gallery_base.js:250           Copying from array indices 12 to 12 : null
+gallery_base.js:250           Copying from array indices 13 to 13 : null
+gallery_base.js:250         Adding default value entries to dst from 14, up to 33
+gallery_base.js:250       EXIT scrollVirtualArrayView() = null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+gallery_base.js:250       ENTER _downloadForVisibleAndPreloadAreas(layout={"firstCachedIndex":0,"numBeforeVisible":8,"lastCachedIndex":33,"numAfterVisible":20}, firstVisibleIndex=8, visibleCount=6, totalNumberOfItems=50)
+gallery_base.js:250         Scheduling download with sequence no 4 for index 8, count=6
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=8, itemIndex=8, itemCount=6, fetchImmediately=true) state=[this.ongoingDownloads=[{"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=4, cacheIndex=8, itemIndex=8, itemCount=6)
+gallery_base.js:250           ENTER _startModelDownloadAndRemoveFromDownloadQueueWhenDone(downloadRequest={"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6})
+gallery_base.js:250           EXIT _startModelDownloadAndRemoveFromDownloadQueueWhenDone()
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=0, itemIndex=0, itemCount=8, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2},{"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=4, cacheIndex=0, itemIndex=0, itemCount=8)
+gallery_base.js:250               Found in-progress download for item index: 6, {"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 7, {"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2}
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=14, itemIndex=14, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2},{"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=4, cacheIndex=14, itemIndex=14, itemCount=20)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250       EXIT _downloadForVisibleAndPreloadAreas()
+gallery_base.js:250     EXIT updateVisibleArea()
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=8, lVI=13, fRI=8, lRI=13, fVY=1453, lVY=1895, fRY=1280, lRY=2017 })
+gallery_base.js:250     remainingElements: 36, remainingSpace: 5908, recomputedHeight: 5760
+gallery_base.js:250     Computed new height from current 7925 and diff -148: 7777
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=1793) state=[this.displayState={ fVI=8, lVI=13, fRI=8, lRI=13, fVY=1453, lVY=1895, fRY=1280, lRY=2017 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=1793, prevDisplayed={ fVI=8, lVI=13, fRI=8, lRI=13, fVY=1453, lVY=1895, fRY=1280, lRY=2017 }) state=[displayState={ fVI=8, lVI=13, fRI=8, lRI=13, fVY=1453, lVY=1895, fRY=1280, lRY=2017 }, _getVisibleHeight()=443, _getScrollableHeight=7777]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=1793)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":1600,"rowItemIndex":10,"row":5}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 225, visible 443
+gallery_base.js:250     Scrolled to view partly below previous, must add 218
+gallery_base.js:250     ENTER _addProvisionalDivs(startIndex=14, startPos=2018, numColumns=2, heightToAdd=218)
+gallery_base.js:250       ENTER addDivs(level=3, startIndex=14, startPos=2018, numColumns=2, heightToAdd=218)
+gallery_base.js:250         ENTER addDivsWithAddFunc(startIndex=14, startPos=2018, numColumns=2, heightToAdd=218, downwards=true)
+gallery_base.js:250           ENTER _addRowItems(indexOfFirstInRow=14, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250             mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250           EXIT _addRowItems() = 304
+gallery_base.js:250           Added row no 8, first elem 14 at y pos 2018 of height 304
+gallery_base.js:250           addDivsWithAddFunc added 1 rows
+gallery_base.js:250         EXIT addDivsWithAddFunc() = [object Object]
+gallery_base.js:250       EXIT addDivs() = {"index":15,"yPos":2322}
+gallery_base.js:250     EXIT _addProvisionalDivs() = {"index":15,"yPos":2322}
+gallery_base.js:250     Rows added below so updating displayState
+gallery_base.js:250     ENTER DisplayState.addCurYToDisplayState(curY=1793, visibleHeight=443, displayStateFields={"firstRenderedY":1280,"lastRenderedY":2321,"firstVisibleIndex":10,"lastVisibleIndex":15,"firstRenderedIndex":8,"lastRenderedIndex":15})
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=8, prevLastViewIndex=13, firstOverlapCheckIndex=8, lastOverlapCheckIndex=15, newArrayFirstViewIndex=8, newArrayLastViewIndex=15, defaultValue=1)
+gallery_base.js:250         Found number of overlapping 6 from 8 to 13
+gallery_base.js:250         Adding default value entries up to 0
+gallery_base.js:250         Adding overlapping entries to dst from 0, src 0, count 6
+gallery_base.js:250           Copying from array indices 0 to 0 : 1
+gallery_base.js:250           Copying from array indices 1 to 1 : 1
+gallery_base.js:250           Copying from array indices 2 to 2 : 1
+gallery_base.js:250           Copying from array indices 3 to 3 : 1
+gallery_base.js:250           Copying from array indices 4 to 4 : 1
+gallery_base.js:250           Copying from array indices 5 to 5 : 1
+gallery_base.js:250         Adding default value entries to dst from 6, up to 7
+gallery_base.js:250       EXIT scrollVirtualArrayView() = 1,1,1,1,1,1,1,1
+gallery_base.js:250     EXIT DisplayState.addCurYToDisplayState() = { fVI=10, lVI=15, fRI=8, lRI=15, fVY=1793, lVY=2235, fRY=1280, lRY=2321 }
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=10, lVI=15, fRI=8, lRI=15, fVY=1793, lVY=2235, fRY=1280, lRY=2321 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1793, lVY=2235, fRY=1280, lRY=2321 })
+gallery_base.js:250     ENTER updateVisibleArea(firstVisibleIndex=10, visibleCount=6, totalNumberOfItems=50) state=[this.curVisibleIndex=8, this.curVisibleCount=undefined]
+gallery_base.js:250       ENTER _computeNewCacheArrayLayout(firstVisibleIndex=10, visibleCount=6)
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=10) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250         ENTER _getLastIndexInCache(visibleIndex=10, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getLastIndexInCache() = 35
+gallery_base.js:250       EXIT _computeNewCacheArrayLayout() = {"firstCachedIndex":0,"numBeforeVisible":10,"lastCachedIndex":35,"numAfterVisible":20}
+gallery_base.js:250       ENTER _getFirstIndexInCache(visibleIndex=8) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250       ENTER _getLastIndexInCache(visibleIndex=8, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getLastIndexInCache() = 33
+gallery_base.js:250       Look for overlapping area after scroll: firstVisibleIndex=10, curFirstCachedIndex=0, lastVisibleIndex=15, curLastCachedIndex=33
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=0, prevLastViewIndex=33, firstOverlapCheckIndex=10, lastOverlapCheckIndex=15, newArrayFirstViewIndex=0, newArrayLastViewIndex=35, defaultValue=null)
+gallery_base.js:250         Found number of overlapping 6 from 10 to 15
+gallery_base.js:250         Adding default value entries up to 10
+gallery_base.js:250         Adding overlapping entries to dst from 10, src 10, count 6
+gallery_base.js:250           Copying from array indices 10 to 10 : null
+gallery_base.js:250           Copying from array indices 11 to 11 : null
+gallery_base.js:250           Copying from array indices 12 to 12 : null
+gallery_base.js:250           Copying from array indices 13 to 13 : null
+gallery_base.js:250           Copying from array indices 14 to 14 : null
+gallery_base.js:250           Copying from array indices 15 to 15 : null
+gallery_base.js:250         Adding default value entries to dst from 16, up to 35
+gallery_base.js:250       EXIT scrollVirtualArrayView() = null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+gallery_base.js:250       ENTER _downloadForVisibleAndPreloadAreas(layout={"firstCachedIndex":0,"numBeforeVisible":10,"lastCachedIndex":35,"numAfterVisible":20}, firstVisibleIndex=10, visibleCount=6, totalNumberOfItems=50)
+gallery_base.js:250         Scheduling download with sequence no 5 for index 10, count=6
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=10, itemIndex=10, itemCount=6, fetchImmediately=true) state=[this.ongoingDownloads=[{"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2},{"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=5, cacheIndex=10, itemIndex=10, itemCount=6)
+gallery_base.js:250               Found in-progress download for item index: 10, {"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6}
+gallery_base.js:250               Found in-progress download for item index: 11, {"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6}
+gallery_base.js:250               Found in-progress download for item index: 12, {"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6}
+gallery_base.js:250               Found in-progress download for item index: 13, {"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6}
+gallery_base.js:250           ENTER _startModelDownloadAndRemoveFromDownloadQueueWhenDone(downloadRequest={"sequenceNo":5,"totalIndex":10,"totalCount":6,"subIndex":14,"subCount":2})
+gallery_base.js:250           EXIT _startModelDownloadAndRemoveFromDownloadQueueWhenDone()
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=0, itemIndex=0, itemCount=10, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2},{"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6},{"sequenceNo":5,"totalIndex":10,"totalCount":6,"subIndex":14,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=5, cacheIndex=0, itemIndex=0, itemCount=10)
+gallery_base.js:250               Found in-progress download for item index: 6, {"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 7, {"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 8, {"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6}
+gallery_base.js:250               Found in-progress download for item index: 9, {"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6}
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=16, itemIndex=16, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2},{"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6},{"sequenceNo":5,"totalIndex":10,"totalCount":6,"subIndex":14,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=5, cacheIndex=16, itemIndex=16, itemCount=20)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250       EXIT _downloadForVisibleAndPreloadAreas()
+gallery_base.js:250     EXIT updateVisibleArea()
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1793, lVY=2235, fRY=1280, lRY=2321 })
+gallery_base.js:250     remainingElements: 34, remainingSpace: 5456, recomputedHeight: 5440
+gallery_base.js:250     Computed new height from current 7777 and diff -16: 7761
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=1807) state=[this.displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1793, lVY=2235, fRY=1280, lRY=2321 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=1807, prevDisplayed={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1793, lVY=2235, fRY=1280, lRY=2321 }) state=[displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1793, lVY=2235, fRY=1280, lRY=2321 }, _getVisibleHeight()=443, _getScrollableHeight=7761]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=1807)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":1600,"rowItemIndex":10,"row":5}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 515, visible 443
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=1807)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":1600,"rowItemIndex":10,"row":5}
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=2249)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":2240,"rowItemIndex":14,"row":7}
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=10, lVI=15, fRI=8, lRI=15, fVY=1807, lVY=2249, fRY=1280, lRY=2321 }
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1807, lVY=2249, fRY=1280, lRY=2321 })
+gallery_base.js:250     remainingElements: 34, remainingSpace: 5440, recomputedHeight: 5440
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER onModelItemsDownloaded(downloadRequest={"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2}) state=[this.ongoingDownloads=[{"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2},{"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6},{"sequenceNo":5,"totalIndex":10,"totalCount":6,"subIndex":14,"subCount":2}], this.updateRequests=4]
+gallery_base.js:250   ENTER _storeDownloadReponseInCache(downloadRequest={"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2}, data-length=2)
+gallery_base.js:250     ENTER _getFirstIndexInCache(visibleIndex=10) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250     ENTER _getLastIndexInCache(visibleIndex=10, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getLastIndexInCache() = 35
+gallery_base.js:250     ENTER _addDownloadedDataToCacheIfStillOverlaps(index=6, count=2, data-length=2, firstIndexInCache=0, lastIndexInCache=35)
+gallery_base.js:250       Copy from post-overlapping data[0] to this.cachedData[6] at item index 6: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[1] to this.cachedData[7] at item index 7: <nonnull>
+gallery_base.js:250     EXIT _addDownloadedDataToCacheIfStillOverlaps()
+gallery_base.js:250   EXIT _storeDownloadReponseInCache()
+gallery_base.js:250           ENTER _checkWhetherAllInCache(downloadRequest={"sequenceNo":3,"totalIndex":4,"totalCount":4,"subIndex":6,"subCount":2})
+gallery_base.js:250             ENTER _getFirstIndexInCache(visibleIndex=10) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250             ENTER _getLastIndexInCache(visibleIndex=10, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getLastIndexInCache() = 35
+gallery_base.js:250           EXIT _checkWhetherAllInCache() = null
+gallery_base.js:250           true
+gallery_base.js:250 EXIT onModelItemsDownloaded()
+gallery_base.js:250 ENTER onModelItemsDownloaded(downloadRequest={"sequenceNo":5,"totalIndex":10,"totalCount":6,"subIndex":14,"subCount":2}) state=[this.ongoingDownloads=[{"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6},{"sequenceNo":5,"totalIndex":10,"totalCount":6,"subIndex":14,"subCount":2}], this.updateRequests=4]
+gallery_base.js:250   ENTER _storeDownloadReponseInCache(downloadRequest={"sequenceNo":5,"totalIndex":10,"totalCount":6,"subIndex":14,"subCount":2}, data-length=2)
+gallery_base.js:250     ENTER _getFirstIndexInCache(visibleIndex=10) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250     ENTER _getLastIndexInCache(visibleIndex=10, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getLastIndexInCache() = 35
+gallery_base.js:250     ENTER _addDownloadedDataToCacheIfStillOverlaps(index=14, count=2, data-length=2, firstIndexInCache=0, lastIndexInCache=35)
+gallery_base.js:250       Copy from post-overlapping data[0] to this.cachedData[14] at item index 14: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[1] to this.cachedData[15] at item index 15: <nonnull>
+gallery_base.js:250     EXIT _addDownloadedDataToCacheIfStillOverlaps()
+gallery_base.js:250   EXIT _storeDownloadReponseInCache()
+gallery_base.js:250           ENTER _checkWhetherAllInCache(downloadRequest={"sequenceNo":5,"totalIndex":10,"totalCount":6,"subIndex":14,"subCount":2})
+gallery_base.js:250             ENTER _getFirstIndexInCache(visibleIndex=10) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250             ENTER _getLastIndexInCache(visibleIndex=10, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getLastIndexInCache() = 35
+gallery_base.js:250           EXIT _checkWhetherAllInCache() = null
+gallery_base.js:250           true
+gallery_base.js:250 EXIT onModelItemsDownloaded()
+gallery_base.js:250 ENTER onModelItemsDownloaded(downloadRequest={"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6}) state=[this.ongoingDownloads=[{"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6}], this.updateRequests=4]
+gallery_base.js:250   ENTER _storeDownloadReponseInCache(downloadRequest={"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6}, data-length=6)
+gallery_base.js:250     ENTER _getFirstIndexInCache(visibleIndex=10) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250     ENTER _getLastIndexInCache(visibleIndex=10, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getLastIndexInCache() = 35
+gallery_base.js:250     ENTER _addDownloadedDataToCacheIfStillOverlaps(index=8, count=6, data-length=6, firstIndexInCache=0, lastIndexInCache=35)
+gallery_base.js:250       Copy from post-overlapping data[0] to this.cachedData[8] at item index 8: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[1] to this.cachedData[9] at item index 9: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[2] to this.cachedData[10] at item index 10: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[3] to this.cachedData[11] at item index 11: <null>
+gallery_base.js:250       Copy from post-overlapping data[4] to this.cachedData[12] at item index 12: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[5] to this.cachedData[13] at item index 13: <nonnull>
+gallery_base.js:250     EXIT _addDownloadedDataToCacheIfStillOverlaps()
+gallery_base.js:250   EXIT _storeDownloadReponseInCache()
+gallery_base.js:250           ENTER _checkWhetherAllInCache(downloadRequest={"sequenceNo":4,"totalIndex":8,"totalCount":6,"subIndex":8,"subCount":6})
+gallery_base.js:250             ENTER _getFirstIndexInCache(visibleIndex=10) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250             ENTER _getLastIndexInCache(visibleIndex=10, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getLastIndexInCache() = 35
+gallery_base.js:250           EXIT _checkWhetherAllInCache() = 6
+gallery_base.js:250           true
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=10) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250 ENTER _showCompleteForRows(firstModelItemIndex=10, itemCount=6, completeDataArray=6, prevDisplayed={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1807, lVY=2249, fRY=1280, lRY=2321 })
+gallery_base.js:250   ENTER _addRowItems(indexOfFirstInRow=10, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250     mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250   EXIT _addRowItems() = 286
+gallery_base.js:250   ENTER _addRowItems(indexOfFirstInRow=12, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250     mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250   EXIT _addRowItems() = 226
+gallery_base.js:250   ENTER _addRowItems(indexOfFirstInRow=14, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250     mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250   EXIT _addRowItems() = 304
+gallery_base.js:250   ENTER Display.setRenderStateComplete(index=10, count=6) state=[this={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1807, lVY=2249, fRY=1280, lRY=2321 }]
+gallery_base.js:250   EXIT Display.setRenderStateComplete() = { fVI=10, lVI=15, fRI=8, lRI=15, fVY=1807, lVY=2249, fRY=1280, lRY=2321 }
+gallery_base.js:250 EXIT _showCompleteForRows() = { fVI=10, lVI=15, fRI=8, lRI=15, fVY=1807, lVY=2249, fRY=1280, lRY=2321 }
+gallery_base.js:250 EXIT onModelItemsDownloaded()
+gallery_base.js:250 ENTER updateOnScroll(yPos=1830) state=[this.displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1807, lVY=2249, fRY=1280, lRY=2321 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=1830, prevDisplayed={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1807, lVY=2249, fRY=1280, lRY=2321 }) state=[displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1807, lVY=2249, fRY=1280, lRY=2321 }, _getVisibleHeight()=443, _getScrollableHeight=7761]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=1830)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":1600,"rowItemIndex":10,"row":5}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 492, visible 443
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=1830)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":1600,"rowItemIndex":10,"row":5}
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=2272)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":2240,"rowItemIndex":14,"row":7}
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=10, lVI=15, fRI=8, lRI=15, fVY=1830, lVY=2272, fRY=1280, lRY=2321 }
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1830, lVY=2272, fRY=1280, lRY=2321 })
+gallery_base.js:250     remainingElements: 34, remainingSpace: 5440, recomputedHeight: 5440
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=1847) state=[this.displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1830, lVY=2272, fRY=1280, lRY=2321 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=1847, prevDisplayed={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1830, lVY=2272, fRY=1280, lRY=2321 }) state=[displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1830, lVY=2272, fRY=1280, lRY=2321 }, _getVisibleHeight()=443, _getScrollableHeight=7761]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=1847)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":1600,"rowItemIndex":10,"row":5}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 475, visible 443
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=1847)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":1600,"rowItemIndex":10,"row":5}
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=2289)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":2240,"rowItemIndex":14,"row":7}
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=10, lVI=15, fRI=8, lRI=15, fVY=1847, lVY=2289, fRY=1280, lRY=2321 }
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1847, lVY=2289, fRY=1280, lRY=2321 })
+gallery_base.js:250     remainingElements: 34, remainingSpace: 5440, recomputedHeight: 5440
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=1875) state=[this.displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1847, lVY=2289, fRY=1280, lRY=2321 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=1875, prevDisplayed={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1847, lVY=2289, fRY=1280, lRY=2321 }) state=[displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1847, lVY=2289, fRY=1280, lRY=2321 }, _getVisibleHeight()=443, _getScrollableHeight=7761]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=1875)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":1600,"rowItemIndex":10,"row":5}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 447, visible 443
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=1875)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":1600,"rowItemIndex":10,"row":5}
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=2317)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":2240,"rowItemIndex":14,"row":7}
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=10, lVI=15, fRI=8, lRI=15, fVY=1875, lVY=2317, fRY=1280, lRY=2321 }
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1875, lVY=2317, fRY=1280, lRY=2321 })
+gallery_base.js:250     remainingElements: 34, remainingSpace: 5440, recomputedHeight: 5440
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=1887) state=[this.displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1875, lVY=2317, fRY=1280, lRY=2321 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=1887, prevDisplayed={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1875, lVY=2317, fRY=1280, lRY=2321 }) state=[displayState={ fVI=10, lVI=15, fRI=8, lRI=15, fVY=1875, lVY=2317, fRY=1280, lRY=2321 }, _getVisibleHeight()=443, _getScrollableHeight=7761]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=1887)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":1600,"rowItemIndex":10,"row":5}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 435, visible 443
+gallery_base.js:250     Scrolled to view partly below previous, must add 8
+gallery_base.js:250     ENTER _addProvisionalDivs(startIndex=16, startPos=2322, numColumns=2, heightToAdd=8)
+gallery_base.js:250       ENTER addDivs(level=3, startIndex=16, startPos=2322, numColumns=2, heightToAdd=8)
+gallery_base.js:250         ENTER addDivsWithAddFunc(startIndex=16, startPos=2322, numColumns=2, heightToAdd=8, downwards=true)
+gallery_base.js:250           ENTER _addRowItems(indexOfFirstInRow=16, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250             mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250           EXIT _addRowItems() = 244
+gallery_base.js:250           Added row no 9, first elem 16 at y pos 2322 of height 244
+gallery_base.js:250           addDivsWithAddFunc added 1 rows
+gallery_base.js:250         EXIT addDivsWithAddFunc() = [object Object]
+gallery_base.js:250       EXIT addDivs() = {"index":17,"yPos":2566}
+gallery_base.js:250     EXIT _addProvisionalDivs() = {"index":17,"yPos":2566}
+gallery_base.js:250     Rows added below so updating displayState
+gallery_base.js:250     ENTER DisplayState.addCurYToDisplayState(curY=1887, visibleHeight=443, displayStateFields={"firstRenderedY":1280,"lastRenderedY":2565,"firstVisibleIndex":10,"lastVisibleIndex":17,"firstRenderedIndex":8,"lastRenderedIndex":17})
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=8, prevLastViewIndex=15, firstOverlapCheckIndex=8, lastOverlapCheckIndex=17, newArrayFirstViewIndex=8, newArrayLastViewIndex=17, defaultValue=1)
+gallery_base.js:250         Found number of overlapping 8 from 8 to 15
+gallery_base.js:250         Adding default value entries up to 0
+gallery_base.js:250         Adding overlapping entries to dst from 0, src 0, count 8
+gallery_base.js:250           Copying from array indices 0 to 0 : 1
+gallery_base.js:250           Copying from array indices 1 to 1 : 1
+gallery_base.js:250           Copying from array indices 2 to 2 : 2
+gallery_base.js:250           Copying from array indices 3 to 3 : 2
+gallery_base.js:250           Copying from array indices 4 to 4 : 2
+gallery_base.js:250           Copying from array indices 5 to 5 : 2
+gallery_base.js:250           Copying from array indices 6 to 6 : 2
+gallery_base.js:250           Copying from array indices 7 to 7 : 2
+gallery_base.js:250         Adding default value entries to dst from 8, up to 9
+gallery_base.js:250       EXIT scrollVirtualArrayView() = 1,1,2,2,2,2,2,2,1,1
+gallery_base.js:250     EXIT DisplayState.addCurYToDisplayState() = { fVI=10, lVI=17, fRI=8, lRI=17, fVY=1887, lVY=2329, fRY=1280, lRY=2565 }
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=10, lVI=17, fRI=8, lRI=17, fVY=1887, lVY=2329, fRY=1280, lRY=2565 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=10, lVI=17, fRI=8, lRI=17, fVY=1887, lVY=2329, fRY=1280, lRY=2565 })
+gallery_base.js:250     ENTER updateVisibleArea(firstVisibleIndex=10, visibleCount=8, totalNumberOfItems=50) state=[this.curVisibleIndex=10, this.curVisibleCount=undefined]
+gallery_base.js:250       ENTER _computeNewCacheArrayLayout(firstVisibleIndex=10, visibleCount=8)
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=10) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250         ENTER _getLastIndexInCache(visibleIndex=10, visibleCount=8, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getLastIndexInCache() = 37
+gallery_base.js:250       EXIT _computeNewCacheArrayLayout() = {"firstCachedIndex":0,"numBeforeVisible":10,"lastCachedIndex":37,"numAfterVisible":20}
+gallery_base.js:250       ENTER _getFirstIndexInCache(visibleIndex=10) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250       ENTER _getLastIndexInCache(visibleIndex=10, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getLastIndexInCache() = 35
+gallery_base.js:250       Look for overlapping area after scroll: firstVisibleIndex=10, curFirstCachedIndex=0, lastVisibleIndex=17, curLastCachedIndex=35
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=0, prevLastViewIndex=35, firstOverlapCheckIndex=10, lastOverlapCheckIndex=17, newArrayFirstViewIndex=0, newArrayLastViewIndex=37, defaultValue=null)
+gallery_base.js:250         Found number of overlapping 8 from 10 to 17
+gallery_base.js:250         Adding default value entries up to 10
+gallery_base.js:250         Adding overlapping entries to dst from 10, src 10, count 8
+gallery_base.js:250           Copying from array indices 10 to 10 : [object Object]
+gallery_base.js:250           Copying from array indices 11 to 11 : [object Object]
+gallery_base.js:250           Copying from array indices 12 to 12 : [object Object]
+gallery_base.js:250           Copying from array indices 13 to 13 : [object Object]
+gallery_base.js:250           Copying from array indices 14 to 14 : [object Object]
+gallery_base.js:250           Copying from array indices 15 to 15 : [object Object]
+gallery_base.js:250           Copying from array indices 16 to 16 : null
+gallery_base.js:250           Copying from array indices 17 to 17 : null
+gallery_base.js:250         Adding default value entries to dst from 18, up to 37
+gallery_base.js:250       EXIT scrollVirtualArrayView() = null,null,null,null,null,null,null,null,null,null,[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+gallery_base.js:250       ENTER _downloadForVisibleAndPreloadAreas(layout={"firstCachedIndex":0,"numBeforeVisible":10,"lastCachedIndex":37,"numAfterVisible":20}, firstVisibleIndex=10, visibleCount=8, totalNumberOfItems=50)
+gallery_base.js:250         Scheduling download with sequence no 6 for index 10, count=8
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=10, itemIndex=10, itemCount=8, fetchImmediately=true) state=[this.ongoingDownloads=[]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=6, cacheIndex=10, itemIndex=10, itemCount=8)
+gallery_base.js:250           ENTER _startModelDownloadAndRemoveFromDownloadQueueWhenDone(downloadRequest={"sequenceNo":6,"totalIndex":10,"totalCount":8,"subIndex":16,"subCount":2})
+gallery_base.js:250           EXIT _startModelDownloadAndRemoveFromDownloadQueueWhenDone()
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=0, itemIndex=0, itemCount=10, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":6,"totalIndex":10,"totalCount":8,"subIndex":16,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=6, cacheIndex=0, itemIndex=0, itemCount=10)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=18, itemIndex=18, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":6,"totalIndex":10,"totalCount":8,"subIndex":16,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=6, cacheIndex=18, itemIndex=18, itemCount=20)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250       EXIT _downloadForVisibleAndPreloadAreas()
+gallery_base.js:250     EXIT updateVisibleArea()
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=10, lVI=17, fRI=8, lRI=17, fVY=1887, lVY=2329, fRY=1280, lRY=2565 })
+gallery_base.js:250     remainingElements: 32, remainingSpace: 5196, recomputedHeight: 5120
+gallery_base.js:250     Computed new height from current 7761 and diff -76: 7685
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER onModelItemsDownloaded(downloadRequest={"sequenceNo":6,"totalIndex":10,"totalCount":8,"subIndex":16,"subCount":2}) state=[this.ongoingDownloads=[{"sequenceNo":6,"totalIndex":10,"totalCount":8,"subIndex":16,"subCount":2}], this.updateRequests=1]
+gallery_base.js:250   ENTER _storeDownloadReponseInCache(downloadRequest={"sequenceNo":6,"totalIndex":10,"totalCount":8,"subIndex":16,"subCount":2}, data-length=2)
+gallery_base.js:250     ENTER _getFirstIndexInCache(visibleIndex=10) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250     ENTER _getLastIndexInCache(visibleIndex=10, visibleCount=8, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getLastIndexInCache() = 37
+gallery_base.js:250     ENTER _addDownloadedDataToCacheIfStillOverlaps(index=16, count=2, data-length=2, firstIndexInCache=0, lastIndexInCache=37)
+gallery_base.js:250       Copy from post-overlapping data[0] to this.cachedData[16] at item index 16: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[1] to this.cachedData[17] at item index 17: <nonnull>
+gallery_base.js:250     EXIT _addDownloadedDataToCacheIfStillOverlaps()
+gallery_base.js:250   EXIT _storeDownloadReponseInCache()
+gallery_base.js:250           ENTER _checkWhetherAllInCache(downloadRequest={"sequenceNo":6,"totalIndex":10,"totalCount":8,"subIndex":16,"subCount":2})
+gallery_base.js:250             ENTER _getFirstIndexInCache(visibleIndex=10) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250             ENTER _getLastIndexInCache(visibleIndex=10, visibleCount=8, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getLastIndexInCache() = 37
+gallery_base.js:250           EXIT _checkWhetherAllInCache() = 8
+gallery_base.js:250           true
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=10) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250 ENTER _showCompleteForRows(firstModelItemIndex=10, itemCount=8, completeDataArray=8, prevDisplayed={ fVI=10, lVI=17, fRI=8, lRI=17, fVY=1887, lVY=2329, fRY=1280, lRY=2565 })
+gallery_base.js:250   ENTER _addRowItems(indexOfFirstInRow=16, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250     mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250   EXIT _addRowItems() = 244
+gallery_base.js:250   ENTER Display.setRenderStateComplete(index=10, count=8) state=[this={ fVI=10, lVI=17, fRI=8, lRI=17, fVY=1887, lVY=2329, fRY=1280, lRY=2565 }]
+gallery_base.js:250   EXIT Display.setRenderStateComplete() = { fVI=10, lVI=17, fRI=8, lRI=17, fVY=1887, lVY=2329, fRY=1280, lRY=2565 }
+gallery_base.js:250 EXIT _showCompleteForRows() = { fVI=10, lVI=17, fRI=8, lRI=17, fVY=1887, lVY=2329, fRY=1280, lRY=2565 }
+gallery_base.js:250 EXIT onModelItemsDownloaded()
+gallery_base.js:250 ENTER updateOnScroll(yPos=1908) state=[this.displayState={ fVI=10, lVI=17, fRI=8, lRI=17, fVY=1887, lVY=2329, fRY=1280, lRY=2565 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=1908, prevDisplayed={ fVI=10, lVI=17, fRI=8, lRI=17, fVY=1887, lVY=2329, fRY=1280, lRY=2565 }) state=[displayState={ fVI=10, lVI=17, fRI=8, lRI=17, fVY=1887, lVY=2329, fRY=1280, lRY=2565 }, _getVisibleHeight()=443, _getScrollableHeight=7685]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=1908)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":1600,"rowItemIndex":10,"row":5}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 658, visible 443
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=1908)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":1600,"rowItemIndex":10,"row":5}
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=2350)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":2240,"rowItemIndex":14,"row":7}
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=10, lVI=15, fRI=8, lRI=17, fVY=1908, lVY=2350, fRY=1280, lRY=2565 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=10, lVI=15, fRI=8, lRI=17, fVY=1908, lVY=2350, fRY=1280, lRY=2565 })
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=10, lVI=15, fRI=8, lRI=17, fVY=1908, lVY=2350, fRY=1280, lRY=2565 })
+gallery_base.js:250     remainingElements: 34, remainingSpace: 5120, recomputedHeight: 5440
+gallery_base.js:250     Computed new height from current 7685 and diff 320: 8005
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=1927) state=[this.displayState={ fVI=10, lVI=15, fRI=8, lRI=17, fVY=1908, lVY=2350, fRY=1280, lRY=2565 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=1927, prevDisplayed={ fVI=10, lVI=15, fRI=8, lRI=17, fVY=1908, lVY=2350, fRY=1280, lRY=2565 }) state=[displayState={ fVI=10, lVI=15, fRI=8, lRI=17, fVY=1908, lVY=2350, fRY=1280, lRY=2565 }, _getVisibleHeight()=443, _getScrollableHeight=8005]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=1927)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":1920,"rowItemIndex":12,"row":6}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 639, visible 443
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=1927)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":1920,"rowItemIndex":12,"row":6}
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=2369)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":2240,"rowItemIndex":14,"row":7}
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=12, lVI=15, fRI=8, lRI=17, fVY=1927, lVY=2369, fRY=1280, lRY=2565 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=12, lVI=15, fRI=8, lRI=17, fVY=1927, lVY=2369, fRY=1280, lRY=2565 })
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=12, lVI=15, fRI=8, lRI=17, fVY=1927, lVY=2369, fRY=1280, lRY=2565 })
+gallery_base.js:250     remainingElements: 34, remainingSpace: 5440, recomputedHeight: 5440
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=1958) state=[this.displayState={ fVI=12, lVI=15, fRI=8, lRI=17, fVY=1927, lVY=2369, fRY=1280, lRY=2565 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=1958, prevDisplayed={ fVI=12, lVI=15, fRI=8, lRI=17, fVY=1927, lVY=2369, fRY=1280, lRY=2565 }) state=[displayState={ fVI=12, lVI=15, fRI=8, lRI=17, fVY=1927, lVY=2369, fRY=1280, lRY=2565 }, _getVisibleHeight()=443, _getScrollableHeight=8005]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=1958)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":1920,"rowItemIndex":12,"row":6}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 608, visible 443
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=1958)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":1920,"rowItemIndex":12,"row":6}
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=2400)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":2240,"rowItemIndex":14,"row":7}
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=12, lVI=15, fRI=8, lRI=17, fVY=1958, lVY=2400, fRY=1280, lRY=2565 }
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=12, lVI=15, fRI=8, lRI=17, fVY=1958, lVY=2400, fRY=1280, lRY=2565 })
+gallery_base.js:250     remainingElements: 34, remainingSpace: 5440, recomputedHeight: 5440
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=1994) state=[this.displayState={ fVI=12, lVI=15, fRI=8, lRI=17, fVY=1958, lVY=2400, fRY=1280, lRY=2565 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=1994, prevDisplayed={ fVI=12, lVI=15, fRI=8, lRI=17, fVY=1958, lVY=2400, fRY=1280, lRY=2565 }) state=[displayState={ fVI=12, lVI=15, fRI=8, lRI=17, fVY=1958, lVY=2400, fRY=1280, lRY=2565 }, _getVisibleHeight()=443, _getScrollableHeight=8005]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=1994)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":1920,"rowItemIndex":12,"row":6}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 572, visible 443
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=1994)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":1920,"rowItemIndex":12,"row":6}
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=2436)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":2240,"rowItemIndex":14,"row":7}
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=12, lVI=15, fRI=8, lRI=17, fVY=1994, lVY=2436, fRY=1280, lRY=2565 }
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=12, lVI=15, fRI=8, lRI=17, fVY=1994, lVY=2436, fRY=1280, lRY=2565 })
+gallery_base.js:250     remainingElements: 34, remainingSpace: 5440, recomputedHeight: 5440
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=2194) state=[this.displayState={ fVI=12, lVI=15, fRI=8, lRI=17, fVY=1994, lVY=2436, fRY=1280, lRY=2565 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=2194, prevDisplayed={ fVI=12, lVI=15, fRI=8, lRI=17, fVY=1994, lVY=2436, fRY=1280, lRY=2565 }) state=[displayState={ fVI=12, lVI=15, fRI=8, lRI=17, fVY=1994, lVY=2436, fRY=1280, lRY=2565 }, _getVisibleHeight()=443, _getScrollableHeight=8005]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=2194)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":1920,"rowItemIndex":12,"row":6}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 372, visible 443
+gallery_base.js:250     Scrolled to view partly below previous, must add 71
+gallery_base.js:250     ENTER _addProvisionalDivs(startIndex=18, startPos=2566, numColumns=2, heightToAdd=71)
+gallery_base.js:250       ENTER addDivs(level=3, startIndex=18, startPos=2566, numColumns=2, heightToAdd=71)
+gallery_base.js:250         ENTER addDivsWithAddFunc(startIndex=18, startPos=2566, numColumns=2, heightToAdd=71, downwards=true)
+gallery_base.js:250           ENTER _addRowItems(indexOfFirstInRow=18, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250             mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250           EXIT _addRowItems() = 226
+gallery_base.js:250           Added row no 10, first elem 18 at y pos 2566 of height 226
+gallery_base.js:250           addDivsWithAddFunc added 1 rows
+gallery_base.js:250         EXIT addDivsWithAddFunc() = [object Object]
+gallery_base.js:250       EXIT addDivs() = {"index":19,"yPos":2792}
+gallery_base.js:250     EXIT _addProvisionalDivs() = {"index":19,"yPos":2792}
+gallery_base.js:250     Rows added below so updating displayState
+gallery_base.js:250     ENTER DisplayState.addCurYToDisplayState(curY=2194, visibleHeight=443, displayStateFields={"firstRenderedY":1280,"lastRenderedY":2791,"firstVisibleIndex":12,"lastVisibleIndex":19,"firstRenderedIndex":8,"lastRenderedIndex":19})
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=8, prevLastViewIndex=17, firstOverlapCheckIndex=8, lastOverlapCheckIndex=19, newArrayFirstViewIndex=8, newArrayLastViewIndex=19, defaultValue=1)
+gallery_base.js:250         Found number of overlapping 10 from 8 to 17
+gallery_base.js:250         Adding default value entries up to 0
+gallery_base.js:250         Adding overlapping entries to dst from 0, src 0, count 10
+gallery_base.js:250           Copying from array indices 0 to 0 : 1
+gallery_base.js:250           Copying from array indices 1 to 1 : 1
+gallery_base.js:250           Copying from array indices 2 to 2 : 2
+gallery_base.js:250           Copying from array indices 3 to 3 : 2
+gallery_base.js:250           Copying from array indices 4 to 4 : 2
+gallery_base.js:250           Copying from array indices 5 to 5 : 2
+gallery_base.js:250           Copying from array indices 6 to 6 : 2
+gallery_base.js:250           Copying from array indices 7 to 7 : 2
+gallery_base.js:250           Copying from array indices 8 to 8 : 2
+gallery_base.js:250           Copying from array indices 9 to 9 : 2
+gallery_base.js:250         Adding default value entries to dst from 10, up to 11
+gallery_base.js:250       EXIT scrollVirtualArrayView() = 1,1,2,2,2,2,2,2,2,2,1,1
+gallery_base.js:250     EXIT DisplayState.addCurYToDisplayState() = { fVI=12, lVI=19, fRI=8, lRI=19, fVY=2194, lVY=2636, fRY=1280, lRY=2791 }
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=12, lVI=19, fRI=8, lRI=19, fVY=2194, lVY=2636, fRY=1280, lRY=2791 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=12, lVI=19, fRI=8, lRI=19, fVY=2194, lVY=2636, fRY=1280, lRY=2791 })
+gallery_base.js:250     ENTER updateVisibleArea(firstVisibleIndex=12, visibleCount=8, totalNumberOfItems=50) state=[this.curVisibleIndex=10, this.curVisibleCount=undefined]
+gallery_base.js:250       ENTER _computeNewCacheArrayLayout(firstVisibleIndex=12, visibleCount=8)
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=12) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250         ENTER _getLastIndexInCache(visibleIndex=12, visibleCount=8, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getLastIndexInCache() = 39
+gallery_base.js:250       EXIT _computeNewCacheArrayLayout() = {"firstCachedIndex":0,"numBeforeVisible":12,"lastCachedIndex":39,"numAfterVisible":20}
+gallery_base.js:250       ENTER _getFirstIndexInCache(visibleIndex=10) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250       ENTER _getLastIndexInCache(visibleIndex=10, visibleCount=8, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getLastIndexInCache() = 37
+gallery_base.js:250       Look for overlapping area after scroll: firstVisibleIndex=12, curFirstCachedIndex=0, lastVisibleIndex=19, curLastCachedIndex=37
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=0, prevLastViewIndex=37, firstOverlapCheckIndex=12, lastOverlapCheckIndex=19, newArrayFirstViewIndex=0, newArrayLastViewIndex=39, defaultValue=null)
+gallery_base.js:250         Found number of overlapping 8 from 12 to 19
+gallery_base.js:250         Adding default value entries up to 12
+gallery_base.js:250         Adding overlapping entries to dst from 12, src 12, count 8
+gallery_base.js:250           Copying from array indices 12 to 12 : [object Object]
+gallery_base.js:250           Copying from array indices 13 to 13 : [object Object]
+gallery_base.js:250           Copying from array indices 14 to 14 : [object Object]
+gallery_base.js:250           Copying from array indices 15 to 15 : [object Object]
+gallery_base.js:250           Copying from array indices 16 to 16 : [object Object]
+gallery_base.js:250           Copying from array indices 17 to 17 : [object Object]
+gallery_base.js:250           Copying from array indices 18 to 18 : null
+gallery_base.js:250           Copying from array indices 19 to 19 : null
+gallery_base.js:250         Adding default value entries to dst from 20, up to 39
+gallery_base.js:250       EXIT scrollVirtualArrayView() = null,null,null,null,null,null,null,null,null,null,null,null,[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+gallery_base.js:250       ENTER _downloadForVisibleAndPreloadAreas(layout={"firstCachedIndex":0,"numBeforeVisible":12,"lastCachedIndex":39,"numAfterVisible":20}, firstVisibleIndex=12, visibleCount=8, totalNumberOfItems=50)
+gallery_base.js:250         Scheduling download with sequence no 7 for index 12, count=8
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=12, itemIndex=12, itemCount=8, fetchImmediately=true) state=[this.ongoingDownloads=[]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=7, cacheIndex=12, itemIndex=12, itemCount=8)
+gallery_base.js:250           ENTER _startModelDownloadAndRemoveFromDownloadQueueWhenDone(downloadRequest={"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2})
+gallery_base.js:250           EXIT _startModelDownloadAndRemoveFromDownloadQueueWhenDone()
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=0, itemIndex=0, itemCount=12, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=7, cacheIndex=0, itemIndex=0, itemCount=12)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=20, itemIndex=20, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=7, cacheIndex=20, itemIndex=20, itemCount=20)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250       EXIT _downloadForVisibleAndPreloadAreas()
+gallery_base.js:250     EXIT updateVisibleArea()
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=12, lVI=19, fRI=8, lRI=19, fVY=2194, lVY=2636, fRY=1280, lRY=2791 })
+gallery_base.js:250     remainingElements: 30, remainingSpace: 5214, recomputedHeight: 4800
+gallery_base.js:250     Computed new height from current 8005 and diff -414: 7591
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=2434) state=[this.displayState={ fVI=12, lVI=19, fRI=8, lRI=19, fVY=2194, lVY=2636, fRY=1280, lRY=2791 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=2434, prevDisplayed={ fVI=12, lVI=19, fRI=8, lRI=19, fVY=2194, lVY=2636, fRY=1280, lRY=2791 }) state=[displayState={ fVI=12, lVI=19, fRI=8, lRI=19, fVY=2194, lVY=2636, fRY=1280, lRY=2791 }, _getVisibleHeight()=443, _getScrollableHeight=7591]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=2434)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":2240,"rowItemIndex":14,"row":7}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 358, visible 443
+gallery_base.js:250     Scrolled to view partly below previous, must add 85
+gallery_base.js:250     ENTER _addProvisionalDivs(startIndex=20, startPos=2792, numColumns=2, heightToAdd=85)
+gallery_base.js:250       ENTER addDivs(level=3, startIndex=20, startPos=2792, numColumns=2, heightToAdd=85)
+gallery_base.js:250         ENTER addDivsWithAddFunc(startIndex=20, startPos=2792, numColumns=2, heightToAdd=85, downwards=true)
+gallery_base.js:250           ENTER _addRowItems(indexOfFirstInRow=20, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250             mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250           EXIT _addRowItems() = 286
+gallery_base.js:250           Added row no 11, first elem 20 at y pos 2792 of height 286
+gallery_base.js:250           addDivsWithAddFunc added 1 rows
+gallery_base.js:250         EXIT addDivsWithAddFunc() = [object Object]
+gallery_base.js:250       EXIT addDivs() = {"index":21,"yPos":3078}
+gallery_base.js:250     EXIT _addProvisionalDivs() = {"index":21,"yPos":3078}
+gallery_base.js:250     Rows added below so updating displayState
+gallery_base.js:250     ENTER DisplayState.addCurYToDisplayState(curY=2434, visibleHeight=443, displayStateFields={"firstRenderedY":1280,"lastRenderedY":3077,"firstVisibleIndex":14,"lastVisibleIndex":21,"firstRenderedIndex":8,"lastRenderedIndex":21})
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=8, prevLastViewIndex=19, firstOverlapCheckIndex=8, lastOverlapCheckIndex=21, newArrayFirstViewIndex=8, newArrayLastViewIndex=21, defaultValue=1)
+gallery_base.js:250         Found number of overlapping 12 from 8 to 19
+gallery_base.js:250         Adding default value entries up to 0
+gallery_base.js:250         Adding overlapping entries to dst from 0, src 0, count 12
+gallery_base.js:250           Copying from array indices 0 to 0 : 1
+gallery_base.js:250           Copying from array indices 1 to 1 : 1
+gallery_base.js:250           Copying from array indices 2 to 2 : 2
+gallery_base.js:250           Copying from array indices 3 to 3 : 2
+gallery_base.js:250           Copying from array indices 4 to 4 : 2
+gallery_base.js:250           Copying from array indices 5 to 5 : 2
+gallery_base.js:250           Copying from array indices 6 to 6 : 2
+gallery_base.js:250           Copying from array indices 7 to 7 : 2
+gallery_base.js:250           Copying from array indices 8 to 8 : 2
+gallery_base.js:250           Copying from array indices 9 to 9 : 2
+gallery_base.js:250           Copying from array indices 10 to 10 : 1
+gallery_base.js:250           Copying from array indices 11 to 11 : 1
+gallery_base.js:250         Adding default value entries to dst from 12, up to 13
+gallery_base.js:250       EXIT scrollVirtualArrayView() = 1,1,2,2,2,2,2,2,2,2,1,1,1,1
+gallery_base.js:250     EXIT DisplayState.addCurYToDisplayState() = { fVI=14, lVI=21, fRI=8, lRI=21, fVY=2434, lVY=2876, fRY=1280, lRY=3077 }
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=14, lVI=21, fRI=8, lRI=21, fVY=2434, lVY=2876, fRY=1280, lRY=3077 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=14, lVI=21, fRI=8, lRI=21, fVY=2434, lVY=2876, fRY=1280, lRY=3077 })
+gallery_base.js:250     ENTER updateVisibleArea(firstVisibleIndex=14, visibleCount=8, totalNumberOfItems=50) state=[this.curVisibleIndex=12, this.curVisibleCount=undefined]
+gallery_base.js:250       ENTER _computeNewCacheArrayLayout(firstVisibleIndex=14, visibleCount=8)
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=14) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250         ENTER _getLastIndexInCache(visibleIndex=14, visibleCount=8, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getLastIndexInCache() = 41
+gallery_base.js:250       EXIT _computeNewCacheArrayLayout() = {"firstCachedIndex":0,"numBeforeVisible":14,"lastCachedIndex":41,"numAfterVisible":20}
+gallery_base.js:250       ENTER _getFirstIndexInCache(visibleIndex=12) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250       ENTER _getLastIndexInCache(visibleIndex=12, visibleCount=8, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getLastIndexInCache() = 39
+gallery_base.js:250       Look for overlapping area after scroll: firstVisibleIndex=14, curFirstCachedIndex=0, lastVisibleIndex=21, curLastCachedIndex=39
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=0, prevLastViewIndex=39, firstOverlapCheckIndex=14, lastOverlapCheckIndex=21, newArrayFirstViewIndex=0, newArrayLastViewIndex=41, defaultValue=null)
+gallery_base.js:250         Found number of overlapping 8 from 14 to 21
+gallery_base.js:250         Adding default value entries up to 14
+gallery_base.js:250         Adding overlapping entries to dst from 14, src 14, count 8
+gallery_base.js:250           Copying from array indices 14 to 14 : [object Object]
+gallery_base.js:250           Copying from array indices 15 to 15 : [object Object]
+gallery_base.js:250           Copying from array indices 16 to 16 : [object Object]
+gallery_base.js:250           Copying from array indices 17 to 17 : [object Object]
+gallery_base.js:250           Copying from array indices 18 to 18 : null
+gallery_base.js:250           Copying from array indices 19 to 19 : null
+gallery_base.js:250           Copying from array indices 20 to 20 : null
+gallery_base.js:250           Copying from array indices 21 to 21 : null
+gallery_base.js:250         Adding default value entries to dst from 22, up to 41
+gallery_base.js:250       EXIT scrollVirtualArrayView() = null,null,null,null,null,null,null,null,null,null,null,null,null,null,[object Object],[object Object],[object Object],[object Object],null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+gallery_base.js:250       ENTER _downloadForVisibleAndPreloadAreas(layout={"firstCachedIndex":0,"numBeforeVisible":14,"lastCachedIndex":41,"numAfterVisible":20}, firstVisibleIndex=14, visibleCount=8, totalNumberOfItems=50)
+gallery_base.js:250         Scheduling download with sequence no 8 for index 14, count=8
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=14, itemIndex=14, itemCount=8, fetchImmediately=true) state=[this.ongoingDownloads=[{"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=8, cacheIndex=14, itemIndex=14, itemCount=8)
+gallery_base.js:250               Found in-progress download for item index: 18, {"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 19, {"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2}
+gallery_base.js:250           ENTER _startModelDownloadAndRemoveFromDownloadQueueWhenDone(downloadRequest={"sequenceNo":8,"totalIndex":14,"totalCount":8,"subIndex":20,"subCount":2})
+gallery_base.js:250           EXIT _startModelDownloadAndRemoveFromDownloadQueueWhenDone()
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=0, itemIndex=0, itemCount=14, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2},{"sequenceNo":8,"totalIndex":14,"totalCount":8,"subIndex":20,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=8, cacheIndex=0, itemIndex=0, itemCount=14)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=22, itemIndex=22, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2},{"sequenceNo":8,"totalIndex":14,"totalCount":8,"subIndex":20,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=8, cacheIndex=22, itemIndex=22, itemCount=20)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250       EXIT _downloadForVisibleAndPreloadAreas()
+gallery_base.js:250     EXIT updateVisibleArea()
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=14, lVI=21, fRI=8, lRI=21, fVY=2434, lVY=2876, fRY=1280, lRY=3077 })
+gallery_base.js:250     remainingElements: 28, remainingSpace: 4514, recomputedHeight: 4480
+gallery_base.js:250     Computed new height from current 7591 and diff -34: 7557
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=2558) state=[this.displayState={ fVI=14, lVI=21, fRI=8, lRI=21, fVY=2434, lVY=2876, fRY=1280, lRY=3077 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=2558, prevDisplayed={ fVI=14, lVI=21, fRI=8, lRI=21, fVY=2434, lVY=2876, fRY=1280, lRY=3077 }) state=[displayState={ fVI=14, lVI=21, fRI=8, lRI=21, fVY=2434, lVY=2876, fRY=1280, lRY=3077 }, _getVisibleHeight()=443, _getScrollableHeight=7557]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=2558)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":2240,"rowItemIndex":14,"row":7}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 520, visible 443
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=2558)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":2240,"rowItemIndex":14,"row":7}
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=3000)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":2880,"rowItemIndex":18,"row":9}
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=14, lVI=19, fRI=8, lRI=21, fVY=2558, lVY=3000, fRY=1280, lRY=3077 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=14, lVI=19, fRI=8, lRI=21, fVY=2558, lVY=3000, fRY=1280, lRY=3077 })
+gallery_base.js:250     ENTER updateVisibleArea(firstVisibleIndex=14, visibleCount=6, totalNumberOfItems=50) state=[this.curVisibleIndex=14, this.curVisibleCount=undefined]
+gallery_base.js:250       ENTER _computeNewCacheArrayLayout(firstVisibleIndex=14, visibleCount=6)
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=14) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250         ENTER _getLastIndexInCache(visibleIndex=14, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getLastIndexInCache() = 39
+gallery_base.js:250       EXIT _computeNewCacheArrayLayout() = {"firstCachedIndex":0,"numBeforeVisible":14,"lastCachedIndex":39,"numAfterVisible":20}
+gallery_base.js:250       ENTER _getFirstIndexInCache(visibleIndex=14) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250       ENTER _getLastIndexInCache(visibleIndex=14, visibleCount=8, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getLastIndexInCache() = 41
+gallery_base.js:250       Look for overlapping area after scroll: firstVisibleIndex=14, curFirstCachedIndex=0, lastVisibleIndex=19, curLastCachedIndex=41
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=0, prevLastViewIndex=41, firstOverlapCheckIndex=14, lastOverlapCheckIndex=19, newArrayFirstViewIndex=0, newArrayLastViewIndex=39, defaultValue=null)
+gallery_base.js:250         Found number of overlapping 6 from 14 to 19
+gallery_base.js:250         Adding default value entries up to 14
+gallery_base.js:250         Adding overlapping entries to dst from 14, src 14, count 6
+gallery_base.js:250           Copying from array indices 14 to 14 : [object Object]
+gallery_base.js:250           Copying from array indices 15 to 15 : [object Object]
+gallery_base.js:250           Copying from array indices 16 to 16 : [object Object]
+gallery_base.js:250           Copying from array indices 17 to 17 : [object Object]
+gallery_base.js:250           Copying from array indices 18 to 18 : null
+gallery_base.js:250           Copying from array indices 19 to 19 : null
+gallery_base.js:250         Adding default value entries to dst from 20, up to 39
+gallery_base.js:250       EXIT scrollVirtualArrayView() = null,null,null,null,null,null,null,null,null,null,null,null,null,null,[object Object],[object Object],[object Object],[object Object],null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+gallery_base.js:250       ENTER _downloadForVisibleAndPreloadAreas(layout={"firstCachedIndex":0,"numBeforeVisible":14,"lastCachedIndex":39,"numAfterVisible":20}, firstVisibleIndex=14, visibleCount=6, totalNumberOfItems=50)
+gallery_base.js:250         Scheduling download with sequence no 9 for index 14, count=6
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=14, itemIndex=14, itemCount=6, fetchImmediately=true) state=[this.ongoingDownloads=[{"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2},{"sequenceNo":8,"totalIndex":14,"totalCount":8,"subIndex":20,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=9, cacheIndex=14, itemIndex=14, itemCount=6)
+gallery_base.js:250               Found in-progress download for item index: 18, {"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 19, {"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2}
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=0, itemIndex=0, itemCount=14, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2},{"sequenceNo":8,"totalIndex":14,"totalCount":8,"subIndex":20,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=9, cacheIndex=0, itemIndex=0, itemCount=14)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=20, itemIndex=20, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2},{"sequenceNo":8,"totalIndex":14,"totalCount":8,"subIndex":20,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=9, cacheIndex=20, itemIndex=20, itemCount=20)
+gallery_base.js:250               Found in-progress download for item index: 20, {"sequenceNo":8,"totalIndex":14,"totalCount":8,"subIndex":20,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 21, {"sequenceNo":8,"totalIndex":14,"totalCount":8,"subIndex":20,"subCount":2}
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250       EXIT _downloadForVisibleAndPreloadAreas()
+gallery_base.js:250     EXIT updateVisibleArea()
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=14, lVI=19, fRI=8, lRI=21, fVY=2558, lVY=3000, fRY=1280, lRY=3077 })
+gallery_base.js:250     remainingElements: 30, remainingSpace: 4480, recomputedHeight: 4800
+gallery_base.js:250     Computed new height from current 7557 and diff 320: 7877
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER onModelItemsDownloaded(downloadRequest={"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2}) state=[this.ongoingDownloads=[{"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2},{"sequenceNo":8,"totalIndex":14,"totalCount":8,"subIndex":20,"subCount":2}], this.updateRequests=3]
+gallery_base.js:250   ENTER _storeDownloadReponseInCache(downloadRequest={"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2}, data-length=2)
+gallery_base.js:250     ENTER _getFirstIndexInCache(visibleIndex=14) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250     ENTER _getLastIndexInCache(visibleIndex=14, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getLastIndexInCache() = 39
+gallery_base.js:250     ENTER _addDownloadedDataToCacheIfStillOverlaps(index=18, count=2, data-length=2, firstIndexInCache=0, lastIndexInCache=39)
+gallery_base.js:250       Copy from post-overlapping data[0] to this.cachedData[18] at item index 18: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[1] to this.cachedData[19] at item index 19: <nonnull>
+gallery_base.js:250     EXIT _addDownloadedDataToCacheIfStillOverlaps()
+gallery_base.js:250   EXIT _storeDownloadReponseInCache()
+gallery_base.js:250           ENTER _checkWhetherAllInCache(downloadRequest={"sequenceNo":7,"totalIndex":12,"totalCount":8,"subIndex":18,"subCount":2})
+gallery_base.js:250             ENTER _getFirstIndexInCache(visibleIndex=14) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250             ENTER _getLastIndexInCache(visibleIndex=14, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getLastIndexInCache() = 39
+gallery_base.js:250           EXIT _checkWhetherAllInCache() = null
+gallery_base.js:250           true
+gallery_base.js:250 EXIT onModelItemsDownloaded()
+gallery_base.js:250 ENTER onModelItemsDownloaded(downloadRequest={"sequenceNo":8,"totalIndex":14,"totalCount":8,"subIndex":20,"subCount":2}) state=[this.ongoingDownloads=[{"sequenceNo":8,"totalIndex":14,"totalCount":8,"subIndex":20,"subCount":2}], this.updateRequests=3]
+gallery_base.js:250   ENTER _storeDownloadReponseInCache(downloadRequest={"sequenceNo":8,"totalIndex":14,"totalCount":8,"subIndex":20,"subCount":2}, data-length=2)
+gallery_base.js:250     ENTER _getFirstIndexInCache(visibleIndex=14) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250     ENTER _getLastIndexInCache(visibleIndex=14, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getLastIndexInCache() = 39
+gallery_base.js:250     ENTER _addDownloadedDataToCacheIfStillOverlaps(index=20, count=2, data-length=2, firstIndexInCache=0, lastIndexInCache=39)
+gallery_base.js:250       Copy from post-overlapping data[0] to this.cachedData[20] at item index 20: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[1] to this.cachedData[21] at item index 21: <null>
+gallery_base.js:250     EXIT _addDownloadedDataToCacheIfStillOverlaps()
+gallery_base.js:250   EXIT _storeDownloadReponseInCache()
+gallery_base.js:250           ENTER _checkWhetherAllInCache(downloadRequest={"sequenceNo":8,"totalIndex":14,"totalCount":8,"subIndex":20,"subCount":2})
+gallery_base.js:250             ENTER _getFirstIndexInCache(visibleIndex=14) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250             ENTER _getLastIndexInCache(visibleIndex=14, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getLastIndexInCache() = 39
+gallery_base.js:250           EXIT _checkWhetherAllInCache() = 8
+gallery_base.js:250           true
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=14) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250 ENTER _showCompleteForRows(firstModelItemIndex=14, itemCount=6, completeDataArray=6, prevDisplayed={ fVI=14, lVI=19, fRI=8, lRI=21, fVY=2558, lVY=3000, fRY=1280, lRY=3077 })
+gallery_base.js:250   ENTER _addRowItems(indexOfFirstInRow=18, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250     mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250   EXIT _addRowItems() = 226
+gallery_base.js:250   ENTER Display.setRenderStateComplete(index=14, count=6) state=[this={ fVI=14, lVI=19, fRI=8, lRI=21, fVY=2558, lVY=3000, fRY=1280, lRY=3077 }]
+gallery_base.js:250   EXIT Display.setRenderStateComplete() = { fVI=14, lVI=19, fRI=8, lRI=21, fVY=2558, lVY=3000, fRY=1280, lRY=3077 }
+gallery_base.js:250 EXIT _showCompleteForRows() = { fVI=14, lVI=19, fRI=8, lRI=21, fVY=2558, lVY=3000, fRY=1280, lRY=3077 }
+gallery_base.js:250 EXIT onModelItemsDownloaded()
+gallery_base.js:250 ENTER updateOnScroll(yPos=2584) state=[this.displayState={ fVI=14, lVI=19, fRI=8, lRI=21, fVY=2558, lVY=3000, fRY=1280, lRY=3077 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=2584, prevDisplayed={ fVI=14, lVI=19, fRI=8, lRI=21, fVY=2558, lVY=3000, fRY=1280, lRY=3077 }) state=[displayState={ fVI=14, lVI=19, fRI=8, lRI=21, fVY=2558, lVY=3000, fRY=1280, lRY=3077 }, _getVisibleHeight()=443, _getScrollableHeight=7877]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=2584)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":2560,"rowItemIndex":16,"row":8}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 494, visible 443
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=2584)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":2560,"rowItemIndex":16,"row":8}
+gallery_base.js:250 ENTER _findElementYPosAndItemIndex(yPos=3026)
+gallery_base.js:250 EXIT _findElementYPosAndItemIndex() = {"rowYPos":2880,"rowItemIndex":18,"row":9}
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=16, lVI=19, fRI=8, lRI=21, fVY=2584, lVY=3026, fRY=1280, lRY=3077 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=16, lVI=19, fRI=8, lRI=21, fVY=2584, lVY=3026, fRY=1280, lRY=3077 })
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=16, lVI=19, fRI=8, lRI=21, fVY=2584, lVY=3026, fRY=1280, lRY=3077 })
+gallery_base.js:250     remainingElements: 30, remainingSpace: 4800, recomputedHeight: 4800
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=2745) state=[this.displayState={ fVI=16, lVI=19, fRI=8, lRI=21, fVY=2584, lVY=3026, fRY=1280, lRY=3077 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=2745, prevDisplayed={ fVI=16, lVI=19, fRI=8, lRI=21, fVY=2584, lVY=3026, fRY=1280, lRY=3077 }) state=[displayState={ fVI=16, lVI=19, fRI=8, lRI=21, fVY=2584, lVY=3026, fRY=1280, lRY=3077 }, _getVisibleHeight()=443, _getScrollableHeight=7877]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=2745)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":2560,"rowItemIndex":16,"row":8}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 333, visible 443
+gallery_base.js:250     Scrolled to view partly below previous, must add 110
+gallery_base.js:250     ENTER _addProvisionalDivs(startIndex=22, startPos=3078, numColumns=2, heightToAdd=110)
+gallery_base.js:250       ENTER addDivs(level=3, startIndex=22, startPos=3078, numColumns=2, heightToAdd=110)
+gallery_base.js:250         ENTER addDivsWithAddFunc(startIndex=22, startPos=3078, numColumns=2, heightToAdd=110, downwards=true)
+gallery_base.js:250           ENTER _addRowItems(indexOfFirstInRow=22, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250             mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250           EXIT _addRowItems() = 286
+gallery_base.js:250           Added row no 12, first elem 22 at y pos 3078 of height 286
+gallery_base.js:250           addDivsWithAddFunc added 1 rows
+gallery_base.js:250         EXIT addDivsWithAddFunc() = [object Object]
+gallery_base.js:250       EXIT addDivs() = {"index":23,"yPos":3364}
+gallery_base.js:250     EXIT _addProvisionalDivs() = {"index":23,"yPos":3364}
+gallery_base.js:250     Rows added below so updating displayState
+gallery_base.js:250     ENTER DisplayState.addCurYToDisplayState(curY=2745, visibleHeight=443, displayStateFields={"firstRenderedY":1280,"lastRenderedY":3363,"firstVisibleIndex":16,"lastVisibleIndex":23,"firstRenderedIndex":8,"lastRenderedIndex":23})
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=8, prevLastViewIndex=21, firstOverlapCheckIndex=8, lastOverlapCheckIndex=23, newArrayFirstViewIndex=8, newArrayLastViewIndex=23, defaultValue=1)
+gallery_base.js:250         Found number of overlapping 14 from 8 to 21
+gallery_base.js:250         Adding default value entries up to 0
+gallery_base.js:250         Adding overlapping entries to dst from 0, src 0, count 14
+gallery_base.js:250           Copying from array indices 0 to 0 : 1
+gallery_base.js:250           Copying from array indices 1 to 1 : 1
+gallery_base.js:250           Copying from array indices 2 to 2 : 2
+gallery_base.js:250           Copying from array indices 3 to 3 : 2
+gallery_base.js:250           Copying from array indices 4 to 4 : 2
+gallery_base.js:250           Copying from array indices 5 to 5 : 2
+gallery_base.js:250           Copying from array indices 6 to 6 : 2
+gallery_base.js:250           Copying from array indices 7 to 7 : 2
+gallery_base.js:250           Copying from array indices 8 to 8 : 2
+gallery_base.js:250           Copying from array indices 9 to 9 : 2
+gallery_base.js:250           Copying from array indices 10 to 10 : 2
+gallery_base.js:250           Copying from array indices 11 to 11 : 2
+gallery_base.js:250           Copying from array indices 12 to 12 : 1
+gallery_base.js:250           Copying from array indices 13 to 13 : 1
+gallery_base.js:250         Adding default value entries to dst from 14, up to 15
+gallery_base.js:250       EXIT scrollVirtualArrayView() = 1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1
+gallery_base.js:250     EXIT DisplayState.addCurYToDisplayState() = { fVI=16, lVI=23, fRI=8, lRI=23, fVY=2745, lVY=3187, fRY=1280, lRY=3363 }
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=16, lVI=23, fRI=8, lRI=23, fVY=2745, lVY=3187, fRY=1280, lRY=3363 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=16, lVI=23, fRI=8, lRI=23, fVY=2745, lVY=3187, fRY=1280, lRY=3363 })
+gallery_base.js:250     ENTER updateVisibleArea(firstVisibleIndex=16, visibleCount=8, totalNumberOfItems=50) state=[this.curVisibleIndex=14, this.curVisibleCount=undefined]
+gallery_base.js:250       ENTER _computeNewCacheArrayLayout(firstVisibleIndex=16, visibleCount=8)
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=16) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250         ENTER _getLastIndexInCache(visibleIndex=16, visibleCount=8, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getLastIndexInCache() = 43
+gallery_base.js:250       EXIT _computeNewCacheArrayLayout() = {"firstCachedIndex":0,"numBeforeVisible":16,"lastCachedIndex":43,"numAfterVisible":20}
+gallery_base.js:250       ENTER _getFirstIndexInCache(visibleIndex=14) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250       ENTER _getLastIndexInCache(visibleIndex=14, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getLastIndexInCache() = 39
+gallery_base.js:250       Look for overlapping area after scroll: firstVisibleIndex=16, curFirstCachedIndex=0, lastVisibleIndex=23, curLastCachedIndex=39
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=0, prevLastViewIndex=39, firstOverlapCheckIndex=16, lastOverlapCheckIndex=23, newArrayFirstViewIndex=0, newArrayLastViewIndex=43, defaultValue=null)
+gallery_base.js:250         Found number of overlapping 8 from 16 to 23
+gallery_base.js:250         Adding default value entries up to 16
+gallery_base.js:250         Adding overlapping entries to dst from 16, src 16, count 8
+gallery_base.js:250           Copying from array indices 16 to 16 : [object Object]
+gallery_base.js:250           Copying from array indices 17 to 17 : [object Object]
+gallery_base.js:250           Copying from array indices 18 to 18 : [object Object]
+gallery_base.js:250           Copying from array indices 19 to 19 : [object Object]
+gallery_base.js:250           Copying from array indices 20 to 20 : [object Object]
+gallery_base.js:250           Copying from array indices 21 to 21 : [object Object]
+gallery_base.js:250           Copying from array indices 22 to 22 : null
+gallery_base.js:250           Copying from array indices 23 to 23 : null
+gallery_base.js:250         Adding default value entries to dst from 24, up to 43
+gallery_base.js:250       EXIT scrollVirtualArrayView() = null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+gallery_base.js:250       ENTER _downloadForVisibleAndPreloadAreas(layout={"firstCachedIndex":0,"numBeforeVisible":16,"lastCachedIndex":43,"numAfterVisible":20}, firstVisibleIndex=16, visibleCount=8, totalNumberOfItems=50)
+gallery_base.js:250         Scheduling download with sequence no 10 for index 16, count=8
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=16, itemIndex=16, itemCount=8, fetchImmediately=true) state=[this.ongoingDownloads=[]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=10, cacheIndex=16, itemIndex=16, itemCount=8)
+gallery_base.js:250           ENTER _startModelDownloadAndRemoveFromDownloadQueueWhenDone(downloadRequest={"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2})
+gallery_base.js:250           EXIT _startModelDownloadAndRemoveFromDownloadQueueWhenDone()
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=0, itemIndex=0, itemCount=16, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=10, cacheIndex=0, itemIndex=0, itemCount=16)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=24, itemIndex=24, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=10, cacheIndex=24, itemIndex=24, itemCount=20)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250       EXIT _downloadForVisibleAndPreloadAreas()
+gallery_base.js:250     EXIT updateVisibleArea()
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=16, lVI=23, fRI=8, lRI=23, fVY=2745, lVY=3187, fRY=1280, lRY=3363 })
+gallery_base.js:250     remainingElements: 26, remainingSpace: 4514, recomputedHeight: 4160
+gallery_base.js:250     Computed new height from current 7877 and diff -354: 7523
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=3174) state=[this.displayState={ fVI=16, lVI=23, fRI=8, lRI=23, fVY=2745, lVY=3187, fRY=1280, lRY=3363 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=3174, prevDisplayed={ fVI=16, lVI=23, fRI=8, lRI=23, fVY=2745, lVY=3187, fRY=1280, lRY=3363 }) state=[displayState={ fVI=16, lVI=23, fRI=8, lRI=23, fVY=2745, lVY=3187, fRY=1280, lRY=3363 }, _getVisibleHeight()=443, _getScrollableHeight=7523]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=3174)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":2880,"rowItemIndex":18,"row":9}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 190, visible 443
+gallery_base.js:250     Scrolled to view partly below previous, must add 253
+gallery_base.js:250     ENTER _addProvisionalDivs(startIndex=24, startPos=3364, numColumns=2, heightToAdd=253)
+gallery_base.js:250       ENTER addDivs(level=3, startIndex=24, startPos=3364, numColumns=2, heightToAdd=253)
+gallery_base.js:250         ENTER addDivsWithAddFunc(startIndex=24, startPos=3364, numColumns=2, heightToAdd=253, downwards=true)
+gallery_base.js:250           ENTER _addRowItems(indexOfFirstInRow=24, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250             mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250           EXIT _addRowItems() = 286
+gallery_base.js:250           Added row no 13, first elem 24 at y pos 3364 of height 286
+gallery_base.js:250           addDivsWithAddFunc added 1 rows
+gallery_base.js:250         EXIT addDivsWithAddFunc() = [object Object]
+gallery_base.js:250       EXIT addDivs() = {"index":25,"yPos":3650}
+gallery_base.js:250     EXIT _addProvisionalDivs() = {"index":25,"yPos":3650}
+gallery_base.js:250     Rows added below so updating displayState
+gallery_base.js:250     ENTER DisplayState.addCurYToDisplayState(curY=3174, visibleHeight=443, displayStateFields={"firstRenderedY":1280,"lastRenderedY":3649,"firstVisibleIndex":18,"lastVisibleIndex":25,"firstRenderedIndex":8,"lastRenderedIndex":25})
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=8, prevLastViewIndex=23, firstOverlapCheckIndex=8, lastOverlapCheckIndex=25, newArrayFirstViewIndex=8, newArrayLastViewIndex=25, defaultValue=1)
+gallery_base.js:250         Found number of overlapping 16 from 8 to 23
+gallery_base.js:250         Adding default value entries up to 0
+gallery_base.js:250         Adding overlapping entries to dst from 0, src 0, count 16
+gallery_base.js:250           Copying from array indices 0 to 0 : 1
+gallery_base.js:250           Copying from array indices 1 to 1 : 1
+gallery_base.js:250           Copying from array indices 2 to 2 : 2
+gallery_base.js:250           Copying from array indices 3 to 3 : 2
+gallery_base.js:250           Copying from array indices 4 to 4 : 2
+gallery_base.js:250           Copying from array indices 5 to 5 : 2
+gallery_base.js:250           Copying from array indices 6 to 6 : 2
+gallery_base.js:250           Copying from array indices 7 to 7 : 2
+gallery_base.js:250           Copying from array indices 8 to 8 : 2
+gallery_base.js:250           Copying from array indices 9 to 9 : 2
+gallery_base.js:250           Copying from array indices 10 to 10 : 2
+gallery_base.js:250           Copying from array indices 11 to 11 : 2
+gallery_base.js:250           Copying from array indices 12 to 12 : 1
+gallery_base.js:250           Copying from array indices 13 to 13 : 1
+gallery_base.js:250           Copying from array indices 14 to 14 : 1
+gallery_base.js:250           Copying from array indices 15 to 15 : 1
+gallery_base.js:250         Adding default value entries to dst from 16, up to 17
+gallery_base.js:250       EXIT scrollVirtualArrayView() = 1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1
+gallery_base.js:250     EXIT DisplayState.addCurYToDisplayState() = { fVI=18, lVI=25, fRI=8, lRI=25, fVY=3174, lVY=3616, fRY=1280, lRY=3649 }
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=18, lVI=25, fRI=8, lRI=25, fVY=3174, lVY=3616, fRY=1280, lRY=3649 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=18, lVI=25, fRI=8, lRI=25, fVY=3174, lVY=3616, fRY=1280, lRY=3649 })
+gallery_base.js:250     ENTER updateVisibleArea(firstVisibleIndex=18, visibleCount=8, totalNumberOfItems=50) state=[this.curVisibleIndex=16, this.curVisibleCount=undefined]
+gallery_base.js:250       ENTER _computeNewCacheArrayLayout(firstVisibleIndex=18, visibleCount=8)
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=18) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250         ENTER _getLastIndexInCache(visibleIndex=18, visibleCount=8, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getLastIndexInCache() = 45
+gallery_base.js:250       EXIT _computeNewCacheArrayLayout() = {"firstCachedIndex":0,"numBeforeVisible":18,"lastCachedIndex":45,"numAfterVisible":20}
+gallery_base.js:250       ENTER _getFirstIndexInCache(visibleIndex=16) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250       ENTER _getLastIndexInCache(visibleIndex=16, visibleCount=8, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getLastIndexInCache() = 43
+gallery_base.js:250       Look for overlapping area after scroll: firstVisibleIndex=18, curFirstCachedIndex=0, lastVisibleIndex=25, curLastCachedIndex=43
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=0, prevLastViewIndex=43, firstOverlapCheckIndex=18, lastOverlapCheckIndex=25, newArrayFirstViewIndex=0, newArrayLastViewIndex=45, defaultValue=null)
+gallery_base.js:250         Found number of overlapping 8 from 18 to 25
+gallery_base.js:250         Adding default value entries up to 18
+gallery_base.js:250         Adding overlapping entries to dst from 18, src 18, count 8
+gallery_base.js:250           Copying from array indices 18 to 18 : [object Object]
+gallery_base.js:250           Copying from array indices 19 to 19 : [object Object]
+gallery_base.js:250           Copying from array indices 20 to 20 : [object Object]
+gallery_base.js:250           Copying from array indices 21 to 21 : [object Object]
+gallery_base.js:250           Copying from array indices 22 to 22 : null
+gallery_base.js:250           Copying from array indices 23 to 23 : null
+gallery_base.js:250           Copying from array indices 24 to 24 : null
+gallery_base.js:250           Copying from array indices 25 to 25 : null
+gallery_base.js:250         Adding default value entries to dst from 26, up to 45
+gallery_base.js:250       EXIT scrollVirtualArrayView() = null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,[object Object],[object Object],[object Object],[object Object],null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+gallery_base.js:250       ENTER _downloadForVisibleAndPreloadAreas(layout={"firstCachedIndex":0,"numBeforeVisible":18,"lastCachedIndex":45,"numAfterVisible":20}, firstVisibleIndex=18, visibleCount=8, totalNumberOfItems=50)
+gallery_base.js:250         Scheduling download with sequence no 11 for index 18, count=8
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=18, itemIndex=18, itemCount=8, fetchImmediately=true) state=[this.ongoingDownloads=[{"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=11, cacheIndex=18, itemIndex=18, itemCount=8)
+gallery_base.js:250               Found in-progress download for item index: 22, {"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 23, {"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2}
+gallery_base.js:250           ENTER _startModelDownloadAndRemoveFromDownloadQueueWhenDone(downloadRequest={"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2})
+gallery_base.js:250           EXIT _startModelDownloadAndRemoveFromDownloadQueueWhenDone()
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=0, itemIndex=0, itemCount=18, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2},{"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=11, cacheIndex=0, itemIndex=0, itemCount=18)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=26, itemIndex=26, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2},{"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=11, cacheIndex=26, itemIndex=26, itemCount=20)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250       EXIT _downloadForVisibleAndPreloadAreas()
+gallery_base.js:250     EXIT updateVisibleArea()
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=18, lVI=25, fRI=8, lRI=25, fVY=3174, lVY=3616, fRY=1280, lRY=3649 })
+gallery_base.js:250     remainingElements: 24, remainingSpace: 3874, recomputedHeight: 3840
+gallery_base.js:250     Computed new height from current 7523 and diff -34: 7489
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=3818) state=[this.displayState={ fVI=18, lVI=25, fRI=8, lRI=25, fVY=3174, lVY=3616, fRY=1280, lRY=3649 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=3818, prevDisplayed={ fVI=18, lVI=25, fRI=8, lRI=25, fVY=3174, lVY=3616, fRY=1280, lRY=3649 }) state=[displayState={ fVI=18, lVI=25, fRI=8, lRI=25, fVY=3174, lVY=3616, fRY=1280, lRY=3649 }, _getVisibleHeight()=443, _getScrollableHeight=7489]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=3818)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":3520,"rowItemIndex":22,"row":11}
+gallery_base.js:250     Scrolled to completely below previous curY 3818 visibleHeight 443 > lastVisibleY 3616, posAndIndex={"rowYPos":3520,"rowItemIndex":22,"row":11}
+gallery_base.js:250     ENTER _redrawCompletelyAt(curY=3818, posAndIndex={"rowYPos":3520,"rowItemIndex":22,"row":11})
+gallery_base.js:250       Element start index: 22, removing all rows: 9
+9gallery_base.js:250       Removing row element [object HTMLDivElement]
+gallery_base.js:250       ENTER _addProvisionalDivs(startIndex=22, startPos=3520, numColumns=2, heightToAdd=741)
+gallery_base.js:250         ENTER addDivs(level=4, startIndex=22, startPos=3520, numColumns=2, heightToAdd=741)
+gallery_base.js:250           ENTER addDivsWithAddFunc(startIndex=22, startPos=3520, numColumns=2, heightToAdd=741, downwards=true)
+gallery_base.js:250             ENTER _addRowItems(indexOfFirstInRow=22, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250               mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250             EXIT _addRowItems() = 286
+gallery_base.js:250             Added row no 12, first elem 22 at y pos 3520 of height 286
+gallery_base.js:250             ENTER _addRowItems(indexOfFirstInRow=24, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250               mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250             EXIT _addRowItems() = 286
+gallery_base.js:250             Added row no 13, first elem 24 at y pos 3806 of height 286
+gallery_base.js:250             ENTER _addRowItems(indexOfFirstInRow=26, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250               mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250             EXIT _addRowItems() = 286
+gallery_base.js:250             Added row no 14, first elem 26 at y pos 4092 of height 286
+gallery_base.js:250             addDivsWithAddFunc added 3 rows
+gallery_base.js:250           EXIT addDivsWithAddFunc() = [object Object]
+gallery_base.js:250         EXIT addDivs() = {"index":27,"yPos":4378}
+gallery_base.js:250       EXIT _addProvisionalDivs() = {"index":27,"yPos":4378}
+gallery_base.js:250     EXIT _redrawCompletelyAt() = {"index":27,"yPos":4378}
+gallery_base.js:250     ENTER DisplayState.addCurYToDisplayState(curY=3818, visibleHeight=443, displayStateFields={"firstRenderedY":3520,"lastRenderedY":4377,"firstVisibleIndex":22,"lastVisibleIndex":27,"firstRenderedIndex":22,"lastRenderedIndex":27})
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=8, prevLastViewIndex=25, firstOverlapCheckIndex=22, lastOverlapCheckIndex=27, newArrayFirstViewIndex=22, newArrayLastViewIndex=27, defaultValue=1)
+gallery_base.js:250         Found number of overlapping 4 from 22 to 25
+gallery_base.js:250         Adding default value entries up to 0
+gallery_base.js:250         Adding overlapping entries to dst from 0, src 14, count 4
+gallery_base.js:250           Copying from array indices 14 to 0 : 1
+gallery_base.js:250           Copying from array indices 15 to 1 : 1
+gallery_base.js:250           Copying from array indices 16 to 2 : 1
+gallery_base.js:250           Copying from array indices 17 to 3 : 1
+gallery_base.js:250         Adding default value entries to dst from 4, up to 5
+gallery_base.js:250       EXIT scrollVirtualArrayView() = 1,1,1,1,1,1
+gallery_base.js:250     EXIT DisplayState.addCurYToDisplayState() = { fVI=22, lVI=27, fRI=22, lRI=27, fVY=3818, lVY=4260, fRY=3520, lRY=4377 }
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=22, lVI=27, fRI=22, lRI=27, fVY=3818, lVY=4260, fRY=3520, lRY=4377 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=22, lVI=27, fRI=22, lRI=27, fVY=3818, lVY=4260, fRY=3520, lRY=4377 })
+gallery_base.js:250     ENTER updateVisibleArea(firstVisibleIndex=22, visibleCount=6, totalNumberOfItems=50) state=[this.curVisibleIndex=18, this.curVisibleCount=undefined]
+gallery_base.js:250       ENTER _computeNewCacheArrayLayout(firstVisibleIndex=22, visibleCount=6)
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=22) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 2
+gallery_base.js:250         ENTER _getLastIndexInCache(visibleIndex=22, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getLastIndexInCache() = 47
+gallery_base.js:250       EXIT _computeNewCacheArrayLayout() = {"firstCachedIndex":2,"numBeforeVisible":20,"lastCachedIndex":47,"numAfterVisible":20}
+gallery_base.js:250       ENTER _getFirstIndexInCache(visibleIndex=18) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getFirstIndexInCache() = 0
+gallery_base.js:250       ENTER _getLastIndexInCache(visibleIndex=18, visibleCount=8, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getLastIndexInCache() = 45
+gallery_base.js:250       Look for overlapping area after scroll: firstVisibleIndex=22, curFirstCachedIndex=0, lastVisibleIndex=27, curLastCachedIndex=45
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=0, prevLastViewIndex=45, firstOverlapCheckIndex=22, lastOverlapCheckIndex=27, newArrayFirstViewIndex=2, newArrayLastViewIndex=47, defaultValue=null)
+gallery_base.js:250         Found number of overlapping 6 from 22 to 27
+gallery_base.js:250         Adding default value entries up to 20
+gallery_base.js:250         Adding overlapping entries to dst from 20, src 22, count 6
+gallery_base.js:250           Copying from array indices 22 to 20 : null
+gallery_base.js:250           Copying from array indices 23 to 21 : null
+gallery_base.js:250           Copying from array indices 24 to 22 : null
+gallery_base.js:250           Copying from array indices 25 to 23 : null
+gallery_base.js:250           Copying from array indices 26 to 24 : null
+gallery_base.js:250           Copying from array indices 27 to 25 : null
+gallery_base.js:250         Adding default value entries to dst from 26, up to 45
+gallery_base.js:250       EXIT scrollVirtualArrayView() = null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+gallery_base.js:250       ENTER _downloadForVisibleAndPreloadAreas(layout={"firstCachedIndex":2,"numBeforeVisible":20,"lastCachedIndex":47,"numAfterVisible":20}, firstVisibleIndex=22, visibleCount=6, totalNumberOfItems=50)
+gallery_base.js:250         Scheduling download with sequence no 12 for index 22, count=6
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=20, itemIndex=22, itemCount=6, fetchImmediately=true) state=[this.ongoingDownloads=[{"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2},{"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=12, cacheIndex=20, itemIndex=22, itemCount=6)
+gallery_base.js:250               Found in-progress download for item index: 22, {"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 23, {"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 24, {"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 25, {"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2}
+gallery_base.js:250           ENTER _startModelDownloadAndRemoveFromDownloadQueueWhenDone(downloadRequest={"sequenceNo":12,"totalIndex":22,"totalCount":6,"subIndex":26,"subCount":2})
+gallery_base.js:250           EXIT _startModelDownloadAndRemoveFromDownloadQueueWhenDone()
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=0, itemIndex=2, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2},{"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2},{"sequenceNo":12,"totalIndex":22,"totalCount":6,"subIndex":26,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=12, cacheIndex=0, itemIndex=2, itemCount=20)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=26, itemIndex=28, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2},{"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2},{"sequenceNo":12,"totalIndex":22,"totalCount":6,"subIndex":26,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=12, cacheIndex=26, itemIndex=28, itemCount=20)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250       EXIT _downloadForVisibleAndPreloadAreas()
+gallery_base.js:250     EXIT updateVisibleArea()
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=22, lVI=27, fRI=22, lRI=27, fVY=3818, lVY=4260, fRY=3520, lRY=4377 })
+gallery_base.js:250     remainingElements: 22, remainingSpace: 3112, recomputedHeight: 3520
+gallery_base.js:250     Computed new height from current 7489 and diff 408: 7897
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER updateOnScroll(yPos=4182) state=[this.displayState={ fVI=22, lVI=27, fRI=22, lRI=27, fVY=3818, lVY=4260, fRY=3520, lRY=4377 }]
+gallery_base.js:250   ENTER _updateOnScroll(curY=4182, prevDisplayed={ fVI=22, lVI=27, fRI=22, lRI=27, fVY=3818, lVY=4260, fRY=3520, lRY=4377 }) state=[displayState={ fVI=22, lVI=27, fRI=22, lRI=27, fVY=3818, lVY=4260, fRY=3520, lRY=4377 }, _getVisibleHeight()=443, _getScrollableHeight=7897]
+gallery_base.js:250     ENTER _findElementYPosAndItemIndex(yPos=4182)
+gallery_base.js:250     EXIT _findElementYPosAndItemIndex() = {"rowYPos":4160,"rowItemIndex":26,"row":13}
+gallery_base.js:250     Scrolled to view partly below previous, must add ? Height from curY to last rendered 196, visible 443
+gallery_base.js:250     Scrolled to view partly below previous, must add 247
+gallery_base.js:250     ENTER _addProvisionalDivs(startIndex=28, startPos=4378, numColumns=2, heightToAdd=247)
+gallery_base.js:250       ENTER addDivs(level=3, startIndex=28, startPos=4378, numColumns=2, heightToAdd=247)
+gallery_base.js:250         ENTER addDivsWithAddFunc(startIndex=28, startPos=4378, numColumns=2, heightToAdd=247, downwards=true)
+gallery_base.js:250           ENTER _addRowItems(indexOfFirstInRow=28, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250             mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250           EXIT _addRowItems() = 286
+gallery_base.js:250           Added row no 15, first elem 28 at y pos 4378 of height 286
+gallery_base.js:250           addDivsWithAddFunc added 1 rows
+gallery_base.js:250         EXIT addDivsWithAddFunc() = [object Object]
+gallery_base.js:250       EXIT addDivs() = {"index":29,"yPos":4664}
+gallery_base.js:250     EXIT _addProvisionalDivs() = {"index":29,"yPos":4664}
+gallery_base.js:250     Rows added below so updating displayState
+gallery_base.js:250     ENTER DisplayState.addCurYToDisplayState(curY=4182, visibleHeight=443, displayStateFields={"firstRenderedY":3520,"lastRenderedY":4663,"firstVisibleIndex":26,"lastVisibleIndex":29,"firstRenderedIndex":22,"lastRenderedIndex":29})
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=22, prevLastViewIndex=27, firstOverlapCheckIndex=22, lastOverlapCheckIndex=29, newArrayFirstViewIndex=22, newArrayLastViewIndex=29, defaultValue=1)
+gallery_base.js:250         Found number of overlapping 6 from 22 to 27
+gallery_base.js:250         Adding default value entries up to 0
+gallery_base.js:250         Adding overlapping entries to dst from 0, src 0, count 6
+gallery_base.js:250           Copying from array indices 0 to 0 : 1
+gallery_base.js:250           Copying from array indices 1 to 1 : 1
+gallery_base.js:250           Copying from array indices 2 to 2 : 1
+gallery_base.js:250           Copying from array indices 3 to 3 : 1
+gallery_base.js:250           Copying from array indices 4 to 4 : 1
+gallery_base.js:250           Copying from array indices 5 to 5 : 1
+gallery_base.js:250         Adding default value entries to dst from 6, up to 7
+gallery_base.js:250       EXIT scrollVirtualArrayView() = 1,1,1,1,1,1,1,1
+gallery_base.js:250     EXIT DisplayState.addCurYToDisplayState() = { fVI=26, lVI=29, fRI=22, lRI=29, fVY=4182, lVY=4624, fRY=3520, lRY=4663 }
+gallery_base.js:250   EXIT _updateOnScroll() = { fVI=26, lVI=29, fRI=22, lRI=29, fVY=4182, lVY=4624, fRY=3520, lRY=4663 }
+gallery_base.js:250   ENTER _downloadAndRenderComplete(displayState={ fVI=26, lVI=29, fRI=22, lRI=29, fVY=4182, lVY=4624, fRY=3520, lRY=4663 })
+gallery_base.js:250     ENTER updateVisibleArea(firstVisibleIndex=26, visibleCount=4, totalNumberOfItems=50) state=[this.curVisibleIndex=22, this.curVisibleCount=undefined]
+gallery_base.js:250       ENTER _computeNewCacheArrayLayout(firstVisibleIndex=26, visibleCount=4)
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=26) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 6
+gallery_base.js:250         ENTER _getLastIndexInCache(visibleIndex=26, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getLastIndexInCache() = 49
+gallery_base.js:250       EXIT _computeNewCacheArrayLayout() = {"firstCachedIndex":6,"numBeforeVisible":20,"lastCachedIndex":49,"numAfterVisible":20}
+gallery_base.js:250       ENTER _getFirstIndexInCache(visibleIndex=22) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getFirstIndexInCache() = 2
+gallery_base.js:250       ENTER _getLastIndexInCache(visibleIndex=22, visibleCount=6, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250       EXIT _getLastIndexInCache() = 47
+gallery_base.js:250       Look for overlapping area after scroll: firstVisibleIndex=26, curFirstCachedIndex=2, lastVisibleIndex=29, curLastCachedIndex=47
+gallery_base.js:250       ENTER scrollVirtualArrayView(prevFirstViewIndex=2, prevLastViewIndex=47, firstOverlapCheckIndex=26, lastOverlapCheckIndex=29, newArrayFirstViewIndex=6, newArrayLastViewIndex=49, defaultValue=null)
+gallery_base.js:250         Found number of overlapping 4 from 26 to 29
+gallery_base.js:250         Adding default value entries up to 20
+gallery_base.js:250         Adding overlapping entries to dst from 20, src 24, count 4
+gallery_base.js:250           Copying from array indices 24 to 20 : null
+gallery_base.js:250           Copying from array indices 25 to 21 : null
+gallery_base.js:250           Copying from array indices 26 to 22 : null
+gallery_base.js:250           Copying from array indices 27 to 23 : null
+gallery_base.js:250         Adding default value entries to dst from 24, up to 43
+gallery_base.js:250       EXIT scrollVirtualArrayView() = null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+gallery_base.js:250       ENTER _downloadForVisibleAndPreloadAreas(layout={"firstCachedIndex":6,"numBeforeVisible":20,"lastCachedIndex":49,"numAfterVisible":20}, firstVisibleIndex=26, visibleCount=4, totalNumberOfItems=50)
+gallery_base.js:250         Scheduling download with sequence no 13 for index 26, count=4
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=20, itemIndex=26, itemCount=4, fetchImmediately=true) state=[this.ongoingDownloads=[{"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2},{"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2},{"sequenceNo":12,"totalIndex":22,"totalCount":6,"subIndex":26,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=13, cacheIndex=20, itemIndex=26, itemCount=4)
+gallery_base.js:250               Found in-progress download for item index: 26, {"sequenceNo":12,"totalIndex":22,"totalCount":6,"subIndex":26,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 27, {"sequenceNo":12,"totalIndex":22,"totalCount":6,"subIndex":26,"subCount":2}
+gallery_base.js:250           ENTER _startModelDownloadAndRemoveFromDownloadQueueWhenDone(downloadRequest={"sequenceNo":13,"totalIndex":26,"totalCount":4,"subIndex":28,"subCount":2})
+gallery_base.js:250           EXIT _startModelDownloadAndRemoveFromDownloadQueueWhenDone()
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=0, itemIndex=6, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2},{"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2},{"sequenceNo":12,"totalIndex":22,"totalCount":6,"subIndex":26,"subCount":2},{"sequenceNo":13,"totalIndex":26,"totalCount":4,"subIndex":28,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=13, cacheIndex=0, itemIndex=6, itemCount=20)
+gallery_base.js:250               Found in-progress download for item index: 22, {"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 23, {"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 24, {"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2}
+gallery_base.js:250               Found in-progress download for item index: 25, {"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2}
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250         ENTER _downloadItems(cacheIndex=24, itemIndex=30, itemCount=20, fetchImmediately=false) state=[this.ongoingDownloads=[{"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2},{"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2},{"sequenceNo":12,"totalIndex":22,"totalCount":6,"subIndex":26,"subCount":2},{"sequenceNo":13,"totalIndex":26,"totalCount":4,"subIndex":28,"subCount":2}]]
+gallery_base.js:250           ENTER _scheduleDownloadInMultipleChunksIfNecessary(sequenceNo=13, cacheIndex=24, itemIndex=30, itemCount=20)
+gallery_base.js:250           EXIT _scheduleDownloadInMultipleChunksIfNecessary()
+gallery_base.js:250         EXIT _downloadItems()
+gallery_base.js:250       EXIT _downloadForVisibleAndPreloadAreas()
+gallery_base.js:250     EXIT updateVisibleArea()
+gallery_base.js:250   EXIT _downloadAndRenderComplete()
+gallery_base.js:250   ENTER _updateHeightIfApproximation(displayState={ fVI=26, lVI=29, fRI=22, lRI=29, fVY=4182, lVY=4624, fRY=3520, lRY=4663 })
+gallery_base.js:250     remainingElements: 20, remainingSpace: 3234, recomputedHeight: 3200
+gallery_base.js:250     Computed new height from current 7897 and diff -34: 7863
+gallery_base.js:250   EXIT _updateHeightIfApproximation()
+gallery_base.js:250 EXIT updateOnScroll()
+gallery_base.js:250 ENTER onModelItemsDownloaded(downloadRequest={"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2}) state=[this.ongoingDownloads=[{"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2},{"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2},{"sequenceNo":12,"totalIndex":22,"totalCount":6,"subIndex":26,"subCount":2},{"sequenceNo":13,"totalIndex":26,"totalCount":4,"subIndex":28,"subCount":2}], this.updateRequests=4]
+gallery_base.js:250   ENTER _storeDownloadReponseInCache(downloadRequest={"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2}, data-length=2)
+gallery_base.js:250     ENTER _getFirstIndexInCache(visibleIndex=26) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getFirstIndexInCache() = 6
+gallery_base.js:250     ENTER _getLastIndexInCache(visibleIndex=26, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getLastIndexInCache() = 49
+gallery_base.js:250     ENTER _addDownloadedDataToCacheIfStillOverlaps(index=22, count=2, data-length=2, firstIndexInCache=6, lastIndexInCache=49)
+gallery_base.js:250       Copy from post-overlapping data[0] to this.cachedData[22] at item index 22: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[1] to this.cachedData[23] at item index 23: <nonnull>
+gallery_base.js:250     EXIT _addDownloadedDataToCacheIfStillOverlaps()
+gallery_base.js:250   EXIT _storeDownloadReponseInCache()
+gallery_base.js:250           ENTER _checkWhetherAllInCache(downloadRequest={"sequenceNo":10,"totalIndex":16,"totalCount":8,"subIndex":22,"subCount":2})
+gallery_base.js:250             ENTER _getFirstIndexInCache(visibleIndex=26) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getFirstIndexInCache() = 6
+gallery_base.js:250             ENTER _getLastIndexInCache(visibleIndex=26, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getLastIndexInCache() = 49
+gallery_base.js:250           EXIT _checkWhetherAllInCache() = null
+gallery_base.js:250           true
+gallery_base.js:250 EXIT onModelItemsDownloaded()
+gallery_base.js:250 ENTER onModelItemsDownloaded(downloadRequest={"sequenceNo":12,"totalIndex":22,"totalCount":6,"subIndex":26,"subCount":2}) state=[this.ongoingDownloads=[{"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2},{"sequenceNo":12,"totalIndex":22,"totalCount":6,"subIndex":26,"subCount":2},{"sequenceNo":13,"totalIndex":26,"totalCount":4,"subIndex":28,"subCount":2}], this.updateRequests=4]
+gallery_base.js:250   ENTER _storeDownloadReponseInCache(downloadRequest={"sequenceNo":12,"totalIndex":22,"totalCount":6,"subIndex":26,"subCount":2}, data-length=2)
+gallery_base.js:250     ENTER _getFirstIndexInCache(visibleIndex=26) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getFirstIndexInCache() = 6
+gallery_base.js:250     ENTER _getLastIndexInCache(visibleIndex=26, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getLastIndexInCache() = 49
+gallery_base.js:250     ENTER _addDownloadedDataToCacheIfStillOverlaps(index=26, count=2, data-length=2, firstIndexInCache=6, lastIndexInCache=49)
+gallery_base.js:250       Copy from post-overlapping data[0] to this.cachedData[26] at item index 26: <null>
+gallery_base.js:250       Copy from post-overlapping data[1] to this.cachedData[27] at item index 27: <nonnull>
+gallery_base.js:250     EXIT _addDownloadedDataToCacheIfStillOverlaps()
+gallery_base.js:250   EXIT _storeDownloadReponseInCache()
+gallery_base.js:250           ENTER _checkWhetherAllInCache(downloadRequest={"sequenceNo":12,"totalIndex":22,"totalCount":6,"subIndex":26,"subCount":2})
+gallery_base.js:250             ENTER _getFirstIndexInCache(visibleIndex=26) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getFirstIndexInCache() = 6
+gallery_base.js:250             ENTER _getLastIndexInCache(visibleIndex=26, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getLastIndexInCache() = 49
+gallery_base.js:250           EXIT _checkWhetherAllInCache() = null
+gallery_base.js:250           true
+gallery_base.js:250 EXIT onModelItemsDownloaded()
+gallery_base.js:250 ENTER onModelItemsDownloaded(downloadRequest={"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2}) state=[this.ongoingDownloads=[{"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2},{"sequenceNo":13,"totalIndex":26,"totalCount":4,"subIndex":28,"subCount":2}], this.updateRequests=4]
+gallery_base.js:250   ENTER _storeDownloadReponseInCache(downloadRequest={"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2}, data-length=2)
+gallery_base.js:250     ENTER _getFirstIndexInCache(visibleIndex=26) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getFirstIndexInCache() = 6
+gallery_base.js:250     ENTER _getLastIndexInCache(visibleIndex=26, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getLastIndexInCache() = 49
+gallery_base.js:250     ENTER _addDownloadedDataToCacheIfStillOverlaps(index=24, count=2, data-length=2, firstIndexInCache=6, lastIndexInCache=49)
+gallery_base.js:250       Copy from post-overlapping data[0] to this.cachedData[24] at item index 24: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[1] to this.cachedData[25] at item index 25: <nonnull>
+gallery_base.js:250     EXIT _addDownloadedDataToCacheIfStillOverlaps()
+gallery_base.js:250   EXIT _storeDownloadReponseInCache()
+gallery_base.js:250           ENTER _checkWhetherAllInCache(downloadRequest={"sequenceNo":11,"totalIndex":18,"totalCount":8,"subIndex":24,"subCount":2})
+gallery_base.js:250             ENTER _getFirstIndexInCache(visibleIndex=26) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getFirstIndexInCache() = 6
+gallery_base.js:250             ENTER _getLastIndexInCache(visibleIndex=26, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getLastIndexInCache() = 49
+gallery_base.js:250           EXIT _checkWhetherAllInCache() = null
+gallery_base.js:250           true
+gallery_base.js:250 EXIT onModelItemsDownloaded()
+gallery_base.js:250 ENTER onModelItemsDownloaded(downloadRequest={"sequenceNo":13,"totalIndex":26,"totalCount":4,"subIndex":28,"subCount":2}) state=[this.ongoingDownloads=[{"sequenceNo":13,"totalIndex":26,"totalCount":4,"subIndex":28,"subCount":2}], this.updateRequests=4]
+gallery_base.js:250   ENTER _storeDownloadReponseInCache(downloadRequest={"sequenceNo":13,"totalIndex":26,"totalCount":4,"subIndex":28,"subCount":2}, data-length=2)
+gallery_base.js:250     ENTER _getFirstIndexInCache(visibleIndex=26) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getFirstIndexInCache() = 6
+gallery_base.js:250     ENTER _getLastIndexInCache(visibleIndex=26, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250     EXIT _getLastIndexInCache() = 49
+gallery_base.js:250     ENTER _addDownloadedDataToCacheIfStillOverlaps(index=28, count=2, data-length=2, firstIndexInCache=6, lastIndexInCache=49)
+gallery_base.js:250       Copy from post-overlapping data[0] to this.cachedData[28] at item index 28: <nonnull>
+gallery_base.js:250       Copy from post-overlapping data[1] to this.cachedData[29] at item index 29: <nonnull>
+gallery_base.js:250     EXIT _addDownloadedDataToCacheIfStillOverlaps()
+gallery_base.js:250   EXIT _storeDownloadReponseInCache()
+gallery_base.js:250           ENTER _checkWhetherAllInCache(downloadRequest={"sequenceNo":13,"totalIndex":26,"totalCount":4,"subIndex":28,"subCount":2})
+gallery_base.js:250             ENTER _getFirstIndexInCache(visibleIndex=26) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getFirstIndexInCache() = 6
+gallery_base.js:250             ENTER _getLastIndexInCache(visibleIndex=26, visibleCount=4, totalNumberOfItems=50) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250             EXIT _getLastIndexInCache() = 49
+gallery_base.js:250           EXIT _checkWhetherAllInCache() = 4
+gallery_base.js:250           true
+gallery_base.js:250         ENTER _getFirstIndexInCache(visibleIndex=26) state=[this.cachedBeforeAndAfter=20]
+gallery_base.js:250         EXIT _getFirstIndexInCache() = 6
+gallery_base.js:250 ENTER _showCompleteForRows(firstModelItemIndex=26, itemCount=4, completeDataArray=4, prevDisplayed={ fVI=26, lVI=29, fRI=22, lRI=29, fVY=4182, lVY=4624, fRY=3520, lRY=4663 })
+gallery_base.js:250   ENTER _addRowItems(indexOfFirstInRow=26, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250     mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250   EXIT _addRowItems() = 286
+gallery_base.js:250   ENTER _addRowItems(indexOfFirstInRow=28, itemsThisRow=2, numRowsTotal=25, rowWidth=879)
+gallery_base.js:250     mustComputeDimensions: true, rowHeight: null
+gallery_base.js:250   EXIT _addRowItems() = 286
+gallery_base.js:250   ENTER Display.setRenderStateComplete(index=26, count=4) state=[this={ fVI=26, lVI=29, fRI=22, lRI=29, fVY=4182, lVY=4624, fRY=3520, lRY=4663 }]
+gallery_base.js:250   EXIT Display.setRenderStateComplete() = { fVI=26, lVI=29, fRI=22, lRI=29, fVY=4182, lVY=4624, fRY=3520, lRY=4663 }
+gallery_base.js:250 EXIT _showCompleteForRows() = { fVI=26, lVI=29, fRI=22, lRI=29, fVY=4182, lVY=4624, fRY=3520, lRY=4663 }
+gallery_base.js:250 EXIT onModelItemsDownloaded()
+

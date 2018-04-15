@@ -24,7 +24,33 @@ public class Div extends Element {
 		
 		elements.add(element);
 	}
-	
+
+	public void insertBefore(Element toAdd, Element beforeThis) {
+		if (toAdd == null) {
+			throw new IllegalArgumentException("toADd == null");
+		}
+		
+		if (beforeThis == null) {
+			throw new IllegalArgumentException("beforeThis == null");
+		}
+		
+		final int index = elements.indexOf(beforeThis);
+		
+		if (index < 0) {
+			throw new IllegalArgumentException("beforeThis not found"); 
+		}
+		
+		final ArrayList<Element> newElements = new ArrayList<>();
+		if (index > 0) {
+			newElements.addAll(elements.subList(0, index));
+		}
+		newElements.add(toAdd);
+		newElements.addAll(elements.subList(index, elements.size()));
+		
+		this.elements.clear();
+		this.elements.addAll(newElements);
+	}
+
 	public int getNumElements() {
 		return elements.size();
 	}

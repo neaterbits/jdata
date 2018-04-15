@@ -10,6 +10,10 @@ public class GalleryViewElementsStub implements GalleryViewElements<Div, Element
 		container.append(toAdd);
 	}
 
+	final void insertBefore(Div container, Element toAdd, Element beforeThis) {
+		container.insertBefore(toAdd, beforeThis);
+	}
+
 	@Override
 	public int getNumElements(Div container) {
 		return container.getNumElements();

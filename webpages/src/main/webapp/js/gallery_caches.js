@@ -263,7 +263,7 @@ GalleryCacheBase.prototype._prependDivs = function(level, startIndex, startPos, 
 				}
 				else {
 					t.cachedRowDivs.splice(0, 0, rowDiv); // insert at beginning of row
-					t._renderDiv.insertBefore(rowDiv, firstRowDiv);
+					t.galleryView.prependRowToRenderContainer(t.renderDiv, rowDiv, firstRowDiv);
 				}
 			},
 			function(index, itemWidth, itemHeight) {
@@ -364,9 +364,20 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 		heightAdded += rowHeight;
 
 		if (heightAdded >= heightToAdd) {
-			var offset = itemsThisRow - 1;
 			
-			lastRenderedElement = { 'index' : i + (downwards ? offset : -offset), 'yPos' :  y };
+			var lastRenderedIndex;
+			
+			if (downwards) {
+				// last rendered index is last in row when rendering downwards
+				lastRenderedIndex = i + itemsThisRow - 1;
+			}
+			else {
+				// last rendered is i (== first in row) since we are rendering upwards
+				lastRenderedIndex = i;
+			}
+			
+
+			lastRenderedElement = { 'index' : lastRenderedIndex, 'yPos' :  y };
 			break;
 		}
 	}
@@ -376,6 +387,7 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 			// Added rows but never reached heightAdded >= heightToAdd which means we
 			// we we reached < 0 or > total, depending direction of adding
 			var lastIndex = (downwards ? i - 1 : i + 1);
+
 			lastRenderedElement = { 'index' : lastIndex /* itemsThisRow already added */, 'yPos' :  y };
 		}
 		else {
@@ -385,7 +397,7 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
 
 	this.log(level, 'addDivsWithAddFunc added ' + rowsAdded + ' rows');
 
-	this.exit(level, 'addDivsWithAddFunc', lastRenderedElement);
+	this.exit(level, 'addDivsWithAddFunc', JSON.stringify(lastRenderedElement));
 
 	return lastRenderedElement;
 }

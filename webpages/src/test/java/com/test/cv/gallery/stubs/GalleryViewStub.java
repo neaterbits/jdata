@@ -80,6 +80,20 @@ public final class GalleryViewStub extends GalleryViewElementsStub implements Ga
 		
 		super.appendToContainer(container, row);
 	}
+	
+	
+
+	@Override
+	public void prependRowToRenderContainer(RenderDiv container, Row rowToAdd, Row currentFirstRow) {
+		
+		if (rowToAdd.getRowNo() != currentFirstRow.getRowNo() - 1) {
+			throw new IllegalArgumentException("Row is not current - 1");
+		}
+
+		operations.prependRowToRenderContainer(rowToAdd.getRowNo());
+
+		super.insertBefore(container, rowToAdd, currentFirstRow);
+	}
 
 	@Override
 	public void appendItemToRowContainer(Row row, Provisional item) {

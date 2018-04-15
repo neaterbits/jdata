@@ -49,6 +49,16 @@ public interface GalleryView<CONTAINER, ELEMENT,
 	void appendRowToRenderContainer(RENDER_CONTAINER container, ROW row);
 	
 	/**
+	 * Prepend a row to scrollable render container.
+	 * Note, this is added after the placeholder that push rows down to currently visible area.
+	 * 
+	 * @param container the outer scrollable render area
+	 * @param row the row to add, previously created with createRowContainer()
+	 */
+	
+	void prependRowToRenderContainer(RENDER_CONTAINER container, ROW rowToAdd, ROW currentFirstRow);
+	
+	/**
 	 * Append an item to a row
 	 * 
 	 * @param row the row to append to, previously created with createRowContainer()

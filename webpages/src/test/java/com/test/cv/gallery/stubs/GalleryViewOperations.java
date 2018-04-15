@@ -33,6 +33,12 @@ public final class GalleryViewOperations {
 		return this;
 	}
 	
+	public GalleryViewOperations prependRowToRenderContainer(int rowNo) {
+		add(new PrependRowToRenderContainer(rowNo));
+
+		return this;
+	}
+
 	public GalleryViewOperations createRowContainer(int rowNo) {
 		add(new CreateRowOperation(rowNo));
 		
@@ -151,6 +157,33 @@ public final class GalleryViewOperations {
 		@Override
 		public String toString() {
 			return "AppendRow [" + rowNo + "]";
+		}
+	}
+
+	private static class PrependRowToRenderContainer extends GalleryViewOperation {
+		private final int rowNo;
+
+		public PrependRowToRenderContainer(int rowNo) {
+			this.rowNo = rowNo;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			PrependRowToRenderContainer other = (PrependRowToRenderContainer) obj;
+			if (rowNo != other.rowNo)
+				return false;
+			return true;
+		}
+		
+		@Override
+		public String toString() {
+			return "PrependRow [" + rowNo + "]";
 		}
 	}
 

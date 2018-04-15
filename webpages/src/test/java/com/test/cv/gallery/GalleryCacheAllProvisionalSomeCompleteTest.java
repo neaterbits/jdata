@@ -546,6 +546,49 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 				;
 		});
 
+		// ********************************* Scroll upwards into overlapping area *********************************
+		cacheItems.clearUpdateRequests();
+
+		cm.cache.updateOnScroll(4900); // 5000 / 250 == 20 rows ( * 3 columns = index 60)
+
+		// Should produce one single update request
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
+
+		assertThat(cacheItems.getRequestAt(0).getFirstVisibleIndex()).isEqualTo(57);
+		assertThat(cacheItems.getRequestAt(0).getVisibleCount()).isEqualTo(9);
+		assertThat(cacheItems.getRequestAt(0).getTotalNumberOfItems()).isEqualTo(100);
+		
+		checkDisplayState(cm.cache, 57, 65, 57, 68, 4900, 5499, 4750, 5749);
+
+		checkViewOperations(cm, operations -> {
+			operations
+
+				// Must create one new row
+				.createRowContainer(19)
+				.prependRowToRenderContainer(19)
+				.appendItemToRowContainer(19, 0, 57)
+				.appendItemToRowContainer(19, 1, 58)
+				.appendItemToRowContainer(19, 2, 59)
+
+				// Placeholder height will be updated to position of first element
+				// so that scrollbars appear correctly
+				// Happens after adding rows since that is when we know what to adjust to,
+				// since row height may be variable and we just have to get the element heights
+				.setPlaceHolderHeight(4750)
+
+				;
+		});
+
+		cacheItems.getRequestAt(0).onComplete();;
+		checkViewOperations(cm, operations -> {
+			operations
+				.replaceProvisionalWithComplete(19, 0, 57)
+				.replaceProvisionalWithComplete(19, 1, 58)
+				.replaceProvisionalWithComplete(19, 2, 59)
+
+				;
+		});
+		
 		// ********************************* Scroll upwards onto not rendered at all *********************************
 		cacheItems.clearUpdateRequests();
 
@@ -555,13 +598,14 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
 
 		checkDisplayState(cm.cache, 30, 38, 30, 38, 2500, 3099, 2500, 3249);
-		
+
 		checkViewOperations(cm, operations -> {
 			operations
 				// Placeholder height will be updated to position of first element
 				.setPlaceHolderHeight(2500)
 
 				// remove existing rows
+				.removeRowFromContainer(19)
 				.removeRowFromContainer(20)
 				.removeRowFromContainer(21)
 				.removeRowFromContainer(22)

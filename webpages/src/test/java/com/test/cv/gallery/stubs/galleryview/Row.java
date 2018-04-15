@@ -35,4 +35,9 @@ public class Row extends Div {
 
 		return elements;
 	}
+
+	@Override
+	public String toString() {
+		return "Row [rowNo=" + rowNo + "]";
+	}
 }

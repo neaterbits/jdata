@@ -123,7 +123,7 @@ DisplayState.prototype.addCurYToDisplayState = function(level, curY, visibleHeig
 
 	copy._applyFields(displayStateFields)
 	copy._addCurYToDisplayState(curY, visibleHeight);
-	
+
 	// Must scroll render-state as well according to updated values
 	copy.renderState = this.scrollVirtualArrayView(
 			level + 1,
@@ -181,6 +181,14 @@ DisplayState.prototype._makeCopy = function() {
 		copy.renderState[i] = this.renderState[i];
 	}
 
+	return copy;
+}
+
+DisplayState.prototype.updateFields = function(toApply) {
+	var copy = this._makeCopy();
+	
+	copy._applyFields(toApply);
+	
 	return copy;
 }
 
