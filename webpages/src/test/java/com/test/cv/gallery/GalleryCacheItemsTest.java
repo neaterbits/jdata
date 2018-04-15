@@ -173,7 +173,7 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		assertThat(completedUpdate.data[3]).isEqualTo(dataString(4, 2, 1)); // Start at 4, index 1 out of count 2
 	}
 	
-	public void testScrollPreloadedBelowInitialElement() throws IOException {
+	public void testScrollBelowInitialElement() throws IOException {
 		// Fix issue for when updating visible area so that first row of virtual array
 		// no longer included in cached data
 		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
@@ -229,6 +229,36 @@ public class GalleryCacheItemsTest extends BaseGalleryTest {
 		// Once more to trigger bug since now this.curVisibleIndex is not in sync with size of cached data
 		cacheItems.updateVisibleArea(0, firstVisibleIndex + 4, visibleCount, totalNumberOfItems, updateVisibleAreaCompleteCallback);
 				
+	}
+	
+	public void testPreloadBeforeAndAfter() throws IOException {
+		final List<DownloadInvocation> downloadRequests = new ArrayList<>();
+
+		// Preload 2 items before and after
+		final GalleryCacheItems cacheItems = prepareRuntime(downloadRequests, 2);
+		
+		// List for tracking updated items
+		final List<UpdateCompletion> completedUpdates = new ArrayList<>();
+		final Object updateVisibleAreaCompleteCallback = prepareUpdateVisibleAreaCallback(completedUpdates);
+
+		// No download requests until item downloaded
+		assertThat(downloadRequests.size()).isEqualTo(0);
+
+		cacheItems.updateVisibleArea(0, 4, 20, updateVisibleAreaCompleteCallback);
+		
+		// Should now have one download request
+		assertThat(downloadRequests.size()).isEqualTo(1);
+		
+		final DownloadInvocation downloadRequest = downloadRequests.get(0);
+		
+		downloadRequests.clear();
+		
+		System.out.println("## trigger onDownloaded");
+
+		// Responding to this download request ought to cause one request for two items after this one, which are the preload requests
+		downloadRequest.onDownloaded();
+
+		assertThat(downloadRequests.size()).isEqualTo(1);
 	}
 
 	private static class UpdateCompletion {

@@ -30,6 +30,8 @@ function GalleryCacheItemsFactory() {
 	this.createCacheItems = function(cachedBeforeAndAfter, onDownloaded) {
 		return new GalleryCacheItems(cachedBeforeAndAfter, onDownloaded);
 	}
+	
+	this.DO_PRELOAD = false;
 };
 
 /**
@@ -506,11 +508,13 @@ GalleryCacheItems.prototype._downloadItems = function(level, sequenceNo, cacheIn
 		// Preloading, just add to download queue
 		
 		fetchChunkFunction = function(downloadRequest) {
-			t.downloadQueue.push(downloadRequest);
-
-			// Schedule anything from download queue if necessary
-			// and no ongoing downloads
-			t._scheduleFromDownloadQueue(level + 1);
+			if (this.DO_PRELOAD) {
+				t.downloadQueue.push(downloadRequest);
+	
+				// Schedule anything from download queue if necessary
+				// and no ongoing downloads
+				t._scheduleFromDownloadQueue(level + 1);
+			}
 		};
 	}
 	
