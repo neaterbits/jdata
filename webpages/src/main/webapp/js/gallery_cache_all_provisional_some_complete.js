@@ -86,8 +86,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level) {
 	// Set height of complete scrollable area, this might have to be adjusted as we scroll
 	// but must be set in order to have scrollbars appear correctly relative to number of elements in virtual array
 	this._setScrollableHeight(height);
-	
-	this.log(level, 'Height: ' + height);
+
+	this.log(level, 'Set scrollable height: ' + height);
 
 	// We can now render within the visible area by adding divs and displaying them as we scroll
 	// at a relative position to the display area
@@ -145,13 +145,13 @@ GalleryCacheAllProvisionalSomeComplete.prototype._updateHeightIfApproximation = 
 
 	if (this.gallerySizes.getSpecificHeightOrNull() == null) {
 		
-		// Only height hint, must update remaning height as has not been set accurately
+		// Only height hint, must update remaining height as has not been set accurately
 		
 		var currentHeight = this._getScrollableHeight();
 		var lastRenderedY = displayState.lastRenderedY;
 		
 		if (currentHeight < lastRenderedY) {
-			throw "currentHeight < lastRenderedY";
+			throw "currentHeight < lastRenderedY: " + currentHeight + "/" + lastRenderedY;
 		}
 		
 		// Computes height after last-rendered element
