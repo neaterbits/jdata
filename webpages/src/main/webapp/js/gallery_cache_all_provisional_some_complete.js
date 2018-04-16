@@ -16,6 +16,13 @@ function GalleryCacheAllProvisionalSomeComplete(gallerySizes, galleryModel, gall
 	this.displayState = null;
 	
 	this.galleryCacheItemsFactory = galleryCacheItemsFactory;
+
+	var t = this;
+
+	// Mechanism for downloading complete-data on the fly as user scrolls
+	this.cacheItems = this.galleryCacheItemsFactory.createCacheItems(20, function(index, count, onDownloaded) {
+		t.galleryModel.getCompleteData(index, count, onDownloaded);
+	});
 }
 
 GalleryCacheAllProvisionalSomeComplete.prototype = Object.create(GalleryCacheBase.prototype);
@@ -29,13 +36,6 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 	this._clear(level + 1);
 
 	var t = this;
-	
-	// Mechanism for downloading complete-data on the fly as user scrolls
-	this.cacheItems = this.galleryCacheItemsFactory.createCacheItems(20, function(index, count, onDownloaded) {
-		t.galleryModel.getCompleteData(index, count, onDownloaded);
-	});
-	
-	var t = this;
 
 	// Placeholder div at the beginning which we can use set the start
 	// of rendered divs without adding all divs from the beginning and down
@@ -45,8 +45,9 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 	
 	if (typeof this.upperPlaceHolder === 'undefined') {
 		this.upperPlaceHolder = t.galleryView.createUpperPlaceHolder();
-		this.galleryView.appendPlaceholderToRenderContainer(this._getRenderDiv(), this.upperPlaceHolder);
 	}
+
+	this.galleryView.appendPlaceholderToRenderContainer(this._getRenderDiv(), this.upperPlaceHolder);
 
 	this.totalNumberOfItems = totalNumberOfItems;
 

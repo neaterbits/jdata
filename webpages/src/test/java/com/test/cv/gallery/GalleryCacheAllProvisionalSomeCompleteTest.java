@@ -247,6 +247,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		// Check what operations have been performed
 		checkViewOperations(cm, operations -> {
 			operations
+				.clearRenderContainer()
 				.createUpperPlaceHolder()
 				.appendPlaceholderToRenderContainer();
 		});
@@ -702,7 +703,7 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		checkDisplayStateIsComplete(cm.cache, 0, 8); // 0-8 is complete, ie. all rendered 
 	}
 
-	public void testReproduceIssueWithScrollCompletePageRendersOnlyToStartOfRowPlusVisibleHight() throws IOException {
+	public void testReproduceIssueWithScrollCompletePageRendersOnlyToStartOfRowPlusVisibleHeight() throws IOException {
 
 		// Was a bug when redrawing complete where computing height to add from curY, then adding
 		// elements only from start of first visible row to visibleHeight. So if only half of first visible row is visible,
@@ -767,4 +768,83 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		cm.cache.updateOnScroll(990);
 	}
 
+	// Similar to refreshing based on deselecting a facet
+	public void testRefreshWithFewerItems() throws IOException {
+
+		final GalleryConfig config = new HintGalleryConfig(10, 10, 240, 240);
+		final GalleryItemData [] items = createGalleryItemData(100, 240, 240);
+
+		final GalleryCacheItemsStub cacheItems = new GalleryCacheItemsStub(this::getJSFunction, (firstIndex, count, i) -> items[firstIndex + i].getCompleteData());
+
+		final CacheAndModel cm = createCache(config, new GalleryCacheItemsFactoryStub(cacheItems), items, 800, 300);
+
+		cm.cache.refresh(items.length);
+		checkViewOperations(cm, operations -> {
+			operations
+				.clearRenderContainer()
+				.createUpperPlaceHolder()
+				.appendPlaceholderToRenderContainer();
+		});
+		
+
+		final DownloadInvocation provisionalRequest = cm.galleryModel.getProvisionalRequestAt(0);
+		
+		cm.galleryModel.clearProvisionalRequests();
+
+		provisionalRequest.onDownloaded();
+
+		checkViewOperations(cm, operations -> {
+			operations
+				.createRowContainer(0)
+				.appendRowToRenderContainer(0)
+				.appendItemToRowContainer(0, 0, 0)
+				.appendItemToRowContainer(0, 1, 1)
+				.appendItemToRowContainer(0, 2, 2)
+				
+				.createRowContainer(1)
+				.appendRowToRenderContainer(1)
+				.appendItemToRowContainer(1, 0, 3)
+				.appendItemToRowContainer(1, 1, 4)
+				.appendItemToRowContainer(1, 2, 5);
+		});
+		
+		cacheItems.getRequestAt(0).onComplete();
+
+		checkViewOperations(cm, operations -> {
+			operations
+				.replaceProvisionalWithComplete(0, 0, 0)
+				.replaceProvisionalWithComplete(0, 1, 1)
+				.replaceProvisionalWithComplete(0, 2, 2)
+				
+				.replaceProvisionalWithComplete(1, 0, 3)
+				.replaceProvisionalWithComplete(1, 1, 4)
+				.replaceProvisionalWithComplete(1, 2, 5);
+		});
+
+
+		final GalleryItemData [] items2 = createGalleryItemData(50, 240, 240);
+
+		cm.cache.refresh(items2.length);
+		cm.galleryModel.getProvisionalRequestAt(0).onDownloaded();
+		cm.galleryModel.clearProvisionalRequests();
+
+		checkViewOperations(cm, operations -> {
+			operations
+				.clearRenderContainer()
+				 // .createUpperPlaceHolder()
+				.appendPlaceholderToRenderContainer()
+
+				.createRowContainer(0)
+				.appendRowToRenderContainer(0)
+				.appendItemToRowContainer(0, 0, 0)
+				.appendItemToRowContainer(0, 1, 1)
+				.appendItemToRowContainer(0, 2, 2)
+				
+				.createRowContainer(1)
+				.appendRowToRenderContainer(1)
+				.appendItemToRowContainer(1, 0, 3)
+				.appendItemToRowContainer(1, 1, 4)
+				.appendItemToRowContainer(1, 2, 5);
+		});
+	}	
 }

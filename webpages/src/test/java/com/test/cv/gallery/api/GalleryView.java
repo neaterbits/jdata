@@ -12,6 +12,8 @@ public interface GalleryView<CONTAINER, ELEMENT,
 	COMPLETE extends ITEM
 	> {
 	
+	void clearRenderContainer(RENDER_CONTAINER container);
+
 	/**
 	 * Create view element (a <div> typically)
 	 * that will take up space at start of view so that
@@ -22,7 +24,6 @@ public interface GalleryView<CONTAINER, ELEMENT,
 	 * @return element to take up space, a <div> element if this is web
 	 */
 	PLACEHOLDER createUpperPlaceHolder();
-
 
 	/**
 	 * Create eg. div element for keeping all elements in a row

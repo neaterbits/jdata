@@ -14,13 +14,19 @@ public final class GalleryViewOperations {
 	public void clear() {
 		this.operations.clear();
 	}
-	
+
 	public GalleryViewOperations createUpperPlaceHolder() {
 		add(new CreateUpperPlaceHolderOperation());
 
 		return this;
 	}
-	
+
+	public GalleryViewOperations clearRenderContainer() {
+		add(new ClearRenderContainerOperation());
+
+		return this;
+	}
+
 	public GalleryViewOperations appendPlaceholderToRenderContainer() {
 		add(new AppendPlaceHolderToRenderContainer());
 
@@ -133,6 +139,14 @@ public final class GalleryViewOperations {
 		}
 	}
 	
+	private static class ClearRenderContainerOperation extends GalleryViewOperation {
+		
+		@Override
+		public String toString() {
+			return "ClearRenderContainer";
+		}
+	}
+
 	private static class AppendRowToRenderContainer extends GalleryViewOperation {
 		private final int rowNo;
 

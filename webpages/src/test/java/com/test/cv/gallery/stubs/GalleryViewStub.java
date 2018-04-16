@@ -35,6 +35,14 @@ public final class GalleryViewStub extends GalleryViewElementsStub implements Ga
 	}
 	
 	@Override
+	public void clearRenderContainer(RenderDiv container) {
+		
+		operations.clearRenderContainer();
+
+		rows.clear();
+	}
+
+	@Override
 	public Placeholder createUpperPlaceHolder() {
 		
 		operations.createUpperPlaceHolder();

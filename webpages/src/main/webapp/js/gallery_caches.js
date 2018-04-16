@@ -149,9 +149,9 @@ GalleryCacheBase.prototype._makeProvisionalElement = function (index, itemWidth,
  * Clear all contents by removing all divs
  */
 GalleryCacheBase.prototype._clear = function(level) {
-	while (this.renderDiv.firstChild) {
-		this.renderDiv.removeChild(this.renderDiv.firstChild);
-	}
+	this.galleryView.clearRenderContainer(this.renderDiv);
+	
+	this.cachedRowDivs = [];
 }
 
 /**

@@ -264,6 +264,11 @@ function SearchView(
 					createUpperPlaceHolder : function () { return document.createElement('div'); },
 					createRowContainer : function (rowNo) { return document.createElement('div'); },
 					
+					clearRenderContainer : function (container) {
+						while (container.firstChild) {
+							container.removeChild(container.firstChild);
+						}
+					},
 					appendPlaceholderToRenderContainer	: appendToContainer,
 					appendRowToRenderContainer 			: appendToContainer,
 					appendItemToRowContainer 			: appendToContainer,
