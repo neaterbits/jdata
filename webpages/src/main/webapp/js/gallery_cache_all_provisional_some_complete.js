@@ -34,6 +34,9 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 	
 	// Remove any added divs
 	this._clear(level + 1);
+	
+	// Clear update cache
+	this.cacheItems.clear(level + 1);
 
 	var t = this;
 
@@ -53,10 +56,14 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 
 	// Get all provisional data, complete-data is gathered dynamically
 	this.galleryModel.getProvisionalData(0, totalNumberOfItems, function(provisionalDataArray) {
+		t.enter(level, 'getProvisionalData callback');
+
 		t.provisionalDataArray = provisionalDataArray;
 
 		// completed metadata build, now compute and re-render with provisional data
 		t._render(level + 1);
+
+		t.exit(level, 'getProvisionalData callback');
 	});
 	
 	this.exit(level, 'refresh');
@@ -64,6 +71,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype.refresh = function(level, total
 
 GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level) {
 
+	this.enter(level, '_render');
+	
 	// Get the width of element to compute how many elements there are room for
 	var numColumns = this._computeNumColumns();
 	
@@ -115,6 +124,8 @@ GalleryCacheAllProvisionalSomeComplete.prototype._render = function(level) {
 	}
 
 	this._updateHeightIfApproximation(level + 1, this.displayState);
+	
+	this.exit(level, '_render');
 }
 
 // For unit test checkes

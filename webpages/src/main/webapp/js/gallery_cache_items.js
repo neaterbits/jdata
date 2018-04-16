@@ -53,6 +53,8 @@ function GalleryCacheItems(cachedBeforeAndAfter, modelDownloadItems) {
 	this.curVisibleCount = 0;
 
 	this.updateSequenceNo = 0;
+	this.initialSequenceNoAfterClear = this.updateSequenceNo;
+
 	this.updateRequests = []; // Incoming in-progress update requests
 
 	// Queue of downloads to be scheduled
@@ -68,6 +70,48 @@ function GalleryCacheItems(cachedBeforeAndAfter, modelDownloadItems) {
 
 
 GalleryCacheItems.prototype = Object.create(GalleryBase.prototype);
+
+/**
+ * Clear all ongoing activity and continue later
+ * Eg. when changing some search criteria so must redraw gallery.
+ * 
+ * We do not clear ongoing requests as those must just be completed asynchronously.
+ * However we ought not store results of these since they are responses for requests
+ * from other search criteria (ie. item 0 in the old listing might be something completely different from item 0 in the new one).
+ * 
+ * So:
+ *  - all current updateRequests are cleared
+ *  - cache array is cleared
+ *  - downloadQueue is cleared as no reason to preload anything
+ *  - ongoingDownloads is kept since still ought to match previos requests, but we will compare this.initialSequenceNoAfterClear to the one in request
+ *    and just ignore the response if not matches current (after removing request from this.ongoingDownloads).
+ * 
+ */
+
+GalleryCacheItems.prototype.clear = function(level) {
+	
+	this.enter(level, 'clear');
+	
+	this.curVisibleIndex = 0;
+	this.totalNumberOfItems = 0;
+	
+	// Update this so can check against and ignore responses to pre-clear requests.
+	this.initialSequenceNoAfterClear = this.updateSequenceNo;
+	
+	// Not responding to updateVisibleArea() call made before this .clear() call
+	this.udateRequests = [];
+	
+	// No point in scheduling any preload
+	this.downloadQueue = [];
+	
+	// Clear all cached data since order probably does not match what is in seach reaspons
+	// and we have no way to move data over as we have no real item IDs to work with, only indices into virtual array
+	// (and that will change completely eg upon user selecting sort order)
+	this.cachedData = null;
+	
+	this.exit(level, 'clear');
+}
+
 
 GalleryCacheItems.prototype._clear = function(array, arrayIndex, count) {
 	for (var i = 0; i < count; ++ i) {
@@ -178,9 +222,9 @@ GalleryCacheItems.prototype.updateVisibleArea = function(level, firstVisibleInde
 	
 	if (this.cachedData == null) {
 		if (this.totalNumberOfItems !== 0) {
-			throw "Expected 0 nuber of items for initial invocation";
+			throw "Expected 0 number of items for initial invocation";
 		}
-		
+
 		if (totalNumberOfItems === 0) {
 			throw "TODO: handle total number";
 		}
@@ -591,7 +635,7 @@ GalleryCacheItems.prototype._scheduleDownloadInMultipleChunksIfNecessary = funct
 				var subIndex = itemIndex + firstNotDownloaded;
 				var subCount = i - firstNotDownloaded;
 				
-				var downloadRequest = new GalleryCacheDownloadRequest(sequenceNo, itemIndex, itemCount, subIndex, subCount);
+				var downloadRequest = new GalleryCacheDownloadRequest(sequenceNo, this.initialSequenceNoAfterClear, itemIndex, itemCount, subIndex, subCount);
 				
 				fetchChunkFunction(downloadRequest);
 			}
@@ -611,7 +655,7 @@ GalleryCacheItems.prototype._scheduleDownloadInMultipleChunksIfNecessary = funct
 
 //		console.log('### download rest (' + subCount +') from ' + firstNotDownloaded + '/' + itemIndex);
 
-		var downloadRequest = new GalleryCacheDownloadRequest(sequenceNo, itemIndex, itemCount, subIndex, subCount);
+		var downloadRequest = new GalleryCacheDownloadRequest(sequenceNo, this.initialSequenceNoAfterClear, itemIndex, itemCount, subIndex, subCount);
 
 		fetchChunkFunction(downloadRequest);
 	}
@@ -656,40 +700,60 @@ GalleryCacheItems.prototype._startModelDownloadAndRemoveFromDownloadQueueWhenDon
 	
 	var t = this;
 	
+	var initialSequenceNoAfterClear = downloadRequest.initialSequenceNoAfterClear;
+	
 	// Call user-supplied model download function
 	this.modelDownloadItems(downloadRequest.subIndex, downloadRequest.subCount, function(data) {
 
 		var level = 0;
 		
 		t.enter(level, 'onModelItemsDownloaded',
-			[ 'downloadRequest', 		JSON.stringify(downloadRequest) ],
-			[
-				'this.ongoingDownloads', 	JSON.stringify(t.ongoingDownloads),
-				'this.updateRequests', 		JSON.stringify(t.updateRequests.length)
-			]
-		);
-		
-		// Make sure to remove from ongoing requests since we now have a response
-		var index = t.ongoingDownloads.indexOf(downloadRequest);
-		if (index < 0) {
-			throw "Downloadrequest not among ongoing downloads";
-		}
-		
-		var removed = t.ongoingDownloads.splice(index, 1);
-		
-		if (removed.length !== 1 || removed[0] !== downloadRequest) {
-			throw "Item not removed: " + printArray(removed)  + '/' + downloadRequest;
-		}
+				[ 'downloadRequest', 		JSON.stringify(downloadRequest) ],
+				[
+					'this.ongoingDownloads', 	JSON.stringify(t.ongoingDownloads),
+					'this.updateRequests', 		JSON.stringify(t.updateRequests.length)
+				]
+			);
 
-		t._storeDownloadReponseInCache(level + 1, downloadRequest, data);
-		
-		// Call the supplied callback so can do more other book-keeping tasks and schedule any preloading
-		onDownloaded(downloadRequest);
+		// Make sure to remove from ongoing requests since we now have a response
+		t._removeFromOngoingDownloads(level + 1, downloadRequest);
+
+		if (initialSequenceNoAfterClear != t.initialSequenceNoAfterClear) {
+			// Probably a response for a request from before clear, ignore
+			t.log(level, 'Ignoring response to pre-clear request with sequence no ' + downloadRequest.sequenceNo);
+		}
+		else {
+			t._storeDownloadReponseInCache(level + 1, downloadRequest, data);
+
+			// Call the supplied callback so can do more other book-keeping tasks and schedule any preloading
+			onDownloaded(downloadRequest);
+		}
 
 		t.exit(level, 'onModelItemsDownloaded');
 	});
 
 	this.exit(level, '_startModelDownloadAndRemoveFromDownloadQueueWhenDone');
+}
+
+GalleryCacheItems.prototype._removeFromOngoingDownloads = function(level, downloadRequest) {
+
+	this.enter(level, '_removeFromOngoingDownloads', [
+		'downloadRequest', JSON.stringify(downloadRequest)
+	]);
+	
+	var index = this.ongoingDownloads.indexOf(downloadRequest);
+
+	if (index < 0) {
+		throw "Downloadrequest not among ongoing downloads";
+	}
+
+	var removed = this.ongoingDownloads.splice(index, 1);
+
+	if (removed.length !== 1 || removed[0] !== downloadRequest) {
+		throw "Item not removed: " + printArray(removed)  + '/' + downloadRequest;
+	}
+
+	this.exit(level, '_removeFromOngoingDownloads')
 }
 
 GalleryCacheItems.prototype._storeDownloadReponseInCache = function(level, downloadRequest, data) {
@@ -824,6 +888,9 @@ GalleryCacheItems.prototype._scheduleFromDownloadQueue = function(level) {
  * and to cancel downloads that are no longer needed because user scrolled out of area to be downladed.
  * 
  * Constructor
+ *  - sequenceNo - sequence number of updateVisibleArea() call that caused this
+ *  - initialSequenceNoAfterClear - sequence no of first updateVisibleArea() after creation or after last .clear(). Helps
+ *    identify responses for download request called right before clear() and ignoring these.
  *  - totalIndex - when we are downloading a larger chunk but only sub parts are missing, this is index into the total chunk
  *                 eg. start of visible area.
  *  - totalCount - count for the case above, eg number of visible elements
@@ -831,8 +898,9 @@ GalleryCacheItems.prototype._scheduleFromDownloadQueue = function(level) {
  *  - subCount - number of items to request
  */
 
-function GalleryCacheDownloadRequest(sequenceNo, totalIndex, totalCount, subIndex, subCount) {
+function GalleryCacheDownloadRequest(sequenceNo, initialSequenceNoAfterClear, totalIndex, totalCount, subIndex, subCount) {
 	this.sequenceNo = sequenceNo;
+	this.initialSequenceNoAfterClear = initialSequenceNoAfterClear;
 	this.totalIndex = totalIndex;
 	this.totalCount = totalCount;
 	this.subIndex = subIndex; 
