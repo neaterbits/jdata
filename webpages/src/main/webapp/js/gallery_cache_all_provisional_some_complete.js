@@ -659,12 +659,12 @@ GalleryCacheAllProvisionalSomeComplete.prototype._showCompleteForRows = function
 	var numColumns = this._computeNumColumns();
 
 	var numRenderedItems = prevDisplayed.lastRenderedIndex - prevDisplayed.firstRenderedIndex + 1;
-	var numRenderedRows = numRenderedItems / numColumns;
+	var numRenderedRows = this._computeNumRowsFromNumItemsAndColumns(numRenderedItems, numColumns);
 
 	if (numRowsInCache !== numRenderedRows) {
-		throw "Cached rows mismatch";
+		throw "Cached rows mismatch: numRowsInCache=" + numRowsInCache + ", numRenderedRows=" + numRenderedRows + ", numRenderedItems=" + numRenderedItems + ", numColumns=" + numColumns;
 	}
-	
+
 	var numRowsTotal = this._computeNumRowsTotal();
 	
 	if (firstModelItemIndex % numColumns !== 0) {

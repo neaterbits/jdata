@@ -855,4 +855,37 @@ public class GalleryCacheAllProvisionalSomeCompleteTest_StubbedCache extends Bas
 				.appendItemToRowContainer(1, 2, 5);
 		});
 	}	
+
+	public void testReproduceIssueWithOddNumberOfItems() throws IOException {
+
+		// Was a bug when redrawing complete where computing height to add from curY, then adding
+		// elements only from start of first visible row to visibleHeight. So if only half of first visible row is visible,
+		// then half of a rowheight would not be added to display
+		// To trigger exception, must scroll a bit more after complete redraw in order to trigger assertion
+		// on lasteRendereY < lastVisibleY
+		
+		final GalleryConfig config = new HintGalleryConfig(10, 10, 240, 240);
+		final GalleryItemData [] items = createGalleryItemData(5, 240, 240);
+
+		final GalleryCacheItemsStub cacheItems = new GalleryCacheItemsStub(this::getJSFunction, (firstIndex, count, i) -> items[firstIndex + i].getCompleteData());
+
+		final CacheAndModel cm = createCache(config, new GalleryCacheItemsFactoryStub(cacheItems), items, 700, 450);
+
+		cm.cache.refresh(items.length);
+		
+
+		// Trigger download completion of all provisional data
+		cm.galleryModel.getProvisionalRequestAt(0).onDownloaded();
+		cm.galleryModel.clearProvisionalRequests();
+
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
+		cacheItems.getRequestAt(0).onComplete();
+		cacheItems.clearUpdateRequests();
+
+		// This ought to cause exception
+		cm.cache.updateOnScroll(160);
+
+		assertThat(cacheItems.getUpdateRequestCount()).isEqualTo(1);
+		cacheItems.getRequestAt(0).onComplete();
+	}
 }

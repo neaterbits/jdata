@@ -571,13 +571,26 @@ GalleryCacheBase.prototype._computeNumRowsTotalFromNumColumns = function(numColu
 	}
 	
 	var totalNumberOfItems = this._getTotalNumberOfItems();
+
+	var numRows = this._computeNumRowsFromNumItemsAndColumns(totalNumberOfItems, numColumns);
+
+	return numRows;
+}
+
+GalleryCacheBase.prototype._computeNumRowsFromNumItemsAndColumns = function(numItems, numColumns) {
 	var numRows;
 
-	if (totalNumberOfItems === 0) {
+	if (numItems < 0) {
+		throw "numItems < 0";
+	}
+	else if (numColumns <= 0) {
+		throw "numColumns <= 0";
+	}
+	else if (numItems === 0) {
 		numRows = 0;
 	}
 	else {
-		numRows = Math.floor((totalNumberOfItems - 1) / numColumns) + 1;
+		numRows = Math.floor((numItems - 1) / numColumns) + 1;
 	}
 
 	return numRows;
