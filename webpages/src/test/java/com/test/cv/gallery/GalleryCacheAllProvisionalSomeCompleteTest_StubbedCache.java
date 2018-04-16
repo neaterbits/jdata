@@ -32,7 +32,7 @@ import com.test.cv.gallery.wrappers.GalleryCacheAllProvisionalSomeComplete;
 import com.test.cv.jsutils.ConstructRequest;
 import com.test.cv.jsutils.JSInvocable;
 
-public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest {
+public class GalleryCacheAllProvisionalSomeCompleteTest_StubbedCache extends BaseGalleryTest {
 
 	private GalleryCacheAllProvisionalSomeComplete prepareRuntime(
 			GalleryConfig config,
@@ -778,7 +778,11 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 
 		final CacheAndModel cm = createCache(config, new GalleryCacheItemsFactoryStub(cacheItems), items, 800, 300);
 
+		assertThat(cacheItems.getNumClearCalls()).isEqualTo(0);
 		cm.cache.refresh(items.length);
+		assertThat(cacheItems.getNumClearCalls()).isEqualTo(1);
+		cacheItems.resetNumClearCalls();
+		
 		checkViewOperations(cm, operations -> {
 			operations
 				.clearRenderContainer()
@@ -825,6 +829,10 @@ public class GalleryCacheAllProvisionalSomeCompleteTest extends BaseGalleryTest 
 		final GalleryItemData [] items2 = createGalleryItemData(50, 240, 240);
 
 		cm.cache.refresh(items2.length);
+		
+		assertThat(cacheItems.getNumClearCalls()).isEqualTo(1);
+		cacheItems.resetNumClearCalls();
+
 		cm.galleryModel.getProvisionalRequestAt(0).onDownloaded();
 		cm.galleryModel.clearProvisionalRequests();
 

@@ -39,4 +39,9 @@ public final class GalleryCacheItems extends JavaWrapper implements CacheItems {
 				updateVisibleAreaCompleteCallback);
 	}
 
+	@Override
+	public void clear(int level) {
+		
+		invokeMethod("clear", level);
+	}
 }

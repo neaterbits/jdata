@@ -13,6 +13,8 @@ public class GalleryCacheItemsStub implements CacheItems {
 	private final List<UpdateVisibleAreaRequest> updateRequests;
 	private final MakeDownloadData makeDownloadData;
 	
+	private int numClearCalls;
+	
 	public GalleryCacheItemsStub(Function<Object, JSFunction> getJSFunction, MakeDownloadData makeDownloadData) {
 		if (getJSFunction == null) {
 			throw new IllegalArgumentException("getJSFunction == null");
@@ -45,7 +47,7 @@ public class GalleryCacheItemsStub implements CacheItems {
 
 		this.updateRequests.add(request);
 	}
-	
+
 	public int getUpdateRequestCount() {
 		return this.updateRequests.size();
 	}
@@ -56,5 +58,18 @@ public class GalleryCacheItemsStub implements CacheItems {
 
 	public void clearUpdateRequests() {
 		this.updateRequests.clear();
+	}
+
+	@Override
+	public void clear(int level) {
+		++ numClearCalls;
+	}
+
+	public int getNumClearCalls() {
+		return numClearCalls;
+	}
+
+	public void resetNumClearCalls() {
+		this.numClearCalls = 0;
 	}
 }

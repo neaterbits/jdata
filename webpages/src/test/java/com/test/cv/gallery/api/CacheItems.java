@@ -15,4 +15,5 @@ public interface CacheItems {
 			int totalNumberOfItems,
 			Object updateVisibleAreaCompleteCallback);
 
+	void clear(int level);
 }
