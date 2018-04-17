@@ -278,7 +278,8 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				element,
 				attributeElement.listItem,
 				attributeElement.checkboxItem,
-				attributeElement.thisOnlyItem);
+				attributeElement.thisOnlyItem,
+				text);
 
 		this._setAttributeCheckboxListener(viewElementFactory, cur, attributeRange, false);
 
