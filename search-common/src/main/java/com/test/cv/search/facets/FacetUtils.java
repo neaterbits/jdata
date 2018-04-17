@@ -33,6 +33,9 @@ public class FacetUtils {
 		Boolean getBooleanValue(F field);
 		
 		Object getObjectValue(ItemAttribute attribute, F field);
+		
+		// Returns null if the field's value is set to no-value constant, which is the case for Lucene
+		boolean isNoValue(ItemAttribute attribute, F field);
 	}
 
 	public static <I, F> ItemsFacets computeFacets(List<I> documents, Set<ItemAttribute> facetedAttributes, FacetFunctions<I, F> functions) {
@@ -213,38 +216,45 @@ public class FacetUtils {
 	private static <I, F> void processAttribute(I d, FacetFunctions<I, F> functions, ItemAttribute attribute, Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults) {
 		final F field = functions.getField(d, attribute.getName());
 		
-		if (field != null) {
-		
-			// Get the field value from document
-			if (attribute.isFaceted()) {
-				if (attribute.getIntegerRanges() != null) {
-					
-					// Find which range we are in
-					final int value = functions.getIntegerValue(field);
-	
-					computeFacetsForRange(attribute, attribute.getIntegerRanges(), value, attributeResults);
-				}
-				else if (attribute.getDecimalRanges() != null) {
-					
-					// Find which range we are in
-					final BigDecimal value = functions.getDecimalValue(field);
-					
-					computeFacetsForRange(attribute, attribute.getDecimalRanges(), value, attributeResults);
+		// Get the field value from document
+		if (attribute.isFaceted()) {
+			if (field != null) {
+				
+				if (functions.isNoValue(attribute, field)) {
+					// No value so add to no-value count
+					assureResult(attribute, attributeResults).addToNoAttributeValueCount();
 				}
 				else {
-					// Single-value
-					final IndexSingleValueFacetedAttributeResult singleValueResult = assureSingleResult(attribute, attributeResults);
+			
+					if (attribute.getIntegerRanges() != null) {
+						
+						// Find which range we are in
+						final int value = functions.getIntegerValue(field);
+		
+						computeFacetsForRange(attribute, attribute.getIntegerRanges(), value, attributeResults);
+					}
+					else if (attribute.getDecimalRanges() != null) {
+						
+						// Find which range we are in
+						final BigDecimal value = functions.getDecimalValue(field);
+						
+						computeFacetsForRange(attribute, attribute.getDecimalRanges(), value, attributeResults);
+					}
+					else {
+						// Single-value
+						final IndexSingleValueFacetedAttributeResult singleValueResult = assureSingleResult(attribute, attributeResults);
+						
+						final Object value = functions.getObjectValue(attribute, field);
 					
-					final Object value = functions.getObjectValue(attribute, field);
-				
-					addSingleValueFacet(attribute, singleValueResult, value);
+						addSingleValueFacet(attribute, singleValueResult, value);
+					}
 				}
 			}
-		}
-		else {
+			else {
 
-			// No value so add to no-value count
-			assureResult(attribute, attributeResults).addToNoAttributeValueCount();
+				// No value so add to no-value count
+				assureResult(attribute, attributeResults).addToNoAttributeValueCount();
+			}
 		}
 	}
 	

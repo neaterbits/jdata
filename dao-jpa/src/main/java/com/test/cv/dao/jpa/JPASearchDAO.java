@@ -220,6 +220,11 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			public Object getObjectValue(ItemAttribute attribute, Object field) {
 				return field;
 			}
+
+			@Override
+			public boolean isNoValue(ItemAttribute attribute, Object field) {
+				return false;
+			}
 		});
 
 		return new JPASearchCursorWithFacets(items, facets);

@@ -1340,9 +1340,9 @@ public class LuceneItemIndex implements ItemIndex {
 
 	private static <T extends Enum<T>> T getEnumValueFromField(Class<T> enumClass, IndexableField field) {
 		final T [] enums = enumClass.getEnumConstants();
-		
+
 		T found = null;
-		
+
 		for (T e : enums) {
 			if (e.name().equals(field.stringValue())) {
 				found = e;
@@ -1405,6 +1405,40 @@ public class LuceneItemIndex implements ItemIndex {
 		return result;
 	}
 	
+	private static boolean isNoValueField(ItemAttribute attribute, IndexableField field) {
+		final AttributeType attributeType = attribute.getAttributeType();
+		
+		final boolean result;
+		
+		switch (attributeType) {
+		case STRING:
+			result = STRING_NONE.equals(field.stringValue());
+			break;
+			
+		case INTEGER:
+			result = INTEGER_NONE == getIntegerValueFromField(field);
+			break;
+			
+		case DECIMAL:
+			result = DOUBLE_NONE == field.numericValue().doubleValue();
+			break;
+			
+		case ENUM:
+			result = ENUM_NONE.equals(field.stringValue());
+			break;
+			
+		case BOOLEAN:
+			result = BOOLEAN_NONE == field.numericValue().intValue();
+			break;
+			
+		default:
+			throw new UnsupportedOperationException("Unknown attribute type " + attributeType);
+		}
+		
+		return result;
+	}
+
+	
 	private static ItemsFacets computeFacets(List<Document> documents, Set<ItemAttribute> facetedAttributes) {
 		return FacetUtils.computeFacets(documents, facetedAttributes, new FacetUtils.FacetFunctions<Document, IndexableField>() {
 			@Override
@@ -1440,6 +1474,11 @@ public class LuceneItemIndex implements ItemIndex {
 			@Override
 			public Object getObjectValue(ItemAttribute attribute, IndexableField field) {
 				return getObjectValueFromField(attribute, field);
+			}
+
+			@Override
+			public boolean isNoValue(ItemAttribute attribute, IndexableField field) {
+				return isNoValueField(attribute, field);
 			}
 		});
 	}
