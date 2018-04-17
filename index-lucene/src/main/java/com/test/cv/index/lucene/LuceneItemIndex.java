@@ -67,7 +67,6 @@ import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.ItemAttributeValue;
 import com.test.cv.model.LongAttributeValue;
 import com.test.cv.model.PropertyAttribute;
-import com.test.cv.model.SortAttribute;
 import com.test.cv.model.SortAttributeAndOrder;
 import com.test.cv.model.StringAttributeValue;
 import com.test.cv.model.attributes.AttributeType;
@@ -151,6 +150,10 @@ public class LuceneItemIndex implements ItemIndex {
 		}
 	}
 	
+	private static boolean storeValue(ItemAttribute attribute) {
+		return attribute.shouldStoreValueInSearchIndex() || attribute.isFaceted();
+	}
+	
 	private boolean addToDocument(Document document, TypeInfo typeInfo, String userId, List<ItemAttributeValue<?>> attributeValues) {
 		
 		// Must have ID
@@ -170,8 +173,8 @@ public class LuceneItemIndex implements ItemIndex {
 			final Field field;
 			
 			final String fieldName = attributeValue.getAttribute().getName();
-			final boolean storeValue = attribute.shouldStoreValueInSearchIndex() || attribute.isFaceted();
-			
+			final boolean storeValue = storeValue(attribute);
+
 			//System.out.println("Indexing " + fieldName + " of type " + attributeValue.getClass().getSimpleName() + " with store=" + storeValue);
 			StoredField storedField = null;
 			
@@ -281,55 +284,90 @@ public class LuceneItemIndex implements ItemIndex {
 		typeInfo.getAttributes().forEach(attribute -> {
 			if (!attributeValues.stream().anyMatch(value -> value.getAttribute().equals(attribute))) {
 				// Does not exist, add none-value
-				addNoAttributeValueToDocument(document, attribute);
+				final boolean storeValue = storeValue(attribute);
+
+				addNoAttributeValueToDocument(document, attribute, storeValue);
 			}
 		});
 		
 		return idFound;
 	}
 	
-	private void addNoAttributeValueToDocument(Document document, ItemAttribute attribute) {
+	private void addNoAttributeValueToDocument(Document document, ItemAttribute attribute, boolean storeValue) {
 		
 		final String fieldName = ItemIndex.fieldName(attribute);
 		
 		final Field field;
 		
-		final Field.Store stored = Field.Store.NO;
+		final Field.Store stored = storeValue ? Field.Store.YES : Field.Store.NO;
+		StoredField storedField = null;
 
 		switch (attribute.getAttributeType()) {
 		case STRING:
 			field = new StringField(fieldName, STRING_NONE, stored);
+
+			if (storeValue) {
+				storedField = new StoredField(fieldName, STRING_NONE);
+			}
 			break;
 			
 		case INTEGER:
 			field = new IntPoint(fieldName, INTEGER_NONE);
+
+			if (storeValue) {
+				storedField = new StoredField(fieldName, INTEGER_NONE);
+			}
 			break;
 			
 		case LONG:
 			field = new LongPoint(fieldName, LONG_NONE);
+
+			if (storeValue) {
+				storedField = new StoredField(fieldName, LONG_NONE);
+			}
 			break;
 
 		case DECIMAL:
 			field = new DoublePoint(fieldName, DOUBLE_NONE);
+			
+			if (storeValue) {
+				storedField = new StoredField(fieldName, DOUBLE_NONE);
+			}
 			break;
 			
 		case ENUM:
 			field = new StringField(fieldName, ENUM_NONE, stored);
+
+			if (storeValue) {
+				storedField = new StoredField(fieldName, ENUM_NONE);
+			}
 			break;
 			
 		case BOOLEAN:
 			field = new IntPoint(fieldName, BOOLEAN_NONE);
+			
+			if (storeValue) {
+				storedField = new StoredField(fieldName, BOOLEAN_NONE);
+			}
 			break;
 
 		case DATE:
 			field = new LongPoint(fieldName, DATE_NONE);
+
+			if (storeValue) {
+				storedField = new StoredField(fieldName, DATE_NONE);
+			}
 			break;
 			
 		default:
 			throw new UnsupportedOperationException("Unknown attribute type: " + attribute.getAttributeType());
 		}
-		
+
 		document.add(field);
+
+		if (storedField != null) {
+			document.add(storedField);
+		}
 	}
 	
 	final List<ItemAttributeValue<?>> getValuesFromDocument(Document document, Set<ItemAttribute> attributes) {
@@ -664,12 +702,13 @@ public class LuceneItemIndex implements ItemIndex {
 				Stream<Document> s = documents.stream()
 						.skip(initialIdx)
 						.limit(count);
-
+				
 				final Comparator<Document> comparator = SortUtils.makeSortItemsComparator(sortOrder, (doc, attribute) -> getObjectValueFromDocument(doc, attribute));
 
 				if (comparator != null) {
 					s = s.sorted(comparator);
 				}
+				
 
 				return s.map(d -> {
 							
@@ -699,6 +738,7 @@ public class LuceneItemIndex implements ItemIndex {
 							// TODO perhaps parameterize attribute names
 							// since this layer ought to be more generic
 							final IndexableField titleField = d.getField("title");
+
 							return new IndexSearchItem(
 									d.getField("id").stringValue(),
 									titleField != null ? titleField.stringValue() : null,
@@ -1322,7 +1362,13 @@ public class LuceneItemIndex implements ItemIndex {
 	}
 	
 	private static Comparable<?> getObjectValueFromDocument(Document document, PropertyAttribute attribute) {
-		return getObjectValueFromField(attribute, document.getField(ItemIndex.fieldName(attribute)));
+	
+		final String fieldName = ItemIndex.fieldName(attribute);
+		final IndexableField field = document.getField(fieldName);
+
+		final Comparable<?> result = getObjectValueFromField(attribute, field);
+
+		return result;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
