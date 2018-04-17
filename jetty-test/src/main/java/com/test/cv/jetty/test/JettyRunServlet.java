@@ -96,6 +96,8 @@ public class JettyRunServlet {
 			final String itemsPerPageString = req.getParameter("itemsPerPage");
 			final int itemsPerPage = itemsPerPageString == null ? Integer.MAX_VALUE : Integer.parseInt(itemsPerPageString);			
 			System.out.println("Types: " + Arrays.toString(types));
+
+			final String [] sortOrder = req.getParameterValues("sortOrder");
 			
 			final SearchCriterium [] searchCriteria;
 			
@@ -122,7 +124,7 @@ public class JettyRunServlet {
 					types,
 					freeText,
 					searchCriteria,
-					null,
+					sortOrder,
 					pageNo,
 					itemsPerPage,
 					testdata,
