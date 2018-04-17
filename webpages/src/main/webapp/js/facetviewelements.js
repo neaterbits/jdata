@@ -126,6 +126,14 @@ function FacetViewElements() {
 				100);
 			}
 			else {
+				// Any parent accordion must have heigt set to auto, otherwise this nested one will not be expanded
+				// since parent accordion is hardcoded to a particular size
+				for (var parentNode = wrapperDiv.parentNode; parentNode != null; parentNode = parentNode.parentNode) {
+					if (parentNode.className === 'facetsAccordion') {
+						parentNode.style.height = 'auto';
+					}
+				}
+
 				wrapperDiv.style.height = heightToSet + 'px'; 
 				onexpandcollapse(true);
 			}
@@ -296,7 +304,7 @@ function FacetViewElements() {
 			function expandedClass(expanded) {
 				return expanded ? 'attributeValueExpanderExpanded' :'attributeValueExpanderCollapsed';
 			}
-			
+
 			// There are sub attributes so we have to make sure they are expandable
 			var valueNameDiv = document.createElement('div');
 			valueNameDiv.setAttribute('class', 'attributeValueTitleDiv');
