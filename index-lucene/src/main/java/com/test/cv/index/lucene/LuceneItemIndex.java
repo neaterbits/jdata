@@ -379,15 +379,18 @@ public class LuceneItemIndex implements ItemIndex {
 			final IndexableField field = document.getField(fieldName);
 			
 			if (field != null) {
-				final Object obj = getObjectValueFromField(attribute, field);
-				
-				final ItemAttributeValue<?> attributeValue = attribute.getValueFromObject(obj);
-				
-				if (attributeValue == null) {
-					throw new IllegalStateException("attributeValue == null");
+				// Only copy over if is not a no-value field (no-values are added just to be able to search for 'Other'-matches)
+				if (!isNoValueField(attribute, field)) {
+					final Object obj = getObjectValueFromField(attribute, field);
+					
+					final ItemAttributeValue<?> attributeValue = attribute.getValueFromObject(obj);
+					
+					if (attributeValue == null) {
+						throw new IllegalStateException("attributeValue == null");
+					}
+	
+					values.add(attributeValue);
 				}
-
-				values.add(attributeValue);
 			}
 		}
 		
