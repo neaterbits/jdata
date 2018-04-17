@@ -667,7 +667,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				function (kind, element, index, cur) {
 					var sub;
 					var updateMatchCount = false;
-					
+
 					if (kind == 'type') {
 						// cur is FacetTypeList
 						sub = cur.findType(element.type);
@@ -781,7 +781,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				if (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeList') {
 					throw "Classname " + className + " should either be in use or not appear here";
 				}
-
+				
 				var removeFromViewModel = facetUpdate.onNoLongerInDataModel(parent, t.lastDeselectedAttributeValueList, obj);
 
 				if (removeFromViewModel) {
@@ -792,12 +792,12 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 					obj.setVisible(false);
 				}
 
-				if (className == 'FacetTypeContainer') { // TODO should be returned from facetUpdate whether continuing iterating?
+				if (removeFromViewModel) {
 					// we are not hiding type container so just iterating to sub elements and hide those instead
-					iter = ITER_CONTINUE;
+					iter = ITER_SKIP_SUB;
 				}
 				else{
-					iter = ITER_SKIP_SUB;
+					iter = ITER_CONTINUE;
 				}
 			}
 			else {
@@ -1906,6 +1906,17 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 		this.facetUpdateClassName = 'FacetUpdateSearchChanged';
 	}
+	
+	FacetUpdateSearchChanged.prototype.onListStillInDataModelAndVisibleInViewModel = function(list) {
+		// Nothing to do since no match counts to update
+	}
+
+	FacetUpdateSearchChanged.prototype.onListInDataModelButHiddenInViewModel = function(list) {
+		// Facet attribute list or type list, these are completely hidden when
+		// user deactivates eg a type. So show again
+		list.getViewElementFactory().showElement(list.getViewElement());
+	}
+
 
 	FacetUpdateSearchChanged.prototype.onElementStillInDataModelAndVisibleInViewModel = function(value, matchCount) {
 		// Facet still in use and present in DOM, this means we can just update the match count
