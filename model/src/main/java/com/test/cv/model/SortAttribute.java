@@ -99,4 +99,9 @@ public final class SortAttribute extends DistinctAttribute {
 	public SortableType getSortableType() {
 		return sortableType;
 	}
+
+	@Override
+	public String toString() {
+		return sortableTitle;
+	}
 }

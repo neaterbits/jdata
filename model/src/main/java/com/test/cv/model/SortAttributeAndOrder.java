@@ -26,4 +26,9 @@ public class SortAttributeAndOrder {
 	public SortOrder getSortOrder() {
 		return sortOrder;
 	}
+
+	@Override
+	public String toString() {
+		return "SortAttributeAndOrder [attribute=" + attribute + ", sortOrder=" + sortOrder + "]";
+	}
 }
