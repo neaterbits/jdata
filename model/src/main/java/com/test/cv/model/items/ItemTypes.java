@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import com.test.cv.model.DistinctAttribute;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
-import com.test.cv.model.SortAttribute;
 import com.test.cv.model.annotations.FacetEntity;
 import com.test.cv.model.attributes.ClassAttributes;
 import com.test.cv.model.housing.RentalApartment;
@@ -27,7 +26,7 @@ import com.test.cv.model.items.vehicular.Car;
 
 public class ItemTypes {
 	
-	private static final List<Class<? extends Item>> baseTypes = Collections.unmodifiableList(Arrays.asList(Item.class));
+	private static final List<Class<? extends Item>> baseTypes = Collections.unmodifiableList(Arrays.asList(Item.class, BaseItem.class));
 	
 	private static final List<Class<? extends Item>> types = Collections.unmodifiableList(Arrays.asList(
 			Snowboard.class,
@@ -57,7 +56,30 @@ public class ItemTypes {
 	public static Class<? extends Item> [] getJAXBTypeClasses() {
 		return types.toArray(new Class[types.size()]);
 	}
-	
+
+	public static List<Class<? extends Item>> getBaseTypesList() {
+		return baseTypes;
+	}
+
+	public static Set<Class<? extends Item>> getBaseTypes(Collection<Class<? extends Item>> typesList) {
+		
+		final Set<Class<? extends Item>> baseTypes = new HashSet<>(typesList.size());
+		
+		for (Class<? extends Item> cl : typesList) {
+			for (Class<?> superClass = cl.getSuperclass();
+					Item.class.isAssignableFrom(superClass);
+					superClass = superClass.getSuperclass()) {
+				
+				@SuppressWarnings("unchecked")
+				final Class<? extends Item> baseType = (Class<? extends Item>)superClass;
+				
+				baseTypes.add(baseType);
+			}
+		}
+		
+		return baseTypes;
+	}
+
 	public static List<Class<? extends Item>> getAllTypesList() {
 		return types;
 	}

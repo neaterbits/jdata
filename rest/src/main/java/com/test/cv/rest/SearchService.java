@@ -121,7 +121,15 @@ public class SearchService extends BaseService {
 		
 		final List<SortAttributeAndOrder> sortAttributes;
 		if (sortOrder != null) {
-			sortAttributes = decodeSortOrders(typesList, sortOrder);
+
+			final Set<Class<? extends Item>> baseTypes = ItemTypes.getBaseTypes(typesList);
+			final Set<Class<? extends Item>> sortOrderTypes = new HashSet<>(baseTypes.size() + typesList.size());
+
+			// Must add base types to sortorder types since some attributes are only in base types
+			sortOrderTypes.addAll(baseTypes);
+			sortOrderTypes.addAll(typesList);
+			
+			sortAttributes = decodeSortOrders(sortOrderTypes, sortOrder);
 		}
 		else {
 			// Get sort order from common denominator among types
