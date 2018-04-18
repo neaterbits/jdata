@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +55,7 @@ import com.test.cv.index.IndexSearchItem;
 import com.test.cv.index.ItemIndex;
 import com.test.cv.index.ItemIndexException;
 import com.test.cv.index.MatchNoneIndexSearchCursor;
+import com.test.cv.model.DistinctAttribute;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.ItemAttributeValue;
@@ -174,10 +176,18 @@ public class ElasticSearchIndex implements ItemIndex {
 			sb.append(",\n");
 
 			final ItemAttribute attribute = value.getAttribute();
+			final Object v = value.getValue();
+			
+			// Index freetext as extra field
+			if (attribute.isFreetext()) {
+				// Index freetext field as well
+				final String freetextFieldName = ItemIndex.freetextFieldName(attribute);
+
+				sb.append("  ").append('"').append(freetextFieldName).append('"').append(" : ").append('"').append((String)v).append('"').append(",\n");
+			}
 
 			sb.append("  ").append('"').append(ItemIndex.fieldName(attribute)).append('"').append(" : ");
 
-			final Object v = value.getValue();
 			final String s;
 			
 			switch (attribute.getAttributeType()) {
@@ -226,6 +236,41 @@ public class ElasticSearchIndex implements ItemIndex {
 			throw new ItemIndexException("Failed to index", ex);
 		}
 	}
+	
+	private static QueryBuilder createFreetextQuery(Collection<Class<? extends Item>> types, String freeText) {
+		
+		// Get SortAttribute since this has equals() and hashCode() on base class,
+		// this makes us find distinct attributes
+		final Set<DistinctAttribute> distinctAttributes = ItemTypes.getFreetextAttributes(types);
+		
+		final QueryBuilder query;
+		
+		if (distinctAttributes.isEmpty()) {
+			query = null;
+		}
+		else if (distinctAttributes.size() == 1) {
+			final String fieldName = ItemIndex.freetextFieldName(distinctAttributes.iterator().next());
+
+			query = QueryBuilders.termQuery(fieldName, freeText);
+		}
+		else {
+		
+			final BoolQueryBuilder booleanQuery = QueryBuilders.boolQuery();
+		
+			for (DistinctAttribute attribute : distinctAttributes) {
+				final String fieldName = ItemIndex.freetextFieldName(attribute);
+				
+				final QueryBuilder termQuery = QueryBuilders.termQuery(fieldName, freeText);
+				
+				booleanQuery.should(termQuery);
+			}
+			
+			query = booleanQuery;
+		}
+		
+		return query;
+	}
+
 	
 	@Override
 	public void deleteItem(String itemId, Class<? extends Item> type) throws ItemIndexException {
@@ -432,7 +477,9 @@ public class ElasticSearchIndex implements ItemIndex {
 				criteriaBuilder = buildQuery(criteria);
 			}
 			
-			if (TYPE_HANDLING.hasQueryTypeFilter()) {
+			final String trimmedFreetext = ItemIndex.trimAndLowercaseFreetext(freeText);
+			
+			if (TYPE_HANDLING.hasQueryTypeFilter() || trimmedFreetext != null) {
 				// Add to a boolean query also specifying types
 				final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
@@ -448,7 +495,11 @@ public class ElasticSearchIndex implements ItemIndex {
 						typesQuery.should(TYPE_HANDLING.createQueryTypeFilter(type));
 					}
 				}
-				
+
+				if (trimmedFreetext != null) {
+					boolQuery.must(createFreetextQuery(types, trimmedFreetext));
+				}
+
 				queryBuilder = boolQuery;
 			}
 			else {
@@ -1126,6 +1177,13 @@ public class ElasticSearchIndex implements ItemIndex {
 			TYPE_HANDLING.getCreateIndexAttributes(typeName).forEach(attribute -> {
 				final String esFieldType = getESFieldType(attribute.getAttributeType());
 				
+				if (attribute.isFreetext()) {
+					// Index freetext field as well
+					final String freetextFieldName = ItemIndex.freetextFieldName(attribute);
+
+					fieldTypes.put(freetextFieldName, "text");
+				}
+
 				fieldTypes.put(ItemIndex.fieldName(attribute), esFieldType);
 			});
 			

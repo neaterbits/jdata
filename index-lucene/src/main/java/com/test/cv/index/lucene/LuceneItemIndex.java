@@ -581,21 +581,7 @@ public class LuceneItemIndex implements ItemIndex {
 		
 		final Query query;
 		
-		String trimmedFreetext;
-		if (freeText != null) {
-			trimmedFreetext = freeText.trim();
-			
-			if (trimmedFreetext.isEmpty()) {
-				trimmedFreetext = null;
-			}
-			else {
-				// Must convert to lowercase since Lucene does that when indexing
-				trimmedFreetext = trimmedFreetext.toLowerCase();
-			}
-		}
-		else {
-			trimmedFreetext = null;
-		}
+		final String trimmedFreetext = ItemIndex.trimAndLowercaseFreetext(freeText);
 
 		if (types == null) {
 			throw new IllegalArgumentException("types == null");
