@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -84,12 +85,24 @@ public class ESTypeHandlingOneTypePerIndexCustomTypeField extends ESTypeHandling
 	}
 
 	@Override
-	boolean hasTypeFilter() {
+	boolean hasQueryTypeFilter() {
 		return true;
 	}
 
 	@Override
-	AggregationBuilder createTypeFilter(Class<? extends Item> type) {
+	QueryBuilder createQueryTypeFilter(Class<? extends Item> type) {
+		final String typeName = ItemTypes.getTypeName(type);
+
+		return QueryBuilders.termQuery(TYPE_FIELD, typeName);
+	}
+
+	@Override
+	boolean hasAggregationTypeFilter() {
+		return true;
+	}
+
+	@Override
+	AggregationBuilder createAggregationTypeFilter(Class<? extends Item> type) {
 		
 		final String typeName = ItemTypes.getTypeName(type);
 		

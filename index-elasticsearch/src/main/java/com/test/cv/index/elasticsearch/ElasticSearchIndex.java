@@ -53,10 +53,10 @@ import com.test.cv.index.IndexSearchCursor;
 import com.test.cv.index.IndexSearchItem;
 import com.test.cv.index.ItemIndex;
 import com.test.cv.index.ItemIndexException;
+import com.test.cv.index.MatchNoneIndexSearchCursor;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemAttribute;
 import com.test.cv.model.ItemAttributeValue;
-import com.test.cv.model.SortAttribute;
 import com.test.cv.model.SortAttributeAndOrder;
 import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.attributes.facets.FacetedAttributeDecimalRange;
@@ -412,115 +412,163 @@ public class ElasticSearchIndex implements ItemIndex {
 			Set<ItemAttribute> facetAttributes)
 			throws ItemIndexException {
 
-		// Must add both query and also aggregations if necessary
-		final SearchRequest request = new SearchRequest(INDEX_NAME);
+		final IndexSearchCursor cursor;
 
-		final SearchSourceBuilder sourceBuilder = request.source();
-		
-		final QueryBuilder queryBuilder;
-		
-		if (criteria == null) {
-			queryBuilder = QueryBuilders.matchAllQuery();
+		if (types.isEmpty()) {
+			cursor = new MatchNoneIndexSearchCursor();
 		}
 		else {
-			queryBuilder = buildQuery(criteria);
-		}
+			// Must add both query and also aggregations if necessary
+			final SearchRequest request = new SearchRequest(INDEX_NAME);
 
-		sourceBuilder.query(queryBuilder);
+			final SearchSourceBuilder sourceBuilder = request.source();
+			final QueryBuilder queryBuilder;
+			final QueryBuilder criteriaBuilder;
+
+			if (criteria == null) {
+				criteriaBuilder = QueryBuilders.matchAllQuery();
+			}
+			else {
+				criteriaBuilder = buildQuery(criteria);
+			}
+			
+			if (TYPE_HANDLING.hasQueryTypeFilter()) {
+				// Add to a boolean query also specifying types
+				final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
+				boolQuery.must(criteriaBuilder);
+
+				if (types.size() == 1) {
+					boolQuery.must(TYPE_HANDLING.createQueryTypeFilter(types.get(0)));
+				}
+				else {
+					final BoolQueryBuilder typesQuery = QueryBuilders.boolQuery();
 		
-		if (facetAttributes != null && !facetAttributes.isEmpty()) {
-			addAggregations(sourceBuilder, facetAttributes);
-		}
-
-		if (false) {
+					for (Class<? extends Item> type : types) {
+						typesQuery.should(TYPE_HANDLING.createQueryTypeFilter(type));
+					}
+				}
+				
+				queryBuilder = boolQuery;
+			}
+			else {
+				queryBuilder = criteriaBuilder;
+			}
+	
+			sourceBuilder.query(queryBuilder);
+			
+			if (facetAttributes != null && !facetAttributes.isEmpty()) {
+				addAggregations(sourceBuilder, facetAttributes);
+			}
+	
+			if (false) {
+				try {
+					final XContentBuilder content = JsonXContent.contentBuilder();
+					
+					sourceBuilder.toXContent(content, null);
+					
+					System.out.println("## request: " + content.string());
+				}
+				catch (IOException ex) {
+					throw new IllegalStateException("Failed to create content builder", ex);
+				}
+			}
+	
+			final SearchResponse response;
 			try {
-				final XContentBuilder content = JsonXContent.contentBuilder();
-				
-				sourceBuilder.toXContent(content, null);
-				
-				System.out.println("## request: " + content.string());
+				response = client.search(request);
+			} catch (IOException ex) {
+				throw new ItemIndexException("Failed to read index result", ex);
 			}
-			catch (IOException ex) {
-				throw new IllegalStateException("Failed to create content builder", ex);
-			}
+			
+			// TODO use ES paging? For now optimized to get all data
+			
+			cursor = new ESIndexSearchCursor(response);
 		}
 
-		final SearchResponse response;
-		try {
-			response = client.search(request);
-		} catch (IOException ex) {
-			throw new ItemIndexException("Failed to read index result", ex);
-		}
-		
-		final SearchHits searchHits = response.getHits();
-		
-		final SearchHit [] hits = searchHits.getHits();
-		
-		// TODO use ES paging? For now optimized to get all data
-		
-		return new IndexSearchCursor() {
-			
-			@Override
-			public int getTotalMatchCount() {
-				
-				if (searchHits.totalHits > Integer.MAX_VALUE) {
-					throw new IllegalStateException("More than Integer.MAX_VALUE hits");
-				}
-
-				return (int)searchHits.totalHits;
-			}
-			
-			@Override
-			public List<SearchItem> getItemIDsAndTitles(int initialIdx, int count) {
-
-				final List<SearchItem> items = new ArrayList<>(Math.min(hits.length, count));
-				
-				for (int i = 0; i < count && (initialIdx + i) < hits.length; ++ i) {
-
-					final SearchHit hit = hits[initialIdx + i];
-					
-					final Map<String, Object> sourceMap = hit.getSourceAsMap();
-					final String title = (String)sourceMap.get(ItemIndex.fieldName(titleAttribute));
-
-					@SuppressWarnings("unchecked")
-					final List<Integer> thumbs = (List<Integer>)sourceMap.get(FIELD_THUMBS);
-					
-					final Integer thumbWidth;
-					final Integer thumbHeight;
-					if (thumbs != null && !thumbs.isEmpty()) {
-						final int thumbEncoded = thumbs.get(0);
-						
-						thumbWidth = thumbEncoded >> 16;
-						thumbHeight = thumbEncoded & 0x0000FFFF;
-					}
-					else {
-						thumbWidth = null;
-						thumbHeight = null;
-					}
-
-					items.add(new IndexSearchItem(hit.getId(), title, thumbWidth, thumbHeight));
-				}
-				
-				return items;
-			}
-			
-			@Override
-			public List<String> getItemIDs(int initialIdx, int count) {
-				final List<String> ids = new ArrayList<>(Math.min(hits.length, count));
-				
-				for (int i = 0; i < count && (initialIdx + i) < hits.length; ++ i) {
-					ids.add(hits[initialIdx + i].getId());
-				}
-
-				return ids;
-			}
-
-			@Override
-			public ItemsFacets getFacets() {
-				return makeFacets(response.getAggregations());
-			}
-		};
+		return cursor;
 	}
+	
+	private class ESIndexSearchCursor implements IndexSearchCursor {
+		private final SearchResponse response;
+		
+		public ESIndexSearchCursor(SearchResponse response) {
+			this.response = response;
+		}
+		
+		private SearchHit [] getHits() {
+			final SearchHits searchHits = response.getHits();
+			
+			final SearchHit [] hits = searchHits.getHits();
+		
+			return hits;
+		}
+
+		@Override
+		public int getTotalMatchCount() {
+			final SearchHits searchHits = response.getHits();
+
+			if (searchHits.totalHits > Integer.MAX_VALUE) {
+				throw new IllegalStateException("More than Integer.MAX_VALUE hits");
+			}
+
+			return (int)searchHits.totalHits;
+		}
+		
+		@Override
+		public List<SearchItem> getItemIDsAndTitles(int initialIdx, int count) {
+			final SearchHit [] hits = getHits();
+
+			final List<SearchItem> items = new ArrayList<>(Math.min(hits.length, count));
+			
+			for (int i = 0; i < count && (initialIdx + i) < hits.length; ++ i) {
+
+				final SearchHit hit = hits[initialIdx + i];
+				
+				final Map<String, Object> sourceMap = hit.getSourceAsMap();
+				final String title = (String)sourceMap.get(ItemIndex.fieldName(titleAttribute));
+
+				@SuppressWarnings("unchecked")
+				final List<Integer> thumbs = (List<Integer>)sourceMap.get(FIELD_THUMBS);
+				
+				final Integer thumbWidth;
+				final Integer thumbHeight;
+				if (thumbs != null && !thumbs.isEmpty()) {
+					final int thumbEncoded = thumbs.get(0);
+					
+					thumbWidth = thumbEncoded >> 16;
+					thumbHeight = thumbEncoded & 0x0000FFFF;
+				}
+				else {
+					thumbWidth = null;
+					thumbHeight = null;
+				}
+
+				items.add(new IndexSearchItem(hit.getId(), title, thumbWidth, thumbHeight));
+			}
+			
+			return items;
+		}
+		
+		@Override
+		public List<String> getItemIDs(int initialIdx, int count) {
+			final SearchHit [] hits = getHits();
+
+			final List<String> ids = new ArrayList<>(Math.min(hits.length, count));
+			
+			for (int i = 0; i < count && (initialIdx + i) < hits.length; ++ i) {
+				ids.add(hits[initialIdx + i].getId());
+			}
+
+			return ids;
+		}
+
+		@Override
+		public ItemsFacets getFacets() {
+			return makeFacets(response.getAggregations());
+		}
+	}
+	
 	
 	private static ItemsFacets makeFacets(Aggregations aggregations) {
 		
@@ -963,8 +1011,8 @@ public class ElasticSearchIndex implements ItemIndex {
 			
 			final Consumer<AggregationBuilder> addAttributeAggregation;
 			final AggregationBuilder typeFilter;
-			if (TYPE_HANDLING.hasTypeFilter()) {
-				typeFilter = TYPE_HANDLING.createTypeFilter(type);
+			if (TYPE_HANDLING.hasAggregationTypeFilter()) {
+				typeFilter = TYPE_HANDLING.createAggregationTypeFilter(type);
 
 				addAttributeAggregation = a -> typeFilter.subAggregation(a);
 			}
@@ -1044,7 +1092,7 @@ public class ElasticSearchIndex implements ItemIndex {
 				addAttributeAggregation.accept(AggregationBuilders.missing(MISSING_PREFIX + fieldName + "_agg").field(fieldName));
 			}
 
-			if (TYPE_HANDLING.hasTypeFilter()) {
+			if (TYPE_HANDLING.hasAggregationTypeFilter()) {
 				sourceBuilder.aggregation(typeFilter);
 			}
 		}

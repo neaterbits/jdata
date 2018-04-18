@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -55,12 +56,24 @@ public class ESTypeHandlingBuiltinType extends ESTypeHandling {
 	}
 
 	@Override
-	boolean hasTypeFilter() {
+	boolean hasQueryTypeFilter() {
 		return true;
 	}
 
 	@Override
-	AggregationBuilder createTypeFilter(Class<? extends Item> type) {
+	QueryBuilder createQueryTypeFilter(Class<? extends Item> type) {
+		final String typeName = getESTypeName(type);
+		
+		return QueryBuilders.typeQuery(typeName);
+	}
+
+	@Override
+	boolean hasAggregationTypeFilter() {
+		return true;
+	}
+
+	@Override
+	AggregationBuilder createAggregationTypeFilter(Class<? extends Item> type) {
 		final String typeName = getESTypeName(type);
 		
 		return AggregationBuilders.filter(typeName + "_agg", QueryBuilders.typeQuery(typeName));

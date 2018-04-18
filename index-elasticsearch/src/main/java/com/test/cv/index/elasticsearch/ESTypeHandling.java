@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 
 import com.test.cv.model.Item;
@@ -42,8 +43,12 @@ public abstract class ESTypeHandling {
 	abstract Map<String, Object> indexCustomFields(Class<? extends Item> type);
 	
 	abstract String getESTypeName(Class<? extends Item> type);
+
+	abstract boolean hasQueryTypeFilter();
 	
-	abstract boolean hasTypeFilter();
+	abstract QueryBuilder createQueryTypeFilter(Class<? extends Item> type);
 	
-	abstract AggregationBuilder createTypeFilter(Class<? extends Item> type);
+	abstract boolean hasAggregationTypeFilter();
+	
+	abstract AggregationBuilder createAggregationTypeFilter(Class<? extends Item> type);
 }
