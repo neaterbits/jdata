@@ -507,6 +507,30 @@ public class ElasticSearchIndex implements ItemIndex {
 			}
 	
 			sourceBuilder.query(queryBuilder);
+
+			if (sortOrder != null && !sortOrder.isEmpty()) {
+
+				for (SortAttributeAndOrder so : sortOrder) {
+
+					final String fieldName = ItemIndex.fieldName(so.getAttribute());
+					final org.elasticsearch.search.sort.SortOrder esSortOrder;
+
+					switch (so.getSortOrder()) {
+					case ASCENDING:
+						esSortOrder = org.elasticsearch.search.sort.SortOrder.ASC;
+						break;
+						
+					case DESCENDING:
+						esSortOrder = org.elasticsearch.search.sort.SortOrder.DESC;
+						break;
+
+					default:
+						throw new IllegalArgumentException("Unknown sort order " + so.getSortOrder());
+					}
+
+					sourceBuilder.sort(fieldName, esSortOrder);
+				}
+			}
 			
 			if (facetAttributes != null && !facetAttributes.isEmpty()) {
 				addAggregations(sourceBuilder, facetAttributes);
