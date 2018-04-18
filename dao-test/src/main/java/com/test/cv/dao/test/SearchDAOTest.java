@@ -118,24 +118,31 @@ public abstract class SearchDAOTest extends TestCase {
 			
 			car.setMake("Totyota");
 			car.setModel("Corolla");
-			
 
 			itemDAO.addItem(userId, car);
-
-			final String carItemId = car.getIdString();
-			assertThat(carItemId).isNotNull();
-
-			final Snowboard snowboard = makeSnowboard1();
-
-			itemDAO.addItem(userId, snowboard);
-
-			try (ISearchDAO searchDAO = getSearchDAO()) {
-
-				final ISearchCursor cursor = searchDAO.search(Arrays.asList(Car.class), null, null, null, null);
-				final List<String> itemIds = cursor.getAllItemIDs();
-
-				assertThat(itemIds.size()).isEqualTo(1);
-				assertThat(itemIds.get(0)).isEqualTo(carItemId);
+			
+			try {
+				final String carItemId = car.getIdString();
+				assertThat(carItemId).isNotNull();
+	
+				final Snowboard snowboard = makeSnowboard1();
+	
+				itemDAO.addItem(userId, snowboard);
+	
+				try (ISearchDAO searchDAO = getSearchDAO()) {
+	
+					final ISearchCursor cursor = searchDAO.search(Arrays.asList(Car.class), null, null, null, null);
+					final List<String> itemIds = cursor.getAllItemIDs();
+	
+					assertThat(itemIds.size()).isEqualTo(1);
+					assertThat(itemIds.get(0)).isEqualTo(carItemId);
+				}
+				finally {
+					itemDAO.deleteItem(userId, snowboard.getIdString(), Snowboard.class);
+				}
+			}
+			finally {
+				itemDAO.deleteItem(userId, car.getIdString(), Car.class);
 			}
 		}
 	}
