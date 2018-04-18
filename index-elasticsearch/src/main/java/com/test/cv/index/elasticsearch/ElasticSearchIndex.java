@@ -46,6 +46,7 @@ import org.elasticsearch.search.aggregations.bucket.range.Range;
 import org.elasticsearch.search.aggregations.bucket.range.Range.Bucket;
 import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 
@@ -78,6 +79,7 @@ import com.test.cv.search.criteria.StringCriterium;
 import com.test.cv.search.facets.FacetUtils;
 import com.test.cv.search.facets.IndexFacetedAttributeResult;
 import com.test.cv.search.facets.IndexRangeFacetedAttributeResult;
+import com.test.cv.search.facets.IndexSingleValueFacet;
 import com.test.cv.search.facets.IndexSingleValueFacetedAttributeResult;
 import com.test.cv.search.facets.ItemsFacets;
 import com.test.cv.search.facets.TypeFacets;
@@ -667,105 +669,10 @@ public class ElasticSearchIndex implements ItemIndex {
 			}
 			
 			final SingleBucketAggregation sb = (SingleBucketAggregation)typeAggregation;
-			
 			final List<IndexFacetedAttributeResult> attributes = new ArrayList<>();
-
 			final Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults = new HashMap<>();
 
-			for (Aggregation subAggregation : sb.getAggregations().asList()) {
-				
-				final String attributeName = splitAggregationName(subAggregation.getName());
-				
-				final ItemAttribute attribute = typeInfo.getAttributes().getByName(attributeName);
-				
-				if (attribute == null) {
-					throw new IllegalStateException("No attribute with name " + attributeName);
-				}
-
-				final IndexFacetedAttributeResult attributeResult;
-				
-				final IndexFacetedAttributeResult existingAttributeResult = attributeResults.get(attribute);
-				
-				if (subAggregation instanceof Range) {
-					
-					final Range range = (Range)subAggregation;
-					final int expectedCounts = attribute.getRangeCount();
-
-					final int [] matchCounts = new int[expectedCounts];
-					
-					// For simplicity EleasticSearch returns ranges in same order as query
-					if (range.getBuckets().size() != expectedCounts) {
-						throw new IllegalStateException("Different number of ranges in return");
-					}
-							
-					for (int i = 0; i < expectedCounts; ++ i) {
-						final Bucket bucket = range.getBuckets().get(i);
-
-						if (bucket.getDocCount() > Integer.MAX_VALUE) {
-							throw new IllegalStateException("bucket.getDocCount() > Integer.MAX_VALUE");
-						}
-
-						matchCounts[i] = (int)bucket.getDocCount();
-					}
-
-					attributeResult = new IndexRangeFacetedAttributeResult(attribute, matchCounts);
-					
-					attributeResults.put(attribute, attributeResult);
-					
-					if (existingAttributeResult != null) {
-						// had 
-					}
-				}
-				else if (subAggregation instanceof Terms) {
-					final Terms terms = (Terms)subAggregation;
-					
-					final IndexSingleValueFacetedAttributeResult singleValueFacetedAttributeResult = FacetUtils.createSingleValueFacetedAttributeResult(attribute);
-					attributeResult = singleValueFacetedAttributeResult;
-
-					terms.getBuckets().forEach(b -> {
-						if (b.getDocCount() > Integer.MAX_VALUE) {
-							throw new IllegalStateException("b.getDocCount() > Integer.MAX_VALUE");
-						}
-						
-						final Object value = b.getKey();
-						
-						FacetUtils.addSingleValueFacet(attribute, singleValueFacetedAttributeResult, value);
-					});
-					
-				}
-				else if (subAggregation instanceof Missing) {
-					final Missing missing = (Missing)subAggregation;
-
-					if (missing.getDocCount() > Integer.MAX_VALUE) {
-						throw new IllegalStateException("missing.getDocCount() > Integer.MAX_VALUE");
-					}
-					
-					attributeResult = null;
-					
-					
-					if (missing.getDocCount() > 0L) {
-						final IndexFacetedAttributeResult missingAttributeResult = FacetUtils.assureResult(attribute, attributeResults);
-
-						missingAttributeResult.addToNoAttributeValueCount((int)missing.getDocCount());
-
-						attributeResults.put(attribute, missingAttributeResult);
-					}
-				}
-				else {
-					throw new UnsupportedOperationException("Unknown aggregation type: " + subAggregation.getClass());
-				}
-
-				if (attributeResult != null) {
-					if (existingAttributeResult != null) {
-						// missing-attribute was already found and added to hash, so update count from already found attribute before we put new value in hash
-						// For opposite order (value attributes found first), attributeResult will be null in missing-case so will never reach here
-						attributeResult.addToNoAttributeValueCount(existingAttributeResult.getNoAttributeValueCount());
-					}
-					
-					attributeResults.put(attribute, attributeResult);
-					attributes.add(attributeResult);
-				}
-			}
+			processSubAggregations(typeInfo, sb.getAggregations().asList(), attributes, attributeResults);
 			
 			final TypeFacets typeFacets = new TypeFacets(typeInfo.getType(), attributes);
 			
@@ -773,6 +680,114 @@ public class ElasticSearchIndex implements ItemIndex {
 		}
 		
 		return new ItemsFacets(types);
+	}
+	
+	private static void processSubAggregations(
+			TypeInfo typeInfo,
+			Collection<Aggregation> aggregations,
+			List<IndexFacetedAttributeResult> attributes,
+			Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults) {
+
+		for (Aggregation subAggregation : aggregations) {
+			
+			final String attributeName = splitAggregationName(subAggregation.getName());
+			
+			final ItemAttribute attribute = typeInfo.getAttributes().getByName(attributeName);
+			
+			if (attribute == null) {
+				throw new IllegalStateException("No attribute with name " + attributeName);
+			}
+
+			final IndexFacetedAttributeResult attributeResult;
+			
+			final IndexFacetedAttributeResult existingAttributeResult = attributeResults.get(attribute);
+			
+			if (subAggregation instanceof Range) {
+				
+				final Range range = (Range)subAggregation;
+				final int expectedCounts = attribute.getRangeCount();
+
+				final int [] matchCounts = new int[expectedCounts];
+				
+				// For simplicity EleasticSearch returns ranges in same order as query
+				if (range.getBuckets().size() != expectedCounts) {
+					throw new IllegalStateException("Different number of ranges in return");
+				}
+						
+				for (int i = 0; i < expectedCounts; ++ i) {
+					final Bucket bucket = range.getBuckets().get(i);
+
+					if (bucket.getDocCount() > Integer.MAX_VALUE) {
+						throw new IllegalStateException("bucket.getDocCount() > Integer.MAX_VALUE");
+					}
+
+					matchCounts[i] = (int)bucket.getDocCount();
+				}
+
+				attributeResult = new IndexRangeFacetedAttributeResult(attribute, matchCounts);
+				
+				attributeResults.put(attribute, attributeResult);
+				
+				if (existingAttributeResult != null) {
+					// had 
+				}
+			}
+			else if (subAggregation instanceof Terms) {
+				final Terms terms = (Terms)subAggregation;
+				
+				final IndexSingleValueFacetedAttributeResult singleValueFacetedAttributeResult = FacetUtils.createSingleValueFacetedAttributeResult(attribute);
+				attributeResult = singleValueFacetedAttributeResult;
+
+				terms.getBuckets().forEach(b -> {
+					if (b.getDocCount() > Integer.MAX_VALUE) {
+						throw new IllegalStateException("b.getDocCount() > Integer.MAX_VALUE");
+					}
+					
+					final Object value = b.getKey();
+
+					final IndexSingleValueFacet singleValueFacet = FacetUtils.addSingleValueFacet(attribute, singleValueFacetedAttributeResult, value);
+
+					final List<IndexFacetedAttributeResult> subAttributes = new ArrayList<>();
+					final Map<ItemAttribute, IndexFacetedAttributeResult> subAttributeResults = new HashMap<>();
+
+					processSubAggregations(typeInfo, b.getAggregations().asList(), subAttributes, subAttributeResults);
+
+					singleValueFacet.setSubFacets(new ArrayList<>(subAttributeResults.values()));
+				});
+			}
+			else if (subAggregation instanceof Missing) {
+				final Missing missing = (Missing)subAggregation;
+
+				if (missing.getDocCount() > Integer.MAX_VALUE) {
+					throw new IllegalStateException("missing.getDocCount() > Integer.MAX_VALUE");
+				}
+				
+				attributeResult = null;
+				
+				
+				if (missing.getDocCount() > 0L) {
+					final IndexFacetedAttributeResult missingAttributeResult = FacetUtils.assureResult(attribute, attributeResults);
+
+					missingAttributeResult.addToNoAttributeValueCount((int)missing.getDocCount());
+
+					attributeResults.put(attribute, missingAttributeResult);
+				}
+			}
+			else {
+				throw new UnsupportedOperationException("Unknown aggregation type: " + subAggregation.getClass());
+			}
+
+			if (attributeResult != null) {
+				if (existingAttributeResult != null) {
+					// missing-attribute was already found and added to hash, so update count from already found attribute before we put new value in hash
+					// For opposite order (value attributes found first), attributeResult will be null in missing-case so will never reach here
+					attributeResult.addToNoAttributeValueCount(existingAttributeResult.getNoAttributeValueCount());
+				}
+				
+				attributeResults.put(attribute, attributeResult);
+				attributes.add(attributeResult);
+			}
+		}
 	}
 	
 	private static String splitAggregationName(String name) {
@@ -1097,80 +1112,117 @@ public class ElasticSearchIndex implements ItemIndex {
 				addAttributeAggregation = a -> sourceBuilder.aggregation(a);
 			}
 
-			for (ItemAttribute facet : facets) {
-				
-				if (!facet.getItemType().equals(type)) {
-					continue;
-				}
-				
-				if (!facet.isFaceted()) {
-					continue;
-				}
-				
-				
-				final String fieldName = facet.getName();
-				final String aggregationName = fieldName + "_agg";
-				
-				if (facet.isSingleValue()) {
-					addAttributeAggregation.accept(AggregationBuilders.terms(aggregationName).field(fieldName).size(Integer.MAX_VALUE));
-				}
-				else if (facet.isRange()) {
-					
-					final RangeAggregationBuilder rangeAggregation = AggregationBuilders.range(aggregationName).field(fieldName);
-					
-					if (facet.getIntegerRanges() != null) {
-						
-						for (int i = 0; i < facet.getIntegerRanges().length; ++ i) {
-							
-							final FacetedAttributeIntegerRange range = facet.getIntegerRanges()[i];
-							final String key = String.valueOf(i);
-
-							if (range.getLower() == null) {
-								rangeAggregation.addUnboundedTo(key, range.getUpper());
-							}
-							else if (range.getUpper() == null) {
-								rangeAggregation.addUnboundedFrom(key, range.getLower());
-							}
-							else {
-								rangeAggregation.addRange(key,  range.getLower(), range.getUpper());
-							}
-						}
-					}
-					else if (facet.getDecimalRanges() != null) {
-						for (int i = 0; i < facet.getDecimalRanges().length; ++ i) {
-							
-							final FacetedAttributeDecimalRange range = facet.getDecimalRanges()[i];
-							final String key = String.valueOf(i);
-
-							if (range.getLower() == null) {
-								rangeAggregation.addUnboundedTo(key, range.getUpper().doubleValue());
-							}
-							else if (range.getUpper() == null) {
-								rangeAggregation.addUnboundedFrom(key, range.getLower().doubleValue());
-							}
-							else {
-								rangeAggregation.addRange(key,  range.getLower().doubleValue(), range.getUpper().doubleValue());
-							}
-						}
-					}
-					else {
-						throw new IllegalStateException("Neither integer nor decimal ranges: " + facet.getName());
-					}
-					
-					addAttributeAggregation.accept(rangeAggregation);
-				}
-				else {
-					throw new IllegalStateException("Neither single value nor range: " + facet.getName());
-				}
-				
-				// Add an aggregation for elements that has no value set for this field
-				addAttributeAggregation.accept(AggregationBuilders.missing(MISSING_PREFIX + fieldName + "_agg").field(fieldName));
-			}
+			addAggregationForAttributes(type, facets, null, addAttributeAggregation);
+			
 
 			if (TYPE_HANDLING.hasAggregationTypeFilter()) {
 				sourceBuilder.aggregation(typeFilter);
 			}
 		}
+	}
+	
+	private static void addAggregationForAttributes(
+			Class<? extends Item> type,
+			Collection<ItemAttribute> facets,
+			ItemAttribute superAttribute,
+			Consumer<AggregationBuilder> addAttributeAggregation) {
+		
+		for (ItemAttribute facet : facets) {
+			
+			if (!facet.getItemType().equals(type)) {
+				continue;
+			}
+			
+			if (!facet.isFaceted()) {
+				continue;
+			}
+			
+			if (superAttribute == null) {
+				if (facet.getFacetSuperAttribute() != null) {
+					continue;
+				}
+			}
+			else {
+				if (!superAttribute.getName().equals(facet.getFacetSuperAttribute())) { // FacetSuperAttribute may be null here
+					continue;
+				}
+			}
+			
+			final String fieldName = facet.getName();
+			final String aggregationName = fieldName + "_agg";
+			
+			if (facet.isSingleValue()) {
+
+				final TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms(aggregationName)
+						.field(fieldName)
+						.size(Integer.MAX_VALUE);
+				
+				addAttributeAggregation.accept(termsAggregationBuilder);
+
+				final List<ItemAttribute> subAttributes = facets.stream()
+						.filter(attr -> facet.getName().equals(attr.getFacetSuperAttribute()) && attr.isFaceted())
+						.collect(Collectors.toList());
+				
+				if (!subAttributes.isEmpty()) {
+					// Add for all that has this as super attribute
+					final Consumer<AggregationBuilder> addSubAggregation = a -> termsAggregationBuilder.subAggregation(a);
+					
+					addAggregationForAttributes(type, facets, facet, addSubAggregation);
+				}
+			}
+			else if (facet.isRange()) {
+				
+				final RangeAggregationBuilder rangeAggregation = AggregationBuilders.range(aggregationName).field(fieldName);
+				
+				if (facet.getIntegerRanges() != null) {
+					
+					for (int i = 0; i < facet.getIntegerRanges().length; ++ i) {
+						
+						final FacetedAttributeIntegerRange range = facet.getIntegerRanges()[i];
+						final String key = String.valueOf(i);
+
+						if (range.getLower() == null) {
+							rangeAggregation.addUnboundedTo(key, range.getUpper());
+						}
+						else if (range.getUpper() == null) {
+							rangeAggregation.addUnboundedFrom(key, range.getLower());
+						}
+						else {
+							rangeAggregation.addRange(key,  range.getLower(), range.getUpper());
+						}
+					}
+				}
+				else if (facet.getDecimalRanges() != null) {
+					for (int i = 0; i < facet.getDecimalRanges().length; ++ i) {
+						
+						final FacetedAttributeDecimalRange range = facet.getDecimalRanges()[i];
+						final String key = String.valueOf(i);
+
+						if (range.getLower() == null) {
+							rangeAggregation.addUnboundedTo(key, range.getUpper().doubleValue());
+						}
+						else if (range.getUpper() == null) {
+							rangeAggregation.addUnboundedFrom(key, range.getLower().doubleValue());
+						}
+						else {
+							rangeAggregation.addRange(key,  range.getLower().doubleValue(), range.getUpper().doubleValue());
+						}
+					}
+				}
+				else {
+					throw new IllegalStateException("Neither integer nor decimal ranges: " + facet.getName());
+				}
+				
+				addAttributeAggregation.accept(rangeAggregation);
+			}
+			else {
+				throw new IllegalStateException("Neither single value nor range: " + facet.getName());
+			}
+			
+			// Add an aggregation for elements that has no value set for this field
+			addAttributeAggregation.accept(AggregationBuilders.missing(MISSING_PREFIX + fieldName + "_agg").field(fieldName));
+		}
+		
 	}
 	
 	private void createIndexIfNotExists() throws ItemIndexException {

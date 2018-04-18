@@ -258,7 +258,7 @@ public class FacetUtils {
 		}
 	}
 	
-	public static void addSingleValueFacet(ItemAttribute attribute, IndexSingleValueFacetedAttributeResult singleValueResult, Object value) {
+	public static IndexSingleValueFacet addSingleValueFacet(ItemAttribute attribute, IndexSingleValueFacetedAttributeResult singleValueResult, Object value) {
 		if (value == null) {
 			throw new IllegalStateException("Expected field value when field is present");
 		}
@@ -274,6 +274,8 @@ public class FacetUtils {
 		}
 		
 		valueFacet.increaseMatchCount();
+
+		return valueFacet;
 	}
 	
 	private static IndexSingleValueFacetedAttributeResult assureSingleResult(ItemAttribute attribute, Map<ItemAttribute, IndexFacetedAttributeResult> attributeResults) {
