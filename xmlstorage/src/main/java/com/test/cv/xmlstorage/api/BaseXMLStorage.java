@@ -145,6 +145,16 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	
 	protected abstract String [] listFiles(String userId, String itemId, ItemFileType itemFileType);
 
+	
+
+	@Override
+	public int getNumThumbnailsForItem(String userId, String itemId) throws StorageException {
+		final String [] thumbs;
+
+		thumbs = listFiles(userId, itemId, ItemFileType.THUMBNAIL);
+		
+		return thumbs.length;
+	}
 
 	@Override
 	public int getNumThumbnailsAndPhotosForItem(String userId, String itemId) throws StorageException {
@@ -376,7 +386,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	public void retrieveThumbnails(ItemId[] itemIds, BiConsumer<ImageResult, ItemId> consumer) throws StorageException {
 		// Retrieve thumbnails for all that have such
 		for (ItemId itemId : itemIds) {
-			if (getNumThumbnailsAndPhotosForItem(itemId.getUserId(), itemId.getItemId()) > 0) {
+			if (getNumThumbnailsForItem(itemId.getUserId(), itemId.getItemId()) > 0) {
 				
 				final Images imageList = getImageList(itemId.getUserId(), itemId.getItemId());
 				

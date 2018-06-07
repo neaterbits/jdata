@@ -50,6 +50,8 @@ public interface IItemStorage {
 
 	int getNumThumbnailsAndPhotosForItem(String userId, String itemId) throws StorageException;
 
+	int getNumThumbnailsForItem(String userId, String itemId) throws StorageException;
+
 	// Sorted in order
 	List<ImageResult> getThumbnailsForItem(String userId, String itemId) throws StorageException;
 
