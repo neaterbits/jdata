@@ -62,7 +62,11 @@ public interface IItemStorage {
 	int addPhotoAndThumbnailForItem(String userId, String itemId,
 			InputStream thumbnailInputStream, String thumbnailMimeType, Integer thumbLength,
 			InputStream photoInputStream, String photoMimeType, Integer photoLength) throws StorageException;
-	
+
+	int addPhotoUrlAndThumbnailForItem(String userId, String itemId,
+			InputStream thumbnailInputStream, String thumbnailMimeType, Integer thumbLength,
+			String photoUrl) throws StorageException;
+
 	void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException;
 
 	void retrieveThumbnails(ItemId [] itemIds, BiConsumer<ImageResult, ItemId> consumer) throws StorageException;

@@ -178,7 +178,25 @@ public class JettyRunServlet {
 			final ItemService itemService = new ItemService();
 			final String userId = req.getParameter("userId");
 
-			if (req.getPathInfo() != null && req.getPathInfo().contains("image")) {
+			if (req.getPathInfo() != null && req.getPathInfo().contains("imageThumbAndUrl")) {
+				final int index = Integer.parseInt(req.getParameter("index"));
+				final int thumbWidth = Integer.parseInt(req.getParameter("thumbWidth"));
+				final int thumbHeight = Integer.parseInt(req.getParameter("thumbHeight"));
+				
+				final String imageUrl = req.getParameter("imageUrl");
+				
+				// Posting image
+				final String itemId = req.getPathInfo().split("/")[1];
+				
+				final String itemType = req.getParameter("itemType");
+				
+				try {
+					itemService.storeThumbAndImageUrl(userId, itemId, itemType, index, thumbWidth, thumbHeight, imageUrl, IOUtil.readAll(req.getInputStream()), req);
+				} catch (ItemStorageException ex) {
+					throw new ServletException("Failed to store image", ex);
+				}
+			}
+			else if (req.getPathInfo() != null && req.getPathInfo().contains("image")) {
 				final int index = Integer.parseInt(req.getParameter("index"));
 				// Posting image
 				final String itemId = req.getPathInfo().split("/")[1];

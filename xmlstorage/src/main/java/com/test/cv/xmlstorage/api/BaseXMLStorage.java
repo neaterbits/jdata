@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -19,7 +20,6 @@ import javax.xml.bind.Unmarshaller;
 import com.test.cv.common.IOUtil;
 import com.test.cv.common.ItemId;
 import com.test.cv.common.StringUtil;
-import com.test.cv.common.StringUtilTest;
 import com.test.cv.xmlstorage.model.images.Image;
 import com.test.cv.xmlstorage.model.images.ImageData;
 import com.test.cv.xmlstorage.model.images.Images;
@@ -200,23 +200,41 @@ public abstract class BaseXMLStorage implements IItemStorage {
 
 	}
 	
-	
-	protected final int addToImageList(String userId, String itemId,
-			String thumbnailFileName, String thumbnailMimeType,
-			String photoFileName, String photoMimeType) throws StorageException {
+	private int addToImageList(String userId, String itemId, Consumer<Image> init) throws StorageException {
 		final Images imageList = getOrCreateImageList(userId, itemId);
 		
 		final Image image = new Image();
 		
 		image.setId(itemId);
-		image.setThumb(makeImageData(thumbnailFileName, thumbnailMimeType));
-		image.setPhoto(makeImageData(photoFileName, photoMimeType));
+		
+		init.accept(image);
 		
 		imageList.getImages().add(image);
 
 		writeImageList(userId, itemId, imageList);
 		
 		return imageList.getImages().size() - 1;
+	}
+	
+	
+	protected final int addToImageList(String userId, String itemId,
+			String thumbnailFileName, String thumbnailMimeType,
+			String photoFileName, String photoMimeType) throws StorageException {
+		
+		return addToImageList(userId, itemId, image -> {
+			image.setThumb(makeImageData(thumbnailFileName, thumbnailMimeType));
+			image.setPhoto(makeImageData(photoFileName, photoMimeType));
+		});
+	}
+
+	protected final int addToImageList(String userId, String itemId,
+			String thumbnailFileName, String thumbnailMimeType,
+			String photoUrl) throws StorageException {
+		
+		return addToImageList(userId, itemId, image -> {
+			image.setThumb(makeImageData(thumbnailFileName, thumbnailMimeType));
+			image.setPhotoUrl(photoUrl);
+		});
 	}
 
 	protected final void removeFromImageList(String userId, String itemId,

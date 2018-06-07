@@ -6,7 +6,10 @@ public class Image {
 
 	private String id;
 	private ImageData thumb;
+	
+	// Either has image data for photo, or just an URL reference to photo
 	private ImageData photo;
+	private String photoUrl;
 
 	@XmlElement
 	public String getId() {
@@ -33,5 +36,14 @@ public class Image {
 
 	public void setPhoto(ImageData photo) {
 		this.photo = photo;
+	}
+
+	@XmlElement
+	public String getPhotoUrl() {
+		return photoUrl;
+	}
+
+	public void setPhotoUrl(String photoUrl) {
+		this.photoUrl = photoUrl;
 	}
 }

@@ -286,6 +286,32 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 			releaseLock(lock);
 		}
 	}
+	
+	
+
+	@Override
+	public void addPhotoUrlAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type,
+			InputStream thumbnailInputStream, String thumbnailMimeType, Integer thumbLength, int thumbWidth,
+			int thumbHeight, String photoUrl) throws ItemStorageException {
+
+		final Lock lock = obtainLock(userId, itemId);
+		
+		try {
+			final int photoNo = xmlStorage.addPhotoUrlAndThumbnailForItem(
+					userId, itemId,
+					thumbnailInputStream, thumbnailMimeType, thumbLength,
+					photoUrl);
+
+			index.indexThumbnailSize(itemId, type, photoNo, thumbWidth, thumbHeight);
+		} catch (StorageException ex) {
+			throw new ItemStorageException("Failed to store thumbnail", ex);
+		} catch (ItemIndexException ex) {
+			throw new ItemStorageException("Failed to index thumbnail sizes", ex);
+		}
+		finally {
+			releaseLock(lock);
+		}
+	}
 
 	@Override
 	public void movePhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, int photoNo, int toIndex)

@@ -7,6 +7,7 @@ import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +18,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
+import com.test.cv.common.IOUtil;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.model.Item;
 import com.test.cv.model.items.ItemTypes;
@@ -40,8 +42,6 @@ public class ItemService extends BaseService {
 	@Path("items/{itemId}/image")
 	@Consumes({ "image/jpeg", "image/png" })
 	public void storeImage(@QueryParam("userId") String userId, @PathParam("itemId") String itemId, @QueryParam("itemType") String itemType, @QueryParam("index") int index, byte [] imageData, HttpServletRequest request) throws IOException, ItemStorageException {
-		// Received an item as JSon, store it
-		
 		if (userId == null || userId.trim().isEmpty()) {
 			throw new IllegalArgumentException("No userId");
 		}
@@ -123,7 +123,41 @@ public class ItemService extends BaseService {
 				thumbnailInputStream, thumbnailMimeType, thumbDataLength, thumbWidth, thumbHeight,
 				photoInputStream1, photoMimeType, imageData.length);
 	}
-	
+
+	@POST
+	@Path("items/{itemId}/imageThumbAndUrl")
+	@Consumes({ "image/jpeg", "image/png" })
+	public void storeThumbAndImageUrl(
+			@QueryParam("userId") String userId,
+			@PathParam("itemId") String itemId,
+			@QueryParam("itemType") String itemType,
+			@QueryParam("index") int index,
+			@QueryParam("thumbWidth") int thumbWidth,
+			@QueryParam("thumbHeight") int thumbHeight,
+			@QueryParam("imageUrl") String imageUrl,
+			byte [] thumbData,
+			HttpServletRequest request) throws IOException, ItemStorageException {
+
+		if (userId == null || userId.trim().isEmpty()) {
+			throw new IllegalArgumentException("No userId");
+		}
+		
+		if (itemType == null || itemType.trim().isEmpty()) {
+			throw new IllegalArgumentException("No item type");
+		}
+		
+		final String thumbnailMimeType = request.getContentType();
+		
+		final int thumbDataLength = thumbData.length;
+		final InputStream thumbnailInputStream = new ByteArrayInputStream(thumbData);
+		
+		getItemDAO(request).addPhotoUrlAndThumbnailForItem(
+				userId, itemId, ItemTypes.getTypeByName(itemType).getType(),
+				thumbnailInputStream, thumbnailMimeType, thumbDataLength, thumbWidth, thumbHeight,
+				imageUrl);
+		
+	}
+
 	
 	private static RenderedImage imageToRenderedImage(Image image) {
 		final BufferedImage bufferedImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);

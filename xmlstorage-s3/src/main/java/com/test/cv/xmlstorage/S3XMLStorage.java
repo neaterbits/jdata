@@ -166,6 +166,13 @@ public class S3XMLStorage extends BaseXMLStorage implements IItemStorage {
 
 		return index;
 	}
+	
+
+	@Override
+	public int addPhotoUrlAndThumbnailForItem(String userId, String itemId, InputStream thumbnailInputStream,
+			String thumbnailMimeType, Integer thumbLength, String photoUrl) throws StorageException {
+		throw new UnsupportedOperationException("TODO");
+	}
 
 	private void deleteDirecoryFiles(String userId, String itemId, ItemFileType itemFileType) throws StorageException {
 		

@@ -272,6 +272,39 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage, Loc
 
 		return index;
 	}
+	
+	
+
+	@Override
+	public int addPhotoUrlAndThumbnailForItem(String userId, String itemId, InputStream thumbnailInputStream,
+			String thumbnailMimeType, Integer thumbLength, String photoUrl) throws StorageException {
+		final int index;
+
+		try {
+			final String thumbFileName = allocateFileName(userId, itemId, ItemFileType.THUMBNAIL, thumbnailMimeType);
+
+			final File thumbFile = itemFile(userId, itemId, ItemFileType.THUMBNAIL, thumbFileName);
+			
+			writeAndCloseOutput(thumbnailInputStream, new FileOutputStream(thumbFile));
+			
+			boolean ok = false;
+			try {
+				index = addToImageList(userId, itemId, thumbFileName, thumbnailMimeType, photoUrl);
+				
+				ok = true;
+			}
+			finally {
+				if (!ok) {
+					thumbFile.delete();
+				}
+			}
+		}
+		catch (FileNotFoundException ex) {
+			throw new StorageException("Failed to open thumb output file", ex);
+		}
+
+		return index;
+	}
 
 	@Override
 	public void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException {
