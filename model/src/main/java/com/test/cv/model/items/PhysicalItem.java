@@ -9,7 +9,7 @@ import javax.persistence.InheritanceType;
 
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
-public abstract class PhysicalItem extends BaseItem {
+public abstract class PhysicalItem extends RetailItem {
 
 	// measurements in centimeters
 	@Column(precision=15, scale=3)

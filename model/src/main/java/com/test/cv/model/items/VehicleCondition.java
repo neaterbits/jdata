@@ -2,7 +2,7 @@ package com.test.cv.model.items;
 
 import com.test.cv.model.AttributeEnum;
 
-public enum Condition implements AttributeEnum {
+public enum VehicleCondition implements AttributeEnum {
 	NEW("New"),
 	LIKE_NEW("Like new"),
 	EXCELLENT("Excellent"),
@@ -12,7 +12,7 @@ public enum Condition implements AttributeEnum {
 	
 	private final String displayName;
 
-	private Condition(String displayName) {
+	private VehicleCondition(String displayName) {
 		this.displayName = displayName;
 	}
 

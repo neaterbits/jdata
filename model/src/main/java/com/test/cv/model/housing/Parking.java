@@ -3,6 +3,7 @@ package com.test.cv.model.housing;
 import com.test.cv.model.AttributeEnum;
 
 public enum Parking implements AttributeEnum {
+	AVAILABLE("Available"),
 	CARPORT("Carport"),
 	DETACHED_GARAGE("Detached garage"),
 	ATTACHED_GARAGE("Attached garage"),

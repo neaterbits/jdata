@@ -5,20 +5,21 @@ import javax.persistence.MappedSuperclass;
 
 import com.test.cv.model.annotations.Facet;
 import com.test.cv.model.items.BaseItem;
-import com.test.cv.model.items.Condition;
+import com.test.cv.model.items.RetailItem;
+import com.test.cv.model.items.VehicleCondition;
 
 @MappedSuperclass
-public abstract class Vehicle extends BaseItem {
+public abstract class Vehicle extends RetailItem {
 
 	@Column
 	@Facet("Condition")
-	private Condition condition;
+	private VehicleCondition condition;
 
-	public Condition getCondition() {
+	public VehicleCondition getCondition() {
 		return condition;
 	}
 
-	public void setCondition(Condition condition) {
+	public void setCondition(VehicleCondition condition) {
 		this.condition = condition;
 	}
 }

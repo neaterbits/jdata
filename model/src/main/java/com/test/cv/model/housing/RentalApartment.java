@@ -47,6 +47,30 @@ public class RentalApartment extends Housing {
 	private ApartmentType apartmentType;
 	
 	@Column
+	@Facet("Condition")
+	private ApartmentCondition condition;
+
+	@Column
+	@Facet("Renter")
+	private ApartmentRenter renter;
+	
+	@Column
+	@Facet("Agent company")
+	private String agentCompany;
+
+	@Column
+	@Facet(value = "Agent", superAttribute = "agentCompany")
+	private String agent;
+
+	@Column
+	@Facet("Floor")
+	private Integer floor;
+
+	@Column
+	@Facet("Building floors")
+	private Integer buildingFloors;
+
+	@Column
 	@Facet("Laundry")
 	private Laundry laundry;
 	
@@ -57,6 +81,26 @@ public class RentalApartment extends Housing {
 	@Column
 	@Facet("Furnishment")
 	private Furnishment furnishment;
+
+	@Column
+	@Facet("Appliances")
+	private Appliances appliances;
+
+	@Column
+	@Facet("Storeroom")
+	private StoreRoom storeRoom;
+
+	@Column
+	@Facet("Heating")
+	private Heating heating;
+
+	@Column
+	@Facet("Air conditioning")
+	private AirConditioning airConditioning;
+
+	@Column
+	@Facet("Internet")
+	private Internet internet;
 
 	@Column
 	@Facet(value = "Smoking allowed", trueString="Yes", falseString="No")
@@ -85,6 +129,54 @@ public class RentalApartment extends Housing {
 	public void setApartmentType(ApartmentType apartmentType) {
 		this.apartmentType = apartmentType;
 	}
+	
+	public ApartmentCondition getCondition() {
+		return condition;
+	}
+
+	public void setCondition(ApartmentCondition condition) {
+		this.condition = condition;
+	}
+
+	public ApartmentRenter getRenter() {
+		return renter;
+	}
+
+	public void setRenter(ApartmentRenter renter) {
+		this.renter = renter;
+	}
+	
+	public String getAgentCompany() {
+		return agentCompany;
+	}
+
+	public void setAgentCompany(String agentCompany) {
+		this.agentCompany = agentCompany;
+	}
+
+	public String getAgent() {
+		return agent;
+	}
+
+	public void setAgent(String agent) {
+		this.agent = agent;
+	}
+	
+	public Integer getFloor() {
+		return floor;
+	}
+
+	public void setFloor(Integer floor) {
+		this.floor = floor;
+	}
+
+	public Integer getBuildingFloors() {
+		return buildingFloors;
+	}
+
+	public void setBuildingFloors(Integer buildingFloors) {
+		this.buildingFloors = buildingFloors;
+	}
 
 	public Laundry getLaundry() {
 		return laundry;
@@ -108,6 +200,46 @@ public class RentalApartment extends Housing {
 
 	public void setFurnishment(Furnishment furnishment) {
 		this.furnishment = furnishment;
+	}
+
+	public Appliances getAppliances() {
+		return appliances;
+	}
+
+	public void setAppliances(Appliances appliances) {
+		this.appliances = appliances;
+	}
+
+	public StoreRoom getStoreRoom() {
+		return storeRoom;
+	}
+
+	public void setStoreRoom(StoreRoom storeRoom) {
+		this.storeRoom = storeRoom;
+	}
+
+	public Heating getHeating() {
+		return heating;
+	}
+
+	public void setHeating(Heating heating) {
+		this.heating = heating;
+	}
+
+	public AirConditioning getAirConditioning() {
+		return airConditioning;
+	}
+
+	public void setAirConditioning(AirConditioning airConditioning) {
+		this.airConditioning = airConditioning;
+	}
+
+	public Internet getInternet() {
+		return internet;
+	}
+
+	public void setInternet(Internet internet) {
+		this.internet = internet;
 	}
 
 	public Boolean getSmoking() {

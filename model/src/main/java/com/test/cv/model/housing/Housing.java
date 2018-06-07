@@ -12,7 +12,19 @@ import com.test.cv.model.items.BaseItem;
 
 @MappedSuperclass
 public class Housing extends BaseItem {
-	
+
+	@Column
+	@Facet("City")
+	private String city;
+
+	@Column
+	@Facet(value = "Area", superAttribute = "city")
+	private String area;
+
+	@Column
+	@Facet(value = "District", superAttribute = "area")
+	private String district;
+
 	@Column
 	@Facet("Number of rooms")
 	private Integer numberOfRooms;
@@ -42,6 +54,30 @@ public class Housing extends BaseItem {
 	@Column
 	@Facet(value = "Wheelchair accesible", trueString="Yes", falseString="No")
 	private Boolean wheelchairAccessible; 
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getArea() {
+		return area;
+	}
+
+	public void setArea(String area) {
+		this.area = area;
+	}
+
+	public String getDistrict() {
+		return district;
+	}
+
+	public void setDistrict(String district) {
+		this.district = district;
+	}
 
 	public Integer getNumberOfRooms() {
 		return numberOfRooms;
