@@ -13,10 +13,14 @@ import com.test.cv.model.annotations.FacetEntity;
 @Entity(name="rental_apartment")
 @FacetEntity(value = "Rental apartments", propertyOrder = {
 	"apartmentType",
-	"costPerMonth",
+	"price",
+	"currency",
+	"costPeriod",
 	"squarage",
 	"numberOfBedrooms",
 	"numberOfBathrooms",
+	"numberOfRooms",
+	"city",
 	"laundry",
 	"parking",
 	"furnishment",
@@ -29,7 +33,7 @@ import com.test.cv.model.annotations.FacetEntity;
 public class RentalApartment extends Housing {
 
 	@Column
-	@Facet(value = "Cost per month",
+	@Facet(value = "Price",
 			decimalRanges={
 			@DecimalRange(upper=500),
 			@DecimalRange(lower=500,  upper=1000),
@@ -40,7 +44,15 @@ public class RentalApartment extends Housing {
 			@DecimalRange(lower=3000, upper=3500),
 			@DecimalRange(lower=3500)
 	})
-	private BigDecimal costPerMonth;
+	private BigDecimal price;
+	
+	@Column
+	@Facet("Currency")
+	private String currency;
+	
+	@Column
+	@Facet("Cost period")
+	private CostPeriod costPeriod;
 	
 	@Column
 	@Facet("Apartment type")
@@ -114,14 +126,30 @@ public class RentalApartment extends Housing {
 	@Facet(value = "Dogs allowed", trueString="Yes", falseString="No")
 	private Boolean dogs;
 
-	public BigDecimal getCostPerMonth() {
-		return costPerMonth;
+	public BigDecimal getPrice() {
+		return price;
 	}
 
-	public void setCostPerMonth(BigDecimal costPerMonth) {
-		this.costPerMonth = costPerMonth;
+	public void setPrice(BigDecimal price) {
+		this.price = price;
 	}
-	
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
+
+	public CostPeriod getCostPeriod() {
+		return costPeriod;
+	}
+
+	public void setCostPeriod(CostPeriod costPeriod) {
+		this.costPeriod = costPeriod;
+	}
+
 	public ApartmentType getApartmentType() {
 		return apartmentType;
 	}
