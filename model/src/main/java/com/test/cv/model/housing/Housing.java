@@ -27,7 +27,7 @@ public class Housing extends BaseItem {
 
 	@Column
 	@Facet("Number of rooms")
-	private Integer numberOfRooms;
+	private BigDecimal numberOfRooms;
 
 	@Column
 	@Facet("Number of bedrooms")
@@ -37,6 +37,10 @@ public class Housing extends BaseItem {
 	@Facet("Number of bathrooms")
 	private BigDecimal numberOfBathrooms; // can have 1.5 bathrooms, eg one with shower and toilet, one with only topilet
 
+	@Column
+	@Facet("Building status")
+	private BuildingStatus buildingStatus;
+	
 	@Column
 	@Facet(value = "Squarage",
 			decimalRanges = {
@@ -79,11 +83,11 @@ public class Housing extends BaseItem {
 		this.district = district;
 	}
 
-	public Integer getNumberOfRooms() {
+	public BigDecimal getNumberOfRooms() {
 		return numberOfRooms;
 	}
 
-	public void setNumberOfRooms(Integer numberOfRooms) {
+	public void setNumberOfRooms(BigDecimal numberOfRooms) {
 		this.numberOfRooms = numberOfRooms;
 	}
 
@@ -103,6 +107,14 @@ public class Housing extends BaseItem {
 		this.numberOfBathrooms = numberOfBathrooms;
 	}
 	
+	public BuildingStatus getBuildingStatus() {
+		return buildingStatus;
+	}
+
+	public void setBuildingStatus(BuildingStatus buildingStatus) {
+		this.buildingStatus = buildingStatus;
+	}
+
 	public BigDecimal getSquarage() {
 		return squarage;
 	}
