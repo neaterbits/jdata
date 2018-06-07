@@ -65,6 +65,10 @@ public class SearchService extends BaseService {
 	private static final String ASCENDING = "ascending";
 	private static final String DESCENDING = "descending";
 	
+	public SearchService(String localFileDir) {
+		super(localFileDir);
+	}
+
 	private ISearchDAO getSearchDAO(HttpServletRequest request) {
 		
 		final ISearchDAO ret;

@@ -18,15 +18,17 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
-import com.test.cv.common.IOUtil;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.model.Item;
 import com.test.cv.model.items.ItemTypes;
 
 @Path("/")
 public class ItemService extends BaseService {
-
 	
+	public ItemService(String localFileDir) {
+		super(localFileDir);
+	}
+
 	@POST
 	@Path("items")
 	@Consumes("application/json")

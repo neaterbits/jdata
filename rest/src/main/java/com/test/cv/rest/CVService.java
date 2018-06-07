@@ -18,7 +18,7 @@ import com.test.cv.model.cv.Personalia;
 @Path("/cv")
 public class CVService extends BaseService {
 
-	private static ICVDAO getDAO(HttpServletRequest request) {
+	private ICVDAO getDAO(HttpServletRequest request) {
 		
 		final ICVDAO ret;
 		
@@ -34,6 +34,10 @@ public class CVService extends BaseService {
 		}
 		
 		return ret;
+	}
+
+	public CVService(String localFileDir) {
+		super(localFileDir);
 	}
 
 	// return the complete CV

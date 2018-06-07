@@ -1,6 +1,7 @@
 package com.test.cv.jetty.test;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -42,10 +43,25 @@ public class JettyRunServlet {
 
 		//final ServletHandler contextHandler = new ServletHandler();
 		
+		final String localFileDir;
+		if (args.length >= 1) {
+			localFileDir = args[0];
+			
+			final File dir = new File(localFileDir);
+			
+			if (!dir.exists() || !dir.isDirectory()) {
+				throw new IllegalArgumentException("No directory at " + localFileDir);
+			}
+		}
+		else {
+			throw new IllegalArgumentException("Must pass local file dir");
+		}
 		
 		final Server server = new Server(8080);
 		
 		server.setHandler(contextHandler);
+		
+		contextHandler.setInitParameter("localFileDir", localFileDir);
 		
 		contextHandler.addServlet(SearchServlet.class, "/search/*");
 		contextHandler.addServlet(ItemServlet.class, "/items/*");
@@ -61,7 +77,7 @@ public class JettyRunServlet {
 		}
 	}
 
-	public static class SearchServlet extends HttpServlet {
+	public static class SearchServlet extends BaseServlet {
 
 		private static final long serialVersionUID = 1L;
 
@@ -83,7 +99,7 @@ public class JettyRunServlet {
 			
 			//throw new UnsupportedOperationException();
 			
-			final SearchService searchService = new SearchService();
+			final SearchService searchService = new SearchService(getLocalFileDir());
 			
 			// Get parameters
 			String freeText = req.getParameter("freeText");
@@ -155,7 +171,7 @@ public class JettyRunServlet {
 					throw new IllegalArgumentException("No itemIds");
 				}
 				
-				final SearchService searchService = new SearchService();
+				final SearchService searchService = new SearchService(getLocalFileDir());
 
 				final byte [] data = searchService.getThumbnails(itemIds, req);
 				
@@ -166,7 +182,7 @@ public class JettyRunServlet {
 		}
 	}
 	
-	public static class ItemServlet extends HttpServlet {
+	public static class ItemServlet extends BaseServlet {
 
 		private static final long serialVersionUID = 1L;
 
@@ -175,7 +191,7 @@ public class JettyRunServlet {
 
 			System.out.println("## post to items servlet");
 			
-			final ItemService itemService = new ItemService();
+			final ItemService itemService = new ItemService(getLocalFileDir());
 			final String userId = req.getParameter("userId");
 
 			if (req.getPathInfo() != null && req.getPathInfo().contains("imageThumbAndUrl")) {

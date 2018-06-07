@@ -52,9 +52,25 @@ public abstract class BaseService {
 		return new Language [] { language };
 	}
 	
-	private static final File localBaseDir = new File("/Users/nils.lorentzen/cvs");
-	
-	static LocalXmlStorage getLocalXMLStorage() {
+	private static File localBaseDir;
+			
+	BaseService(String localFileDir) {
+		
+		final File f = new File(localFileDir);
+		
+		synchronized (BaseService.class) {
+			if (localBaseDir == null) {
+				BaseService.localBaseDir = f;
+			}
+			else {
+				if (!f.equals(localBaseDir)) {
+					throw new IllegalStateException("Mismatch in local base dir: " + f + "/" + localBaseDir);
+				}
+			}
+		}
+	}
+			
+	LocalXmlStorage getLocalXMLStorage() {
 		return new LocalXmlStorage(localBaseDir);
 	}
 
@@ -73,7 +89,7 @@ public abstract class BaseService {
 		return luceneIndex;
 	}
 
-	static IItemDAO getItemDAO(HttpServletRequest request) {
+	IItemDAO getItemDAO(HttpServletRequest request) {
 		
 		final IItemDAO ret;
 		
