@@ -90,6 +90,9 @@
 						<mainClass>com.test.cv.jetty.test.JettyRunServlet</mainClass>
 					</manifest>
 					</archive>
+				<descriptorRefs>
+					<descriptorRef>jar-with-dependencies</descriptorRef>
+				</descriptorRefs>
 				</configuration>
 			</plugin>
 		</plugins>
