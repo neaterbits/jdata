@@ -419,6 +419,28 @@ public class SearchService extends BaseService {
 		return criteria;
 	}
 	
+	private static BigDecimal toDecimal(Object rangeNo) {
+		final BigDecimal result;
+		
+		if (rangeNo == null) {
+			result = null;
+		}
+		else if (rangeNo instanceof Integer) {
+			result = BigDecimal.valueOf((Integer)rangeNo);
+		}
+		else if (rangeNo instanceof Double) {
+			result = BigDecimal.valueOf((Double)rangeNo);
+		}
+		else if (rangeNo instanceof BigDecimal) {
+			result = (BigDecimal)rangeNo;
+		}
+		else {
+			throw new IllegalArgumentException("Unknown rangeNo type " + rangeNo.getClass());
+		}
+		
+		return result;
+	}
+	
 	private static Criterium convertCriterium(SearchCriterium searchCriterium) {
 		
 		// Figure out the type first
@@ -473,8 +495,8 @@ public class SearchService extends BaseService {
 					final SearchRange range = ranges[i];
 
 					final DecimalRange decimalRange = new DecimalRange(
-							(BigDecimal)range.getLower(), range.includeLower(),
-							(BigDecimal)range.getUpper(), range.includeUpper());
+							toDecimal(range.getLower()), range.includeLower(),
+							toDecimal(range.getUpper()), range.includeUpper());
 					
 					decimalRanges[i] = decimalRange;
 				}
@@ -499,7 +521,7 @@ public class SearchService extends BaseService {
 				break;
 
 			case DECIMAL:
-				criterium = new DecimalInCriterium(attribute, convertCriteriaValues(searchCriterium, o -> (BigDecimal)o), includeItemsWithNoValue);
+				criterium = new DecimalInCriterium(attribute, convertCriteriaValues(searchCriterium, o -> toDecimal(o)), includeItemsWithNoValue);
 				break;
 				
 			case ENUM:
