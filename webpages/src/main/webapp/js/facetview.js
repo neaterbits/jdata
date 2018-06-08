@@ -426,7 +426,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	
 	this.refreshFromNewModel = function(model, isFullUpdate) {
 
-		var facetUpdate = new FacetUpdateShowHide();
+		var facetUpdate = new FacetUpdateSetMatchCountTo0(); // new FacetUpdateShowHide();
 		
 		if (isFullUpdate) {
 			// Caused by fulltext update, that means we are going to remove elements
@@ -759,7 +759,6 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 			
 			var iter;
 			
-			
 			// Remove only if not in use any more and is not in same list as last deselected
 			if (!obj.isPresentInDataModel()) {
 				
@@ -780,7 +779,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				// - an attribute range list, since an empty such would mean the attribute should not be returned in the first place
 
 				if (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeList') {
-					throw "Classname " + className + " should either be in use or not appear here";
+					throw "Classname " + className + " should either be in use or not appear here: " + obj.toDebugString();
 				}
 				
 				var removeFromViewModel = facetUpdate.onNoLongerInDataModel(parent, t.lastDeselectedAttributeValueList, obj);
