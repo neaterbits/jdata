@@ -2,14 +2,21 @@ package com.test.cv.xmlstorage.api;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -27,7 +34,7 @@ import com.test.cv.xmlstorage.model.images.Image;
 import com.test.cv.xmlstorage.model.images.ImageData;
 import com.test.cv.xmlstorage.model.images.Images;
 
-public abstract class BaseXMLStorage implements IItemStorage {
+public abstract class BaseXMLStorage implements IItemStorage, AutoCloseable {
 
 	// TODO we cannot really store this as a file in S3 since does no read-after=write consistency on update
 	// would have to pass in former order on move operation
@@ -45,6 +52,18 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		}
 	}
 	
+	private final ExecutorService thumbDownloadService;
+	
+	protected BaseXMLStorage() {
+		this.thumbDownloadService = Executors.newFixedThreadPool(20);
+	}
+	
+	@Override
+	public void close() throws Exception {
+		this.thumbDownloadService.shutdown();
+	}
+
+
 	/**
 	 * List all files indices in-order. These might not be monotonically increasing
 	 * since files may have been deleted
@@ -151,7 +170,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 	
 
 	@Override
-	public int getNumThumbnailsForItem(String userId, String itemId) throws StorageException {
+	public int getNumThumbnailFilesForItem(String userId, String itemId) throws StorageException {
 		final String [] thumbs;
 
 		thumbs = listFiles(userId, itemId, ItemFileType.THUMBNAIL);
@@ -315,8 +334,7 @@ public abstract class BaseXMLStorage implements IItemStorage {
 
 		return images;
 	}
-	
-	
+
 
 	@Override
 	public final void movePhotoAndThumbnailForItem(String userId, String itemId, int photoNo, int toIndex) throws StorageException {
@@ -406,23 +424,170 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		return getImageFileForItem(userId, itemId, photoNo, ItemFileType.PHOTO);
 	}
 
+	
+	private static class ReadImage {
+		private final ItemId itemId;
+		private final ImageResult imageResult;
+
+		
+		public ReadImage(ItemId itemId, ImageResult imageResult) {
+			
+			if (itemId == null) {
+				throw new IllegalArgumentException("itemId == null");
+			}
+
+			this.itemId = itemId;
+			this.imageResult = imageResult;
+		}
+	}
+	
+	private static ImageResult nullImageResult() {
+		return new ImageResult("", 0, new ByteArrayInputStream(new byte[0]));
+	}
+	
 	@Override
 	public void retrieveThumbnails(ItemId[] itemIds, BiConsumer<ImageResult, ItemId> consumer) throws StorageException {
+
+		
+		final BlockingQueue<ReadImage> imageQueue = new ArrayBlockingQueue<>(itemIds.length);
+		
 		// Retrieve thumbnails for all that have such
 		for (ItemId itemId : itemIds) {
-			if (getNumThumbnailsForItem(itemId.getUserId(), itemId.getItemId()) > 0) {
+
+			final Images imageList = getImageList(itemId.getUserId(), itemId.getItemId());
+
+			if (imageList == null) {
+				throw new IllegalStateException("Should have had image list");
+			}
+
+			// TODO this is slow for S3, just store some flag in image list
+			if (getNumThumbnailFilesForItem(itemId.getUserId(), itemId.getItemId()) > 0) {
 				
-				final Images imageList = getImageList(itemId.getUserId(), itemId.getItemId());
+				thumbDownloadService.submit(() -> {
+
+					ImageResult image = nullImageResult();
+					try {
+						final String fileName = getImageFileName(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, imageList, 0);
+		
+						try {
+							image = getImageFileForItem(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, fileName);
+						} catch (StorageException ex) {
+							ex.printStackTrace();
+						}
+					}
+					catch (Throwable t) {
+						t.printStackTrace(System.err);
+					}
+
+					try {
+						imageQueue.put(new ReadImage(itemId, image));
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				});
+			}
+			else {
+				// No image files, retrieve from URLs asynchronously
 				
-				if (imageList == null) {
-					throw new IllegalStateException("Should have had image list");
+				
+				final String thumbUrl;
+				
+				if (imageList.getImages() == null) {
+					thumbUrl = null;
+				}
+				else {
+					thumbUrl = imageList.getImages().isEmpty()
+							? null
+							: imageList.getImages().get(0).getThumbUrl();
 				}
 				
-				final String fileName = getImageFileName(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, imageList, 0);
+				thumbDownloadService.submit(() -> {
+					ImageResult image = nullImageResult();
 
-				final ImageResult image = getImageFileForItem(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, fileName);
+					// Download thumb data
+					try {
+						if (thumbUrl != null) {
+							URLConnection connection = null;
+							
+							// TODO connection reuse
+							try {
+								connection = new java.net.URL(thumbUrl).openConnection();
+							} catch (MalformedURLException e) {
+								e.printStackTrace();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+							
+							if (connection != null) {
+								connection.setRequestProperty("User-Agent", "Mozilla/5.0 (MS-Windows; rv:60.0) Gecko/20100101 Firefox/60.0");
+								
+								final String mimeType = connection.getContentType();
+								
+								byte[] thumbData = null;
+								try {
+									thumbData = IOUtil.readAll(connection.getInputStream());
+								} catch (IOException e) {
+								}
+	
+								if (thumbData != null) {
+									image = new ImageResult(mimeType, thumbData.length, new ByteArrayInputStream(thumbData));
+								}
+								
+							}
+						}
+					}
+					catch (Throwable t) {
+						t.printStackTrace(System.err);
+					}
+
+					try {
+						imageQueue.put(new ReadImage(itemId, image));
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				});
+			}
+		}
+		
+		// Read all items back
+		
+		
+		// Loop around until have processed all
+		int nextIndexToSendOn = 0;
+		int processed = 0;
+
+		final Map<String, ImageResult> retrievedThumbs = new HashMap<>();
+
+		while (processed < itemIds.length) {
+			
+			ReadImage read;
+			try {
+				read = imageQueue.take();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				continue;
+			}
+
+			retrievedThumbs.put(read.itemId.getItemId(), read.imageResult);
+			
+			// Check first if more to be processed
+			for (int i = nextIndexToSendOn; i < itemIds.length; ++ i) {
 				
-				consumer.accept(image, itemId);
+				final String itemId = itemIds[i].getItemId();
+
+				if (retrievedThumbs.containsKey(itemId)) {
+
+					final ImageResult result = retrievedThumbs.get(itemId);
+					
+					consumer.accept(result, itemIds[i]);
+					
+					++ nextIndexToSendOn;
+					++ processed;
+				}
+				else {
+					// No match, wait for next
+					break;
+				}
 			}
 		}
 	}

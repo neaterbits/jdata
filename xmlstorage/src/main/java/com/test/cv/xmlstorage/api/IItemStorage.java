@@ -7,7 +7,7 @@ import java.util.function.BiConsumer;
 import com.test.cv.common.ItemId;
 import com.test.cv.common.images.ThumbAndImageUrls;
 
-public interface IItemStorage {
+public interface IItemStorage extends AutoCloseable {
 
 	public static class ImageMetaData {
 		public final String mimeType;
@@ -51,7 +51,7 @@ public interface IItemStorage {
 
 	int getNumThumbnailsAndPhotosForItem(String userId, String itemId) throws StorageException;
 
-	int getNumThumbnailsForItem(String userId, String itemId) throws StorageException;
+	int getNumThumbnailFilesForItem(String userId, String itemId) throws StorageException;
 
 	// Sorted in order
 	List<ImageResult> getThumbnailsForItem(String userId, String itemId) throws StorageException;

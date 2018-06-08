@@ -40,4 +40,9 @@ public class ItemId {
 	public void setItemId(String itemId) {
 		this.itemId = itemId;
 	}
+
+	@Override
+	public String toString() {
+		return "ItemId [userId=" + userId + ", itemId=" + itemId + "]";
+	}
 }
