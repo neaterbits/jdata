@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.test.cv.common.IOUtil;
+import com.test.cv.common.images.ThumbAndImageUrls;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.model.Item;
 import com.test.cv.model.items.ItemTypes;
@@ -194,7 +195,20 @@ public class JettyRunServlet {
 			final ItemService itemService = new ItemService(getLocalFileDir());
 			final String userId = req.getParameter("userId");
 
-			if (req.getPathInfo() != null && req.getPathInfo().contains("imageThumbAndUrl")) {
+			if (req.getPathInfo() != null && req.getPathInfo().contains("thumbAndImageUrls")) {
+				final ThumbAndImageUrls thumbAndImageUrls = decodeJson(IOUtil.readAll(req.getInputStream()), ThumbAndImageUrls.class);
+
+				final String itemId = req.getPathInfo().split("/")[1];
+				
+				final String itemType = req.getParameter("itemType");
+
+				try {
+					itemService.storeThumbAndImageUrls(userId, itemId, itemType, thumbAndImageUrls, req);
+				} catch (ItemStorageException ex) {
+					throw new ServletException("Failed to store image URLs", ex);
+				}
+			}
+			else if (req.getPathInfo() != null && req.getPathInfo().contains("imageThumbAndUrl")) {
 				final int index = Integer.parseInt(req.getParameter("index"));
 				final int thumbWidth = Integer.parseInt(req.getParameter("thumbWidth"));
 				final int thumbHeight = Integer.parseInt(req.getParameter("thumbHeight"));
@@ -238,16 +252,12 @@ public class JettyRunServlet {
 				if (typeInfo == null) {
 					throw new ServletException("Unknown type " + type);
 				}
-
-				final ObjectMapper mapper = new ObjectMapper();
-				
-				mapper.setDateFormat(new StdDateFormat());
 				
 				final byte [] data = IOUtil.readAll(req.getInputStream());
 				
 				System.out.println("Received data:\n" + new String(data));
 				
-				final Item item = mapper.readValue(new ByteArrayInputStream(data), typeInfo.getType());
+				final Item item = decodeJson(data, typeInfo.getType());
 				
 				try {
 					final String itemId = itemService.storeItem(userId, item, req);
@@ -258,6 +268,14 @@ public class JettyRunServlet {
 				}
 			}
 		}
+	}
+	
+	private static <T> T decodeJson(byte [] data, Class<T> type) throws IOException {
+		final ObjectMapper mapper = new ObjectMapper();
+		
+		mapper.setDateFormat(new StdDateFormat());
+		
+		return mapper.readValue(new ByteArrayInputStream(data), type);
 	}
 	
 	public static class LoginServlet extends HttpServlet {

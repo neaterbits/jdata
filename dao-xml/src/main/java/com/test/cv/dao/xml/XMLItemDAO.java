@@ -14,6 +14,8 @@ import javax.xml.bind.JAXBException;
 
 import com.test.cv.common.IOUtil;
 import com.test.cv.common.ItemId;
+import com.test.cv.common.images.ThumbAndImageUrl;
+import com.test.cv.common.images.ThumbAndImageUrls;
 import com.test.cv.dao.IFoundItem;
 import com.test.cv.dao.IFoundItemPhotoThumbnail;
 import com.test.cv.dao.IItemDAO;
@@ -303,6 +305,32 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 					photoUrl);
 
 			index.indexThumbnailSize(itemId, type, photoNo, thumbWidth, thumbHeight);
+		} catch (StorageException ex) {
+			throw new ItemStorageException("Failed to store thumbnail", ex);
+		} catch (ItemIndexException ex) {
+			throw new ItemStorageException("Failed to index thumbnail sizes", ex);
+		}
+		finally {
+			releaseLock(lock);
+		}
+	}
+	
+	
+
+	@Override
+	public void addThumbAndPhotoUrlsForItem(String userId, String itemId, Class<? extends Item> type,
+			ThumbAndImageUrls urls) throws ItemStorageException {
+
+		final Lock lock = obtainLock(userId, itemId);
+		
+		try {
+			xmlStorage.addThumbAndPhotoUrlsForItem(userId, itemId, urls);
+
+			// Index all thumb sizes
+			for (int i = 0; i < urls.getUrls().size(); ++ i) {
+				final ThumbAndImageUrl url = urls.getUrls().get(i);
+				index.indexThumbnailSize(itemId, type, i, url.getThumbWidth(), url.getThumbHeight());
+			}
 		} catch (StorageException ex) {
 			throw new ItemStorageException("Failed to store thumbnail", ex);
 		} catch (ItemIndexException ex) {

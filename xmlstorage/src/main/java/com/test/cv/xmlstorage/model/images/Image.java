@@ -5,8 +5,10 @@ import javax.xml.bind.annotation.XmlElement;
 public class Image {
 
 	private String id;
+
 	private ImageData thumb;
-	
+	private String thumbUrl;
+
 	// Either has image data for photo, or just an URL reference to photo
 	private ImageData photo;
 	private String photoUrl;
@@ -27,6 +29,15 @@ public class Image {
 
 	public void setThumb(ImageData thumb) {
 		this.thumb = thumb;
+	}
+
+	@XmlElement
+	public String getThumbUrl() {
+		return thumbUrl;
+	}
+
+	public void setThumbUrl(String thumbUrl) {
+		this.thumbUrl = thumbUrl;
 	}
 
 	@XmlElement

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 import com.test.cv.common.ItemId;
+import com.test.cv.common.images.ThumbAndImageUrls;
 
 public interface IItemStorage {
 
@@ -69,6 +70,9 @@ public interface IItemStorage {
 			InputStream thumbnailInputStream, String thumbnailMimeType, Integer thumbLength,
 			String photoUrl) throws StorageException;
 
+	void addThumbAndPhotoUrlsForItem(String userId, String itemId,
+			ThumbAndImageUrls urls) throws StorageException;
+	
 	void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException;
 
 	void retrieveThumbnails(ItemId [] itemIds, BiConsumer<ImageResult, ItemId> consumer) throws StorageException;

@@ -16,6 +16,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 
 import com.test.cv.common.IOUtil;
+import com.test.cv.common.images.ThumbAndImageUrls;
 import com.test.cv.dao.IFoundItem;
 import com.test.cv.dao.IFoundItemPhotoThumbnail;
 import com.test.cv.dao.IItemDAO;
@@ -214,6 +215,15 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	public void addPhotoUrlAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type,
 			InputStream thumbnailInputStream, String thumbnailMimeType, Integer thumbLength, int thumbWidth,
 			int thumbHeight, String photoUrl) throws ItemStorageException {
+
+		throw new UnsupportedOperationException("TODO");
+	}
+	
+	
+
+	@Override
+	public void addThumbAndPhotoUrlsForItem(String userId, String itemId, Class<? extends Item> type,
+			ThumbAndImageUrls urls) throws ItemStorageException {
 
 		throw new UnsupportedOperationException("TODO");
 	}

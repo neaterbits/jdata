@@ -3,6 +3,7 @@ package com.test.cv.dao;
 import java.io.InputStream;
 import java.util.List;
 
+import com.test.cv.common.images.ThumbAndImageUrls;
 import com.test.cv.model.Item;
 import com.test.cv.model.ItemPhoto;
 
@@ -55,6 +56,9 @@ public interface IItemDAO extends AutoCloseable {
 	void addPhotoUrlAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type,
 			InputStream thumbnailInputStream, String thumbnailMimeType, Integer thumbLength, int thumbWidth, int thumbHeight, 
 			String photoUrl) throws ItemStorageException;
+
+	void addThumbAndPhotoUrlsForItem(String userId, String itemId, Class<? extends Item> type, ThumbAndImageUrls urls)
+			throws ItemStorageException;
 
 	// move thumbnail indices to change priority, ie update order
 	// toIndex must be in the range 0 to num - 1

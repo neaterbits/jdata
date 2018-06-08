@@ -18,6 +18,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
+import com.test.cv.common.images.ThumbAndImageUrls;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.model.Item;
 import com.test.cv.model.items.ItemTypes;
@@ -39,7 +40,25 @@ public class ItemService extends BaseService {
 		
 		return itemId;
 	}
-	
+
+	@POST
+	@Path("items/{itemId}/thumbAndImageUrls")
+	@Consumes("application/json")
+	public void storeThumbAndImageUrls(@QueryParam("userId") String userId, @QueryParam("itemId") String itemId, @QueryParam("itemType") String itemType, ThumbAndImageUrls urls, HttpServletRequest request) throws ItemStorageException {
+		if (userId == null || userId.trim().isEmpty()) {
+			throw new IllegalArgumentException("No userId");
+		}
+
+		if (itemType == null || itemType.trim().isEmpty()) {
+			throw new IllegalArgumentException("No item type");
+		}
+
+		final Class<? extends Item> type = ItemTypes.getTypeByName(itemType).getType();
+
+		// Received an item as JSon, store it
+		getItemDAO(request).addThumbAndPhotoUrlsForItem(userId, itemId, type, urls);
+	}
+
 	@POST
 	@Path("items/{itemId}/image")
 	@Consumes({ "image/jpeg", "image/png" })

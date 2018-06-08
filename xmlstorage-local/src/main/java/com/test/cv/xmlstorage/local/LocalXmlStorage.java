@@ -306,6 +306,7 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage, Loc
 		return index;
 	}
 
+
 	@Override
 	public void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException {
 		final String thumbFileName = getImageFileName(userId, itemId, ItemFileType.THUMBNAIL, photoNo);

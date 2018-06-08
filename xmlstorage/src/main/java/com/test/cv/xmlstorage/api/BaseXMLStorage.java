@@ -2,6 +2,7 @@ package com.test.cv.xmlstorage.api;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,6 +21,8 @@ import javax.xml.bind.Unmarshaller;
 import com.test.cv.common.IOUtil;
 import com.test.cv.common.ItemId;
 import com.test.cv.common.StringUtil;
+import com.test.cv.common.images.ThumbAndImageUrl;
+import com.test.cv.common.images.ThumbAndImageUrls;
 import com.test.cv.xmlstorage.model.images.Image;
 import com.test.cv.xmlstorage.model.images.ImageData;
 import com.test.cv.xmlstorage.model.images.Images;
@@ -170,6 +173,27 @@ public abstract class BaseXMLStorage implements IItemStorage {
 		}
 		
 		return thumbs.length;
+	}
+
+	@Override
+	public final void addThumbAndPhotoUrlsForItem(String userId, String itemId, ThumbAndImageUrls urls)
+			throws StorageException {
+
+		// Only stores image-list, not any images
+		final Images imageList = getOrCreateImageList(userId, itemId);
+
+		for (ThumbAndImageUrl url : urls.getUrls()) {
+			final Image image = new Image();
+
+			image.setId(itemId);
+
+			image.setThumbUrl(url.getThumbUrl());
+			image.setPhotoUrl(url.getImageUrl());
+
+			imageList.getImages().add(image);
+		}
+
+		writeImageList(userId, itemId, imageList);
 	}
 
 	private Images getOrCreateImageList(String userId, String itemId) throws StorageException {
