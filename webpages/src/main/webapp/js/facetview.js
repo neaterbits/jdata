@@ -832,10 +832,6 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				// - an attribute value list, since an empty such would mean the attribute should not be returned in the first place
 				// - an attribute range list, since an empty such would mean the attribute should not be returned in the first place
 
-				if (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeList') {
-					throw "Classname " + className + " should either be in use or not appear here: " + obj.toDebugString();
-				}
-				
 				var removeFromViewModel = facetUpdate.onNoLongerInDataModel(parent, t.lastDeselectedAttributeValueList, obj);
 
 				if (removeFromViewModel) {
@@ -1983,6 +1979,13 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	}
 
 	FacetUpdateSearchChanged.prototype.onNoLongerInDataModel = function(valueList, lastDeselectedAttributeValueList, value) {
+
+		var className = value.className;
+
+		if (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeList') {
+			throw "Classname " + className + " should either be in use or not appear here: " + obj.toDebugString();
+		}
+
 		// Not in use anymore, means we must always remove the element from the DOM
 		// as this option should not result with the current full text search as basis
 		value.getViewElementFactory().removeElement(valueList.getViewElement(), value.getViewElement());
