@@ -1846,11 +1846,15 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		// user deactivates eg a type. So show again
 		list.getViewElementFactory().showElement(list.getViewElement());
 	}
+	
+	FacetUpdateSetMatchCountTo0.prototype._hasMatchCount = function(value) {
+		return value.isAttributeValue() || value.className === 'FacetTypeContainer';
+	}
 
 	// Show a previous hidden value since there are now matches
 	FacetUpdateSetMatchCountTo0.prototype.onElementStillInDataModelAndVisibleInViewModel = function(value, matchCount) {
 
-		if (value.isAttributeValue() || value.className === 'FacetTypeContainer') {
+		if (this._hasMatchCount(value)) {
 			// Update match count
 			value.updateMatchCount(matchCount);
 		}
@@ -1858,7 +1862,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	FacetUpdateSetMatchCountTo0.prototype.onNoLongerInDataModel = function(parent, lastDeselectedAttributeValueList, value) {
 
-		if (value.isAttributeValue() || value.className === 'FacetTypeContainer') {
+		if (this._hasMatchCount(value)) {
 			// Just set match count to 0
 			value.updateMatchCount(0);
 		}
@@ -1875,7 +1879,9 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	// Was not in use but is now in use
 	FacetUpdateSetMatchCountTo0.prototype.onElementInDataModelButHiddenInViewModel = function(value, matchCount) {
 		// Update match count
-		value.updateMatchCount(matchCount);
+		if (this._hasMatchCount(value)) {
+			value.updateMatchCount(matchCount);
+		}
 	}
 
 	FacetUpdateSetMatchCountTo0.prototype.onInDataModelButNotInViewModel = function(parent, value, matchCount) {
