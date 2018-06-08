@@ -43,13 +43,28 @@ public class Housing extends BaseItem {
 	
 	@Column
 	@Facet(value = "Squarage",
+	/*
 			decimalRanges = {
 					@DecimalRange(upper=500),
 					@DecimalRange(lower=500, upper=1000),
 					@DecimalRange(lower=1000, upper=1500),
 					@DecimalRange(lower=1500, upper=2000),
 					@DecimalRange(lower=2500)
-			})
+			}
+	*/
+			decimalRanges = {
+					@DecimalRange(upper=20),
+					@DecimalRange(lower=20, upper=30),
+					@DecimalRange(lower=30, upper=40),
+					@DecimalRange(lower=40, upper=50),
+					@DecimalRange(lower=50, upper=60),
+					@DecimalRange(lower=60, upper=70),
+					@DecimalRange(lower=70, upper=80),
+					@DecimalRange(lower=80, upper=90),
+					@DecimalRange(lower=90, upper=100),
+					@DecimalRange(lower=100)
+			}
+	)
 	private BigDecimal squarage;
 	
 	@Column
