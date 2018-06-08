@@ -6,6 +6,8 @@
 
 function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
+	var DEBUG_MODEL_UPDATE = true;
+	
 	var ITER_CONTINUE = 1; 	// Continue recursive iteration
 	var ITER_BREAK = 2; 	// Break out of iteration, also current level (eg for arrays, skip the rest of indices)
 	var ITER_SKIP_SUB = 3;	// Skip recursion into sub elements but continue all iteration at same level 
@@ -606,6 +608,25 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 					return cur;
 				});
 	};
+	
+	this._itemStackDebugString = function(stack) {
+
+		var s = "[";
+		
+		for (var i = 0; i < stack.length; ++ i) {
+			if (i > 0) {
+				s += ", ";
+			}
+			
+			var obj = stack[i];
+			
+			s += obj.className + ":" + obj.toDebugString();
+		}
+		
+		s += "]";
+		
+		return s;
+	}
 
 	this._markAllStillInDataModelAsInUseAndUpdateMatchCounts = function(model, facetUpdate) {
 
@@ -618,11 +639,15 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 			}
 		};
 		
-		model.iterate(
+		// Stack for debugging
+		var stack = [];
+		
+		model.iterateWithElementEnd(
 				root, // instead of this.rootTypes, which is a FacetTypeList
 
 				// model array, eg type list
 				function (kind, length, cur) {
+					
 					
 					var sub = null;
 					
@@ -655,6 +680,11 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 					else {
 						throw "Unknown data model element: " + kind;
 					}
+					
+					if (DEBUG_MODEL_UPDATE) {
+						stack.push(sub);
+						console.log(indent(stack.length - 1) + 'ENTER array ' + t._itemStackDebugString(stack))
+					}
 
 					if (isNotNull(sub)) {
 						t._updateVisibilityStateForList(facetUpdate, sub);
@@ -663,6 +693,13 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 					}
 
 					return cur;
+				},
+				
+				function() {
+					if (DEBUG_MODEL_UPDATE) {
+						console.log(indent(stack.length - 1) + 'EXIT array ' + t._itemStackDebugString(stack))
+						stack.pop();
+					}
 				},
 
 				function (kind, element, index, cur) {
@@ -694,6 +731,12 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 					else {
 						throw "Unknown data element type for markAllStillInUse: " + kind;
 					}
+					
+					if (DEBUG_MODEL_UPDATE) {
+						stack.push(sub);
+						console.log(indent(stack.length - 1) + 'ENTER array element ' + t._itemStackDebugString(stack))
+					}
+
 
 					if (sub != null) {
 
@@ -704,8 +747,15 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 					t._updateVisibilityStateForElement(facetUpdate, sub, element);
 
+					
 					return cur;
- 				});
+ 				},
+				function() {
+					if (DEBUG_MODEL_UPDATE) {
+						console.log(indent(stack.length - 1) + 'EXIT array element ' + t._itemStackDebugString(stack))
+						stack.pop();
+					}
+				});
 	}
 
 	this._updateVisibilityStateForList = function(facetUpdate, sub) {
@@ -756,6 +806,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 			var last = stack.length > 0 ? stack[stack.length - 1] : null;
 			
 			stack.push(obj);
+
+			if (DEBUG_MODEL_UPDATE) {
+				console.log(indent(stack.length - 1) + "ENTER remove not present " + t._itemStackDebugString(stack));
+			}
 			
 			var iter;
 			
@@ -807,6 +861,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 			return iter;
 		},
 		function(className, obj) {
+			if (DEBUG_MODEL_UPDATE) {
+				console.log(indent(stack.length - 1) + "EXIT remove not present " + t._itemStackDebugString(stack));
+			}
+
 			stack.pop();
 		});
 	}
