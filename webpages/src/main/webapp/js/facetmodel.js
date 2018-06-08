@@ -21,26 +21,35 @@ function FacetModel() {
 			throw "No types defined for model";
 		}
 
-		return this._iterate(this.types, 'type', callerRootElement, onArray, onArrayElement);
+		return this._iterate(this.types, 'type', callerRootElement, onArray, null, onArrayElement, null);
 	}
 
-	this._iterate = function(modelCurArray, kind, callerCur, onArray, onArrayElement) {
+	this.iterateWithElementEnd = function(callerRootElement, onArray, onArrayEnd, onArrayElement, onArrayElementEnd) {
+
+		if (typeof this.types === 'undefined') {
+			throw "No types defined for model";
+		}
+
+		return this._iterate(this.types, 'type', callerRootElement, onArray, onArrayEnd, onArrayElement, onArrayElementEnd);
+	}
+
+	this._iterate = function(modelCurArray, kind, callerCur, onArray, onArrayEnd, onArrayElement, onArrayElementEnd) {
 
 		var arrayCur = onArray(kind, modelCurArray.length, callerCur);
 
 		for (var i = 0; i < modelCurArray.length; ++ i) {
 			var element = modelCurArray[i];
-			
+	
 			var arrayElementCur = onArrayElement(kind, element, i, arrayCur);
 
 			if (kind === 'type') {
 
 				if (typeof element.subTypes !== 'undefined' && element.subTypes != null) {
-					this._iterate(element.subTypes, 'type', arrayElementCur, onArray, onArrayElement);
+					this._iterate(element.subTypes, 'type', arrayElementCur, onArray, onArrayEnd, onArrayElement, onArrayElementEnd);
 				}
 
 				if (typeof element.attributes !== 'undefined' && element.attributes != null) {
-					this._iterate(element.attributes, 'attribute', arrayElementCur, onArray, onArrayElement);
+					this._iterate(element.attributes, 'attribute', arrayElementCur, onArray, onArrayEnd, onArrayElement, onArrayElementEnd);
 				}
 			}
 			else if (kind === 'attribute') {
@@ -54,18 +63,29 @@ function FacetModel() {
 						var attrValue = element.values[attrValueIdx];
 						
 						var attrValueCur = onArrayElement('attributeValue', attrValue, attrValueIdx, valuesArrayCur);
-			
 						
 						if (typeof attrValue.subAttributes !== 'undefined' && attrValue.subAttributes != null) {
 							// Recursive attributes, eg County under State
 
-							this._iterate(attrValue.subAttributes, 'attribute', attrValueCur, onArray, onArrayElement);
+							this._iterate(attrValue.subAttributes, 'attribute', attrValueCur, onArray, onArrayEnd, onArrayElement, onArrayElementEnd);
+						}
+
+						if (onArrayElementEnd != null) {
+							onArrayElementEnd('attributeValue', attrValueIdx, attrValueCur);
 						}
 					} 
 
 					if (typeof element.noAttributeValueCount !== 'undefined' && element.noAttributeValueCount > 0) {
 						// There are elements that have no value for this element, add an element for this too
-						onArrayElement('attributeValueUnknown', { matchCount : element.noAttributeValueCount }, attrValueIdx, valuesArrayCur);
+						var attrValueCur = onArrayElement('attributeValueUnknown', { matchCount : element.noAttributeValueCount }, attrValueIdx, valuesArrayCur);
+
+						if (onArrayElementEnd != null) {
+							onArrayElementEnd('attributeValueUnknown', attrValueIdx, attrValueCur);
+						}
+					}
+
+					if (onArrayEnd != null) {
+						onArrayEnd('attributeValue', valuesArrayCur);
 					}
 				}
 				else if (typeof element.ranges !== 'undefined' && element.ranges != null) {
@@ -75,19 +95,39 @@ function FacetModel() {
 						var attrRange = element.ranges[attrRangeIdx];
 						
 						var attrRangeCur = onArrayElement('attributeRange', attrRange, attrRangeIdx, rangesArrayCur);
+	
+						if (onArrayElementEnd != null) {
+							onArrayElementEnd('attributeRange', attrValueIdx, attrRangeCur);
+						}
 					} 
-					
+
 					if (typeof element.noAttributeValueCount !== 'undefined' && element.noAttributeValueCount > 0) {
 						// There are elements that have no value for this element, add an element for this too
-						onArrayElement('attributeRangeUnknown', { matchCount : element.noAttributeValueCount }, attrValueIdx, rangesArrayCur);
+						var attrRangeCur = onArrayElement('attributeRangeUnknown', { matchCount : element.noAttributeValueCount }, attrValueIdx, rangesArrayCur);
+						
+						if (onArrayElementEnd != null) {
+							onArrayElementEnd('attributeRangeUnknown', attrValueIdx, attrRangeCur);
+						}
 					}
+
+					if (onArrayEnd != null) {
+						onArrayEnd('attributeRange', rangesArrayCur);
+					}
+				}
+				
+				if (onArrayElementEnd != null) {
+					onArrayElementEnd(kind, i, arrayElementCur);
 				}
 			}
 			else {
 				throw "Unknown kind: " + kind;
 			}
 		}
-		
+
+		if (onArrayEnd != null) {
+			onArrayEnd(kind, arrayCur);
+		}
+
 		return arrayCur;
 	};
 
