@@ -36,7 +36,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 		// Iterate through facet model, called back for each single element (like type or attribute)
 		// and list element (subtype or attribute value/range)
-		this.rootTypes = model.iterate(
+		
+		var stack = []; // maintain stack so we can find super-attribute
+		
+		this.rootTypes = model.iterateWithElementEnd(
 				null,
 				
 				// Array of elements
@@ -76,11 +79,18 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 						throw "Neither type nor attribute: " + kind;
 					}
 					
+					stack.push(cur);
+					
 					return cur;
+				},
+				
+				function() {
+					stack.pop();
 				},
 
 				// Array element, create list element
 				function (kind, element, index, cur) {
+					console.log('## stack: ' + stack);
 
 					var viewElementFactory = cur.getViewElementFactory();
 
@@ -92,25 +102,32 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 						cur = t._addFacetAttribute(viewElementFactory, cur, element);
 					}
 					else if (kind == 'attributeValue') {
-						cur = t._addFacetSingleValue(viewElementFactory, cur, element);
+						cur = t._addFacetSingleValue(viewElementFactory, cur, element, index, stack);
 					}
 					else if (kind == 'attributeRange') {
-						cur = t._addFacetAttributeRange(viewElementFactory, cur, element);
+						cur = t._addFacetAttributeRange(viewElementFactory, cur, element, index, stack);
 					}
 					else if (kind === 'attributeValueUnknown')
 						// 'Other' text for values
-						cur = t._addFacetOther(viewElementFactory, cur, element);
+						cur = t._addFacetOther(viewElementFactory, cur, element, index, stack);
 					
 					else if (kind === 'attributeRangeUnknown') {
 						// 'Unknown' text for ranges
-						cur = t._addFacetUnknown(viewElementFactory, cur, element);
+						cur = t._addFacetUnknown(viewElementFactory, cur, element, index, stack);
 					}
 					else {
 						throw "Neither type nor attribute: " + kind;
 					}
 					
+					stack.push(cur);
+					
 					return cur;
-				});
+				},
+
+				function() {
+					stack.pop();
+				}
+		);
 		
 		var x = 123;
 		
@@ -222,7 +239,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		return attribute;
 	}
 
-	this._addFacetSingleValue = function(viewElementFactory, cur, element, index) {
+	this._addFacetSingleValue = function(viewElementFactory, cur, element, index, elementStack) {
+		
+		console.log('## elementStack: ' + elementStack);
+
 		var hasSubAttributes = typeof element.subAttributes !== 'undefined' && element.subAttributes != null;
 		
 		var displayValue = isNotNull(element.displayValue)
@@ -249,14 +269,14 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 								attributeElement.checkboxItem,
 								attributeElement.thisOnlyItem);
 
-		this._setAttributeCheckboxListener(viewElementFactory, cur, attributeValue, hasSubAttributes);
+		this._setAttributeCheckboxListener(viewElementFactory, cur, attributeValue, hasSubAttributes, elementStack);
 				
 		cur.addValue(attributeValue, index);
 
 		return attributeValue;
 	}
 	
-	this._addFacetAttributeRange = function(viewElementFactory, cur, element, index) {
+	this._addFacetAttributeRange = function(viewElementFactory, cur, element, index, elementStack) {
 		var text = '';
 		
 		text += (typeof element.lower !== 'undefined' && element.lower != null ? element.lower : ' ');
@@ -283,7 +303,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				attributeElement.thisOnlyItem,
 				text);
 
-		this._setAttributeCheckboxListener(viewElementFactory, cur, attributeRange, false);
+		this._setAttributeCheckboxListener(viewElementFactory, cur, attributeRange, false, elementStack);
 
 		cur.addRange(attributeRange, index);
 
@@ -320,12 +340,48 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		}
 	}
 	
-	this._setAttributeCheckboxListener = function(viewElementFactory, attributeList, attributeValue, hasSubAttributes) {
+	this._isCheckboxItem = function(element) {
+
+		var isCheckboxItem = false;
+		
+		switch (element.className) {
+		case 'FacetAttributeSingleValue':
+		case 'FacetAttributeRange':
+		case 'FacetAttributeOtherOrUnknown':
+			isCheckboxItem = true;
+			break;
+			
+		default:
+			isCheckboxItem = false;
+			break;
+		}
+
+		return isCheckboxItem;
+	}
+	
+	this._setAttributeCheckboxListener = function(viewElementFactory, attributeList, attributeValue, hasSubAttributes, elementStack) {
+
+		// Must look at stack of elements for super-attributes to be unchecked if this is the last attribute unchecked
+		// Create an array of these.
+		
+		var superElements = [];
+
+		for (var i = 0; i < elementStack.length; ++ i) {
+			var element = elementStack[i];
+			
+			if (this._isCheckboxItem(element)) {
+				superElements.push(element);
+			}
+		}
 
 		var t = this;
 
 		var onCheckboxClicked = function(checked) {
 			t._updateSubAttributeCheckedState(attributeValue, checked);
+
+			// Update super-attributes, ie. if this was the last checked item and is now unchecked
+			t._updateSuperAttributeCheckedState(attributeValue, checked, superElements);
+
 			t._collectAndTriggerCriteriaChangeWithAttributeList(attributeList);
 		};
 
@@ -346,6 +402,45 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				t._unselectAllExceptOnThisOnly(attributeList.ranges, attributeValue, attributeList);
 			}
 		});
+	}
+	
+	this._updateSuperAttributeCheckedState = function(attributeValue, checked, superElements) {
+		
+		if (checked) {
+			// Make sure all superElements are checked as well
+			for (var i = 0; i < superElements.length; ++ i) {
+				var superElement = superElements[i];
+
+				superElement.getViewElementFactory().setCheckboxChecked(superElement.checkboxItem, true);
+			}
+		}
+		else {
+
+			var t = this;
+			
+			// For all sub-attributes, if no subs are checked then we set them to non-checked
+			for (var i = superElements.length - 1; i >= 0; -- i) {
+				var superElement = superElements[i];
+				
+				var checkedState = { checked : false };
+
+				// Iterate over all sub elements to see if any are checked
+				superElement.iterate(function(className, obj) {
+
+					if (t._isCheckboxItem(obj)) {
+						if (obj.getViewElementFactory().isCheckboxChecked(obj.checkboxItem)) {
+							checkedState.checked = true;
+						}
+					}
+				});
+
+				// None checked, set this element as unchecked
+				if (!checkedState.checked) {
+					// No sub-element was checked so uncheck this to
+					superElement.getViewElementFactory().setCheckboxChecked(superElement.checkboxItem, false);
+				}
+			}
+		}
 	}
 
 	this._unselectAllExceptOnThisOnly = function(array, attributeValue, attributeList) {
@@ -378,25 +473,25 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		}
 
 		if (numUpdated > 0) {
-			// Must collect criterias anew
+			// Must collect criteria anew
 			this._collectAndTriggerCriteriaChangeWithAttributeList(attributeList);
 		}
 	}
 
 	// For adding 'other' or 'unknown' elements, ie. where items have no value for some attribute
-	this._addFacetOther = function(viewElementFactory, cur, element, index) {
-		var attributeValue = this._addFacetUnknownValueOrRange(viewElementFactory, cur, element, index, 'Other');
+	this._addFacetOther = function(viewElementFactory, cur, element, index, elementStack) {
+		var attributeValue = this._addFacetUnknownValueOrRange(viewElementFactory, cur, element, index, 'Other', elementStack);
 
 		cur.addValue(attributeValue, index);
 	}
 
-	this._addFacetUnknown = function(viewElementFactory, cur, element, index) {
-		var attributeRange = this._addFacetUnknownValueOrRange(viewElementFactory, cur, element, index, 'Unknown');
+	this._addFacetUnknown = function(viewElementFactory, cur, element, index, elementStack) {
+		var attributeRange = this._addFacetUnknownValueOrRange(viewElementFactory, cur, element, index, 'Unknown', elementStack);
 		
 		cur.addRange(attributeRange, index);
 	}
 
-	this._addFacetUnknownValueOrRange = function(viewElementFactory, cur, element, index, displayText) {
+	this._addFacetUnknownValueOrRange = function(viewElementFactory, cur, element, index, displayText, elementStack) {
 
 		// Attribute within a type in list of attributes
 		var attributeElement = viewElementFactory.createAttributeValueElement(
@@ -416,7 +511,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 								attributeElement.thisOnlyItem,
 								displayText);
 
-		this._setAttributeCheckboxListener(viewElementFactory, cur, attributeValue, false);
+		this._setAttributeCheckboxListener(viewElementFactory, cur, attributeValue, false, elementStack);
 				
 		return attributeValue;
 	}
@@ -479,8 +574,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				return t.rootTypes;
 			}
 		};
+		
+		var stack = [];
 
-		model.iterate(
+		model.iterateWithElementEnd(
 				root, // instead of this.rootTypes,
 				
 				// Array of elements
@@ -524,9 +621,16 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 					else {
 						throw "Unknown data model element: " + kind;
 					}
+					
+					stack.push(cur);
 
 					return cur;
 				},
+				
+				function () {
+					stack.pop();
+				},
+				
 				
 				// Array element
 				function (kind, element, index, cur) {
@@ -582,7 +686,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 						var sub = cur.findValueUnknown();
 						
 						if (cur == null) {
-							sub = t._addFacetOther(cur.getViewElementFactory(), cur, element);
+							sub = t._addFacetOther(cur.getViewElementFactory(), cur, element, index, stack);
 
 							facetUpdate.onInDataModelButNotInViewMode(cur, sub, element.matchCount);
 						}
@@ -594,7 +698,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 						var sub = cur.findValueUnknown();
 						
 						if (cur == null) {
-							sub = t._addFacetOther(cur.getViewElementFactory(), cur, element);
+							sub = t._addFacetUnknown(cur.getViewElementFactory(), cur, element, index, stack);
 
 							facetUpdate.onInDataModelButNotInViewMode(cur, sub, element.matchCount);
 						}
@@ -605,7 +709,13 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 						throw "Unknown data element type for addAllNew: " + kind;
 					}
 					
+					stack.push(cur);
+					
 					return cur;
+				},
+				
+				function () {
+					stack.pop();
 				});
 	};
 	
