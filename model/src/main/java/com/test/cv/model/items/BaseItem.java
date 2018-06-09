@@ -1,5 +1,7 @@
 package com.test.cv.model.items;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
@@ -15,6 +17,9 @@ public abstract class BaseItem extends Item {
 
 	@Column
 	private String originalUrl;
+	
+	@Column
+	private Date publicationDate;
 	
 
 	@Freetext
@@ -33,6 +38,7 @@ public abstract class BaseItem extends Item {
 	public void setOriginalUrl(String originalUrl) {
 		this.originalUrl = originalUrl;
 	}
+	
 
 	/*
 	public List<Item> getSubItems() {
@@ -43,6 +49,14 @@ public abstract class BaseItem extends Item {
 		this.subItems = subItems;
 	}
 	*/
+
+	public Date getPublicationDate() {
+		return publicationDate;
+	}
+
+	public void setPublicationDate(Date publicationDate) {
+		this.publicationDate = publicationDate;
+	}
 
 	public String getDescriptionHtml() {
 		return descriptionHtml;
