@@ -111,7 +111,7 @@ function RentalApartmentGalleryItemFactory() {
 	}
 	
 	this.getItemFields = function () {
-		return ['address', 'price'];
+		return ['address', 'price', 'originalUrl'];
 	}
 
 	this.makeProvisionalItem = function(index, data) {
@@ -224,6 +224,15 @@ function RentalApartmentGalleryItemFactory() {
 		var span3 = document.createElement('span');
 		span3.innerHTML = "Price: " + provisionalData.fields[1] + ' lari / month';
 		textDiv.append(span3);
+		
+		var link = document.createElement('a');
+		
+		link.href = provisionalData.fields[2];
+		
+		link.innerHTML = "Link to ad";
+
+		appendBr(textDiv);
+		textDiv.append(link);
 		
 		return textDiv;
 	}
