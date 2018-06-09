@@ -115,7 +115,7 @@ public class JettyRunServlet {
 			System.out.println("Types: " + Arrays.toString(types));
 
 			final String [] sortOrder = req.getParameterValues("sortOrder");
-			final String [] fields = req.getParameterValues("fields");
+			final String [] fields = req.getParameterValues("field");
 			
 			final SearchCriterium [] searchCriteria;
 			

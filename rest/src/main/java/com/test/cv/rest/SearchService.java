@@ -100,7 +100,6 @@ public class SearchService extends BaseService {
 	// TODO check that we adhere to best practices for pageNo and itemsPerPage
 	public SearchResult search(String [] types, String freeText, SearchCriterium [] criteria, String [] sortOrder, String [] fields, Integer pageNo, Integer itemsPerPage, Boolean testdata, HttpServletRequest request) {
 
-		
 		if (types == null) {
 			// No types selected, ought to return empty resultset
 			types = new String[0];  
@@ -122,11 +121,10 @@ public class SearchService extends BaseService {
 
 			typesList.add(typeInfo.getType());
 		}
-
-		final Set<Class<? extends Item>> baseTypes = ItemTypes.getBaseTypes(typesList);
 		
 		final List<SortAttributeAndOrder> sortAttributes;
 		if (sortOrder != null) {
+			final Set<Class<? extends Item>> baseTypes = ItemTypes.getBaseTypes(typesList);
 
 			final Set<Class<? extends Item>> sortOrderTypes = new HashSet<>(baseTypes.size() + typesList.size());
 
@@ -148,8 +146,8 @@ public class SearchService extends BaseService {
 			responseFieldAttributes = new ArrayList<>();
 
 			for (String field : fields) {
-				for (Class<? extends Item> baseType : baseTypes) {
-					final TypeInfo typeInfo = ItemTypes.getTypeInfo(baseType);
+				for (Class<? extends Item> type : typesList) {
+					final TypeInfo typeInfo = ItemTypes.getTypeInfo(type);
 					
 					final ItemAttribute attribute = typeInfo.getAttributes().getByName(field);
 					
@@ -264,7 +262,7 @@ public class SearchService extends BaseService {
 				final Object [] fieldValues = new Object[responseFieldAttributes.size()];
 
 				for (int fieldNo = 0; fieldNo < responseFieldAttributes.size(); ++ fieldNo) {
-					final ItemAttribute attribute = responseFieldAttributes.get(i);
+					final ItemAttribute attribute = responseFieldAttributes.get(fieldNo);
 
 					fieldValues[fieldNo] = foundItem.getAttributeValue(attribute);
 				}

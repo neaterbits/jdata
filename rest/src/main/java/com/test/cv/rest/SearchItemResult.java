@@ -23,6 +23,7 @@ public class SearchItemResult {
 		this.title = title;
 		this.thumbWidth = thumbWidth;
 		this.thumbHeight = thumbHeight;
+		this.fields = fields;
 	}
 
 	public String getId() {
@@ -55,5 +56,13 @@ public class SearchItemResult {
 
 	public void setThumbHeight(Integer thumbHeight) {
 		this.thumbHeight = thumbHeight;
+	}
+
+	public Object[] getFields() {
+		return fields;
+	}
+
+	public void setFields(Object[] fields) {
+		this.fields = fields;
 	}
 }
