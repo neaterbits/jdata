@@ -270,12 +270,7 @@ function SearchView(
 		
 		return new Gallery(
 				galleryDivId,
-				{
-					columnSpacing : 20,
-					rowSpacing : 20,
-					widthHint : 300,
-					heightHint : 300
-				},
+				galleryItemFactory.getGalleryConfig(),
 				// Create element
 				{ 
 					getProvisionalData 	: function (index, count, onsuccess) { searchView._getGalleryProvisionalData(index, count, onsuccess); },

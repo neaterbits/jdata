@@ -4,6 +4,15 @@
 
 function SimpleGalleryItemFactory() {
 
+	this.getGalleryConfig = function() {
+		return {
+			columnSpacing : 20,
+			rowSpacing : 20,
+			widthHint : 300,
+			heightHint : 300
+		};
+	}
+
 	this.makeProvisionalItem = function(index, data) {
 		var div = document.createElement('div');
 
