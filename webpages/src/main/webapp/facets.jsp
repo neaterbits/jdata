@@ -25,7 +25,9 @@
 <script src="js/gallery_mode_height_hint.js" type="text/javascript"></script>
 <script src="js/gallery.js" type="text/javascript"></script>
 
+<script src="js/galleryitemfactories.js" type="text/javascript"></script>
 <script src="js/searchview.js" type="text/javascript"></script>
+
 </head>
 <body style='height: 100%; margin: 0;'>
 <div style='width: 100%; height: 100%; margin: 0; padding: 0.5em; box-sizing: border-box;'>
@@ -89,7 +91,8 @@
 					'fulltextInput',
 					'fulltextButton',
 					'numberOfItemsCount',
-					'sortListBox');
+					'sortListBox',
+					new SimpleGalleryItemFactory());
 
 		searchView.refresh(true);
 	}
