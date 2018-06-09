@@ -133,7 +133,7 @@ public class LuceneItemIndex implements ItemIndex {
 	}
 
 	@Override
-	public void indexItemAttributes(String userId, Class<? extends Item> itemType, String typeName, List<ItemAttributeValue<?>> attributeValues) throws ItemIndexException {
+	public synchronized void indexItemAttributes(String userId, Class<? extends Item> itemType, String typeName, List<ItemAttributeValue<?>> attributeValues) throws ItemIndexException {
 		final Document document = new Document();
 
 		final boolean idFound = addToDocument(document, ItemTypes.getTypeInfo(itemType), userId, attributeValues);
@@ -417,9 +417,9 @@ public class LuceneItemIndex implements ItemIndex {
 				this.reader = newReader;
 			}
 
-			if (!reader.isCurrent()) {
-				throw new IllegalStateException("Not current");
-			}
+//			if (!reader.isCurrent()) {
+//				throw new IllegalStateException("Not current");
+//			}
 		} catch (IOException ex) {
 			throw new ItemIndexException("Could not reopen reader", ex);
 		}
@@ -491,7 +491,7 @@ public class LuceneItemIndex implements ItemIndex {
 	}
 
 	@Override
-	public void indexThumbnailSize(String itemId, Class<? extends Item> type, int index, int thumbWidth, int thumbHeight) throws ItemIndexException {
+	public synchronized void indexThumbnailSize(String itemId, Class<? extends Item> type, int index, int thumbWidth, int thumbHeight) throws ItemIndexException {
 		final Document doc = refreshReaderGetDoc(itemId);
 		
 		// Get all value
