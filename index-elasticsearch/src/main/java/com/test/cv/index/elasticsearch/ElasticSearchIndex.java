@@ -66,6 +66,8 @@ import com.test.cv.model.attributes.facets.FacetedAttributeDecimalRange;
 import com.test.cv.model.attributes.facets.FacetedAttributeIntegerRange;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.TypeInfo;
+import com.test.cv.search.AttributeValues;
+import com.test.cv.search.FieldValues;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonCriterium;
 import com.test.cv.search.criteria.ComparisonOperator;
@@ -456,6 +458,7 @@ public class ElasticSearchIndex implements ItemIndex {
 			List<Class<? extends Item>> types,
 			String freeText, List<Criterium> criteria,
 			List<SortAttributeAndOrder> sortOrder,
+			Set<ItemAttribute> fieldAttributes,
 			Set<ItemAttribute> facetAttributes)
 			throws ItemIndexException {
 
@@ -560,7 +563,7 @@ public class ElasticSearchIndex implements ItemIndex {
 			
 			// TODO use ES paging? For now optimized to get all data
 			
-			cursor = new ESIndexSearchCursor(response);
+			cursor = new ESIndexSearchCursor(response, fieldAttributes);
 		}
 
 		return cursor;
@@ -568,9 +571,11 @@ public class ElasticSearchIndex implements ItemIndex {
 	
 	private class ESIndexSearchCursor implements IndexSearchCursor {
 		private final SearchResponse response;
+		private final Set<ItemAttribute> fieldAttributes;
 		
-		public ESIndexSearchCursor(SearchResponse response) {
+		public ESIndexSearchCursor(SearchResponse response, Set<ItemAttribute> fieldAttributes) {
 			this.response = response;
+			this.fieldAttributes = fieldAttributes;
 		}
 		
 		private SearchHit [] getHits() {
@@ -597,8 +602,10 @@ public class ElasticSearchIndex implements ItemIndex {
 			final SearchHit [] hits = getHits();
 
 			final List<SearchItem> items = new ArrayList<>(Math.min(hits.length, count));
-			
+
 			for (int i = 0; i < count && (initialIdx + i) < hits.length; ++ i) {
+
+				final FieldValues fieldValues;
 
 				final SearchHit hit = hits[initialIdx + i];
 				
@@ -620,8 +627,22 @@ public class ElasticSearchIndex implements ItemIndex {
 					thumbWidth = null;
 					thumbHeight = null;
 				}
+				
+				if (this.fieldAttributes != null && !fieldAttributes.isEmpty()) {
 
-				items.add(new IndexSearchItem(hit.getId(), title, thumbWidth, thumbHeight));
+					fieldValues = new FieldValues() {
+						
+						@Override
+						public Object getValue(ItemAttribute attribute) {
+							return sourceMap.get(ItemIndex.fieldName(attribute));
+						}
+					};
+				}
+				else {
+					fieldValues = null;
+				}
+
+				items.add(new IndexSearchItem(hit.getId(), title, thumbWidth, thumbHeight, fieldValues));
 			}
 			
 			return items;

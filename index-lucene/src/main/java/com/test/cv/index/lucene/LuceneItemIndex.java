@@ -72,6 +72,7 @@ import com.test.cv.model.StringAttributeValue;
 import com.test.cv.model.attributes.AttributeType;
 import com.test.cv.model.items.ItemTypes;
 import com.test.cv.model.items.TypeInfo;
+import com.test.cv.search.FieldValues;
 import com.test.cv.search.SearchItem;
 import com.test.cv.search.criteria.ComparisonOperator;
 import com.test.cv.search.criteria.ComparisonCriterium;
@@ -573,6 +574,7 @@ public class LuceneItemIndex implements ItemIndex {
 			String freeText,
 			List<Criterium> criteria,
 			List<SortAttributeAndOrder> sortOrder,
+			Set<ItemAttribute> fieldAttributes,
 			Set<ItemAttribute> facetAttributes) throws ItemIndexException {
 		
 		refreshReader();
@@ -723,6 +725,23 @@ public class LuceneItemIndex implements ItemIndex {
 								thumbHeight = null;
 							}
 							
+							final FieldValues fieldValues;
+							
+							if (fieldAttributes != null && !fieldAttributes.isEmpty()) {
+								fieldValues = new FieldValues() {
+									@Override
+									public Object getValue(ItemAttribute attribute) {
+										
+										final IndexableField field = d.getField(ItemIndex.fieldName(attribute));
+										
+										return field != null ? getObjectValueFromField(attribute, field) : null;
+									}
+								};
+							}
+							else {
+								fieldValues = null;
+							}
+							
 
 							// TODO perhaps parameterize attribute names
 							// since this layer ought to be more generic
@@ -732,7 +751,8 @@ public class LuceneItemIndex implements ItemIndex {
 									d.getField("id").stringValue(),
 									titleField != null ? titleField.stringValue() : null,
 									thumbWidth,
-									thumbHeight
+									thumbHeight,
+									fieldValues
 							);
 						})
 						.collect(Collectors.toList());

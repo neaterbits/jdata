@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
@@ -196,6 +200,7 @@ public class LuceneItemIndexTest extends TestCase {
 					null,
 					Arrays.asList(new StringCriterium(idAttribute, itemId, ComparisonOperator.EQUALS)),
 					null,
+					null,
 					null);
 			
 			final SearchItem item = searchCursor.getItemIDsAndTitles(0, 1).get(0);
@@ -238,7 +243,13 @@ public class LuceneItemIndexTest extends TestCase {
 					carTypeInfo.getAttributes().getByName("fuel"),
 					Arrays.asList(new InCriteriumValue<Fuel>(Fuel.GAS, null)),
 					false);
-			final IndexSearchCursor cursor = index.search(Arrays.asList(Snowboard.class), null, Arrays.asList(criterium), null, null);
+			final IndexSearchCursor cursor = index.search(
+					Arrays.asList(Snowboard.class),
+					null,
+					Arrays.asList(criterium),
+					null,
+					null,
+					null);
 
 			assertThat(cursor.getTotalMatchCount()).isEqualTo(2);
 		}
@@ -268,7 +279,7 @@ public class LuceneItemIndexTest extends TestCase {
 	}
 
 	private static IndexSearchCursor searchSnowboads(ItemIndex index, Criterium criterium) throws ItemIndexException {
-		return index.search(Arrays.asList(Snowboard.class), null, Arrays.asList(criterium), null, null);
+		return index.search(Arrays.asList(Snowboard.class), null, Arrays.asList(criterium), null, null, null);
 	}
 }
 

@@ -1,5 +1,7 @@
 package com.test.cv.search;
 
+import com.test.cv.model.ItemAttribute;
+
 /**
  * Information for one item returned from search result
  */
@@ -32,4 +34,10 @@ public interface SearchItem {
 	 * @return height
 	 */
 	Integer getThumbHeight();
+
+	/**
+	 * Any attribute value
+	 */
+	
+	Object getAttributeValue(ItemAttribute attribute);
 }

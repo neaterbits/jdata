@@ -63,7 +63,7 @@ public class ReindexMain {
 				// Just call on source index to get all items
 				final List<Class<? extends Item>> allTypes = ItemTypes.getAllTypesList();
 		
-				final IndexSearchCursor cursor = srcIndex.search(allTypes, null, null, null, null);
+				final IndexSearchCursor cursor = srcIndex.search(allTypes, null, null, null, null, null);
 				
 				final List<String> itemIds = cursor.getItemIDs(0, Integer.MAX_VALUE);
 		

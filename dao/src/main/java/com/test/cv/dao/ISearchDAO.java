@@ -33,6 +33,7 @@ public interface ISearchDAO extends AutoCloseable {
 			String freeText,
 			List<Criterium> criteria,
 			List<SortAttributeAndOrder> sortOrder,
+			Set<ItemAttribute> fieldAttributes,
 			Set<ItemAttribute> facetAttributes) throws SearchException;
 	
 }
