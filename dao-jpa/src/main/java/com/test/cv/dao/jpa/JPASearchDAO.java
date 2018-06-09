@@ -48,6 +48,7 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			String freeText,
 			List<Criterium> criteria,
 			List<SortAttributeAndOrder> sortOrder,
+			Set<ItemAttribute> fieldAttributes,
 			Set<ItemAttribute> facetAttributes) {
 
 		// Must dynamically construct criteria from database by mapping to table

@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.test.cv.model.annotations.DecimalRange;
 import com.test.cv.model.annotations.Facet;
 import com.test.cv.model.annotations.FacetEntity;
+import com.test.cv.model.annotations.Sortable;
 
 @Entity(name="rental_apartment")
 @FacetEntity(value = "Rental apartments", propertyOrder = {
@@ -33,6 +34,7 @@ import com.test.cv.model.annotations.FacetEntity;
 public class RentalApartment extends Housing {
 
 	@Column
+	@Sortable
 	@Facet(value = "Price",
 			decimalRanges={
 			@DecimalRange(upper=500),

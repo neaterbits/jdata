@@ -1976,12 +1976,6 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 			// Just set match count to 0
 			value.updateMatchCount(0);
 		}
-		else {
-			// Hide element, but do not remove completely
-			// since we need to keep the selected-state of the checkbox so that is
-			// correct if an deselected item is re-selected
-			value.getViewElementFactory().hideElement(value.getViewElement());
-		}
 
 		return false; // Do not remove from model
 	}

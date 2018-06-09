@@ -8,6 +8,8 @@ import javax.persistence.MappedSuperclass;
 
 import com.test.cv.model.annotations.DecimalRange;
 import com.test.cv.model.annotations.Facet;
+import com.test.cv.model.annotations.Freetext;
+import com.test.cv.model.annotations.IndexItemAttribute;
 import com.test.cv.model.items.BaseItem;
 
 @MappedSuperclass
@@ -24,6 +26,11 @@ public class Housing extends BaseItem {
 	@Column
 	@Facet(value = "District", superAttribute = "area")
 	private String district;
+
+	@Column
+	@Freetext
+	@IndexItemAttribute(storeValue=true)
+	private String address;
 
 	@Column
 	@Facet("Number of rooms")
@@ -96,6 +103,14 @@ public class Housing extends BaseItem {
 
 	public void setDistrict(String district) {
 		this.district = district;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 	public BigDecimal getNumberOfRooms() {

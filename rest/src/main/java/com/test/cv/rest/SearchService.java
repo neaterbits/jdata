@@ -98,9 +98,8 @@ public class SearchService extends BaseService {
 	@GET
 	@Path("search")
 	// TODO check that we adhere to best practices for pageNo and itemsPerPage
-	public SearchResult search(String [] types, String freeText, SearchCriterium [] criteria, String [] sortOrder, Integer pageNo, Integer itemsPerPage, Boolean testdata, HttpServletRequest request) {
+	public SearchResult search(String [] types, String freeText, SearchCriterium [] criteria, String [] sortOrder, String [] fields, Integer pageNo, Integer itemsPerPage, Boolean testdata, HttpServletRequest request) {
 
-		
 		if (types == null) {
 			// No types selected, ought to return empty resultset
 			types = new String[0];  
@@ -125,8 +124,8 @@ public class SearchService extends BaseService {
 		
 		final List<SortAttributeAndOrder> sortAttributes;
 		if (sortOrder != null) {
-
 			final Set<Class<? extends Item>> baseTypes = ItemTypes.getBaseTypes(typesList);
+
 			final Set<Class<? extends Item>> sortOrderTypes = new HashSet<>(baseTypes.size() + typesList.size());
 
 			// Must add base types to sortorder types since some attributes are only in base types
@@ -141,6 +140,27 @@ public class SearchService extends BaseService {
 					.stream().map(a -> new SortAttributeAndOrder(a, SortOrder.ASCENDING))
 					.collect(Collectors.toList());
 		}
+		
+		final List<ItemAttribute> responseFieldAttributes;
+		if (fields != null && fields.length > 0) {
+			responseFieldAttributes = new ArrayList<>();
+
+			for (String field : fields) {
+				for (Class<? extends Item> type : typesList) {
+					final TypeInfo typeInfo = ItemTypes.getTypeInfo(type);
+					
+					final ItemAttribute attribute = typeInfo.getAttributes().getByName(field);
+					
+					if (attribute != null) {
+						responseFieldAttributes.add(attribute);
+						break;
+					}
+				}
+			}
+		}
+		else {
+			responseFieldAttributes = Collections.emptyList();
+		}
 
 		final SearchResult result;
 		if (testdata != null && testdata && isTest()) {
@@ -148,7 +168,7 @@ public class SearchService extends BaseService {
 			result = makeTestResult();
 		}
 		else {
-			result = searchInDB(typesList, freeText, criteria, sortAttributes, pageNo, itemsPerPage, request);
+			result = searchInDB(typesList, freeText, criteria, sortAttributes, responseFieldAttributes, pageNo, itemsPerPage, request);
 		}
 
 		return result;
@@ -159,6 +179,7 @@ public class SearchService extends BaseService {
 			String freeText,
 			SearchCriterium [] criteria,
 			List<SortAttributeAndOrder> sortAttributes,
+			List<ItemAttribute> responseFieldAttributes,
 			Integer pageNo, Integer itemsPerPage,
 			HttpServletRequest request) {
 		
@@ -181,7 +202,11 @@ public class SearchService extends BaseService {
 		try {
 			final ISearchCursor cursor;
 			try {
-				cursor = searchDAO.search(types, freeText, daoCriteria, sortAttributes, ItemTypes.getFacetAttributes(types));
+				final Set<ItemAttribute> responseFieldSet = (responseFieldAttributes != null && !responseFieldAttributes.isEmpty())
+						? new HashSet<>(responseFieldAttributes)
+						: Collections.emptySet();
+
+				cursor = searchDAO.search(types, freeText, daoCriteria, sortAttributes, responseFieldSet, ItemTypes.getFacetAttributes(types));
 			} catch (SearchException ex) {
 				throw new IllegalStateException("Failed to search", ex);
 			}
@@ -229,17 +254,25 @@ public class SearchService extends BaseService {
 				
 				result.setFacets(convertFacets(cursor.getFacets()));
 			}
-
+			
 			result.setSortOrders(computeAndSortPossibleSortOrders(sortOrderTypes));
 
 			for (int i = 0; i < numFound; ++ i) {
 				final SearchItem foundItem = found.get(i);
-				
+				final Object [] fieldValues = new Object[responseFieldAttributes.size()];
+
+				for (int fieldNo = 0; fieldNo < responseFieldAttributes.size(); ++ fieldNo) {
+					final ItemAttribute attribute = responseFieldAttributes.get(fieldNo);
+
+					fieldValues[fieldNo] = foundItem.getAttributeValue(attribute);
+				}
+
 				items[i] = new SearchItemResult(
 						foundItem.getItemId(),
 						foundItem.getTitle(),
 						foundItem.getThumbWidth() != null ? foundItem.getThumbWidth() : THUMBNAIL_MAX_SIZE,
-						foundItem.getThumbHeight() != null ? foundItem.getThumbHeight() : THUMBNAIL_MAX_SIZE);
+						foundItem.getThumbHeight() != null ? foundItem.getThumbHeight() : THUMBNAIL_MAX_SIZE,
+						fieldValues);
 			}
 			
 			result.setItems(items);
@@ -708,14 +741,21 @@ public class SearchService extends BaseService {
 		return facetAttributesResult;
 	}
 	
-	public byte[] searchReturnCompressed(String freeText, String [] types, SearchCriterium [] criteria, String[] sortOrder, Integer pageNo, Integer itemsPerPage, HttpServletRequest request) {
+	public byte[] searchReturnCompressed(String freeText, String [] types, SearchCriterium [] criteria, String[] sortOrder, String [] fields, Integer pageNo, Integer itemsPerPage, HttpServletRequest request) {
 
 		// Return result as a compressed array (non JSON) of
 		// - IDs, in order
 		// titles, in order
 		// thumbnail sizes (byte width, byte height), in order
+		// fields, in orders
 
-		final SearchResult searchResult = this.search(types, freeText, criteria, sortOrder, pageNo, itemsPerPage, false, request);
+		final SearchResult searchResult = this.search(
+				types,
+				freeText, criteria, sortOrder,
+				fields,
+				pageNo, itemsPerPage,
+				false,
+				request);
 
 		// Add information to compression stream
 		

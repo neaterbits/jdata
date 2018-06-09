@@ -247,7 +247,7 @@ GalleryBase.prototype.log = function(level, text) {
 };
 
 GalleryBase.prototype._log = function(level, text) {
-	console.log(this.indent(level) + text);
+	//console.log(this.indent(level) + text);
 };
 
 GalleryBase.prototype.indent = function(level) {

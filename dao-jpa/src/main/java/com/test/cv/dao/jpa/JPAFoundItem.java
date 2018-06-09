@@ -4,6 +4,7 @@ package com.test.cv.dao.jpa;
 import com.test.cv.dao.BaseFoundItem;
 import com.test.cv.dao.IFoundItem;
 import com.test.cv.model.Item;
+import com.test.cv.model.ItemAttribute;
 
 final class JPAFoundItem extends BaseFoundItem implements IFoundItem {
 
@@ -24,5 +25,10 @@ final class JPAFoundItem extends BaseFoundItem implements IFoundItem {
 	@Override
 	public Integer getThumbHeight() {
 		return getItem().getThumbHeight();
+	}
+
+	@Override
+	public Object getAttributeValue(ItemAttribute attribute) {
+		throw new UnsupportedOperationException("TODO");
 	}
 }

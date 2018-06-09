@@ -7,17 +7,23 @@ public class SearchItemResult {
 
 	private String id;
 	private String title;
+	
+	// May be necessary for figuring the size of element
 	private Integer thumbWidth;
 	private Integer thumbHeight;
+	
+	// Fields as specified in the search request
+	private Object [] fields;
 
 	public SearchItemResult() {
 	}
 
-	public SearchItemResult(String id, String title, Integer thumbWidth, Integer thumbHeight) {
+	public SearchItemResult(String id, String title, Integer thumbWidth, Integer thumbHeight, Object [] fields) {
 		this.id = id;
 		this.title = title;
 		this.thumbWidth = thumbWidth;
 		this.thumbHeight = thumbHeight;
+		this.fields = fields;
 	}
 
 	public String getId() {
@@ -50,5 +56,13 @@ public class SearchItemResult {
 
 	public void setThumbHeight(Integer thumbHeight) {
 		this.thumbHeight = thumbHeight;
+	}
+
+	public Object[] getFields() {
+		return fields;
+	}
+
+	public void setFields(Object[] fields) {
+		this.fields = fields;
 	}
 }

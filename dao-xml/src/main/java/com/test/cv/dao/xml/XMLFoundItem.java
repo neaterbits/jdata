@@ -3,6 +3,7 @@ package com.test.cv.dao.xml;
 import com.test.cv.dao.BaseFoundItem;
 import com.test.cv.dao.IFoundItem;
 import com.test.cv.model.Item;
+import com.test.cv.model.ItemAttribute;
 
 final class XMLFoundItem extends BaseFoundItem implements IFoundItem {
 
@@ -31,6 +32,11 @@ final class XMLFoundItem extends BaseFoundItem implements IFoundItem {
 	@Override
 	public Integer getThumbHeight() {
 		return thumbHeight;
+	}
+
+	@Override
+	public Object getAttributeValue(ItemAttribute attribute) {
+		return attribute.getObjectValue(getItem());
 	}
 }
 

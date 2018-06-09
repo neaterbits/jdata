@@ -1,36 +1,51 @@
 package com.test.cv.search;
 
+import com.test.cv.model.ItemAttribute;
+
 public abstract class BaseSearchItem implements SearchItem {
 
 	private final String id;
 	private final String title;
 	private final Integer thumbWidth;
 	private final Integer thumbHeight;
+	private final FieldValues attributeValues;
+
 	
-	protected BaseSearchItem(String id, String title, Integer thumbWidth, Integer thumbHeight) {
+	protected BaseSearchItem(String id, String title, Integer thumbWidth, Integer thumbHeight, FieldValues attributeValues) {
 		this.id = id;
 		this.title = title;
 		this.thumbWidth = thumbWidth;
 		this.thumbHeight = thumbHeight;
+		this.attributeValues = attributeValues;
 	}
 
 	@Override
-	public String getItemId() {
+	public final String getItemId() {
 		return id;
 	}
 
 	@Override
-	public String getTitle() {
+	public final String getTitle() {
 		return title;
 	}
 
 	@Override
-	public Integer getThumbWidth() {
+	public final Integer getThumbWidth() {
 		return thumbWidth;
 	}
 
 	@Override
-	public Integer getThumbHeight() {
+	public final Integer getThumbHeight() {
 		return thumbHeight;
+	}
+
+	@Override
+	public final Object getAttributeValue(ItemAttribute attribute) {
+		
+		if (attribute == null) {
+			throw new IllegalArgumentException("attribute == null");
+		}
+
+		return attributeValues.getValue(attribute);
 	}
 }
