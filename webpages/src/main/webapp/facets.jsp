@@ -32,7 +32,7 @@
 <body style='height: 100%; margin: 0;'>
 <div style='width: 100%; height: 100%; margin: 0; padding: 0.5em; box-sizing: border-box;'>
 	
-	<div id="leftSideSearchPanel" style='width: 30%; height: 100%;'>
+	<div id="leftSideSearchPanel" style='width: 25%; height: 100%;'>
 		<div id="leftSideSearchPanelFlex">
 			<div id="fulltextAndResultsDiv">
 				<div id="fulltextDiv">
@@ -73,7 +73,7 @@
 	</div>
 	
 	<!-- TODO not set wrapper? Create wrapper in gallery so not setting style on gallery -->
-	<div id = "gallery_frame" style='display: inline-block; width: 65%; height: 100%;'>
+	<div id = "gallery_frame" style='display: inline-block; width: 70%; height: 100%;'>
 		<div id='gallery' style='height: 100%'></div>
 	</div>
 </div>
@@ -92,7 +92,7 @@
 					'fulltextButton',
 					'numberOfItemsCount',
 					'sortListBox',
-					new SimpleGalleryItemFactory());
+					new RentalApartmentGalleryItemFactory());
 
 		searchView.refresh(true);
 	}

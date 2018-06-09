@@ -90,7 +90,10 @@ function SearchView(
 		var t = this;
 
 		// Post to get initial for all known
-		this._postAjax(this.searchUrl + '?itemType=_all_', function(response) {
+		var url = this.searchUrl + '?itemType=_all_';
+		url = this._appendFields(url);
+		
+		this._postAjax(url, function(response) {
 			t.curResponse = response;
 
 			t._updateFacets(response.facets, REFRESH_INITIAL);
@@ -138,6 +141,8 @@ function SearchView(
 			url += "&sortOrder=" + sortOrder;
 		}
 
+		url = this._appendFields(url);
+
 		var freeText = this.searchTextInputElement.value;
 
 		if (freeText != '') {
@@ -158,6 +163,19 @@ function SearchView(
 			
 			onsuccess();
 		});
+	}
+	
+	this._appendFields = function(url) {
+		var fields = this.galleryItemFactory.getItemFields();
+		
+		if (fields != null && fields.length > 0) {
+			for (var i = 0; i < fields.length; ++ i) {
+				console.log('## append ' + fields[i]);
+				url += '&field=' + fields[i];
+			}
+		}
+
+		return url;
 	}
 	
 	this._updateSearchHitsCount = function(response) {
