@@ -94,7 +94,6 @@
 		}
 		else {
 			// Size is hardcoded
-			var 
 		}
 		
 		var x = 0;
