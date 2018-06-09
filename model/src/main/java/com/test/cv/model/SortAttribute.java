@@ -12,7 +12,7 @@ import com.test.cv.model.attributes.ClassAttributes;
 
 /**
  * SortAttributes are different from item attributes in that
- * a bas class attribute is common among subclasses, eg 'Title'
+ * a base class attribute is common among subclasses, eg 'Title'
  * has same hashCode() and equals() for whether being in Car or Snowboard type
  * since resides in baseclass.
  * 
