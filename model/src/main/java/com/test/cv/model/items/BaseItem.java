@@ -9,6 +9,7 @@ import javax.persistence.InheritanceType;
 
 import com.test.cv.model.Item;
 import com.test.cv.model.annotations.Freetext;
+import com.test.cv.model.annotations.IndexItemAttribute;
 
 
 @Entity
@@ -16,6 +17,7 @@ import com.test.cv.model.annotations.Freetext;
 public abstract class BaseItem extends Item {
 
 	@Column
+	@IndexItemAttribute(storeValue=true) // store in index so that can be retrieved straight from index
 	private String originalUrl;
 	
 	@Column
