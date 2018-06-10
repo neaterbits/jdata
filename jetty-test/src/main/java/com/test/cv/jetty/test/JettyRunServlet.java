@@ -270,6 +270,49 @@ public class JettyRunServlet {
 				}
 			}
 		}
+
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			final ItemService itemService = new ItemService(getLocalFileDir());
+
+			if (isTest()) {
+				resp.setHeader("Access-Control-Allow-Origin", "*");
+			}
+
+			if (req.getPathInfo() != null && req.getPathInfo().contains("photoCount")) {
+				final String itemId = req.getPathInfo().split("/")[1];
+
+				try {
+					final int count = itemService.getPhotoCount(itemId, req);
+					
+					System.out.println("## write photo count " + count);
+					
+					resp.getOutputStream().write(String.valueOf(count).getBytes());
+					resp.getOutputStream().close();
+				} catch (ItemStorageException ex) {
+					throw new ServletException("Failed to get photo", ex);
+				}
+			}
+			else if (req.getPathInfo() != null && req.getPathInfo().contains("photos")) {
+				
+				// items/{itemId/photos/{photoNo}
+				final String [] path = req.getPathInfo().split("/");
+				final String itemId = path[1];
+				final int photoNo = Integer.parseInt(path[3]);
+				
+				try {
+					final byte [] data = itemService.getPhoto(itemId, photoNo, req);
+
+					resp.getOutputStream().write(data);
+					resp.getOutputStream().close();
+				} catch (ItemStorageException ex) {
+					throw new ServletException("Failed to get photo", ex);
+				}
+			}
+			else {
+				super.doGet(req, resp);
+			}
+		}
 	}
 	
 	private static <T> T decodeJson(byte [] data, Class<T> type) throws IOException {

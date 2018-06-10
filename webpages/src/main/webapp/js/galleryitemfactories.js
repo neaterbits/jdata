@@ -97,9 +97,13 @@ function SimpleGalleryItemFactory() {
 
 }
 
-function RentalApartmentGalleryItemFactory() {
+function RentalApartmentGalleryItemFactory(ajax, getPhotoCountUrl, getPhotoUrl) {
 	var ITEM_WIDTH = 430;
 	var ITEM_HEIGHT = 115;
+	
+	this.ajax = ajax;
+	this.getPhotoCountUrl = getPhotoCountUrl;
+	this.getPhotoUrl = getPhotoUrl;
 	
 	this.getGalleryConfig = function() {
 		return {
@@ -174,6 +178,8 @@ function RentalApartmentGalleryItemFactory() {
 		
 		return outer;
 	}
+
+	this.photoViewDisplayed = false;
 	
 	this._makeInnerDiv = function(index, provisionalData, imageElement) {
 
@@ -193,6 +199,39 @@ function RentalApartmentGalleryItemFactory() {
 		textDiv.style.width = ITEM_WIDTH - provisionalData.thumbWidth - 20;
 
 		div.append(textDiv);
+		
+		var itemId = provisionalData.id;
+
+		var photoView = this._createPhotoView();
+
+		div.append(photoView);
+		
+		var t = this;
+		
+		div.onclick = function(e) {
+
+			if (photoView.style.display == 'none' && !t.photoViewDisplayed) {
+				
+				var getPhotoCountUrl = t.getPhotoCountUrl(itemId);
+
+				// asynchronously get resonse type
+				t.ajax.getAjax(getPhotoCountUrl, 'text', function(response) {
+
+					console.log('## got response: "' + response + '"');
+
+					var photoCount = parseInt(response);
+
+					console.log('## got photoCount: ' + photoCount);
+
+					// Still not displayed
+					if (photoCount > 0 && photoView.style.display == 'none' && !t.photoViewDisplayed) {
+						t._displayPhotoView(photoView, itemId, photoCount);
+
+						t.photoViewDisplayed = true;
+					}
+				});
+			}
+		}
 
 		return div;
 	}
@@ -236,6 +275,112 @@ function RentalApartmentGalleryItemFactory() {
 		
 		return textDiv;
 	}
+
+	
+	this._createPhotoView = function() {
+
+		var outerDiv = document.createElement('div');
+		
+		outerDiv.style['z-index'] = 100;
+		outerDiv.style.display = 'none';
+		outerDiv.style.position = 'relative';
+
+		outerDiv.style['background-color'] = 'white';
+
+		var header = document.createElement('div');
+		
+		header.innerHTML = "Photo view";
+
+		var imageDiv = document.createElement('div');
+		
+		imageDiv.style.width = '800px';
+		imageDiv.style.height = '600px';
+		imageDiv.setAttribute('class', 'imageDiv');
+
+		var img = document.createElement('img');
+		img.setAttribute('class', 'image');
+		imageDiv.append(img);
+
+		var navigationDiv = document.createElement('div');
+		
+		var nextButton = document.createElement('input');
+		nextButton.type = 'button';
+		nextButton.value = 'Next';
+
+		nextButton.setAttribute('class', 'nextButton');
+
+		var closeButton = document.createElement('input');
+		closeButton.type = 'button';
+		closeButton.value = 'Close';
+		
+		var t = this;
+		
+		closeButton.onclick = function(e) {
+			outerDiv.style.display = 'none';
+
+			t.photoViewDisplayed = false;
+
+			e.stopPropagation();
+		}
+
+		navigationDiv.append(nextButton);
+		navigationDiv.append(closeButton);
+
+		outerDiv.append(header);
+		outerDiv.append(navigationDiv);
+		outerDiv.append(imageDiv);
+		
+		return outerDiv;
+	}
+
+	this._displayPhotoView = function(photoView, itemId, photoCount) {
+
+		if (photoCount < 1) {
+			throw "No photos to display";
+		}
+
+		var img = photoView.getElementsByClassName('image')[0];
+		
+		// Set image URL to download image
+		img.src = this.getPhotoUrl(itemId, 0);
+
+		photoView.style.display = 'block';
+		
+		var nextButton = photoView.getElementsByClassName('nextButton')[0];
+		
+		var t = this;
+		
+		var photoNo = { field : 0 };
+		
+		if (photoCount === 1) {
+			this._enableDisableButton(nextButton, false);
+			nextButton.onclick = null;
+		}
+		else {
+			this._enableDisableButton(nextButton, true);
+
+			nextButton.onclick = function(e) {
+				++ photoNo.field;
+				img.src = getPhotoUrl(itemId, photoNo.field);
+				e.stopPropagation();
+				
+				if (photoNo.field >= photoCount - 1) {
+					t._enableDisableButton(nextButton, false);
+				}
+			};
+		}
+		nextButton.clicked
+	}
+	
+	this._enableDisableButton = function(button, enabled) {
+		if (enabled) {
+			button.removeAttribute('disabled');
+		}
+		else {
+			button.disabled = 'disabled';
+		}
+	}
+	
 }
 
 function appendBr(element) {

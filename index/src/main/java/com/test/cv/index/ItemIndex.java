@@ -41,6 +41,10 @@ public interface ItemIndex extends AutoCloseable {
 
 	void movePhotoAndThumbnailForItem(String itemId, Class<? extends Item> type, int photoNo, int toIndex) throws ItemIndexException;
 
+	public default ItemId expandToItemIdUserId(String itemId) throws ItemIndexException {
+		return expandToItemIdUserId(new String [] { itemId })[0];
+	}
+
 	ItemId [] expandToItemIdUserId(String [] itemIds) throws ItemIndexException;
 
 	/**

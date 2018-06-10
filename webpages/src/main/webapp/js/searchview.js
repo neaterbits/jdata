@@ -9,6 +9,7 @@
 function SearchView(
 		searchUrl,
 		thumbsUrl,
+		ajax,
 		facetsDiv,
 		galleryDivId,
 		searchTextInputId,
@@ -47,6 +48,7 @@ function SearchView(
 	this.searchUrl = searchUrl;
 	this.thumbsUrl = thumbsUrl;
 	
+	this.ajax = ajax;
 	this.galleryItemFactory = galleryItemFactory;
 	
 	this.facetView = facetView;
@@ -260,25 +262,9 @@ function SearchView(
 	}
 	
 	this._sendAjax = function(url, method, responseType, requestContentType, requestContent, onsuccess) {
-		var request = new XMLHttpRequest();
-
-		if (responseType != null) {
-			request.responseType = responseType;
-		}
-
-		request.onreadystatechange = function() {
-
-			if (this.readyState == 4 && this.status == 200) {
-				onsuccess(this.response);
-			}
-		};
-
-		request.open(method, url, true);
-
-		request.send(requestContent);
+		ajax.sendAjax(url, method, responseType, requestContentType, requestContent, onsuccess);
 	};
-	
-	
+
 	function _initGallery(searchView, galleryDivId) {
 		
 		var appendToContainer = function(container, element) { container.append(element); };

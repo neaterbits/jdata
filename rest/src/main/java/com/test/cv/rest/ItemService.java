@@ -12,12 +12,14 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
+import com.test.cv.common.IOUtil;
 import com.test.cv.common.images.ThumbAndImageUrls;
 import com.test.cv.dao.ItemStorageException;
 import com.test.cv.model.Item;
@@ -178,6 +180,38 @@ public class ItemService extends BaseService {
 				imageUrl);
 		
 	}
+
+	// Get total number of images for item
+	@GET
+	@Path("items/{itemId}/photoCount")
+	public int getPhotoCount(
+			@PathParam("itemId") String itemId,
+			HttpServletRequest request) throws IOException, ItemStorageException {
+		
+		return getItemDAO(request).getPhotoCount(itemId);
+	}
+	
+	@GET
+	@Path("items/{itemId}/photos") 
+	@Produces({"image/jpeg"})
+	public byte [] getPhoto(
+			@PathParam("itemId") String itemId,
+			@QueryParam("photoNo") int photoNo,
+			HttpServletRequest request) throws IOException, ItemStorageException {
+	
+		final InputStream photoStream = getItemDAO(request).getItemPhoto(itemId, photoNo);
+
+		final byte[] data;
+		try {
+			data = IOUtil.readAll(photoStream);
+		}
+		finally {
+			photoStream.close();
+		}
+
+		return data;
+	}
+	
 
 	
 	private static RenderedImage imageToRenderedImage(Image image) {

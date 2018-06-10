@@ -32,7 +32,14 @@ public interface IItemDAO extends AutoCloseable {
 	 * @return photo
 	 */
 	ItemPhoto getItemPhoto(String userId, IFoundItemPhotoThumbnail thumbnail) throws ItemStorageException;
-	
+
+	/**
+	 * Get complete photo, given photo no
+	 * @param photoNo
+	 * @return photo
+	 */
+	InputStream getItemPhoto(String itemId, int photoNo) throws ItemStorageException;
+
 	/**
 	 * Add an item to the database, does not cascade to photos
 	 * 
@@ -59,6 +66,8 @@ public interface IItemDAO extends AutoCloseable {
 
 	void addThumbAndPhotoUrlsForItem(String userId, String itemId, Class<? extends Item> type, ThumbAndImageUrls urls)
 			throws ItemStorageException;
+	
+	int getPhotoCount(String itemId) throws ItemStorageException;
 
 	// move thumbnail indices to change priority, ie update order
 	// toIndex must be in the range 0 to num - 1

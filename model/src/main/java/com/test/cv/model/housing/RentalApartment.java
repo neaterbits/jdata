@@ -15,20 +15,21 @@ import com.test.cv.model.annotations.Sortable;
 @FacetEntity(value = "Rental apartments", propertyOrder = {
 	"apartmentType",
 	"price",
-	"currency",
-	"costPeriod",
 	"squarage",
+	"city",
+	"numberOfRooms",
 	"numberOfBedrooms",
 	"numberOfBathrooms",
-	"numberOfRooms",
-	"city",
-	"laundry",
 	"parking",
 	"furnishment",
-	"smoking",
-	"cats",
-	"dogs",
-	"wheelchairAccessible"
+	"appliances",
+	"internet",
+	"floors",
+	"buildingFloors",
+	"laundry",
+	"storeRoom",
+	"currency",
+	"costPeriod",
 })
 @XmlRootElement
 public class RentalApartment extends Housing {

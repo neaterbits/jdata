@@ -184,45 +184,66 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		return result;
 	}
 
-	@Override
-	public ItemPhoto getItemPhoto(String userId, IFoundItemPhotoThumbnail thumbnail) throws ItemStorageException {
+	private ImageResult getPhoto(String userId, String itemId, int photoNo) throws ItemStorageException {
 
-		final ItemPhoto itemPhoto;
-		final String itemId = ((XMLFoundItemPhotoThumbnail)thumbnail).getItemId();
-		
 		final Lock lock = obtainLock(userId, itemId);
-		
+		final ImageResult image;
+
 		try {
-			final int photoNo = Integer.parseInt(thumbnail.getId());
-			
-			final ImageResult image;
 			try {
 				image = xmlStorage.getPhotoForItem(userId, itemId, photoNo);
 			} catch (StorageException ex) {
 				throw new ItemStorageException("Failed to get photo", ex);
 			}
-			
-			try {
-				itemPhoto = new ItemPhoto();
-			
-				itemPhoto.setMimeType(image.mimeType);
-				itemPhoto.setData(IOUtil.readAll(image.inputStream));
-			}
-			catch (IOException ex) {
-				throw new ItemStorageException("Failed to read photo", ex);
-			}
-			finally {
-				try {
-					image.inputStream.close();
-				} catch (IOException e) {
-				}
-			}
 		}
 		finally {
 			releaseLock(lock);
 		}
+
+		return image;
+	}
+	
+	@Override
+	public ItemPhoto getItemPhoto(String userId, IFoundItemPhotoThumbnail thumbnail) throws ItemStorageException {
+
+		final ItemPhoto itemPhoto;
+		final String itemId = ((XMLFoundItemPhotoThumbnail)thumbnail).getItemId();
+		final int photoNo = Integer.parseInt(thumbnail.getId());
+
+		final ImageResult image = getPhoto(userId, itemId, photoNo);
 		
+		try {
+			itemPhoto = new ItemPhoto();
+		
+			itemPhoto.setMimeType(image.mimeType);
+			itemPhoto.setData(IOUtil.readAll(image.inputStream));
+		}
+		catch (IOException ex) {
+			throw new ItemStorageException("Failed to read photo", ex);
+		}
+		finally {
+			try {
+				image.inputStream.close();
+			} catch (IOException e) {
+			}
+		}
+
 		return itemPhoto;
+	}
+
+	@Override
+	public InputStream getItemPhoto(String itemId, int photoNo) throws ItemStorageException {
+
+		final ItemId id;
+		try {
+			id = index.expandToItemIdUserId(itemId);
+		} catch (ItemIndexException ex) {
+			throw new ItemStorageException("Failed to get user id");
+		}
+
+		final ImageResult image = getPhoto(id.getUserId(), itemId, photoNo);
+
+		return image.inputStream;
 	}
 
 	@Override
@@ -315,7 +336,6 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		}
 	}
 	
-	
 
 	@Override
 	public void addThumbAndPhotoUrlsForItem(String userId, String itemId, Class<? extends Item> type,
@@ -338,6 +358,24 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		}
 		finally {
 			releaseLock(lock);
+		}
+	}
+	
+
+	@Override
+	public int getPhotoCount(String itemId) throws ItemStorageException {
+		
+		final ItemId id;
+		try {
+			id = index.expandToItemIdUserId(itemId);
+		} catch (ItemIndexException ex) {
+			throw new ItemStorageException("Failed to get user id");
+		}
+
+		try {
+			return xmlStorage.getPhotoCount(id.getUserId(), itemId);
+		} catch (StorageException ex) {
+			throw new ItemStorageException("Failed to get image count", ex);
 		}
 	}
 
