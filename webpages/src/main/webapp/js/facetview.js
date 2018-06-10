@@ -1786,6 +1786,11 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		for (var i = 0; i < this.ranges.length; ++ i) {
 			var r = this.ranges[i];
 			
+			if (r.className === 'FacetAttributeOtherOrUnknown') {
+				// If no value, there is an 'Other' element here, skip it
+				continue;
+			}
+			
 			// null == undefined below
 			if (r.modelRange.lower == range.lower && r.modelRange.upper == range.upper) {
 				return i;
