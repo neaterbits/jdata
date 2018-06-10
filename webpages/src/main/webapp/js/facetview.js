@@ -90,8 +90,6 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 				// Array element, create list element
 				function (kind, element, index, cur) {
-					console.log('## stack: ' + stack);
-
 					var viewElementFactory = cur.getViewElementFactory();
 
 					// For each element, add to div-model
@@ -241,8 +239,6 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	this._addFacetSingleValue = function(viewElementFactory, cur, element, index, elementStack) {
 		
-		console.log('## elementStack: ' + elementStack);
-
 		var hasSubAttributes = typeof element.subAttributes !== 'undefined' && element.subAttributes != null;
 		
 		var displayValue = isNotNull(element.displayValue)
