@@ -6,7 +6,7 @@
 
 function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
-	var DEBUG_MODEL_UPDATE = true;
+	var DEBUG_MODEL_UPDATE = false;
 	
 	var ITER_CONTINUE = 1; 	// Continue recursive iteration
 	var ITER_BREAK = 2; 	// Break out of iteration, also current level (eg for arrays, skip the rest of indices)
