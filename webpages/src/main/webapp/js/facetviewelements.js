@@ -7,6 +7,10 @@
 
 function FacetViewElements() {
 
+	var FACET_SINGLE_SELECTION_BUTTON = "button";
+	
+	this.facetSingleSelection = null;
+	
 	this.getRootContainer = function(divId) {
 		return document.getElementById(divId);
 	}
@@ -26,16 +30,23 @@ function FacetViewElements() {
 		// Type container contains of two divs, one of title name
 		// and one for subtypes and attributes
 		var typeTitleDiv = document.createElement('div');
-		typeTitleDiv.innerHTML = 
-			  "<div class='typeTitleDiv'>"
+		var titleHtml = "<div class='typeTitleDiv'>"
 				+ "<div class='typeExpander " + expandedClass(isExpanded) + "'></div>"
-				+ "<input type='checkbox' class='includeTypeCheckbox'/>"
-				+ "<span class='typeTitle'>" + text + "</span>"
+				+ "<input type='checkbox' class='includeTypeCheckbox'/>";
+
+		titleHtml += "<span class='typeTitle'>" + text + "</span>";
 				
-				+ "<span class='thisTypeOnlyContainer'>"
+		if (this.facetSingleSelection === FACET_SINGLE_SELECTION_BUTTON) {
+			titleHtml += 
+				  "<span class='thisTypeOnlyContainer'>"
 					+ "<input type='button' class='thisTypeOnlyButton' value='This only'/>"
-				+ "</span>"
-		 	+ "</div>";
+				+ "</span>";
+		}
+				
+		titleHtml += "</div>";
+
+		
+		typeTitleDiv.innerHTML = titleHtml;
 
 		append(typeDiv, typeTitleDiv);
 		
@@ -60,7 +71,11 @@ function FacetViewElements() {
 		typeExpander.onclick = accordion.onclick;
 		typeTitle.onclick = accordion.onclick;
 
-		var thisOnlyButton = typeTitleDiv.getElementsByClassName('thisTypeOnlyButton')[0];
+		var thisOnlyButton;
+		
+		if (this.facetSingleSelection === FACET_SINGLE_SELECTION_BUTTON) {
+			thisOnlyButton = typeTitleDiv.getElementsByClassName('thisTypeOnlyButton')[0];
+		}
 		
 		append(typeDiv, accordion.element);
 
@@ -287,17 +302,23 @@ function FacetViewElements() {
 		checkbox.type = 'checkbox';
 		checkbox.checked = checked;
 
-		var span = document.createElement('span');
-		span.setAttribute('class', 'attributeValueTitle');
-		span.innerHTML = this._makeAttributeValueText(value, matchCount);
-		
-		var thisAttrValueOnlyContainer = document.createElement('span');
-		
-		thisAttrValueOnlyContainer.setAttribute('class', 'thisAttributeValueOnlyContainer');
+		var thisOnlyButton;
+		var titleElement;
 
-		thisAttrValueOnlyContainer.innerHTML = "<input type='button' class='thisAttributeValueOnlyButton' value='This only'/>";
+		titleElement = document.createElement('span');
+		titleElement.setAttribute('class', 'attributeValueTitle');
+		titleElement.innerHTML = this._makeAttributeValueText(value, matchCount);
+		
+		if (this.facetSingleSelection === FACET_SINGLE_SELECTION_BUTTON) {
 
-		var thisOnlyButton = thisAttrValueOnlyContainer.getElementsByTagName('input')[0];
+			var thisAttrValueOnlyContainer = document.createElement('span');
+			
+			thisAttrValueOnlyContainer.setAttribute('class', 'thisAttributeValueOnlyContainer');
+	
+			thisAttrValueOnlyContainer.innerHTML = "<input type='button' class='thisAttributeValueOnlyButton' value='This only'/>";
+	
+			thisOnlyButton = thisAttrValueOnlyContainer.getElementsByTagName('input')[0];
+		}
 
 		if (hasSubAttributes) {
 			
@@ -315,8 +336,11 @@ function FacetViewElements() {
 			
 			append(valueNameDiv, attributeValueExpander);
 			append(valueNameDiv, checkbox);
-			append(valueNameDiv, span);
-			append(valueNameDiv, thisAttrValueOnlyContainer);
+			append(valueNameDiv, titleElement);
+
+			if (this.facetSingleSelection === FACET_SINGLE_SELECTION_BUTTON) {
+				append(valueNameDiv, thisAttrValueOnlyContainer);
+			}
 
 			append(li, valueNameDiv);
 
@@ -327,7 +351,7 @@ function FacetViewElements() {
 				attributeValueExpander.className = 'attributeValueExpander ' + expandedClass(expanded);
 			});
 
-			span.onclick = accordion.onclick;
+			titleElement.onclick = accordion.onclick;
 			attributeValueExpander.onclick = accordion.onclick;
 
 			append(li, accordion.element);
@@ -338,8 +362,10 @@ function FacetViewElements() {
 			valueNameDiv.setAttribute('class', 'attributeValueTitleDiv');
 
 			append(valueNameDiv, checkbox);
-			append(valueNameDiv, span);
-			append(valueNameDiv, thisAttrValueOnlyContainer);
+			append(valueNameDiv, titleElement);
+			if (this.facetSingleSelection === FACET_SINGLE_SELECTION_BUTTON) {
+				append(valueNameDiv, thisAttrValueOnlyContainer);
+			}
 			
 			append(li, valueNameDiv);
 		}
@@ -364,15 +390,20 @@ function FacetViewElements() {
 	}
 
 	this.setAttributeThisOnlyButtonOnClick = function(thisOnlyButton, onButtonClicked) {
-		thisOnlyButton.onclick = function(event) {
-			onButtonClicked();
-		};
+		if (this.facetSingleSelection === FACET_SINGLE_SELECTION_BUTTON) {
+			thisOnlyButton.onclick = function(event) {
+				onButtonClicked();
+			};
+		}
 	}
 
 	this.setTypeThisOnlyButtonOnClick = function(thisOnlyButton, onButtonClicked) {
-		thisOnlyButton.onclick = function(event) {
-			onButtonClicked();
-		};
+
+		if (this.facetSingleSelection === FACET_SINGLE_SELECTION_BUTTON) {
+			thisOnlyButton.onclick = function(event) {
+				onButtonClicked();
+			};
+		}
 	}
 
 	this.setCheckboxChecked = function(checkbox, checked) {
