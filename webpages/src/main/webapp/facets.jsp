@@ -25,6 +25,7 @@
 <script src="js/gallery_mode_height_hint.js" type="text/javascript"></script>
 <script src="js/gallery.js" type="text/javascript"></script>
 
+<script src="js/ajax.js" type="text/javascript"></script>
 <script src="js/galleryitemfactories.js" type="text/javascript"></script>
 <script src="js/searchview.js" type="text/javascript"></script>
 
@@ -82,24 +83,39 @@
 	window.onload = function() {
 		
 		var useTestData = false;
-			
+		
+		var ajax = new Ajax();
+		
+		var getPhotoCountUrl = function(itemId) {
+			return getBaseUrl() + "/items/" + itemId + "/photoCount";
+		}
+
+		var getPhotoUrl = function(itemId, photoNo) {
+			return getBaseUrl() + "/items/" + itemId + "/photos/" + photoNo;
+		}
+
 		var searchView = new SearchView(
 					getSearchUrl(useTestData),
 					getThumbsUrl(useTestData),
+					ajax,
 					'facets',
 					'gallery',
 					'fulltextInput',
 					'fulltextButton',
 					'numberOfItemsCount',
 					'sortListBox',
-					new RentalApartmentGalleryItemFactory());
+					new RentalApartmentGalleryItemFactory(ajax, getPhotoCountUrl, getPhotoUrl));
 
 		searchView.refresh(true);
 	}
 	
+	function getBaseUrl() {
+		return "http://localhost:8080";
+	}
+	
 	
 	function getSearchUrl(testdata) {
-		var url = "http://localhost:8080/search";
+		var url = getBaseUrl() + "/search";
 
 		if (testdata) {
 			url += "?testdata=" + testdata;
@@ -109,7 +125,7 @@
 	}
 
 	function getThumbsUrl(testdata) {
-		var url = "http://localhost:8080/search/thumbnails";
+		var url = getBaseUrl() + "/search/thumbnails";
 
 		if (testdata) {
 			url += "?testdata=" + testdata;

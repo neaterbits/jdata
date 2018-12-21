@@ -6,7 +6,7 @@
 
 function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
-	var DEBUG_MODEL_UPDATE = true;
+	var DEBUG_MODEL_UPDATE = false;
 	
 	var ITER_CONTINUE = 1; 	// Continue recursive iteration
 	var ITER_BREAK = 2; 	// Break out of iteration, also current level (eg for arrays, skip the rest of indices)
@@ -90,8 +90,6 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 				// Array element, create list element
 				function (kind, element, index, cur) {
-					console.log('## stack: ' + stack);
-
 					var viewElementFactory = cur.getViewElementFactory();
 
 					// For each element, add to div-model
@@ -241,8 +239,6 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	this._addFacetSingleValue = function(viewElementFactory, cur, element, index, elementStack) {
 		
-		console.log('## elementStack: ' + elementStack);
-
 		var hasSubAttributes = typeof element.subAttributes !== 'undefined' && element.subAttributes != null;
 		
 		var displayValue = isNotNull(element.displayValue)
@@ -1789,6 +1785,11 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	FacetAttributeRangeList.prototype._findRangeIdx = function(range) {
 		for (var i = 0; i < this.ranges.length; ++ i) {
 			var r = this.ranges[i];
+			
+			if (r.className === 'FacetAttributeOtherOrUnknown') {
+				// If no value, there is an 'Other' element here, skip it
+				continue;
+			}
 			
 			// null == undefined below
 			if (r.modelRange.lower == range.lower && r.modelRange.upper == range.upper) {

@@ -227,6 +227,18 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 
 		throw new UnsupportedOperationException("TODO");
 	}
+	
+	
+
+	@Override
+	public int getPhotoCount(String itemId) {
+		throw new UnsupportedOperationException("TODO");
+	}
+	
+	@Override
+	public InputStream getItemPhoto(String itemId, int photoNo) throws ItemStorageException {
+		throw new UnsupportedOperationException("TODO");
+	}
 
 	@Override
 	public void movePhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, int photoNo, int toIndex)

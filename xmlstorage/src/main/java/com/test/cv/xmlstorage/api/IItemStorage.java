@@ -73,6 +73,8 @@ public interface IItemStorage extends AutoCloseable {
 	void addThumbAndPhotoUrlsForItem(String userId, String itemId,
 			ThumbAndImageUrls urls) throws StorageException;
 	
+	int getPhotoCount(String userId, String itemId) throws StorageException;
+	
 	void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException;
 
 	void retrieveThumbnails(ItemId [] itemIds, BiConsumer<ImageResult, ItemId> consumer) throws StorageException;

@@ -214,6 +214,29 @@ public abstract class BaseXMLStorage implements IItemStorage, AutoCloseable {
 
 		writeImageList(userId, itemId, imageList);
 	}
+	
+
+	@Override
+	public final int getPhotoCount(String userId, String itemId) throws StorageException {
+		int num = listFiles(userId, itemId, ItemFileType.PHOTO).length;
+		
+		if (num == 0) {
+			// Have urls?
+			final Images images = getImageList(userId, itemId);
+			
+			if (images != null && images.getImages() != null && !images.getImages().isEmpty()) {
+				for (Image image : images.getImages()) {
+					if (image.getPhotoUrl() == null) {
+						throw new IllegalStateException("Photo url not set");
+					}
+
+					++ num;
+				}
+			}
+		}
+		
+		return num;
+	}
 
 	private Images getOrCreateImageList(String userId, String itemId) throws StorageException {
 		Images images = getImageList(userId, itemId);
@@ -386,13 +409,83 @@ public abstract class BaseXMLStorage implements IItemStorage, AutoCloseable {
 		return result;
 	}
 	
-	private ImageResult getImageFileForItem(String userId, String itemId, int photoNo, ItemFileType itemFileType) throws StorageException {
+	private String getImageUrl(Image image, ItemFileType fileType) {
+		
+		final String url;
+		
+		switch (fileType) {
+		case THUMBNAIL:
+			url = image.getThumbUrl();
+			break;
+			
+		case PHOTO:
+			url = image.getPhotoUrl();
+			break;
+			
+		default:
+			throw new IllegalArgumentException("Unknown fileType " + fileType);
+		}
+
+		return url;
+	}
+	
+	private ImageResult downloadFileFromNet(String url) {
+		URLConnection connection = null;
+		ImageResult image = null;
+		
+		// TODO connection reuse
+		try {
+			connection = new java.net.URL(url).openConnection();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		if (connection != null) {
+			connection.setRequestProperty("User-Agent", "Mozilla/5.0 (MS-Windows; rv:60.0) Gecko/20100101 Firefox/60.0");
+			
+			final String mimeType = connection.getContentType();
+			
+			byte[] thumbData = null;
+			try {
+				thumbData = IOUtil.readAll(connection.getInputStream());
+			} catch (IOException e) {
+			}
+
+			if (thumbData != null) {
+				image = new ImageResult(mimeType, thumbData.length, new ByteArrayInputStream(thumbData));
+			}
+		}
+		
+		return image;
+	}
+	
+	private ImageResult getImageForItem(String userId, String itemId, int photoNo, ItemFileType itemFileType) throws StorageException {
 
 		final Images images = getImageList(userId, itemId);
 
-		final String fileName = getImageFileName(userId, itemId, itemFileType, images, photoNo);
-		
-		return getImageFileForItem(userId, itemId, itemFileType, fileName);
+		final Image image = images.getImages().get(photoNo);
+
+		// Remote URL or file stored in system?
+		final String url = getImageUrl(image, itemFileType);
+
+		final ImageResult imageResult;
+
+		if (url != null) {
+			imageResult = downloadFileFromNet(url);
+
+			if (imageResult == null) {
+				throw new StorageException("Failed to read image from url " + url);
+			}
+		}
+		else {
+			final String fileName = getImageFileName(userId, itemId, itemFileType, images, photoNo);
+			
+			imageResult = getImageFileForItem(userId, itemId, itemFileType, fileName);
+		}
+
+		return imageResult;
 	}
 
 
@@ -416,12 +509,12 @@ public abstract class BaseXMLStorage implements IItemStorage, AutoCloseable {
 
 	@Override
 	public final ImageResult getThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException {
-		return getImageFileForItem(userId, itemId, photoNo, ItemFileType.THUMBNAIL);
+		return getImageForItem(userId, itemId, photoNo, ItemFileType.THUMBNAIL);
 	}
 
 	@Override
 	public final ImageResult getPhotoForItem(String userId, String itemId, int photoNo) throws StorageException {
-		return getImageFileForItem(userId, itemId, photoNo, ItemFileType.PHOTO);
+		return getImageForItem(userId, itemId, photoNo, ItemFileType.PHOTO);
 	}
 
 	
@@ -507,33 +600,7 @@ public abstract class BaseXMLStorage implements IItemStorage, AutoCloseable {
 					// Download thumb data
 					try {
 						if (thumbUrl != null) {
-							URLConnection connection = null;
-							
-							// TODO connection reuse
-							try {
-								connection = new java.net.URL(thumbUrl).openConnection();
-							} catch (MalformedURLException e) {
-								e.printStackTrace();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-							
-							if (connection != null) {
-								connection.setRequestProperty("User-Agent", "Mozilla/5.0 (MS-Windows; rv:60.0) Gecko/20100101 Firefox/60.0");
-								
-								final String mimeType = connection.getContentType();
-								
-								byte[] thumbData = null;
-								try {
-									thumbData = IOUtil.readAll(connection.getInputStream());
-								} catch (IOException e) {
-								}
-	
-								if (thumbData != null) {
-									image = new ImageResult(mimeType, thumbData.length, new ByteArrayInputStream(thumbData));
-								}
-								
-							}
+							image = downloadFileFromNet(thumbUrl);
 						}
 					}
 					catch (Throwable t) {
