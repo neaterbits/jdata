@@ -18,7 +18,7 @@ import com.test.salesportal.model.items.ItemTypes;
 
 /**
  * Store multiple types in one index.
- * This dows not work anymore in >= 6.x but keep the code here for reference
+ * This does not work anymore in >= 6.x but keep the code here for reference
  */
 
 @Deprecated
