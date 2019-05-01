@@ -10,7 +10,7 @@ import com.test.cv.common.IOUtil;
 
 import junit.framework.TestCase;
 
-public class BaseJSTest extends TestCase {
+public class BaseJSTest /* extends TestCase */ {
 
 	private final JSEngine engine;
 	
