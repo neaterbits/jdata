@@ -28,6 +28,7 @@ Kjapp informajon om innhold i noen av katalogene
 Dette er en tidlig versjon, men begynner å fungerer noenlunde hele stacken igjennom.
 
 # Forbedringer som bør gjøres, og er under utbedring
+ - Javadoc dokumentasjon :)
  - lagre XML, miniatyrbilde og mellomstore bilder som en samlet fil i S3. Slipper da antakelig logikk for synkronisering.
  - cache miniatyrbilder lokalt på EBS, eller i redis eller lignende.
  - cache søkeresultater fra Elasticsearch lokalt i minne på VM i skyen, evt. i redis eller lignende.
