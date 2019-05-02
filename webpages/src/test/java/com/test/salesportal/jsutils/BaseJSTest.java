@@ -8,8 +8,6 @@ import java.util.function.Function;
 
 import com.test.salesportal.common.IOUtil;
 
-import junit.framework.TestCase;
-
 public class BaseJSTest /* extends TestCase */ {
 
 	private final JSEngine engine;

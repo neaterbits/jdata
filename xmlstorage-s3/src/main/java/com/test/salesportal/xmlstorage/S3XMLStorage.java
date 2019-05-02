@@ -42,10 +42,6 @@ public class S3XMLStorage extends BaseXMLStorage implements IItemStorage {
 		return filesDir(userId, itemId, itemFileType) + "/" + fileName;
 	}
 
-	private String itemDir(String userId, String itemId) {
-		return userId + "/" + itemId;
-	}
-
 	private String filesDir(String userId, String itemId, ItemFileType itemFileType) {
 		return userId + "/" + itemId + "/" + itemFileType.getDirectoryName();
 	}

@@ -1,7 +1,5 @@
 package com.test.salesportal.dao.jpa;
 
-import javax.persistence.EntityManagerFactory;
-
 import com.test.salesportal.dao.LockDAO;
 import com.test.salesportal.model.lock.ItemLock;
 

@@ -3,6 +3,12 @@ package com.test.salesportal.dao;
 import com.test.salesportal.model.cv.CV;
 import com.test.salesportal.model.cv.Language;
 
+/**
+ * For storing structured CVs, like in job portals.
+ * Not directly related to salesportal.
+ * 
+ */
+
 public interface ICVDAO extends AutoCloseable {
 
 	/**

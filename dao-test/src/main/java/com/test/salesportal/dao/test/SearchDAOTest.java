@@ -196,10 +196,6 @@ public abstract class SearchDAOTest extends TestCase {
 		});
 	}
 
-	private static <T> boolean contains(Collection<T> collection, Predicate<T> predicate) {
-		return collection.stream().anyMatch(predicate);
-	}
-	
 	private static <T> T find(Collection<T> collection, Predicate<T> predicate) {
 		return collection.stream().filter(predicate).findFirst().get();
 	}
@@ -437,17 +433,6 @@ public abstract class SearchDAOTest extends TestCase {
 		});
 	}
 	
-	@SafeVarargs
-	private static <T extends Comparable<T>> List<InCriteriumValue<T>> values(T ... values)  {
-		final List<InCriteriumValue<T>> list = new ArrayList<>(values.length);
-
-		for (T value : values) {
-			list.add(new InCriteriumValue<T>(value, null));
-		}
-
-		return list;
-	}
-
 	public void testSearchReturnsOnlyOneWhenSameMakeButDifferentModel() throws Exception {
 		final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
 

@@ -10,9 +10,6 @@ import com.test.salesportal.jsutils.JSInvocable;
  */
 public class GalleryCacheAllProvisionalSomeComplete extends GalleryCacheBase {
 
-	private final GalleryModel galleryModel;
-	private final GalleryView<?, ?, ?, ?, ?, ?, ?, ?> galleryView;
-
 	public GalleryCacheAllProvisionalSomeComplete(
 			JSInvocable runtime,
 			Object jsObject,
@@ -32,10 +29,6 @@ public class GalleryCacheAllProvisionalSomeComplete extends GalleryCacheBase {
 		if (galleryView == null) {
 			throw new IllegalArgumentException("galleryView == null");
 		}
-		
-
-		this.galleryModel = galleryModel;
-		this.galleryView = galleryView;
 	}
 	
 	public void refresh(int totalNumberOfItems) {

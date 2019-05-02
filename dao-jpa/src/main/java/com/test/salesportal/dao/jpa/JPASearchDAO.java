@@ -19,7 +19,6 @@ import com.test.salesportal.dao.ISearchCursor;
 import com.test.salesportal.dao.ISearchDAO;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttribute;
 import com.test.salesportal.model.SortAttributeAndOrder;
 import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.model.items.TypeInfo;
@@ -259,7 +258,8 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 	}
 
 	// Not in use, favoring just to get all items
-	private Query buildItemAndFacetAttributesQuery(
+	@Deprecated
+	Query buildItemAndFacetAttributesQuery(
 			LinkedHashMap<EntityType<?>, String> typeToVarName,
 			Set<ItemAttribute> facetedAttributes,
 			String fromList,

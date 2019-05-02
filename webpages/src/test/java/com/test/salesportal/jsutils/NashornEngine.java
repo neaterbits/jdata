@@ -219,8 +219,4 @@ public class NashornEngine implements JSEngine {
 	private static String constructFunctionName(ConstructRequest request) {
 		return "_construct_" + request.getJsClass();
 	}
-
-	private static String constructParamName(ConstructRequest request, int paramNo) {
-		return "_construct_param_" + request.getJsClass() + "_" + paramNo;
-	}
 }

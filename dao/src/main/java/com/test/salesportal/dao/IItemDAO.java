@@ -8,7 +8,15 @@ import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemPhoto;
 
 /**
- * DAO for retrieving items and all their subinformation
+ * DAO for retrieving items and all their subinformation.
+ * Items here are ads for a salesportal, ie. what is shown in one ad.
+ * 
+ * DAO contains methods for updating the ad and for updating thumbnails and photos,
+ * and rearrange the order of photos and thumbnails.
+ * 
+ * Upon storing items, they will typically also be indexed for later search.
+ * 
+ * The DAO is responsible for transactionality/any necessary atomicity.
  */
 public interface IItemDAO extends AutoCloseable {
 	
@@ -82,9 +90,8 @@ public interface IItemDAO extends AutoCloseable {
 	 * thumbnails to show in current display.
 	 * 
 	 * Each entry has 
-	 *  = size of thumbnail in bytes as integer, 0 means no thumbnail for this item
-	 *  = 0-terminated string for mimetype, empty string if no thumbnail
-	 *  = the 
+	 *  - size of thumbnail in bytes as integer, 0 means no thumbnail for this item
+	 *  - 0-terminated string for mimetype, empty string if no thumbnail
 	 *  
 	 * @param itemIds Item IDs to retrieve thumbnails for
 	 * @return stream of concatenated thumbnails

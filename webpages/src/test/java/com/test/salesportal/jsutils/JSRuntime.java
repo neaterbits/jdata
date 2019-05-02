@@ -42,7 +42,7 @@ final class JSRuntime implements JSInvocable {
 	public Object invokeFunction(String function, Object ... args) {
 		final Object result;
 		
-		if (true) {
+		if (Boolean.TRUE) {
 			final JSObject f = (JSObject)scriptContext.getAttribute(function, ScriptContext.ENGINE_SCOPE);
 			
 			result = f.call(null, args);
@@ -79,7 +79,7 @@ final class JSRuntime implements JSInvocable {
 		
 		final JSObject jsObj = (JSObject)obj;
 
-		if (true) {
+		if (Boolean.TRUE) {
 			final JSObject m = (JSObject)jsObj.getMember(method);	
 			
 			result = m.call(obj, args);
@@ -122,7 +122,11 @@ final class JSRuntime implements JSInvocable {
 		final T[] resultArray =(T[]) Array.newInstance(memberClass, arrayLength);
 		
 		for (int i = 0; i < arrayLength; ++ i) {
-			resultArray[i] = (T)jsObject.getSlot(i);
+			
+			@SuppressWarnings("unchecked")
+			final T element = (T)jsObject.getSlot(i);
+			
+			resultArray[i] = element;
 		}
 		
 		return resultArray;

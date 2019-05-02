@@ -9,7 +9,12 @@ import java.util.Arrays;
 
 import com.test.salesportal.common.IOUtil;
 
-// Stream that reads thumbnails on demand, keeping as little as possible in memory
+/**
+ * Stream that returns multiple concatenated thumbnails on demand,
+ * keeping as little as possible in memory, ie. reading source thumbnails as this stream
+ * is read from.
+ */
+
 public abstract class RetrieveThumbnailsInputStream extends InputStream {
 
 	public static class Thumbnail {

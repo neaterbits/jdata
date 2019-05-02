@@ -4,7 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 import com.test.salesportal.model.annotations.Facet;
-import com.test.salesportal.model.items.BaseItem;
 import com.test.salesportal.model.items.RetailItem;
 import com.test.salesportal.model.items.VehicleCondition;
 

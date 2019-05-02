@@ -66,7 +66,6 @@ import com.test.salesportal.model.attributes.facets.FacetedAttributeDecimalRange
 import com.test.salesportal.model.attributes.facets.FacetedAttributeIntegerRange;
 import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.model.items.TypeInfo;
-import com.test.salesportal.search.AttributeValues;
 import com.test.salesportal.search.FieldValues;
 import com.test.salesportal.search.SearchItem;
 import com.test.salesportal.search.criteria.ComparisonCriterium;
@@ -541,7 +540,8 @@ public class ElasticSearchIndex implements ItemIndex {
 				addAggregations(sourceBuilder, facetAttributes);
 			}
 	
-			if (false) {
+			if (Boolean.FALSE) {
+				
 				try {
 					final XContentBuilder content = JsonXContent.contentBuilder();
 					
@@ -1333,7 +1333,7 @@ public class ElasticSearchIndex implements ItemIndex {
 
 		create.source(json, XContentType.JSON);
 		
-		if (false) {
+		if (Boolean.FALSE) {
 			try {
 				final XContentBuilder content = JsonXContent.contentBuilder();
 				

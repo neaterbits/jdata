@@ -11,7 +11,6 @@ import com.test.salesportal.index.ItemIndex;
 import com.test.salesportal.index.ItemIndexException;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttribute;
 import com.test.salesportal.model.SortAttributeAndOrder;
 import com.test.salesportal.search.SearchItem;
 import com.test.salesportal.search.criteria.Criterium;

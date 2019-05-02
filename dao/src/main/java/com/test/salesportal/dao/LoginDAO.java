@@ -4,6 +4,11 @@ import java.util.Date;
 
 import com.test.salesportal.model.login.LoginStatus;
 
+/**
+ * DAO for adding users for login, for now this just supports adding some
+ * basic SMS-code authentication
+ */
+
 public interface LoginDAO extends AutoCloseable {
 	
 	/**
