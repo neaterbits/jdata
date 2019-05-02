@@ -15,7 +15,6 @@ import com.test.salesportal.index.lucene.LuceneItemIndex;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemPhoto;
 import com.test.salesportal.model.items.ItemTypes;
-import com.test.salesportal.xmlstorage.api.LockProvider;
 import com.test.salesportal.xmlstorage.local.LocalXmlStorage;
 
 public class ReindexMain {
@@ -51,15 +50,13 @@ public class ReindexMain {
 		
 		final LocalXmlStorage srcStorage = new LocalXmlStorage(srcDir);
 		final LuceneItemIndex srcIndex = new LuceneItemIndex(indexDir(srcDir));
-		final LockProvider srcLockProvider = srcStorage; // File based locking
 		
-		try (IItemDAO srcDao = new XMLItemDAO(srcStorage, srcIndex, srcLockProvider)) {
+		try (IItemDAO srcDao = new XMLItemDAO(srcStorage, srcIndex)) {
 		
 			final LocalXmlStorage dstStorage = new LocalXmlStorage(dstDir);
 			final LuceneItemIndex dstIndex = new LuceneItemIndex(indexDir(dstDir));
-			final LockProvider dstLockProvider = srcStorage; // File based locking
 
-			try (IItemDAO dstDao = new XMLItemDAO(dstStorage, dstIndex, dstLockProvider)) {
+			try (IItemDAO dstDao = new XMLItemDAO(dstStorage, dstIndex)) {
 				// Just call on source index to get all items
 				final List<Class<? extends Item>> allTypes = ItemTypes.getAllTypesList();
 		

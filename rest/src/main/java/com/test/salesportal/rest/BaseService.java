@@ -98,7 +98,7 @@ public abstract class BaseService {
 		switch (storage) {
 		case LOCAL_FILE_LUCENE:
 			final LocalXmlStorage localXmlStorage = getLocalXMLStorage();
-			ret = new XMLItemDAO(localXmlStorage, assureIndex(), localXmlStorage);
+			ret = new XMLItemDAO(localXmlStorage, assureIndex());
 			break;
 
 		default:

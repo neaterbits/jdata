@@ -1,6 +1,5 @@
 package com.test.salesportal.xmlstorage.local;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,18 +7,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.nio.file.StandardOpenOption;
 
 import com.test.salesportal.common.IOUtil;
 import com.test.salesportal.xmlstorage.api.BaseXMLStorage;
 import com.test.salesportal.xmlstorage.api.IItemStorage;
 import com.test.salesportal.xmlstorage.api.ItemFileType;
-import com.test.salesportal.xmlstorage.api.LockProvider;
 import com.test.salesportal.xmlstorage.api.StorageException;
 
-public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage, LockProvider {
+public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage {
 
 	private final File baseDir;
 
@@ -48,10 +43,6 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage, Loc
 		return new File(itemDir(userId, itemId), "item.xml");
 	}
 
-	private File getLockFile(String userId, String itemId) {
-		return new File(userDir(userId), itemId + ".lockfile");
-	}
-
 	@Override
 	protected String[] listFiles(String userId, String itemId, ItemFileType itemFileType) {
 		
@@ -71,40 +62,6 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage, Loc
 		return result;
 	}
 	
-	private static class LocalFileLock implements Lock {
-		private final FileLock lock;
-
-		LocalFileLock(FileLock lock) {
-			this.lock = lock;
-		}
-	}
-
-	@Override
-	public Lock obtainLock(String userId, String itemId) throws LockException {
-		final File file = getLockFile(userId, itemId);
-		
-		final FileLock fileLock;
-		
-		try {
-			final FileChannel fileChannel = FileChannel.open(file.toPath(), StandardOpenOption.WRITE);
-			fileLock = fileChannel.lock();
-		}
-		catch (IOException ex) {
-			throw new LockException("Failed to obtain file lock for " + file, ex);
-		}
-
-		return new LocalFileLock(fileLock);
-	}
-
-	@Override
-	public void releaseLock(Lock lock) {
-		try {
-			((LocalFileLock)lock).lock.release();
-		} catch (IOException ex) {
-			throw new IllegalStateException("Failed to release lock", ex);
-		}
-	}
-
 	@Override
 	public InputStream getXMLForItem(String userId, String itemId) throws StorageException {
 
@@ -116,38 +73,6 @@ public class LocalXmlStorage extends BaseXMLStorage implements IItemStorage, Loc
 		}
 
 		return inputStream;
-	}
-	
-	@Override
-	public void createLock(String userId, String itemId) throws LockException {
-		// Write a lockfile for later use
-		final File lockFile = getLockFile(userId, itemId);
-
-		final File dir = lockFile.getParentFile();
-		if (!dir.exists()) {
-			if (!dir.mkdirs()) {
-				throw new LockException("Failed to create item directory");
-			}
-		}
-		
-		try {
-			writeAndCloseOutput(new ByteArrayInputStream(new byte [0]), new FileOutputStream(lockFile));
-		} catch (FileNotFoundException ex) {
-			throw new LockException("Failed to write lock file to " + lockFile, ex);
-		}
-		catch (StorageException ex) {
-			throw new LockException("Failed to create lock", ex);
-		}
-	}
-
-	@Override
-	public void deleteLock(String userId, String itemId) throws LockException {
-
-		final boolean deleted = getLockFile(userId, itemId).delete();
-		
-		if (!deleted) {
-			throw new LockException("Could not delete lock for " + itemId);
-		}
 	}
 	
 	@Override

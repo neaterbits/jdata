@@ -36,7 +36,7 @@ public class LuceneIndexSearchDAOTest extends SearchDAOTest {
 	@Override
 	protected IItemDAO getItemDAO() {
 		final LocalXmlStorage localXmlStorage = new LocalXmlStorage(baseDir);
-		return new XMLItemDAO(localXmlStorage, index, localXmlStorage);
+		return new XMLItemDAO(localXmlStorage, index);
 	}
 
 	@Override

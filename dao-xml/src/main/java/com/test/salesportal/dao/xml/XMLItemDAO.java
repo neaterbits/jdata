@@ -7,13 +7,13 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
 import com.test.salesportal.common.IOUtil;
 import com.test.salesportal.common.ItemId;
+import com.test.salesportal.common.UUIDGenerator;
 import com.test.salesportal.common.images.ThumbAndImageUrl;
 import com.test.salesportal.common.images.ThumbAndImageUrls;
 import com.test.salesportal.dao.IFoundItem;
@@ -31,17 +31,14 @@ import com.test.salesportal.model.attributes.ClassAttributes;
 import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.xmlstorage.api.IItemStorage;
 import com.test.salesportal.xmlstorage.api.ItemFileType;
-import com.test.salesportal.xmlstorage.api.LockProvider;
 import com.test.salesportal.xmlstorage.api.StorageException;
 import com.test.salesportal.xmlstorage.api.IItemStorage.ImageMetaData;
 import com.test.salesportal.xmlstorage.api.IItemStorage.ImageResult;
-import com.test.salesportal.xmlstorage.api.LockProvider.Lock;
-import com.test.salesportal.xmlstorage.api.LockProvider.LockException;
 
 public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 
 	private static final JAXBContext jaxbContext;
-
+	
 	static {
 		try {
 			jaxbContext = JAXBContext.newInstance(ItemTypes.getJAXBTypeClasses());
@@ -50,77 +47,53 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		}
 	}
 	
-	private final LockProvider lockProvider;
-	
-	private Lock obtainLock(String userId, String itemId) throws ItemStorageException {
-		try {
-			return lockProvider.obtainLock(userId, itemId);
-		} catch (LockException ex) {
-			throw new ItemStorageException("Failed to obtain lock", ex);
-		}
-	}
-	
-	private void releaseLock(Lock lock) {
-		lockProvider.releaseLock(lock);
-	}
-
-	public XMLItemDAO(IItemStorage xmlStorage, ItemIndex index, LockProvider lockProvider) {
+	public XMLItemDAO(IItemStorage xmlStorage, ItemIndex index) {
 		super(jaxbContext, xmlStorage, index);
-		
-		this.lockProvider = lockProvider;
 	}
 
 	@Override
 	public IFoundItem getItem(String userId, String itemId) throws ItemStorageException {
 		// ID is a file name
 		
-		final Lock lock = obtainLock(userId, itemId);
-		
 		final IFoundItem found;
 		
+		InputStream inputStream;
 		try {
-			
-			InputStream inputStream;
-			try {
-				inputStream = xmlStorage.getXMLForItem(userId, itemId);
-			} catch (StorageException ex) {
-				throw new ItemStorageException("Failed to retrieve item", ex);
-			}
-			
-			if (inputStream == null) {
-				found = null;
-			}
-			else {
-				try {
-				
-					final Item item = (Item)unmarshaller.unmarshal(inputStream);
-					
-					final ImageMetaData thumb = xmlStorage.getThumbnailMetaDataForItem(userId, itemId, 0);
-		
-					found = new XMLFoundItem(
-							item,
-							itemId,
-							thumb != null ? thumb.width : null,
-							thumb != null ? thumb.height : null);
-	
-				} catch (JAXBException ex) {
-					throw new IllegalStateException("Failed to unmarshall XML for ID " + itemId, ex);
-				}
-				catch (StorageException ex) {
-					throw new ItemStorageException("Failed to get thumb metadata", ex);
-				}
-				finally {
-					try {
-						inputStream.close();
-					}
-					catch (IOException ex) {
-						throw new IllegalStateException("Exception on close", ex);
-					}
-				}
-			}
+			inputStream = xmlStorage.getXMLForItem(userId, itemId);
+		} catch (StorageException ex) {
+			throw new ItemStorageException("Failed to retrieve item", ex);
 		}
-		finally {
-			releaseLock(lock);
+		
+		if (inputStream == null) {
+			found = null;
+		}
+		else {
+			try {
+			
+				final Item item = (Item)unmarshaller.unmarshal(inputStream);
+				
+				final ImageMetaData thumb = xmlStorage.getThumbnailMetaDataForItem(userId, itemId, 0);
+	
+				found = new XMLFoundItem(
+						item,
+						itemId,
+						thumb != null ? thumb.width : null,
+						thumb != null ? thumb.height : null);
+
+			} catch (JAXBException ex) {
+				throw new IllegalStateException("Failed to unmarshall XML for ID " + itemId, ex);
+			}
+			catch (StorageException ex) {
+				throw new ItemStorageException("Failed to get thumb metadata", ex);
+			}
+			finally {
+				try {
+					inputStream.close();
+				}
+				catch (IOException ex) {
+					throw new IllegalStateException("Exception on close", ex);
+				}
+			}
 		}
 
 		return found;
@@ -128,57 +101,50 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 
 	@Override
 	public List<IFoundItemPhotoThumbnail> getPhotoThumbnails(String userId, String itemId) throws ItemStorageException {
-
-		final Lock lock = obtainLock(userId, itemId);
 		
 		List<IFoundItemPhotoThumbnail> result = null;
 
-		try {
-			// Thumbnails are stored as separate files, list directory
-			List<ImageResult> images = null;
-			
-			try {
-				images = xmlStorage.getThumbnailsForItem(userId, itemId);
-			} catch (StorageException ex) {
-				if (!xmlStorage.itemExists(userId, itemId)) {
-					result = Collections.emptyList();
-				}
-				else {
-					throw new ItemStorageException("Failed to get thumbnails for " + itemId, ex);
-				}
-			}
-			
-			if (result == null) {
-				try {
-					result = new ArrayList<>(images.size());
-					
-					for (int i = 0; i < images.size(); ++ i) {
-						final ImageResult image = images.get(i);
-						
-						final byte [] data = IOUtil.readAll(image.inputStream);
-						final String id = String.valueOf(i);
-						
-						// TODO categories
-						final List<ItemPhotoCategory> categories = new ArrayList<>();
+		// Thumbnails are stored as separate files, list directory
+		List<ImageResult> images = null;
 		
-						result.add(new XMLFoundItemPhotoThumbnail(id, itemId, i, image.mimeType, image.width, image.height, categories, data));
-					}
-				}
-				catch (IOException ex) {
-					throw new ItemStorageException("Failed to retrieve thumbnail image", ex);
-				}
-				finally {
-					for (ImageResult image : images) {
-						try {
-							image.inputStream.close();
-						} catch (IOException e) {
-						}
-					}
-				}
+		try {
+			images = xmlStorage.getThumbnailsForItem(userId, itemId);
+		} catch (StorageException ex) {
+			if (!xmlStorage.itemExists(userId, itemId)) {
+				result = Collections.emptyList();
+			}
+			else {
+				throw new ItemStorageException("Failed to get thumbnails for " + itemId, ex);
 			}
 		}
-		finally {
-			releaseLock(lock);
+		
+		if (result == null) {
+			try {
+				result = new ArrayList<>(images.size());
+				
+				for (int i = 0; i < images.size(); ++ i) {
+					final ImageResult image = images.get(i);
+					
+					final byte [] data = IOUtil.readAll(image.inputStream);
+					final String id = String.valueOf(i);
+					
+					// TODO categories
+					final List<ItemPhotoCategory> categories = new ArrayList<>();
+	
+					result.add(new XMLFoundItemPhotoThumbnail(id, itemId, i, image.mimeType, image.width, image.height, categories, data));
+				}
+			}
+			catch (IOException ex) {
+				throw new ItemStorageException("Failed to retrieve thumbnail image", ex);
+			}
+			finally {
+				for (ImageResult image : images) {
+					try {
+						image.inputStream.close();
+					} catch (IOException e) {
+					}
+				}
+			}
 		}
 
 		return result;
@@ -186,18 +152,12 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 
 	private ImageResult getPhoto(String userId, String itemId, int photoNo) throws ItemStorageException {
 
-		final Lock lock = obtainLock(userId, itemId);
 		final ImageResult image;
 
 		try {
-			try {
-				image = xmlStorage.getPhotoForItem(userId, itemId, photoNo);
-			} catch (StorageException ex) {
-				throw new ItemStorageException("Failed to get photo", ex);
-			}
-		}
-		finally {
-			releaseLock(lock);
+			image = xmlStorage.getPhotoForItem(userId, itemId, photoNo);
+		} catch (StorageException ex) {
+			throw new ItemStorageException("Failed to get photo", ex);
 		}
 
 		return image;
@@ -257,24 +217,9 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		item.setIdString(itemId);
 		
 		try {
-			lockProvider.createLock(userId, itemId);
-		} catch (LockException ex) {
-			throw new ItemStorageException("Failed to create lock for " + itemId, ex);
-		}
-		
-		// Also lock during creation ? Ought not be necessary since not returned itemId
-		// so no other caller can access it yet. but perhaps useful as a test that locking works for this item
-		final Lock lock = obtainLock(userId, itemId);
-		
-		try {
-			try {
-				store(userId, itemId, item, ItemTypes.getType(item), ClassAttributes.getValues(item));
-			} catch (XMLStorageException ex) {
-				throw new ItemStorageException("Failed to store item", ex);
-			}
-		}
-		finally {
-			releaseLock(lock);
+			store(userId, itemId, item, ItemTypes.getType(item), ClassAttributes.getValues(item));
+		} catch (XMLStorageException ex) {
+			throw new ItemStorageException("Failed to store item", ex);
 		}
 		
 		return itemId;
@@ -291,8 +236,6 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 			String thumbnailMimeType, Integer thumbLength, int thumbWidth, int thumbHeight,
 			InputStream photoInputStream, String photoMimeType, Integer photoLength) throws ItemStorageException {
 
-		final Lock lock = obtainLock(userId, itemId);
-		
 		try {
 			final int photoNo = xmlStorage.addPhotoAndThumbnailForItem(
 					userId, itemId,
@@ -305,9 +248,6 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		} catch (ItemIndexException ex) {
 			throw new ItemStorageException("Failed to index thumbnail sizes", ex);
 		}
-		finally {
-			releaseLock(lock);
-		}
 	}
 	
 	
@@ -317,8 +257,6 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 			InputStream thumbnailInputStream, String thumbnailMimeType, Integer thumbLength, int thumbWidth,
 			int thumbHeight, String photoUrl) throws ItemStorageException {
 
-		final Lock lock = obtainLock(userId, itemId);
-		
 		try {
 			final int photoNo = xmlStorage.addPhotoUrlAndThumbnailForItem(
 					userId, itemId,
@@ -331,9 +269,6 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		} catch (ItemIndexException ex) {
 			throw new ItemStorageException("Failed to index thumbnail sizes", ex);
 		}
-		finally {
-			releaseLock(lock);
-		}
 	}
 	
 
@@ -341,8 +276,6 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	public void addThumbAndPhotoUrlsForItem(String userId, String itemId, Class<? extends Item> type,
 			ThumbAndImageUrls urls) throws ItemStorageException {
 
-		final Lock lock = obtainLock(userId, itemId);
-		
 		try {
 			xmlStorage.addThumbAndPhotoUrlsForItem(userId, itemId, urls);
 
@@ -355,9 +288,6 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 			throw new ItemStorageException("Failed to store thumbnail", ex);
 		} catch (ItemIndexException ex) {
 			throw new ItemStorageException("Failed to index thumbnail sizes", ex);
-		}
-		finally {
-			releaseLock(lock);
 		}
 	}
 	
@@ -383,8 +313,6 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	public void movePhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, int photoNo, int toIndex)
 			throws ItemStorageException {
 		
-		final Lock lock = obtainLock(userId, itemId);
-		
 		try {
 			xmlStorage.movePhotoAndThumbnailForItem(userId, itemId, photoNo, toIndex);
 			index.movePhotoAndThumbnailForItem(itemId, type, photoNo, toIndex);
@@ -393,16 +321,11 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		} catch (ItemIndexException ex) {
 			throw new ItemStorageException("Failed to move index thumbnail sizes", ex);
 		}
-		finally {
-			releaseLock(lock);
-		}
 	}
 
 	@Override
 	public void deletePhotoAndThumbnailForItem(String userId, String itemId, Class<? extends Item> type, int photoNo) throws ItemStorageException {
 
-		final Lock lock = obtainLock(userId, itemId);
-		
 		try {
 			xmlStorage.deletePhotoAndThumbnailForItem(userId, itemId, photoNo);
 			index.deletePhotoAndThumbnailForItem(itemId, type, photoNo);
@@ -411,15 +334,10 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		} catch (ItemIndexException ex) {
 			throw new ItemStorageException("Failed to delete index thumbnail sizes", ex);
 		}
-		finally {
-			releaseLock(lock);
-		}
 	}
 
 	@Override
 	public void deleteItem(String userId, String itemId, Class<? extends Item> type) throws ItemStorageException {
-
-		final Lock lock = obtainLock(userId, itemId);
 
 		try {
 			index.deleteItem(itemId, type);
@@ -431,15 +349,6 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 			xmlStorage.deleteAllItemFiles(userId, itemId);
 		} catch (StorageException ex) {
 			throw new ItemStorageException("Failed to delete item files", ex);
-		}
-		finally {
-			releaseLock(lock);
-		}
-		
-		try {
-			lockProvider.deleteLock(userId, itemId);
-		} catch (LockException ex) {
-			throw new ItemStorageException("Failed to delete lock for " + itemId, ex);
 		}
 	}
 
@@ -500,21 +409,16 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	}
 
 	private String genItemId() {
-		return UUID.randomUUID().toString();
+		return UUIDGenerator.generateUUID();
 	}
 
 	@Override
 	public int getNumThumbnails(String userId, String itemId) throws ItemStorageException {
 		
-		final Lock lock = obtainLock(userId, itemId);
-		
 		try {
 			return xmlStorage.getNumFiles(userId, itemId, ItemFileType.THUMBNAIL);
 		} catch (StorageException ex) {
 			throw new ItemStorageException("Failed to get number of files", ex);
-		}
-		finally {
-			releaseLock(lock);
 		}
 	}
 
