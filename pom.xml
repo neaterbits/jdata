@@ -39,8 +39,6 @@
 	    <module>xmlstorage</module>
 	    <module>xmlstorage-local</module>
 	    <module>xmlstorage-s3</module>
-	    <module>word</module>
-	    <module>pdf</module>
 	    <module>jetty-test</module>
 	    <module>reindex</module>
     <module>rest</module>
