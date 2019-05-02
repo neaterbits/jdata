@@ -37,8 +37,10 @@
 	    <module>index-elasticsearch-aws</module>
 	    <module>integrationtest</module>
 	    <module>xmlstorage</module>
-	    <module>xmlstorage-local</module>
-	    <module>xmlstorage-s3</module>
+	    <module>xmlstorage-filesystem-files</module>
+	    <module>filesystem</module>
+	    <module>filesystem-local</module>
+	    <module>filesystem-s3</module>
 	    <module>jetty-test</module>
 	    <module>reindex</module>
     <module>rest</module>

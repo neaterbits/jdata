@@ -29,4 +29,33 @@ public class StringUtil {
 		
 		return strings.toArray(new String[strings.size()]);
 	}
+	
+	public static String join(String [] strings, char joinChar) {
+		
+		if (strings == null) {
+			throw new IllegalArgumentException("strings == null");
+		}
+		
+		final String result;
+		
+		if (strings.length == 0) {
+			result = "";
+		}
+		else {
+			
+			final StringBuilder sb = new StringBuilder();
+			
+			for (int i = 0; i < strings.length; ++ i) {
+				if (i > 0) {
+					sb.append(joinChar);
+				}
+				
+				sb.append(strings[i]);
+			}
+			
+			result = sb.toString();
+		}
+		
+		return result;
+	}
 }

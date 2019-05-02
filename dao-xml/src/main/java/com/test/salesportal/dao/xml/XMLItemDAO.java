@@ -394,7 +394,7 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 			});
 		}
 		catch (StorageException ex) {
-			throw new ItemStorageException("Failed to retrieve thumbnails form storage", ex);
+			throw new ItemStorageException("Failed to retrieve thumbnails from storage", ex);
 		}
 
 		final Iterator<Thumbnail> sortedIterator = sorted.iterator();

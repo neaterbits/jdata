@@ -5,9 +5,11 @@ import java.io.File;
 import com.test.salesportal.dao.IItemDAO;
 import com.test.salesportal.dao.test.ItemDAOTest;
 import com.test.salesportal.dao.xml.XMLItemDAO;
+import com.test.salesportal.filesystem.local.LocalFileSystem;
 import com.test.salesportal.index.ItemIndex;
 import com.test.salesportal.integrationtest.IntegrationTestHelper;
-import com.test.salesportal.xmlstorage.local.LocalXmlStorage;
+import com.test.salesportal.xmlstorage.api.IItemStorage;
+import com.test.salesportal.xmlstorage.filesystem.files.FileSystemFilesStorage;
 
 public class LocalFileAndLuceneXMLItemDAOTest extends ItemDAOTest {
 
@@ -21,7 +23,8 @@ public class LocalFileAndLuceneXMLItemDAOTest extends ItemDAOTest {
 	
 	@Override
 	protected IItemDAO getItemDAO() {
-		final LocalXmlStorage localXmlStorage = new LocalXmlStorage(baseDir);
+		final IItemStorage localXmlStorage = new FileSystemFilesStorage(new LocalFileSystem(baseDir));
+
 		return new XMLItemDAO(localXmlStorage, index);
 	}
 }

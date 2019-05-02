@@ -6,12 +6,13 @@ import com.amazonaws.regions.Regions;
 import com.test.salesportal.dao.IItemDAO;
 import com.test.salesportal.dao.test.ItemDAOTest;
 import com.test.salesportal.dao.xml.XMLItemDAO;
+import com.test.salesportal.filesystem.s3.S3FileSystem;
 import com.test.salesportal.index.ItemIndexException;
 import com.test.salesportal.index.elasticsearch.ElasticSearchIndex;
 import com.test.salesportal.index.elasticsearch.aws.AWSElasticseachIndex;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.attributes.ClassAttributes;
-import com.test.salesportal.xmlstorage.S3XMLStorage;
+import com.test.salesportal.xmlstorage.filesystem.files.FileSystemFilesStorage;
 
 /**
  * Test directly on S3 and ElasticSearch in the cloud
@@ -34,12 +35,12 @@ public class S3AndElasticSearchXMLItemDAOTest extends ItemDAOTest {
 	static XMLItemDAO makeItemDAO() throws ItemIndexException {
 		final AWSCredentialsProvider awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
 
-		final S3XMLStorage itemStorage = new S3XMLStorage(
+		final S3FileSystem itemFileSystem = new S3FileSystem(
 				awsCredentialsProvider,
 				Regions.EU_WEST_2,
 				"eltodo-testbucket");
 		
-		return new XMLItemDAO(itemStorage, makeIndex());
+		return new XMLItemDAO(new FileSystemFilesStorage(itemFileSystem), makeIndex());
 	}
 	
 	@Override

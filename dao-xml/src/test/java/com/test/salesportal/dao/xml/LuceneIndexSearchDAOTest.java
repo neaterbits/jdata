@@ -11,10 +11,12 @@ import com.test.salesportal.dao.ISearchDAO;
 import com.test.salesportal.dao.index.IndexSearchDAO;
 import com.test.salesportal.dao.test.SearchDAOTest;
 import com.test.salesportal.dao.xml.XMLItemDAO;
+import com.test.salesportal.filesystem.local.LocalFileSystem;
 import com.test.salesportal.index.ItemIndex;
 import com.test.salesportal.index.lucene.LuceneItemIndex;
 import com.test.salesportal.integrationtest.IntegrationTestHelper;
-import com.test.salesportal.xmlstorage.local.LocalXmlStorage;
+import com.test.salesportal.xmlstorage.api.IItemStorage;
+import com.test.salesportal.xmlstorage.filesystem.files.FileSystemFilesStorage;
 
 public class LuceneIndexSearchDAOTest extends SearchDAOTest {
 
@@ -35,7 +37,7 @@ public class LuceneIndexSearchDAOTest extends SearchDAOTest {
 	
 	@Override
 	protected IItemDAO getItemDAO() {
-		final LocalXmlStorage localXmlStorage = new LocalXmlStorage(baseDir);
+		final IItemStorage localXmlStorage = new FileSystemFilesStorage(new LocalFileSystem(baseDir));
 		return new XMLItemDAO(localXmlStorage, index);
 	}
 

@@ -5,22 +5,10 @@
     <artifactId>root</artifactId>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>xmlstorage-s3</artifactId>
-  <name>S3 XML storage</name>
+  <artifactId>filesystem</artifactId>
+  <name>Filesystem API</name>
   <packaging>jar</packaging>
   <dependencies>
-
-  	<dependency>
-	  	<groupId>${project.groupId}</groupId>
-	  	<artifactId>xmlstorage</artifactId>
-	  	<version>${project.version}</version>
-  	</dependency>
-
-  	<dependency>
-	  	<groupId>com.amazonaws</groupId>
-	  	<artifactId>aws-java-sdk-s3</artifactId>
-	  	<version>1.11.302</version>
-  	</dependency>
 
 	<!-- test dependencies --> 
 

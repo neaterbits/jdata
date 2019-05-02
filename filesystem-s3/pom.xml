@@ -5,14 +5,14 @@
     <artifactId>root</artifactId>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>xmlstorage-local</artifactId>
-  <name>Local XML storage</name>
+  <artifactId>filesystem-s3</artifactId>
+  <name>S3 filesystem storage</name>
   <packaging>jar</packaging>
   <dependencies>
 
   	<dependency>
 	  	<groupId>${project.groupId}</groupId>
-	  	<artifactId>xmlstorage</artifactId>
+	  	<artifactId>filesystem</artifactId>
 	  	<version>${project.version}</version>
   	</dependency>
 
@@ -20,6 +20,12 @@
 	  	<groupId>${project.groupId}</groupId>
 	  	<artifactId>common</artifactId>
 	  	<version>${project.version}</version>
+  	</dependency>
+
+  	<dependency>
+	  	<groupId>com.amazonaws</groupId>
+	  	<artifactId>aws-java-sdk-s3</artifactId>
+	  	<version>1.11.302</version>
   	</dependency>
 
 	<!-- test dependencies --> 
