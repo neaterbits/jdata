@@ -8,8 +8,8 @@
 
 	<persistence-unit name="jpa-psql">
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-		<class>com.test.cv.model.login.User</class>
-		<class>com.test.cv.model.lock.ItemLock</class>
+		<class>com.test.salesportal.model.login.User</class>
+		<class>com.test.salesportal.model.lock.ItemLock</class>
 
 		<properties>
 			<property name="javax.persistence.jdbc.url"

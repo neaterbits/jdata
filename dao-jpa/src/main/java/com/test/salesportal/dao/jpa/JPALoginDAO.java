@@ -9,7 +9,7 @@ import javax.persistence.NoResultException;
 import com.test.salesportal.dao.LoginCode;
 import com.test.salesportal.dao.LoginDAO;
 import com.test.salesportal.model.login.LoginStatus;
-import com.test.salesportal.model.login.User;
+import com.test.salesportal.model.login.LoginUser;
 
 public class JPALoginDAO extends JPABaseDAO implements LoginDAO {
 
@@ -25,12 +25,12 @@ public class JPALoginDAO extends JPABaseDAO implements LoginDAO {
 		super(persistenceUnitName, properties);
 	}
 
-	private User getUser(String phoneNo) {
+	private LoginUser getUser(String phoneNo) {
 		
-		User user = null;
+		LoginUser user = null;
 		
 		try {
-			user = entityManager.createQuery("from User user where user.phoneNo = :phoneNo", User.class)
+			user = entityManager.createQuery("from LoginUser user where user.phoneNo = :phoneNo", LoginUser.class)
 				.setParameter("phoneNo", phoneNo)
 				.getSingleResult();
 		}
@@ -47,10 +47,10 @@ public class JPALoginDAO extends JPABaseDAO implements LoginDAO {
 		return performInTransaction(() -> {
 			final LoginStatus status;
 			
-			User user = getUser(phoneNo);
+			LoginUser user = getUser(phoneNo);
 
 			if (user == null) {
-				user = new User();
+				user = new LoginUser();
 				
 				user.setStatus(initialStatus);
 				user.setPhoneNo(phoneNo);
@@ -70,7 +70,7 @@ public class JPALoginDAO extends JPABaseDAO implements LoginDAO {
 	@Override
 	public void deleteUser(String phoneNo) {
 		performInTransaction(() -> {
-			entityManager.createQuery("delete from User user where user.phoneNo = :phoneNo")
+			entityManager.createQuery("delete from LoginUser user where user.phoneNo = :phoneNo")
 				.setParameter("phoneNo", phoneNo)
 				.executeUpdate();
 			
@@ -81,7 +81,7 @@ public class JPALoginDAO extends JPABaseDAO implements LoginDAO {
 	@Override
 	public LoginStatus getLoginStatus(String phoneNo) {
 		
-		final User user = getUser(phoneNo);
+		final LoginUser user = getUser(phoneNo);
 		
 		final LoginStatus status;
 		
@@ -98,7 +98,7 @@ public class JPALoginDAO extends JPABaseDAO implements LoginDAO {
 
 	@Override
 	public void updateLoginStatus(String phoneNo, LoginStatus status) {
-		final User user = getUser(phoneNo);
+		final LoginUser user = getUser(phoneNo);
 
 		user.setStatus(status);
 		
@@ -126,7 +126,7 @@ public class JPALoginDAO extends JPABaseDAO implements LoginDAO {
 
 		
 		performInTransaction(() -> {
-			final User user = getUser(phoneNo);
+			final LoginUser user = getUser(phoneNo);
 
 			user.setCode(code);
 			user.setCodeGeneratedTime(generatedTime);
@@ -140,7 +140,7 @@ public class JPALoginDAO extends JPABaseDAO implements LoginDAO {
 	@Override
 	public LoginCode getLoginStatusAndCode(String phoneNo) {
 		
-		final User user = getUser(phoneNo);
+		final LoginUser user = getUser(phoneNo);
 		
 		final LoginCode code;
 		
