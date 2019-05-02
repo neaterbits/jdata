@@ -12,6 +12,7 @@
 
 				<class>com.test.salesportal.model.login.LoginUser</class>
 				<class>com.test.salesportal.model.lock.ItemLock</class>
+				<class>com.test.salesportal.model.operations.Operation</class>
 
 <!--
 				<class>com.test.salesportal.model.Item</class>

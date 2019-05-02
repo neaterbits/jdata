@@ -10,10 +10,9 @@
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 		<class>com.test.salesportal.model.login.User</class>
 		<class>com.test.salesportal.model.lock.ItemLock</class>
+		<class>com.test.salesportal.model.operations.Operation</class>
 
 		<properties>
-			<property name="javax.persistence.jdbc.url"
-				value="jdbc:postgresql://db.eltodo.org/eltodo_psqldbname" />
 			<property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />
 			<property name="javax.persistence.jdbc.user" value="" />
 			<property name="javax.persistence.jdbc.password" value="" />
