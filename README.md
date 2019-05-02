@@ -16,8 +16,10 @@ Kjapp informajon om innhold i noen av katalogene
  - dao-jpa - implementasjon for lagring i relasjonsdatabaser, mest for å teste hvordan ville måtte implementeres.
  - dao-xml - implementasjon for lagring av annonsedata som XML-fil.
  - xmlstorage - API som kan kalles fra dao-xml for å lagre XMLer til fil.
- - xmlstorage-local - benyttes av dao-xml til å lagre i lokalt filsystem, for test.
- - xmlstorage-s3 - benyttes for lagring av XML i Amazon S3.
+ - xmlstorage-filesystem-files - XML storage implementasjon som kaller mot filesystem abstraksjon.
+ - filesystem - abstraksjon for filsystemer, f.eks lokalt, S3, zip-fil, Azure Blob Storage
+ - filesystem-local - benyttes av XMLStorage til å lagre i lokalt filsystem, for test.
+ - filesystem-s3 - benyttes av XMLStorage for lagring av filer i Amazon S3.
  - model - datamodell for annonser, denne består av annoterte javaklasser (@Facet), slik at kan lett legge til nye typer annonser og facets.
  - webpages - websider m/plain Javascript-kode for filtreringsview og bildegalleri.
  - notifications - API for meldings-utsending.
