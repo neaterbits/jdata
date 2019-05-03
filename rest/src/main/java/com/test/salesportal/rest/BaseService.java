@@ -19,7 +19,7 @@ public abstract class BaseService {
 	protected static final int THUMBNAIL_MAX_SIZE = 240;
 	
 	public static boolean isTest() {
-		final String test = System.getenv(EnvVariables.ELTODO_LOCALHOST_TEST);
+		final String test = System.getenv(EnvVariables.SALESPORTAL_LOCALHOST_TEST);
 
 		return "true".equals(test);
 	}

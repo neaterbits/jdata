@@ -50,12 +50,12 @@ public class LoginService {
 
 	private LoginDAO getDAO() {
 		
-		final String dbUsername = System.getenv(EnvVariables.ELTODO_JPA_USERNAME);
+		final String dbUsername = System.getenv(EnvVariables.SALESPORTAL_JPA_USERNAME);
 		if (dbUsername == null || dbUsername.trim().isEmpty()) {
 			throw new IllegalStateException("No DB username env variable");
 		}
 		
-		final String dbPassword = System.getenv(EnvVariables.ELTODO_JPA_PASSWORD);
+		final String dbPassword = System.getenv(EnvVariables.SALESPORTAL_JPA_PASSWORD);
 		if (dbPassword == null || dbPassword.trim().isEmpty()) {
 			throw new IllegalStateException("No DB username env variable");
 		}
@@ -196,7 +196,7 @@ public class LoginService {
 	
 	private void sendApproveNotification(String phoneNo) {
 		
-		final String approvalPhoneNo = System.getenv(EnvVariables.ELTODO_APPROVAL_NOTIFICATION_PHONENUMBER);
+		final String approvalPhoneNo = System.getenv(EnvVariables.SALESPORTAL_APPROVAL_NOTIFICATION_PHONENUMBER);
 
 		if (approvalPhoneNo == null || approvalPhoneNo.trim().isEmpty()) {
 			throw new IllegalStateException("No approval notification phone number");
