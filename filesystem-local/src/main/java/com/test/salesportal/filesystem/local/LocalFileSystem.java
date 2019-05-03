@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 import com.test.salesportal.common.IOUtil;
 import com.test.salesportal.common.StringUtil;
@@ -89,12 +90,16 @@ public class LocalFileSystem implements IFileSystem {
 		pathToFile(path).delete();
 	}
 	
-	private static final String [] NO_STRINGS = new String[0];
-
 	@Override
 	public String[] listFiles(String[] path) {
-		final String [] files =  pathToFile(path).list();
+		
+		final File pathFile = pathToFile(path);
+		final String [] files = pathFile.list();
 	
-		return files != null ? files : NO_STRINGS;
+		return Arrays.stream(files)
+				.map(fileName -> new File(pathFile, fileName))
+				.filter(File::isFile)
+				.map(File::getName)
+				.toArray(String[]::new);
 	}
 }
