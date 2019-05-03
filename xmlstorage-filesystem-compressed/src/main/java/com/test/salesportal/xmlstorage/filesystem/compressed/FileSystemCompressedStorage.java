@@ -27,7 +27,17 @@ public class FileSystemCompressedStorage extends FileSystemFilesXMLStorage imple
 
 
 	@Override
-	protected IFileSystem getFileSystem(String userId, String itemId) throws StorageException {
+	protected IFileSystem getXmlFileSystem(String userId, String itemId) throws StorageException {
+		return getCompressedFileSystem(userId, itemId);
+	}
+	
+	@Override
+	protected IFileSystem getLargePhotosFileSystem(String userId, String itemId) throws StorageException {
+		return fileSystem;
+	}
+
+	private IFileSystem getCompressedFileSystem(String userId, String itemId) throws StorageException {
+		
 		
 		final String [] path = new String [] { userId, itemId, "data.zip" };
 		

@@ -1,6 +1,7 @@
 package com.test.salesportal.xmlstorage.filesystem.files;
 
 import com.test.salesportal.filesystem.api.IFileSystem;
+import com.test.salesportal.xmlstorage.api.StorageException;
 
 public class ParameterFileSystemFilesXMLStorage extends FileSystemFilesXMLStorage {
 
@@ -16,7 +17,12 @@ public class ParameterFileSystemFilesXMLStorage extends FileSystemFilesXMLStorag
 	}
 
 	@Override
-	protected IFileSystem getFileSystem(String userId, String itemId) {
+	protected IFileSystem getXmlFileSystem(String userId, String itemId) {
+		return fileSystem;
+	}
+
+	@Override
+	protected IFileSystem getLargePhotosFileSystem(String userId, String itemId) throws StorageException {
 		return fileSystem;
 	}
 }

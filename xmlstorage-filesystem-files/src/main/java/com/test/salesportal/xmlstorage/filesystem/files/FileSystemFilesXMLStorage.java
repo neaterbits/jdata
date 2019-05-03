@@ -32,15 +32,23 @@ public abstract class FileSystemFilesXMLStorage extends BaseXMLStorage implement
 		return itemFile(userId, itemId, ItemFileType.XML, "item.xml");
 	}
 	
-	protected abstract IFileSystem getFileSystem(String userId, String itemId) throws StorageException;
+	protected abstract IFileSystem getXmlFileSystem(String userId, String itemId) throws StorageException;
+	protected abstract IFileSystem getLargePhotosFileSystem(String userId, String itemId) throws StorageException;
 
+	private IFileSystem getFileSystemForItemFileType(String userId, String itemId, ItemFileType itemFileType) throws StorageException {
+		return itemFileType == ItemFileType.PHOTO
+				? getLargePhotosFileSystem(userId, itemId)
+				: getXmlFileSystem(userId, itemId);
+	}
+	
 	@Override
 	protected final String[] listFiles(String userId, String itemId, ItemFileType itemFileType) throws StorageException {
 
 		final String [] path = new String [] { userId, itemId, itemFileType.getDirectoryName() };
 		
 		try {
-			return getFileSystem(userId, itemId).listFiles(path);
+			return getFileSystemForItemFileType(userId, itemId, itemFileType).listFiles(path);
+			
 		} catch (IOException ex) {
 			throw new StorageException("", ex);
 		}
@@ -51,7 +59,7 @@ public abstract class FileSystemFilesXMLStorage extends BaseXMLStorage implement
 
 		InputStream inputStream = null;
 		try {
-			inputStream = getFileSystem(userId, itemId).readFile(getXMLFile(userId, itemId));
+			inputStream = getXmlFileSystem(userId, itemId).readFile(getXMLFile(userId, itemId));
 		} catch (FileNotFoundException ex) {
 			inputStream = null;
 		}
@@ -69,7 +77,7 @@ public abstract class FileSystemFilesXMLStorage extends BaseXMLStorage implement
 		final String [] xmlFile = getXMLFile(userId, itemId);
 
 		try {
-			getFileSystem(userId, itemId).storeFile(xmlFile, inputStream, contentLength);
+			getXmlFileSystem(userId, itemId).storeFile(xmlFile, inputStream, contentLength);
 		} catch (FileNotFoundException ex) {
 			throw new StorageException("Failed to open output stream " + xmlFile, ex);
 		} catch (IOException ex) {
@@ -83,7 +91,7 @@ public abstract class FileSystemFilesXMLStorage extends BaseXMLStorage implement
 
 		InputStream result;
 		try {
-			result = getFileSystem(userId, itemId).readFile(new String [] { userId, itemId, fileName });
+			result = getXmlFileSystem(userId, itemId).readFile(new String [] { userId, itemId, fileName });
 		} catch (FileNotFoundException ex) {
 			result = null;
 		} catch (IOException ex) {
@@ -100,7 +108,7 @@ public abstract class FileSystemFilesXMLStorage extends BaseXMLStorage implement
 		final String [] path = new String[] { userId, itemId, fileName };
 
 		try {
-			getFileSystem(userId, itemId).storeFile(path, inputStream, contentLength);
+			getXmlFileSystem(userId, itemId).storeFile(path, inputStream, contentLength);
 		} catch (FileNotFoundException ex) {
 			throw new StorageException("Failed to create imagelist output file", ex);
 		} catch (IOException ex) {
@@ -119,7 +127,7 @@ public abstract class FileSystemFilesXMLStorage extends BaseXMLStorage implement
 		final FileInput input;
 
 		try {
-			input = getFileSystem(userId, itemId).readFileInput(path);
+			input = getFileSystemForItemFileType(userId, itemId, itemFileType).readFileInput(path);
 		} catch (FileNotFoundException ex) {
 			throw new StorageException("Could not open file " + Arrays.toString(path), ex);
 		} catch (IOException ex) {
@@ -134,7 +142,7 @@ public abstract class FileSystemFilesXMLStorage extends BaseXMLStorage implement
 		final String [] path = itemFile(userId, itemId, itemFileType, fileName);
 
 		try {
-			getFileSystem(userId, itemId).deleteFile(path);
+			getFileSystemForItemFileType(userId, itemId, itemFileType).deleteFile(path);
 		} catch (IOException ex) {
 			throw new StorageException("Failed to delete file", ex);
 		}
@@ -164,19 +172,25 @@ public abstract class FileSystemFilesXMLStorage extends BaseXMLStorage implement
 		final int index;
 
 		try {
-			final String thumbFileName = allocateFileName(userId, itemId, ItemFileType.THUMBNAIL, thumbnailMimeType);
+			
+			final ItemFileType thumbFileType = ItemFileType.THUMBNAIL;
+			
+			final String thumbFileName = allocateFileName(userId, itemId, thumbFileType, thumbnailMimeType);
 
-			final String [] thumbFile = itemFile(userId, itemId, ItemFileType.THUMBNAIL, thumbFileName);
+			final String [] thumbFile = itemFile(userId, itemId, thumbFileType, thumbFileName);
 
-			getFileSystem(userId, itemId).storeFile(thumbFile, thumbnailInputStream, thumbLength);
+			getFileSystemForItemFileType(userId, itemId, thumbFileType).storeFile(thumbFile, thumbnailInputStream, thumbLength);
 			
 			boolean ok = false;
 			try {
-				final String photoFileName = allocateFileName(userId, itemId, ItemFileType.PHOTO, photoMimeType);
-
-				final String [] photoPath = itemFile(userId, itemId, ItemFileType.PHOTO, photoFileName);
 				
-				getFileSystem(userId, itemId).storeFile(photoPath, photoInputStream, photoLength);
+				final ItemFileType photoFileType = ItemFileType.PHOTO;
+				
+				final String photoFileName = allocateFileName(userId, itemId, photoFileType, photoMimeType);
+
+				final String [] photoPath = itemFile(userId, itemId, photoFileType, photoFileName);
+				
+				getFileSystemForItemFileType(userId, itemId, photoFileType).storeFile(photoPath, photoInputStream, photoLength);
 
 				index = addToImageList(userId, itemId, thumbFileName, thumbnailMimeType, photoFileName, photoMimeType);
 
@@ -187,7 +201,7 @@ public abstract class FileSystemFilesXMLStorage extends BaseXMLStorage implement
 				throw new StorageException("Failed to store output file", ex);
 			} finally {
 				if (!ok) {
-					getFileSystem(userId, itemId).deleteFile(thumbFile);
+					getFileSystemForItemFileType(userId, itemId, thumbFileType).deleteFile(thumbFile);
 				}
 			}
 		} catch (FileNotFoundException ex) {
@@ -205,11 +219,12 @@ public abstract class FileSystemFilesXMLStorage extends BaseXMLStorage implement
 		final int index;
 
 		try {
-			final String thumbFileName = allocateFileName(userId, itemId, ItemFileType.THUMBNAIL, thumbnailMimeType);
+			final ItemFileType thumbFileType = ItemFileType.THUMBNAIL;
+			final String thumbFileName = allocateFileName(userId, itemId, thumbFileType, thumbnailMimeType);
 
-			final String [] thumbFile = itemFile(userId, itemId, ItemFileType.THUMBNAIL, thumbFileName);
+			final String [] thumbFile = itemFile(userId, itemId, thumbFileType, thumbFileName);
 
-			getFileSystem(userId, itemId).storeFile(thumbFile, thumbnailInputStream, thumbLength);
+			getFileSystemForItemFileType(userId, itemId, thumbFileType).storeFile(thumbFile, thumbnailInputStream, thumbLength);
 
 			boolean ok = false;
 			try {
@@ -218,7 +233,7 @@ public abstract class FileSystemFilesXMLStorage extends BaseXMLStorage implement
 				ok = true;
 			} finally {
 				if (!ok) {
-					getFileSystem(userId, itemId).deleteFile(thumbFile);
+					getFileSystemForItemFileType(userId, itemId, thumbFileType).deleteFile(thumbFile);
 				}
 			}
 		} catch (FileNotFoundException ex) {
@@ -232,15 +247,19 @@ public abstract class FileSystemFilesXMLStorage extends BaseXMLStorage implement
 
 	@Override
 	public final void deletePhotoAndThumbnailForItem(String userId, String itemId, int photoNo) throws StorageException {
-		final String thumbFileName = getImageFileName(userId, itemId, ItemFileType.THUMBNAIL, photoNo);
-		final String photoFileName = getImageFileName(userId, itemId, ItemFileType.PHOTO, photoNo);
+		
+		final ItemFileType thumbFileType = ItemFileType.THUMBNAIL;
+		final ItemFileType photoFileType = ItemFileType.PHOTO;
+		
+		final String thumbFileName = getImageFileName(userId, itemId, thumbFileType, photoNo);
+		final String photoFileName = getImageFileName(userId, itemId, photoFileType, photoNo);
 
 		try {
 			try {
-				getFileSystem(userId, itemId).deleteFile(itemFile(userId, itemId, ItemFileType.THUMBNAIL, thumbFileName));
+				getFileSystemForItemFileType(userId, itemId, thumbFileType).deleteFile(itemFile(userId, thumbFileName, thumbFileType, thumbFileName));
 			}
 			finally {
-				getFileSystem(userId, itemId).deleteFile(itemFile(userId, itemId, ItemFileType.PHOTO, photoFileName));
+				getFileSystemForItemFileType(userId, itemId, photoFileType).deleteFile(itemFile(userId, itemId, photoFileType, photoFileName));
 			}
 		}
 		catch (IOException ex) {
@@ -256,7 +275,7 @@ public abstract class FileSystemFilesXMLStorage extends BaseXMLStorage implement
 	@Override
 	public final boolean itemExists(String userId, String itemId) throws StorageException {
 		try {
-			return getFileSystem(userId, itemId).exists(getXMLFile(userId, itemId));
+			return getXmlFileSystem(userId, itemId).exists(getXMLFile(userId, itemId));
 		} catch (IOException ex) {
 			throw new StorageException("Exception whie checking whether file exists", ex);
 		}
