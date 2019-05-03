@@ -71,8 +71,9 @@ public abstract class BaseXMLStorage implements IItemStorage, AutoCloseable {
 	 * @param itemId
 	 * @param itemFileType
 	 * @return
+	 * @throws StorageException 
 	 */
-	private int [] listFileIndicesSorted(String userId, String itemId, ItemFileType itemFileType) {
+	private int [] listFileIndicesSorted(String userId, String itemId, ItemFileType itemFileType) throws StorageException {
 		final String [] files = listFiles(userId, itemId, itemFileType);
 		
 		// file names are number.mime_type.itemId
@@ -102,7 +103,7 @@ public abstract class BaseXMLStorage implements IItemStorage, AutoCloseable {
 		return StringUtil.split(fileName, FILE_NAME_SEPARATOR);
 	}
 	
-	protected final String allocateFileName(String userId, String itemId, ItemFileType itemFileType, String mimeType) {
+	protected final String allocateFileName(String userId, String itemId, ItemFileType itemFileType, String mimeType) throws StorageException {
 		final int [] indices = listFileIndicesSorted(userId, itemId, itemFileType);
 		
 		final int allocatedId = indices.length == 0 ? 1 : indices[indices.length - 1] + 1;
@@ -165,7 +166,7 @@ public abstract class BaseXMLStorage implements IItemStorage, AutoCloseable {
 	}
 
 	
-	protected abstract String [] listFiles(String userId, String itemId, ItemFileType itemFileType);
+	protected abstract String [] listFiles(String userId, String itemId, ItemFileType itemFileType) throws StorageException;
 
 	
 

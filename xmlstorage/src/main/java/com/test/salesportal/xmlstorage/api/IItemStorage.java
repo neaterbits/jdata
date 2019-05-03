@@ -92,5 +92,5 @@ public interface IItemStorage extends AutoCloseable {
 	
 	int getNumFiles(String userId, String itemId, ItemFileType itemFileType) throws StorageException;
 
-	boolean itemExists(String userId, String itemId);
+	boolean itemExists(String userId, String itemId) throws StorageException;
 }

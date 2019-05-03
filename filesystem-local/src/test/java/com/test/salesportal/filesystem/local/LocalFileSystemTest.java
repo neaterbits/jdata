@@ -40,14 +40,10 @@ public class LocalFileSystemTest extends TestCase {
 		
 		assertThat(fileInput).isNotNull();
 		assertThat(fileInput.getLength()).isEqualTo(bytes.length);
-		assertThat(IOUtil.readAll(fileInput.getInputStream())).isEqualTo(bytes);
-		
-		fileInput.getInputStream().close();
+		assertThat(IOUtil.readAllAndClose(fileInput.getInputStream())).isEqualTo(bytes);
 		
 		final InputStream inputStream = fileSystem.readFile(path);
-		assertThat(IOUtil.readAll(inputStream)).isEqualTo(bytes);
-		
-		inputStream.close();
+		assertThat(IOUtil.readAllAndClose(inputStream)).isEqualTo(bytes);
 		
 		assertThat(fileSystem.exists(path)).isTrue();
 		

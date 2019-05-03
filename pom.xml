@@ -38,9 +38,11 @@
 	    <module>integrationtest</module>
 	    <module>xmlstorage</module>
 	    <module>xmlstorage-filesystem-files</module>
+	    <module>xmlstorage-filesystem-compressed</module>
 	    <module>filesystem</module>
 	    <module>filesystem-local</module>
 	    <module>filesystem-s3</module>
+	    <module>filesystem-zip</module>
 	    <module>jetty-test</module>
 	    <module>reindex</module>
     <module>rest</module>

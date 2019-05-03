@@ -110,10 +110,14 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		try {
 			images = xmlStorage.getThumbnailsForItem(userId, itemId);
 		} catch (StorageException ex) {
-			if (!xmlStorage.itemExists(userId, itemId)) {
-				result = Collections.emptyList();
-			}
-			else {
+			try {
+				if (!xmlStorage.itemExists(userId, itemId)) {
+					result = Collections.emptyList();
+				}
+				else {
+					throw new ItemStorageException("Failed to get thumbnails for " + itemId, ex);
+				}
+			} catch (StorageException itemExistsEx) {
 				throw new ItemStorageException("Failed to get thumbnails for " + itemId, ex);
 			}
 		}

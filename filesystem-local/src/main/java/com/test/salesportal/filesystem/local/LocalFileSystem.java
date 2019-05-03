@@ -90,16 +90,20 @@ public class LocalFileSystem implements IFileSystem {
 		pathToFile(path).delete();
 	}
 	
+	private static final String [] NO_STRINGS = new String[0];
+	
 	@Override
 	public String[] listFiles(String[] path) {
 		
 		final File pathFile = pathToFile(path);
 		final String [] files = pathFile.list();
 	
-		return Arrays.stream(files)
-				.map(fileName -> new File(pathFile, fileName))
-				.filter(File::isFile)
-				.map(File::getName)
-				.toArray(String[]::new);
+		return files == null
+				? NO_STRINGS
+				: Arrays.stream(files)
+					.map(fileName -> new File(pathFile, fileName))
+					.filter(File::isFile)
+					.map(File::getName)
+					.toArray(String[]::new);
 	}
 }

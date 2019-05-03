@@ -72,7 +72,17 @@ public class IOUtil {
 
 		return baos.toByteArray();
 	}
-	
+
+	public static byte [] readAllAndClose(InputStream inputStream) throws IOException {
+		
+		try {
+			return readAll(inputStream);
+		}
+		finally {
+			inputStream.close();
+		}
+	}
+
 	public static String readFileToString(File file) throws IOException {
 		final byte [] data;
 		

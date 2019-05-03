@@ -9,7 +9,7 @@ import com.test.salesportal.filesystem.local.LocalFileSystem;
 import com.test.salesportal.index.ItemIndex;
 import com.test.salesportal.integrationtest.IntegrationTestHelper;
 import com.test.salesportal.xmlstorage.api.IItemStorage;
-import com.test.salesportal.xmlstorage.filesystem.files.FileSystemFilesStorage;
+import com.test.salesportal.xmlstorage.filesystem.files.ParameterFileSystemFilesXMLStorage;
 
 public class LocalFileAndLuceneXMLItemDAOTest extends ItemDAOTest {
 
@@ -23,7 +23,7 @@ public class LocalFileAndLuceneXMLItemDAOTest extends ItemDAOTest {
 	
 	@Override
 	protected IItemDAO getItemDAO() {
-		final IItemStorage localXmlStorage = new FileSystemFilesStorage(new LocalFileSystem(baseDir));
+		final IItemStorage localXmlStorage = new ParameterFileSystemFilesXMLStorage(new LocalFileSystem(baseDir));
 
 		return new XMLItemDAO(localXmlStorage, index);
 	}

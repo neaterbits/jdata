@@ -1,5 +1,6 @@
 package com.test.salesportal.filesystem.api;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -25,6 +26,10 @@ public interface IFileSystem {
 	
 	void storeFile(String [] path, InputStream toStore, Integer streamLength) throws IOException;
 
+	default void writeFile(String [] path, byte [] bytes) throws IOException {
+		storeFile(path, new ByteArrayInputStream(bytes), bytes.length);
+	}
+	
 	default InputStream readFile(String [] path) throws IOException {
 		
 		final FileInput fileInput = readFileInput(path);
@@ -34,9 +39,9 @@ public interface IFileSystem {
 	
 	FileInput readFileInput(String [] path) throws IOException;
 
-	void deleteFile(String [] path);
+	void deleteFile(String [] path) throws IOException;
 	
-	boolean exists(String [] path);
+	boolean exists(String [] path) throws IOException;
 	
-	String [] listFiles(String [] path);
+	String [] listFiles(String [] path) throws IOException;
 }

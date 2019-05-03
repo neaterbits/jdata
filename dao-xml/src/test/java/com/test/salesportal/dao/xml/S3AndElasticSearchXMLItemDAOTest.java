@@ -12,7 +12,7 @@ import com.test.salesportal.index.elasticsearch.ElasticSearchIndex;
 import com.test.salesportal.index.elasticsearch.aws.AWSElasticseachIndex;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.attributes.ClassAttributes;
-import com.test.salesportal.xmlstorage.filesystem.files.FileSystemFilesStorage;
+import com.test.salesportal.xmlstorage.filesystem.files.ParameterFileSystemFilesXMLStorage;
 
 /**
  * Test directly on S3 and ElasticSearch in the cloud
@@ -40,7 +40,7 @@ public class S3AndElasticSearchXMLItemDAOTest extends ItemDAOTest {
 				Regions.EU_WEST_2,
 				"eltodo-testbucket");
 		
-		return new XMLItemDAO(new FileSystemFilesStorage(itemFileSystem), makeIndex());
+		return new XMLItemDAO(new ParameterFileSystemFilesXMLStorage(itemFileSystem), makeIndex());
 	}
 	
 	@Override
