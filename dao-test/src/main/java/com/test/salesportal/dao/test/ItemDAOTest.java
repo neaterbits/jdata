@@ -14,6 +14,7 @@ import java.util.List;
 import com.test.salesportal.dao.IFoundItem;
 import com.test.salesportal.dao.IFoundItemPhotoThumbnail;
 import com.test.salesportal.dao.IItemDAO;
+import com.test.salesportal.dao.IItemUpdate;
 import com.test.salesportal.dao.ItemStorageException;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemPhoto;
@@ -48,13 +49,13 @@ public abstract class ItemDAOTest extends TestCase {
 		
 		final Snowboard snowboard = makeSnowboard();
 		
-		try (IItemDAO itemDAO = getItemDAO()) {
+		try (IItemUpdate itemDAO = getItemDAO()) {
 			 itemId = itemDAO.addItem(userId, snowboard);
 		}
 		
 		// Obtain DAO anew to make sure we skip any caching
 			
-		try (IItemDAO itemDAO = getItemDAO()) {
+		try (IItemUpdate itemDAO = getItemDAO()) {
 			try {
 				final IFoundItem retrieved = itemDAO.getItem(userId, itemId);
 				
@@ -362,7 +363,7 @@ public abstract class ItemDAOTest extends TestCase {
 		return bytes;
 	}
 
-	private void addPhotoAndThumbnail(IItemDAO itemDAO, String userId, String itemId, Class<? extends Item> type, byte [] thumbnail, byte [] photo) throws ItemStorageException {
+	private void addPhotoAndThumbnail(IItemUpdate itemDAO, String userId, String itemId, Class<? extends Item> type, byte [] thumbnail, byte [] photo) throws ItemStorageException {
 		 final ByteArrayInputStream thumbnailInputStream = new ByteArrayInputStream(thumbnail);
 		 final ByteArrayInputStream photoInputStream = new ByteArrayInputStream(photo);
 

@@ -1,6 +1,6 @@
 package com.test.salesportal.dao.xml;
 
-import com.test.salesportal.dao.IItemDAO;
+import com.test.salesportal.dao.IItemUpdate;
 import com.test.salesportal.dao.ISearchDAO;
 import com.test.salesportal.dao.index.IndexSearchDAO;
 import com.test.salesportal.dao.test.SearchDAOTest;
@@ -9,7 +9,7 @@ import com.test.salesportal.index.ItemIndexException;
 public class ElasticSearchIndexDAOTest extends SearchDAOTest {
 
 	@Override
-	protected IItemDAO getItemDAO() {
+	protected IItemUpdate getItemDAO() {
 		try {
 			return S3AndElasticSearchXMLItemDAOTest.makeItemDAO();
 		} catch (ItemIndexException ex) {

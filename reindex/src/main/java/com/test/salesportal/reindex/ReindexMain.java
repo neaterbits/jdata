@@ -9,6 +9,7 @@ import com.test.salesportal.common.ItemId;
 import com.test.salesportal.dao.IFoundItem;
 import com.test.salesportal.dao.IFoundItemPhotoThumbnail;
 import com.test.salesportal.dao.IItemDAO;
+import com.test.salesportal.dao.IItemUpdate;
 import com.test.salesportal.dao.xml.XMLItemDAO;
 import com.test.salesportal.index.IndexSearchCursor;
 import com.test.salesportal.index.lucene.LuceneItemIndex;
@@ -56,7 +57,7 @@ public class ReindexMain {
 			final LocalXmlStorage dstStorage = new LocalXmlStorage(dstDir);
 			final LuceneItemIndex dstIndex = new LuceneItemIndex(indexDir(dstDir));
 
-			try (IItemDAO dstDao = new XMLItemDAO(dstStorage, dstIndex)) {
+			try (IItemUpdate dstDao = new XMLItemDAO(dstStorage, dstIndex)) {
 				// Just call on source index to get all items
 				final List<Class<? extends Item>> allTypes = ItemTypes.getAllTypesList();
 		

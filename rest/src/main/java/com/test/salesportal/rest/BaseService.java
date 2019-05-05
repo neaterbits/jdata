@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.test.salesportal.common.EnvVariables;
 import com.test.salesportal.dao.IItemDAO;
+import com.test.salesportal.dao.IItemRetrieval;
+import com.test.salesportal.dao.IItemUpdate;
 import com.test.salesportal.dao.xml.XMLItemDAO;
 import com.test.salesportal.index.ItemIndex;
 import com.test.salesportal.integrationtest.IntegrationTestHelper;
@@ -89,7 +91,15 @@ public abstract class BaseService {
 		return luceneIndex;
 	}
 
-	protected final IItemDAO getItemDAO(HttpServletRequest request) {
+	protected final IItemRetrieval getItemRetrievalDAO(HttpServletRequest request) {
+		return getItemDAO(request);
+	}
+
+	protected final IItemUpdate getItemUpdateDAO(HttpServletRequest request) {
+		return getItemDAO(request);
+	}
+
+	private final IItemDAO getItemDAO(HttpServletRequest request) {
 		
 		final IItemDAO ret;
 		

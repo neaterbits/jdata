@@ -39,7 +39,7 @@ public class ItemService extends BaseService {
 	@Produces("application/text")
 	public String storeItem(@QueryParam("userId") String userId, Item item, HttpServletRequest request) throws ItemStorageException {
 		// Received an item as JSon, store it
-		final String itemId = getItemDAO(request).addItem(userId, item);
+		final String itemId = getItemUpdateDAO(request).addItem(userId, item);
 		
 		return itemId;
 	}
@@ -59,7 +59,7 @@ public class ItemService extends BaseService {
 		final Class<? extends Item> type = ItemTypes.getTypeByName(itemType).getType();
 
 		// Received an item as JSon, store it
-		getItemDAO(request).addThumbAndPhotoUrlsForItem(userId, itemId, type, urls);
+		getItemUpdateDAO(request).addThumbAndPhotoUrlsForItem(userId, itemId, type, urls);
 	}
 
 	@POST
@@ -142,7 +142,7 @@ public class ItemService extends BaseService {
 		// Must create a thumbnail from photo
 		// Some JPEGs may have thumbnails already
 		
-		getItemDAO(request).addPhotoAndThumbnailForItem(
+		getItemUpdateDAO(request).addPhotoAndThumbnailForItem(
 				userId, itemId, ItemTypes.getTypeByName(itemType).getType(),
 				thumbnailInputStream, thumbnailMimeType, thumbDataLength, thumbWidth, thumbHeight,
 				photoInputStream1, photoMimeType, imageData.length);
@@ -175,7 +175,7 @@ public class ItemService extends BaseService {
 		final int thumbDataLength = thumbData.length;
 		final InputStream thumbnailInputStream = new ByteArrayInputStream(thumbData);
 		
-		getItemDAO(request).addPhotoUrlAndThumbnailForItem(
+		getItemUpdateDAO(request).addPhotoUrlAndThumbnailForItem(
 				userId, itemId, ItemTypes.getTypeByName(itemType).getType(),
 				thumbnailInputStream, thumbnailMimeType, thumbDataLength, thumbWidth, thumbHeight,
 				imageUrl);
@@ -189,7 +189,7 @@ public class ItemService extends BaseService {
 			@PathParam("itemId") String itemId,
 			HttpServletRequest request) throws IOException, ItemStorageException {
 		
-		return getItemDAO(request).getPhotoCount(itemId);
+		return getItemRetrievalDAO(request).getPhotoCount(itemId);
 	}
 	
 	@GET
@@ -200,7 +200,7 @@ public class ItemService extends BaseService {
 			@QueryParam("photoNo") int photoNo,
 			HttpServletRequest request) throws IOException, ItemStorageException {
 	
-		final InputStream photoStream = getItemDAO(request).getItemPhoto(itemId, photoNo);
+		final InputStream photoStream = getItemRetrievalDAO(request).getItemPhoto(itemId, photoNo);
 
 		final byte[] data;
 		try {

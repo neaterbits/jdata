@@ -823,7 +823,7 @@ public class SearchService extends BaseService {
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream(50000);
 
 		try {
-			inputStream = getItemDAO(request).retrieveAndConcatenateThumbnails(itemIds);
+			inputStream = getItemRetrievalDAO(request).retrieveAndConcatenateThumbnails(itemIds);
 
 			IOUtil.copyStreams(inputStream, baos);
 		} catch (ItemStorageException ex) {

@@ -6,7 +6,7 @@ import java.io.IOException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
-import com.test.salesportal.dao.IItemDAO;
+import com.test.salesportal.dao.IItemUpdate;
 import com.test.salesportal.dao.ISearchDAO;
 import com.test.salesportal.dao.index.IndexSearchDAO;
 import com.test.salesportal.dao.test.SearchDAOTest;
@@ -36,7 +36,7 @@ public class LuceneIndexSearchDAOTest extends SearchDAOTest {
 	}
 	
 	@Override
-	protected IItemDAO getItemDAO() {
+	protected IItemUpdate getItemDAO() {
 		final IItemStorage localXmlStorage = new ParameterFileSystemFilesXMLStorage(new LocalFileSystem(baseDir));
 		return new XMLItemDAO(localXmlStorage, index);
 	}

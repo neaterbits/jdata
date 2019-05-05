@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import com.test.salesportal.dao.IItemDAO;
+import com.test.salesportal.dao.IItemUpdate;
 import com.test.salesportal.dao.ISearchCursor;
 import com.test.salesportal.dao.ISearchDAO;
 import com.test.salesportal.dao.SearchException;
@@ -41,7 +41,7 @@ import junit.framework.TestCase;
 
 public abstract class SearchDAOTest extends TestCase {
 
-	protected abstract IItemDAO getItemDAO();
+	protected abstract IItemUpdate getItemDAO();
 	protected abstract ISearchDAO getSearchDAO();
 
 	static Snowboard makeSnowboard1() {
@@ -112,7 +112,7 @@ public abstract class SearchDAOTest extends TestCase {
 
 		final String userId = "theUser";
 		
-		try (IItemDAO itemDAO = getItemDAO()) {
+		try (IItemUpdate itemDAO = getItemDAO()) {
 		
 			final Car car = new Car();
 			
@@ -757,7 +757,7 @@ public abstract class SearchDAOTest extends TestCase {
 
 	@FunctionalInterface
 	public interface CheckSnowboard {
-		void check(String userId, IItemDAO itemDAO,  ISearchDAO searchDAO, String itemId1, String itemId2) throws SearchException, Exception;
+		void check(String userId, IItemUpdate itemDAO,  ISearchDAO searchDAO, String itemId1, String itemId2) throws SearchException, Exception;
 	}
 	
 	private void checkSnowboard(CheckSnowboard check) throws Exception {
@@ -774,7 +774,7 @@ public abstract class SearchDAOTest extends TestCase {
 		String itemId1 = null;
 		String itemId2 = null;
 		
-		final IItemDAO itemDAO = getItemDAO();
+		final IItemUpdate itemDAO = getItemDAO();
 	
 		try {
 			itemId1 = itemDAO.addItem(userId, snowboard1);
