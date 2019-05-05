@@ -1,4 +1,4 @@
-package com.test.salesportal.rest.search.returnitems;
+package com.test.salesportal.rest.search;
 
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetsResult;
 import com.test.salesportal.rest.search.model.sorting.SearchSortOrderAlternative;

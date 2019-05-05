@@ -5,7 +5,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
-import com.test.salesportal.rest.search.returnitems.SearchService;
+import com.test.salesportal.rest.search.SearchService;
 
 public class JettyRunEmbedded {
 

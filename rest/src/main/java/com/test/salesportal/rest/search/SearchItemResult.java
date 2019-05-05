@@ -1,4 +1,4 @@
-package com.test.salesportal.rest.search.returnitems;
+package com.test.salesportal.rest.search;
 
 /**
  * JSON serialized for one item
