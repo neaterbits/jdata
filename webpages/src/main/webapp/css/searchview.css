@@ -163,6 +163,9 @@
 }
 
 #numberOfItemsDiv {
+	font-family : sans-serif;
+	font-size : 14;
+	
 	display : inline;
 }
 
@@ -186,6 +189,8 @@
 }
 
 .galleryItem {
+	font-family : sans-serif;
+	font-size : 10;
 	border : 1px solid black;
 	margin : 3px;
 	box-shadow: 2px 2px 1px #777777;
