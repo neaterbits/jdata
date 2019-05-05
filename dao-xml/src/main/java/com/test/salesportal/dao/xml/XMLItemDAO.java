@@ -384,6 +384,11 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 
 		try {
 			xmlStorage.retrieveThumbnails(itemIds, (imageResult, itemId) -> {
+				
+				if (imageResult == null) {
+					throw new IllegalArgumentException("imageResult == null");
+				}
+				
 				if (itemId == null) {
 					throw new IllegalArgumentException("itemId == null");
 				}
