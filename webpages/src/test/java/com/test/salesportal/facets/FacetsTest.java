@@ -8,12 +8,12 @@ import java.util.HashMap;
 
 import com.test.salesportal.jsutils.ConstructRequest;
 import com.test.salesportal.jsutils.JSInvocable;
-import com.test.salesportal.rest.SearchFacetedAttributeIntegerRangeResult;
-import com.test.salesportal.rest.SearchFacetedTypeResult;
-import com.test.salesportal.rest.SearchFacetsResult;
-import com.test.salesportal.rest.SearchRangeFacetedAttributeResult;
-import com.test.salesportal.rest.SearchSingleValueFacet;
-import com.test.salesportal.rest.SearchSingleValueFacetedAttributeResult;
+import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeIntegerRangeResult;
+import com.test.salesportal.rest.search.model.facetresult.SearchFacetedTypeResult;
+import com.test.salesportal.rest.search.model.facetresult.SearchFacetsResult;
+import com.test.salesportal.rest.search.model.facetresult.SearchRangeFacetedAttributeResult;
+import com.test.salesportal.rest.search.model.facetresult.SearchSingleValueFacet;
+import com.test.salesportal.rest.search.model.facetresult.SearchSingleValueFacetedAttributeResult;
 
 public class FacetsTest extends BaseFacetsTest {
 

@@ -2,7 +2,7 @@ package com.test.salesportal.facets;
 
 import com.test.salesportal.jsutils.JSInvocable;
 import com.test.salesportal.jsutils.JavaWrapper;
-import com.test.salesportal.rest.SearchFacetsResult;
+import com.test.salesportal.rest.search.model.facetresult.SearchFacetsResult;
 
 final class FacetModel extends JavaWrapper {
 

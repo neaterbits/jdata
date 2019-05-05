@@ -23,13 +23,13 @@ import com.test.salesportal.model.Item;
 import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.model.items.TypeInfo;
 import com.test.salesportal.rest.BaseService;
-import com.test.salesportal.rest.ItemService;
-import com.test.salesportal.rest.LoginService;
-import com.test.salesportal.rest.SearchCriterium;
-import com.test.salesportal.rest.SearchResult;
-import com.test.salesportal.rest.SearchService;
-import com.test.salesportal.rest.LoginService.CheckCodeResponse;
-import com.test.salesportal.rest.LoginService.LoginResponse;
+import com.test.salesportal.rest.items.ItemService;
+import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
+import com.test.salesportal.rest.search.returnitems.SearchResult;
+import com.test.salesportal.rest.search.returnitems.SearchService;
+import com.test.salesportal.rest.smslogin.LoginService;
+import com.test.salesportal.rest.smslogin.LoginService.CheckCodeResponse;
+import com.test.salesportal.rest.smslogin.LoginService.LoginResponse;
 
 public class JettyRunServlet {
 

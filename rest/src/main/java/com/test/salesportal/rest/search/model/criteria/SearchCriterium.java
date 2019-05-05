@@ -1,4 +1,4 @@
-package com.test.salesportal.rest;
+package com.test.salesportal.rest.search.model.criteria;
 
 public class SearchCriterium {
 	private String type; // type of object this belongs to
@@ -26,7 +26,7 @@ public class SearchCriterium {
 		this.attribute = attribute;
 	}
 	
-	SearchCriteriumValue[] getValues() {
+	public SearchCriteriumValue[] getValues() {
 		return values;
 	}
 
@@ -42,7 +42,7 @@ public class SearchCriterium {
 		this.otherSelected = otherSelected;
 	}
 
-	SearchRange[] getRanges() {
+	public SearchRange[] getRanges() {
 		return ranges;
 	}
 

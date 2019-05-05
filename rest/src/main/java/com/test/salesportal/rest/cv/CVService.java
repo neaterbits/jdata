@@ -1,4 +1,4 @@
-package com.test.salesportal.rest;
+package com.test.salesportal.rest.cv;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -14,6 +14,7 @@ import com.test.salesportal.dao.xml.XMLCVDAO;
 import com.test.salesportal.model.cv.CV;
 import com.test.salesportal.model.cv.CVItem;
 import com.test.salesportal.model.cv.Personalia;
+import com.test.salesportal.rest.BaseService;
 
 @Path("/cv")
 public class CVService extends BaseService {

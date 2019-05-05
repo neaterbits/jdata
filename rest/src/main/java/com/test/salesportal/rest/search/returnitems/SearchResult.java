@@ -1,4 +1,7 @@
-package com.test.salesportal.rest;
+package com.test.salesportal.rest.search.returnitems;
+
+import com.test.salesportal.rest.search.model.facetresult.SearchFacetsResult;
+import com.test.salesportal.rest.search.model.sorting.SearchSortOrderAlternative;
 
 /**
  * Search result for one page of data

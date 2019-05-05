@@ -24,13 +24,13 @@ public abstract class BaseService {
 		return "true".equals(test);
 	}
 
-	enum Storage {
+	public enum Storage {
 		JPA_RELATIONAL, // standard relational database
 		AMAZON_S3_ES, // S3 and ElasticSearch in AWS
 		LOCAL_FILE_LUCENE // local file and Lucene for search
 	};
 	
-	static Storage getStorageType(HttpServletRequest request) {
+	protected static Storage getStorageType(HttpServletRequest request) {
 		// just store current storage as an attribute
 		Storage storage = (Storage)request.getSession().getAttribute("storage");
 		
@@ -41,7 +41,7 @@ public abstract class BaseService {
 		return storage;
 	}
 
-	static Language [] getLanguages(HttpServletRequest request) {
+	protected static Language [] getLanguages(HttpServletRequest request) {
 		
 		Language language = (Language)request.getSession().getAttribute("language");
 		
@@ -54,7 +54,7 @@ public abstract class BaseService {
 	
 	private static File localBaseDir;
 			
-	BaseService(String localFileDir) {
+	protected BaseService(String localFileDir) {
 		
 		final File f = new File(localFileDir);
 		
@@ -70,7 +70,7 @@ public abstract class BaseService {
 		}
 	}
 			
-	LocalXmlStorage getLocalXMLStorage() {
+	protected final LocalXmlStorage getLocalXMLStorage() {
 		return new LocalXmlStorage(localBaseDir);
 	}
 
@@ -78,7 +78,7 @@ public abstract class BaseService {
 
 	// Lucene index must be static to avoid creating the writer multiple times
 	// We synchronize this on class level
-	synchronized static ItemIndex assureIndex() {
+	protected synchronized static ItemIndex assureIndex() {
 
 		final File indexDir = new File(localBaseDir, "index");
 
@@ -89,7 +89,7 @@ public abstract class BaseService {
 		return luceneIndex;
 	}
 
-	IItemDAO getItemDAO(HttpServletRequest request) {
+	protected final IItemDAO getItemDAO(HttpServletRequest request) {
 		
 		final IItemDAO ret;
 		
@@ -108,11 +108,11 @@ public abstract class BaseService {
 		return ret;
 	}
 	
-	static String getTypeId(Class<? extends Item> type) {
+	protected static String getTypeId(Class<? extends Item> type) {
 		return ItemTypes.getTypeName(type);
 	}
 	
-	static String getTypeDisplayName(Class<? extends Item> type) {
+	protected static String getTypeDisplayName(Class<? extends Item> type) {
 		return ItemTypes.getTypeDisplayName(type);
 	}
 }

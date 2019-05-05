@@ -1,4 +1,4 @@
-package com.test.salesportal.rest;
+package com.test.salesportal.rest.items;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -24,6 +24,7 @@ import com.test.salesportal.common.images.ThumbAndImageUrls;
 import com.test.salesportal.dao.ItemStorageException;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.rest.BaseService;
 
 @Path("/")
 public class ItemService extends BaseService {

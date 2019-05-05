@@ -1,4 +1,4 @@
-package com.test.salesportal.rest;
+package com.test.salesportal.rest.search.model.facetresult;
 
 public abstract class SearchFacetedAttributeRangeResult<T> {
 

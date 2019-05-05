@@ -1,4 +1,4 @@
-package com.test.salesportal.rest;
+package com.test.salesportal.rest.smslogin;
 
 import java.security.SecureRandom;
 import java.util.Date;

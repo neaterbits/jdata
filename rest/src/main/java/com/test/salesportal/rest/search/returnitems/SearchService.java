@@ -1,4 +1,4 @@
-package com.test.salesportal.rest;
+package com.test.salesportal.rest.search.returnitems;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -39,6 +39,20 @@ import com.test.salesportal.model.attributes.AttributeType;
 import com.test.salesportal.model.attributes.ClassAttributes;
 import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.rest.BaseService;
+import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
+import com.test.salesportal.rest.search.model.criteria.SearchCriteriumValue;
+import com.test.salesportal.rest.search.model.criteria.SearchRange;
+import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeDecimalRangeResult;
+import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeIntegerRangeResult;
+import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeRangeResult;
+import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeResult;
+import com.test.salesportal.rest.search.model.facetresult.SearchFacetedTypeResult;
+import com.test.salesportal.rest.search.model.facetresult.SearchFacetsResult;
+import com.test.salesportal.rest.search.model.facetresult.SearchRangeFacetedAttributeResult;
+import com.test.salesportal.rest.search.model.facetresult.SearchSingleValueFacet;
+import com.test.salesportal.rest.search.model.facetresult.SearchSingleValueFacetedAttributeResult;
+import com.test.salesportal.rest.search.model.sorting.SearchSortOrderAlternative;
 import com.test.salesportal.search.SearchItem;
 import com.test.salesportal.search.criteria.Criterium;
 import com.test.salesportal.search.criteria.DecimalInCriterium;
