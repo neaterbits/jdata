@@ -4,6 +4,8 @@
 
 This is a research project without any particular license, which means that standard copyright applies. It is not open source software as it is written for research purposes and thus one does not for now want to feel the responsibility support the software for other use.
 
+Thus it is only here for viewing, and cannot be used for either commercial or non commercial purposes, nor can it be redistributed.
+
 # Oversikt over kataloger
 
 Dette er et FoU prosjekt for å se nærmere på hva som er mulig mtp rask nedlasting oppdatering av grensesnitt via Ajax. Mere informasjon på wiki-sidene.
