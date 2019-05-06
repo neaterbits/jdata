@@ -1,19 +1,20 @@
-package com.test.salesportal.rest.search.all;
+package com.test.salesportal.rest.search.all.cache;
 
 import java.util.List;
 
+import com.test.salesportal.model.Item;
 import com.test.salesportal.model.SortAttribute;
 import com.test.salesportal.model.SortOrder;
+import com.test.salesportal.rest.search.all.AllSearchItemResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetsResult;
 
-abstract class SortedSearchResult {
+public abstract class SortedSearchResult {
 
 	static final AllSearchItemResult [] EMPTY_ARRAY = new AllSearchItemResult[0];
 
 	private final String searchResultId;
 	
 	private final List<SortAttribute> sortAttributes;
-	private final int indexIntoFields;
 	
 	private SearchFacetsResult facetsResult;
 	
@@ -23,8 +24,12 @@ abstract class SortedSearchResult {
 	
 	abstract int getMatchCount();
 
-	SortedSearchResult(String searchResultId, List<SortAttribute> sortAttributes, int indexIntoFields) {
-
+	abstract void applyItemToCachedItems(SearchKey searchKey, Item item);
+	
+	abstract void deleteItemFromCachedItems(String itemId);
+	
+	SortedSearchResult(String searchResultId, List<SortAttribute> sortAttributes) {
+		
 		if (searchResultId == null) {
 			throw new IllegalArgumentException("searchResultId == null");
 		}
@@ -39,10 +44,9 @@ abstract class SortedSearchResult {
 
 		this.searchResultId = searchResultId;
 		this.sortAttributes = sortAttributes;
-		this.indexIntoFields = indexIntoFields;
 	}
 	
-	void initFacetsResult(SearchFacetsResult facetsResult) {
+	final void initFacetsResult(SearchFacetsResult facetsResult) {
 		
 		if (facetsResult == null) {
 			throw new IllegalArgumentException("facetsResult");
@@ -55,7 +59,7 @@ abstract class SortedSearchResult {
 		this.facetsResult = facetsResult;
 	}
 	
-	SearchFacetsResult getFacetsResult() {
+	final SearchFacetsResult getFacetsResult() {
 		return facetsResult;
 	}
 
@@ -67,7 +71,11 @@ abstract class SortedSearchResult {
 		return sortAttributes;
 	}
 
-	final int getIndexIntoFields() {
-		return indexIntoFields;
+	final void applyItem(SearchKey searchKey, Item item) {
+		applyItemToCachedItems(searchKey, item);
+	}
+	
+	final void deleteItem(String itemId) {
+		deleteItemFromCachedItems(itemId);
 	}
 }

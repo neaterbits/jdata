@@ -19,8 +19,17 @@ import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.model.items.TypeInfo;
 import com.test.salesportal.model.operations.Operation;
 import com.test.salesportal.model.operations.dao.BaseOperationData;
+import com.test.salesportal.model.operations.dao.DeleteItemOperationData;
 import com.test.salesportal.model.operations.dao.OperationDataMarshaller;
+import com.test.salesportal.model.operations.dao.StoreItemOperationData;
+import com.test.salesportal.model.operations.dao.UpdateItemOperationData;
 import com.test.salesportal.rest.search.BaseSearchService;
+import com.test.salesportal.rest.search.all.cache.CachedSearchResult;
+import com.test.salesportal.rest.search.all.cache.SearchKey;
+import com.test.salesportal.rest.search.all.cache.SearchResultCache;
+import com.test.salesportal.rest.search.all.cache.SimpleSortedSearchResult;
+import com.test.salesportal.rest.search.all.cache.SortedSearchResult;
+import com.test.salesportal.rest.search.all.cache.SortedSearchResultFactory;
 import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
 import com.test.salesportal.rest.search.model.sorting.SearchSortOrderAlternative;
 import com.test.salesportal.rest.search.paged.ItemSearchResult;
@@ -34,8 +43,8 @@ public final class AllSearchService
 	private static final SortedSearchResultFactory SORTED_SEARCH_RESULT_FACTORY = new SortedSearchResultFactory() {
 		
 		@Override
-		public SortedSearchResult createSortedSearchResult(String searchResultId, List<SortAttribute> sortAttributes, int indexIntoFields) {
-			return new SimpleSortedSearchResult(searchResultId, sortAttributes, indexIntoFields);
+		public SortedSearchResult createSortedSearchResult(String searchResultId, List<SortAttribute> sortAttributes) {
+			return new SimpleSortedSearchResult(searchResultId, sortAttributes);
 		}
 	};
 	
@@ -107,7 +116,21 @@ public final class AllSearchService
 		final List<Class<? extends Item>> typesList = SearchTypesUtil.computeTypes(types);
 		
 		final List<SortAttributeAndOrder> sortAttributes = SearchSortUtil.decodeSortOrders(sortOrder, typesList);
-		
+
+		final List<ItemAttribute> responseFieldAttributes = new ArrayList<>(fields.length);
+
+		for (Class<? extends Item> type : typesList) {
+
+			final TypeInfo typeInfo = ItemTypes.getTypeInfo(type);
+			final ItemAttribute attribute = typeInfo.getAttributes().getByName(Item.MODEL_VERSION);
+
+			if (attribute == null) {
+				throw new IllegalStateException();
+			}
+			
+			responseFieldAttributes.add(attribute);
+		}
+
 		
 		final SearchKey searchKey = new SearchKey(
 				typesList,
@@ -115,7 +138,8 @@ public final class AllSearchService
 				criteria,
 				sortAttributes.stream()
 					.map(SortAttributeAndOrder::getAttribute)
-					.collect(Collectors.toList()));
+					.collect(Collectors.toList()),
+				responseFieldAttributes);
 		
 		
 		CachedSearchResult cachedSearchResult = SEARCH_RESULT_CACHE.getCachedSearchResult(searchKey);
@@ -144,19 +168,6 @@ public final class AllSearchService
 		}
 		else {
 			// Must retrieve fields for sort attributes so that can cache values
-			final List<ItemAttribute> responseFieldAttributes = new ArrayList<>(fields.length);
-
-			for (Class<? extends Item> type : typesList) {
-
-				final TypeInfo typeInfo = ItemTypes.getTypeInfo(type);
-				final ItemAttribute attribute = typeInfo.getAttributes().getByName("modelVersion");
-
-				if (attribute == null) {
-					throw new IllegalStateException();
-				}
-				
-				responseFieldAttributes.add(attribute);
-			}
 
 			if (fields != null && fields.length > 0) {
 	
@@ -188,7 +199,10 @@ public final class AllSearchService
 					request);
 			
 			
-			final String searchResultId = SEARCH_RESULT_CACHE.cacheSearchResult(searchKey, result.getItems(), 0);
+			final String searchResultId = SEARCH_RESULT_CACHE.cacheSearchResult(
+					searchKey,
+					result.getFacets(),
+					result.getItems());
 
 			allSearchResult = new AllSearchResult(
 					result.getTotalItemMatchCount(),
@@ -214,7 +228,7 @@ public final class AllSearchService
 	
 	private void refreshCacheIfOutdated() {
 
-		synchronized (this) {
+		synchronized (AllSearchService.class) {
 
 			final List<Operation> operations = operationsDAO.getCompletedOperationsNewerThanSortedOnModelVersionAsc(currentRefereshedModelVersion);
 			
@@ -225,9 +239,31 @@ public final class AllSearchService
 				// Apply to cache in order
 				for (Operation operation : operations) {
 
-					// final BaseOperationData operationData = OPERATION_DATA_MARSHALLER.decodeOperationData(unmarshaller, operation);
-					
-					throw new UnsupportedOperationException("TODO");
+					final BaseOperationData operationData = OPERATION_DATA_MARSHALLER.decodeOperationData(unmarshaller, operation);
+
+					if (operationData instanceof StoreItemOperationData) {
+						
+						final StoreItemOperationData storeItemOperationData = (StoreItemOperationData)operationData;
+						
+						SEARCH_RESULT_CACHE.applyToAnyMatchingCachedSearchResults(storeItemOperationData.getItem());
+						
+					}
+					else if (operationData instanceof UpdateItemOperationData) {
+
+						final UpdateItemOperationData updateItemOperationData = (UpdateItemOperationData)operationData;
+						
+						SEARCH_RESULT_CACHE.applyToAnyMatchingCachedSearchResults(updateItemOperationData.getItem());
+						
+					}
+					else if (operationData instanceof DeleteItemOperationData) {
+						
+						final DeleteItemOperationData deleteItemOperationData = (DeleteItemOperationData)operationData;
+						
+						SEARCH_RESULT_CACHE.deleteFromCachedSearchResults(deleteItemOperationData.getItemId());
+					}
+					else {
+						throw new UnsupportedOperationException("Unknown operation type " + operationData.getClass().getName());
+					}
 				}
 				
 				currentRefereshedModelVersion = operations.get(operations.size() - 1).getModelVersion();

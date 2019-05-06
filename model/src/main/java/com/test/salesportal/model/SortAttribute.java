@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.test.salesportal.common.StringUtil;
 import com.test.salesportal.model.annotations.SortableType;
 import com.test.salesportal.model.attributes.ClassAttributes;
+import com.test.salesportal.model.items.ItemTypes;
 
 /**
  * SortAttributes are different from item attributes in that
@@ -100,6 +101,13 @@ public final class SortAttribute extends DistinctAttribute {
 		return sortableType;
 	}
 
+	public Object getObjectValue(Item item) {
+		
+		final ItemAttribute itemAttribute = ItemTypes.getTypeInfo(item).getAttributes().getByName(getName());
+		
+		return itemAttribute.getObjectValue(item);
+	}
+	
 	@Override
 	public String toString() {
 		return sortableTitle;

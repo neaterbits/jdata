@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StringUtil {
+	
 	public static String [] split(String s, char splitChar) {
 		
 		int lastSplit = -1;
@@ -13,7 +14,11 @@ public class StringUtil {
 			final char c = s.charAt(i);
 			
 			if (c == splitChar) {
-				if (i != 0 && lastSplit < i - 1) {
+				if (i == 0) {
+					strings.add("");
+					lastSplit = 0;
+				}
+				else {
 					strings.add(s.substring(lastSplit + 1, i));
 					lastSplit = i;
 				}
@@ -23,7 +28,7 @@ public class StringUtil {
 		if (lastSplit == -1) {
 			strings.add(s);
 		}
-		else if (lastSplit < s.length() - 1) {
+		else if (lastSplit < s.length()) {
 			strings.add(s.substring(lastSplit + 1, s.length()));
 		}
 		
@@ -57,5 +62,86 @@ public class StringUtil {
 		}
 		
 		return result;
+	}
+	
+	public static boolean containsWholeWord(String toScan, String toScanFor, boolean caseSensitive) {
+
+		boolean mayHaveWholeWordMatch = true;
+		
+		boolean contains;
+		
+		final String trimmed = toScanFor.trim();
+
+		if (trimmed.length() > toScan.length()) {
+			contains = false;
+		}
+		else {
+			final int maxIndex = toScan.length() - trimmed.length();
+			
+			contains = false;
+			
+			for (int i = 0; i <= maxIndex; ++ i) {
+				
+				if (mayHaveWholeWordMatch) {
+					
+					boolean matches = true;
+
+					int toScanIdx = i;
+					int toScanForIdx = 0;
+					
+					for (;;) {
+
+						char c1 = 0;
+						char c2 = 0;
+
+						while (toScanForIdx < trimmed.length() && Character.isWhitespace(c2 = trimmed.charAt(toScanForIdx))) {
+							++ toScanForIdx;
+						}
+						
+						if (toScanForIdx >= trimmed.length()) {
+							break;
+						}
+						
+						while (toScanIdx < toScan.length() && Character.isWhitespace(c1 = toScan.charAt(toScanIdx))) {
+							++ toScanIdx;
+						}
+						
+						if (toScanIdx >= toScan.length()) {
+							matches = false;
+							break;
+						}
+
+						if (caseSensitive) {
+							if (c1 != c2) {
+								matches = false;
+								break;
+							}
+						}
+						else {
+							if (Character.toLowerCase(c1) != Character.toLowerCase(c2)) {
+								matches = false;
+								break;
+							}
+						}
+						
+						++ toScanIdx;
+						++ toScanForIdx;
+					}
+					
+					if (matches) {
+						contains = true;
+						break;
+					}
+					else {
+						mayHaveWholeWordMatch = Character.isWhitespace(toScan.charAt(i));
+					}
+				}
+				else {
+					mayHaveWholeWordMatch = Character.isWhitespace(toScan.charAt(i));
+				}
+			}
+		}
+		
+		return contains;
 	}
 }

@@ -36,10 +36,12 @@ public class ClassAttributes {
 
 	private final Class<? extends Item> type;
 	private final List<ItemAttribute> attributes;
+	private final Set<ItemAttribute> attributeSet;
 
 	private ClassAttributes(Class<? extends Item> type, List<ItemAttribute> attributes) {
 		this.type = type;
 		this.attributes = attributes;
+		this.attributeSet = Collections.unmodifiableSet(new HashSet<>(attributes));
 	}
 	
 	public List<ItemAttribute> sortInFacetOrder(Collection<ItemAttribute> attributes, boolean checkAllPropertiesPresentInList) {
@@ -91,7 +93,7 @@ public class ClassAttributes {
 	}
 	
 	public Set<ItemAttribute> asSet() {
-		return Collections.unmodifiableSet(new HashSet<>(this.attributes));
+		return attributeSet;
 	}
 	
 	public static List<ItemAttributeValue<?>> getValues(Item item) {

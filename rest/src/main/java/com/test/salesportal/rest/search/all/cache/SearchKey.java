@@ -1,25 +1,37 @@
-package com.test.salesportal.rest.search.all;
+package com.test.salesportal.rest.search.all.cache;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.test.salesportal.model.Item;
+import com.test.salesportal.model.ItemAttribute;
 import com.test.salesportal.model.SortAttribute;
 import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
 
-final class SearchKey {
+public final class SearchKey {
 
 	private final List<Class<? extends Item>> types;
 	private final String freeText;
-	private final SearchCriterium [] criteria;
+	private final List<SearchCriterium> criteria;
 	private final List<SortAttribute> sortAttributes;
+	private final List<ItemAttribute> fieldAttributes;
 	
-	public SearchKey(List<Class<? extends Item>> types, String freeText, SearchCriterium[] criteria,
-			List<SortAttribute> sortAttributes) {
-		this.types = types;
+	public SearchKey(
+			List<Class<? extends Item>> types,
+			String freeText,
+			SearchCriterium[] criteria,
+			List<SortAttribute> sortAttributes,
+			List<ItemAttribute> fieldAttributes) {
+		
+		this.types = Collections.unmodifiableList(new ArrayList<>(types));
 		this.freeText = freeText;
-		this.criteria = criteria;
-		this.sortAttributes = sortAttributes;
+		this.criteria = Collections.unmodifiableList(Arrays.asList(criteria));
+		this.sortAttributes = Collections.unmodifiableList(new ArrayList<>(sortAttributes));
+		this.fieldAttributes = fieldAttributes != null
+				? Collections.unmodifiableList(new ArrayList<>(fieldAttributes))
+				: null;
 	}
 	
 	public List<Class<? extends Item>> getTypes() {
@@ -30,7 +42,7 @@ final class SearchKey {
 		return freeText;
 	}
 
-	public SearchCriterium[] getCriteria() {
+	public List<SearchCriterium> getCriteria() {
 		return criteria;
 	}
 
@@ -38,17 +50,21 @@ final class SearchKey {
 		return sortAttributes;
 	}
 
+	public List<ItemAttribute> getFieldAttributes() {
+		return fieldAttributes;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Arrays.hashCode(criteria);
+		result = prime * result + ((criteria == null) ? 0 : criteria.hashCode());
 		result = prime * result + ((freeText == null) ? 0 : freeText.hashCode());
 		result = prime * result + ((sortAttributes == null) ? 0 : sortAttributes.hashCode());
 		result = prime * result + ((types == null) ? 0 : types.hashCode());
 		return result;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -58,7 +74,10 @@ final class SearchKey {
 		if (getClass() != obj.getClass())
 			return false;
 		SearchKey other = (SearchKey) obj;
-		if (!Arrays.equals(criteria, other.criteria))
+		if (criteria == null) {
+			if (other.criteria != null)
+				return false;
+		} else if (!criteria.equals(other.criteria))
 			return false;
 		if (freeText == null) {
 			if (other.freeText != null)

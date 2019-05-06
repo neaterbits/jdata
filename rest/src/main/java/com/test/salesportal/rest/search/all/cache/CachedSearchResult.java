@@ -1,8 +1,8 @@
-package com.test.salesportal.rest.search.all;
+package com.test.salesportal.rest.search.all.cache;
 
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetsResult;
 
-final class CachedSearchResult {
+public final class CachedSearchResult {
 	private final String searchResultId;
 	private final int totalItemMatchCount;
 	private final SearchFacetsResult facets;
@@ -13,15 +13,15 @@ final class CachedSearchResult {
 		this.facets = facets;
 	}
 
-	String getSearchResultId() {
+	public String getSearchResultId() {
 		return searchResultId;
 	}
 	
-	int getTotalItemMatchCount() {
+	public int getTotalItemMatchCount() {
 		return totalItemMatchCount;
 	}
 
-	SearchFacetsResult getFacets() {
+	public SearchFacetsResult getFacets() {
 		return facets;
 	}
 }

@@ -15,7 +15,6 @@ public class SearchRange {
 		this.lower = lower;
 	}
 	
-	
 	public boolean includeLower() {
 		return includeLower;
 	}

@@ -1,9 +1,11 @@
-package com.test.salesportal.rest.search.all;
+package com.test.salesportal.rest.search.all.cache;
 
 import java.util.List;
 
+import com.test.salesportal.model.Item;
 import com.test.salesportal.model.SortAttribute;
 import com.test.salesportal.model.SortOrder;
+import com.test.salesportal.rest.search.all.AllSearchItemResult;
 
 /**
  * Radix sort for faster insertion
@@ -11,8 +13,8 @@ import com.test.salesportal.model.SortOrder;
  */
 final class RadixSortSearchResult extends SortedSearchResult {
 
-	RadixSortSearchResult(String searchResultId, List<SortAttribute> sortAttributes, int indexIntoFields) {
-		super(searchResultId, sortAttributes, indexIntoFields);
+	RadixSortSearchResult(String searchResultId, List<SortAttribute> sortAttributes) {
+		super(searchResultId, sortAttributes);
 	}
 
 	@Override
@@ -31,5 +33,17 @@ final class RadixSortSearchResult extends SortedSearchResult {
 	int getMatchCount() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	void applyItemToCachedItems(SearchKey searchKey, Item item) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	void deleteItemFromCachedItems(String itemId) {
+		// TODO Auto-generated method stub
+		
 	}
 }

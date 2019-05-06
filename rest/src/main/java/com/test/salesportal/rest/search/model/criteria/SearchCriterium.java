@@ -5,11 +5,12 @@ import java.util.Arrays;
 public class SearchCriterium {
 	private String type; // type of object this belongs to
 	private String attribute; // attribute for this one
-	
-	// either a values ranges
+
+	// A set of values
 	private SearchCriteriumValue [] values;
 	private Boolean otherSelected;
 	
+	// or a set of ranges
 	private SearchRange [] ranges;
 	
 	public String getType() {

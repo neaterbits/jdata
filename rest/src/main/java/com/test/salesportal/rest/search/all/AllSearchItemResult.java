@@ -6,7 +6,12 @@ public class AllSearchItemResult extends SearchItemResult {
 
 	private final long modelVersion;
 
-	public AllSearchItemResult(long modelVersion, String id, String title, Integer thumbWidth, Integer thumbHeight, Object[] sortFields,
+	public AllSearchItemResult(
+			long modelVersion,
+			String id,
+			String title,
+			Integer thumbWidth, Integer thumbHeight,
+			Object[] sortFields,
 			Object[] fields) {
 		super(id, title, thumbWidth, thumbHeight, sortFields, fields);
 

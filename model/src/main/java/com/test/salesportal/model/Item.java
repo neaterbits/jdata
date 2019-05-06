@@ -22,6 +22,7 @@ import com.test.salesportal.model.annotations.Sortable;
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public abstract class Item {
 
+	public static final String MODEL_VERSION = "modelVersion";
 	
 	@IndexItemAttributeTransient
 	@Id

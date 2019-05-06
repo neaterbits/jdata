@@ -1,8 +1,10 @@
-package com.test.salesportal.rest.search.all;
+package com.test.salesportal.rest.search.all.cache;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.assertj.core.api.Assertions;
 
 import com.test.salesportal.model.SortOrder;
+import com.test.salesportal.rest.search.all.cache.SimpleSortedSearchResult;
 
 import junit.framework.TestCase;
 
@@ -91,7 +93,7 @@ public class SimpleSortedSearchResultTest extends TestCase {
 	
 	public void testReverse() {
 		
-		Integer [] array = new Integer[] { 1, 2, 3, 4, 5};
+		Integer [] array = new Integer[] { 1, 2, 3, 4, 5 };
 		SimpleSortedSearchResult.reverse(array);
 		assertThat(array).isEqualTo(new Integer [] { 5, 4, 3, 2, 1 });
 
@@ -115,5 +117,39 @@ public class SimpleSortedSearchResultTest extends TestCase {
 		SimpleSortedSearchResult.reverse(array);
 		assertThat(array).isEqualTo(new Integer [] { });
 
+	}
+	
+	public void testInsertArray() {
+		
+		Integer [] array = new Integer[] { 1, 2, 3};
+
+		assertThat(SimpleSortedSearchResult.insertAt(array, 0, 12, Integer[]::new))
+			.isEqualTo(new Integer [] { 12, 1, 2, 3 });
+		
+		assertThat(SimpleSortedSearchResult.insertAt(array, 1, 12, Integer[]::new))
+			.isEqualTo(new Integer [] { 1, 12, 2, 3 });
+		
+		assertThat(SimpleSortedSearchResult.insertAt(array, 2, 12, Integer[]::new))
+			.isEqualTo(new Integer [] { 1, 2, 12, 3 });
+		
+		try {
+			SimpleSortedSearchResult.insertAt(array, 3, 12, Integer[]::new);
+			
+			Assertions.fail("Expected exception");
+		}
+		catch (IllegalArgumentException ex) {
+			
+		}
+	}
+	
+	public void testAppendToArray() {
+		
+		Integer [] array = new Integer[] { 1, 2, 3};
+
+		assertThat(SimpleSortedSearchResult.append(new Integer[0], 12))
+			.isEqualTo(new Integer [] { 12 });
+		
+		assertThat(SimpleSortedSearchResult.append(array, 12))
+			.isEqualTo(new Integer [] { 1, 2, 3, 12 });
 	}
 }
