@@ -32,6 +32,10 @@ public abstract class Item {
 	@IndexItemAttribute(name="id", storeValue=true)
 	private String idString;
 	
+	@IndexItemAttribute(storeValue=true)
+	@Column(nullable=false)
+	private long modelVersion;
+	
 	@Sortable(value="Title", priority=5)
 	@Freetext
 	@IndexItemAttribute(storeValue=true) // must store for quick-lookup in search results
@@ -68,6 +72,14 @@ public abstract class Item {
 
 	public void setIdString(String idString) {
 		this.idString = idString;
+	}
+
+	public long getModelVersion() {
+		return modelVersion;
+	}
+
+	public void setModelVersion(long modelVersion) {
+		this.modelVersion = modelVersion;
 	}
 
 	public String getTitle() {

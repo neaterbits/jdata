@@ -47,6 +47,7 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			String freeText,
 			List<Criterium> criteria,
 			List<SortAttributeAndOrder> sortOrder,
+			boolean returnSortAttributeValues,
 			Set<ItemAttribute> fieldAttributes,
 			Set<ItemAttribute> facetAttributes) {
 

@@ -67,6 +67,7 @@ import com.test.salesportal.model.ItemAttribute;
 import com.test.salesportal.model.ItemAttributeValue;
 import com.test.salesportal.model.LongAttributeValue;
 import com.test.salesportal.model.PropertyAttribute;
+import com.test.salesportal.model.SortAttribute;
 import com.test.salesportal.model.SortAttributeAndOrder;
 import com.test.salesportal.model.StringAttributeValue;
 import com.test.salesportal.model.attributes.AttributeType;
@@ -574,6 +575,7 @@ public class LuceneItemIndex implements ItemIndex {
 			String freeText,
 			List<Criterium> criteria,
 			List<SortAttributeAndOrder> sortOrder,
+			boolean returnSortAttributeValues,
 			Set<ItemAttribute> fieldAttributes,
 			Set<ItemAttribute> facetAttributes) throws ItemIndexException {
 		
@@ -725,10 +727,27 @@ public class LuceneItemIndex implements ItemIndex {
 								thumbHeight = null;
 							}
 							
-							final FieldValues fieldValues;
+							final FieldValues<SortAttribute> sortValues;
+							
+							if (returnSortAttributeValues && sortOrder != null && !sortOrder.isEmpty()) {
+								sortValues = new FieldValues<SortAttribute>() {
+									@Override
+									public Object getValue(SortAttribute attribute) {
+										
+										final IndexableField field = d.getField(ItemIndex.fieldName(attribute));
+										
+										return field != null ? getObjectValueFromField(attribute, field) : null;
+									}
+								};
+							}
+							else {
+								sortValues = null;
+							}
+							
+							final FieldValues<ItemAttribute> fieldValues;
 							
 							if (fieldAttributes != null && !fieldAttributes.isEmpty()) {
-								fieldValues = new FieldValues() {
+								fieldValues = new FieldValues<ItemAttribute>() {
 									@Override
 									public Object getValue(ItemAttribute attribute) {
 										
@@ -752,6 +771,7 @@ public class LuceneItemIndex implements ItemIndex {
 									titleField != null ? titleField.stringValue() : null,
 									thumbWidth,
 									thumbHeight,
+									sortValues,
 									fieldValues
 							);
 						})

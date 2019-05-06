@@ -1,6 +1,7 @@
 package com.test.salesportal.search;
 
 import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.SortAttribute;
 
 public abstract class BaseSearchItem implements SearchItem {
 
@@ -8,17 +9,24 @@ public abstract class BaseSearchItem implements SearchItem {
 	private final String title;
 	private final Integer thumbWidth;
 	private final Integer thumbHeight;
-	private final FieldValues attributeValues;
+	private final FieldValues<SortAttribute> sortValues;
+	private final FieldValues<ItemAttribute> attributeValues;
 
 	
-	protected BaseSearchItem(String id, String title, Integer thumbWidth, Integer thumbHeight, FieldValues attributeValues) {
+	protected BaseSearchItem(
+			String id,
+			String title,
+			Integer thumbWidth, Integer thumbHeight,
+			FieldValues<SortAttribute> sortValues,
+			FieldValues<ItemAttribute> attributeValues) {
 		this.id = id;
 		this.title = title;
 		this.thumbWidth = thumbWidth;
 		this.thumbHeight = thumbHeight;
+		this.sortValues = sortValues;
 		this.attributeValues = attributeValues;
 	}
-
+	
 	@Override
 	public final String getItemId() {
 		return id;
@@ -38,9 +46,19 @@ public abstract class BaseSearchItem implements SearchItem {
 	public final Integer getThumbHeight() {
 		return thumbHeight;
 	}
+	
+	@Override
+	public Object getSortAttributeValue(SortAttribute attribute) {
+		
+		if (attribute == null) {
+			throw new IllegalArgumentException("attribute == null");
+		}
+
+		return sortValues.getValue(attribute);
+	}
 
 	@Override
-	public final Object getAttributeValue(ItemAttribute attribute) {
+	public final Object getFieldAttributeValue(ItemAttribute attribute) {
 		
 		if (attribute == null) {
 			throw new IllegalArgumentException("attribute == null");

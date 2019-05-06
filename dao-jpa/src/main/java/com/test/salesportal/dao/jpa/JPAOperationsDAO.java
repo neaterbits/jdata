@@ -27,7 +27,6 @@ public class JPAOperationsDAO extends JPABaseDAO implements IOperationsDAO {
 		final String aquireId = generateAquireId();
 		
 		operation.setAquireId(aquireId);
-		
 		operation.setStoreTime(new Date()); // TODO let database set this
 		
 		final long operationId = performInTransaction(() -> {
@@ -127,7 +126,9 @@ public class JPAOperationsDAO extends JPABaseDAO implements IOperationsDAO {
 
 		return performInTransaction(() -> {
 			final int numUpdated = entityManager.createQuery(
-					  "delete from Operation operation"
+					  "update Operation operation"
+					+ " set operation.completed = true,"
+					+ "     operation.aquireId = null"
 					+ " where operation.id = :id"
 					+ "   and operation.aquireId = :aquireId")
 			.setParameter("id", Long.parseLong(operationStorageId.getOperationId()))
@@ -138,8 +139,44 @@ public class JPAOperationsDAO extends JPABaseDAO implements IOperationsDAO {
 		});
 	}
 	
+	
+	
+	@Override
+	public boolean deleteOperationFromLog(String operationId) {
+		return performInTransaction(() -> {
+			final int numUpdated = entityManager.createQuery(
+					  "delete from Operation operation"
+					+ " where operation.id = :id")
+			.setParameter("id", parseOperationId(operationId))
+			.executeUpdate();
+			
+			return numUpdated != 0;
+		});
+	}
+
+	@Override
+	public List<Operation> getCompletedOperationsNewerThanSortedOnModelVersionAsc(long modelVersion) {
+		return entityManager.createQuery(
+				  "from Operation operation"
+				+ " where operation.id > :modelVersion"
+				+ "  and operation.completed = true"
+				+ " order by operation.id asc", Operation.class)
+				
+				.setParameter("modelVersion", modelVersion)
+				.getResultList();
+	}
+	
 	// For testing
 	Operation getOperation(String operationId) {
-		return entityManager.find(Operation.class, Long.parseLong(operationId));
+		return entityManager.createQuery(
+				  "from Operation operation"
+				+ " where operation.id = :id", Operation.class)
+				.setParameter("id", parseOperationId(operationId))
+				.getSingleResult();
+		// return entityManager.find(Operation.class, parseOperationId(operationId));
+	}
+
+	private static long parseOperationId(String operationId) {
+		return Long.parseLong(operationId);
 	}
 }

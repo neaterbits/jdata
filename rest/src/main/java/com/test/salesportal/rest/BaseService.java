@@ -11,9 +11,7 @@ import com.test.salesportal.dao.IItemUpdate;
 import com.test.salesportal.dao.xml.XMLItemDAO;
 import com.test.salesportal.index.ItemIndex;
 import com.test.salesportal.integrationtest.IntegrationTestHelper;
-import com.test.salesportal.model.Item;
 import com.test.salesportal.model.cv.Language;
-import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.xmlstorage.local.LocalXmlStorage;
 
 public abstract class BaseService {
@@ -116,13 +114,5 @@ public abstract class BaseService {
 		}
 		
 		return ret;
-	}
-	
-	protected static String getTypeId(Class<? extends Item> type) {
-		return ItemTypes.getTypeName(type);
-	}
-	
-	protected static String getTypeDisplayName(Class<? extends Item> type) {
-		return ItemTypes.getTypeDisplayName(type);
 	}
 }

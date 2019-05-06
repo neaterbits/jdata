@@ -4,6 +4,8 @@ import com.test.salesportal.dao.BaseFoundItem;
 import com.test.salesportal.dao.IFoundItem;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.SortAttribute;
+import com.test.salesportal.model.items.ItemTypes;
 
 final class XMLFoundItem extends BaseFoundItem implements IFoundItem {
 
@@ -33,9 +35,19 @@ final class XMLFoundItem extends BaseFoundItem implements IFoundItem {
 	public Integer getThumbHeight() {
 		return thumbHeight;
 	}
+	
+	@Override
+	public Object getSortAttributeValue(SortAttribute attribute) {
+		
+		final Item item = getItem();
+		
+		final ItemAttribute itemAttibute = ItemTypes.getTypeInfo(item).getAttributes().getByName(attribute.getName());
+		
+		return itemAttibute.getObjectValue(item);
+	}
 
 	@Override
-	public Object getAttributeValue(ItemAttribute attribute) {
+	public Object getFieldAttributeValue(ItemAttribute attribute) {
 		return attribute.getObjectValue(getItem());
 	}
 }

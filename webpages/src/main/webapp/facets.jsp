@@ -113,9 +113,12 @@
 		return "http://localhost:8080";
 	}
 	
+	function getSearchBaseUrl() {
+		return getBaseUrl() + "/searchpaged";
+	}
 	
 	function getSearchUrl(testdata) {
-		var url = getBaseUrl() + "/search";
+		var url = getSearchBaseUrl();
 
 		if (testdata) {
 			url += "?testdata=" + testdata;
@@ -125,7 +128,7 @@
 	}
 
 	function getThumbsUrl(testdata) {
-		var url = getBaseUrl() + "/search/thumbnails";
+		var url = getSearchUrl() + "/thumbnails";
 
 		if (testdata) {
 			url += "?testdata=" + testdata;

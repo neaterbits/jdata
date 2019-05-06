@@ -1,5 +1,6 @@
 package com.test.salesportal.dao;
 
+import java.util.List;
 import java.util.Map;
 
 import com.test.salesportal.model.operations.Operation;
@@ -114,4 +115,22 @@ public interface IOperationsDAO {
 	 * @param operationStorageId obtained OperationStorageId
 	 */
 	boolean completeOperation(OperationStorageId operationStorageId);
+	
+	/**
+	 * Deletes the operation from log.
+	 * 
+	 * @param operationStorageId
+	 * @return
+	 */
+	boolean deleteOperationFromLog(String operationId);
+
+	/**
+	 * Return all completed operations that can be applied to local cache.
+	 * 
+	 * @param modelVersion model version to get operations newer than.
+	 * 
+	 * @return list of completed operations in ascending order
+	 */
+	
+	List<Operation> getCompletedOperationsNewerThanSortedOnModelVersionAsc(long modelVersion);
 }

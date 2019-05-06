@@ -53,7 +53,9 @@ public interface ItemIndex extends AutoCloseable {
 	IndexSearchCursor search(
 			List<Class<? extends Item>> types,
 			String freeText,
-			List<Criterium> criteria, List<SortAttributeAndOrder> sortOrder,
+			List<Criterium> criteria,
+			List<SortAttributeAndOrder> sortOrder,
+			boolean returnSortAttributeValues,
 			Set<ItemAttribute> fieldAttributes,
 			Set<ItemAttribute> facetAttributes) throws ItemIndexException;
 	

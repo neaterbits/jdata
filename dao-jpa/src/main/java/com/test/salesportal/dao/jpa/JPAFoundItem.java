@@ -5,6 +5,7 @@ import com.test.salesportal.dao.BaseFoundItem;
 import com.test.salesportal.dao.IFoundItem;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.SortAttribute;
 
 final class JPAFoundItem extends BaseFoundItem implements IFoundItem {
 
@@ -26,9 +27,14 @@ final class JPAFoundItem extends BaseFoundItem implements IFoundItem {
 	public Integer getThumbHeight() {
 		return getItem().getThumbHeight();
 	}
+	
+	@Override
+	public Object getSortAttributeValue(SortAttribute attribute) {
+		throw new UnsupportedOperationException("TODO");
+	}
 
 	@Override
-	public Object getAttributeValue(ItemAttribute attribute) {
+	public Object getFieldAttributeValue(ItemAttribute attribute) {
 		throw new UnsupportedOperationException("TODO");
 	}
 }

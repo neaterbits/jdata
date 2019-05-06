@@ -24,9 +24,9 @@ import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.model.items.TypeInfo;
 import com.test.salesportal.rest.BaseService;
 import com.test.salesportal.rest.items.ItemService;
-import com.test.salesportal.rest.search.SearchService;
 import com.test.salesportal.rest.search.SearchResult;
 import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
+import com.test.salesportal.rest.search.paged.PagedSearchService;
 import com.test.salesportal.rest.smslogin.LoginService;
 import com.test.salesportal.rest.smslogin.LoginService.CheckCodeResponse;
 import com.test.salesportal.rest.smslogin.LoginService.LoginResponse;
@@ -64,7 +64,7 @@ public class JettyRunServlet {
 		
 		contextHandler.setInitParameter("localFileDir", localFileDir);
 		
-		contextHandler.addServlet(SearchServlet.class, "/search/*");
+		contextHandler.addServlet(SearchServlet.class, "/searchpaged/*");
 		contextHandler.addServlet(ItemServlet.class, "/items/*");
 		contextHandler.addServlet(LoginServlet.class, "/login/*");
 		//contextHandler.addServletWithMapping(SearchServlet.class, "/search/*");
@@ -100,7 +100,7 @@ public class JettyRunServlet {
 			
 			//throw new UnsupportedOperationException();
 			
-			final SearchService searchService = new SearchService(getLocalFileDir());
+			final PagedSearchService searchService = new PagedSearchService(getLocalFileDir());
 			
 			// Get parameters
 			String freeText = req.getParameter("freeText");
@@ -174,7 +174,7 @@ public class JettyRunServlet {
 					throw new IllegalArgumentException("No itemIds");
 				}
 				
-				final SearchService searchService = new SearchService(getLocalFileDir());
+				final PagedSearchService searchService = new PagedSearchService(getLocalFileDir());
 
 				final byte [] data = searchService.getThumbnails(itemIds, req);
 				

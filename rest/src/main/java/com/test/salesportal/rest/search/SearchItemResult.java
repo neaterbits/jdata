@@ -12,13 +12,23 @@ public class SearchItemResult {
 	private Integer thumbWidth;
 	private Integer thumbHeight;
 	
+	private Object [] sortFields;
+	
 	// Fields as specified in the search request
 	private Object [] fields;
 
 	public SearchItemResult() {
 	}
 
-	public SearchItemResult(String id, String title, Integer thumbWidth, Integer thumbHeight, Object [] fields) {
+	public SearchItemResult(
+			String id,
+			String title,
+			Integer thumbWidth,
+			Integer thumbHeight,
+			Object [] sortFields,
+			Object [] fields) {
+		
+		
 		this.id = id;
 		this.title = title;
 		this.thumbWidth = thumbWidth;
@@ -56,6 +66,14 @@ public class SearchItemResult {
 
 	public void setThumbHeight(Integer thumbHeight) {
 		this.thumbHeight = thumbHeight;
+	}
+
+	public Object[] getSortFields() {
+		return sortFields;
+	}
+
+	public void setSortFields(Object[] sortFields) {
+		this.sortFields = sortFields;
 	}
 
 	public Object[] getFields() {

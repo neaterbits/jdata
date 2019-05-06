@@ -1,4 +1,4 @@
-package com.test.salesportal.rest.search;
+package com.test.salesportal.rest.search.paged;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -12,8 +12,8 @@ import com.test.salesportal.rest.search.model.facetresult.SearchSingleValueFacet
 
 class SearchServiceTestData {
 
-	static SearchResult makeTestResult() {
-		final SearchResult result = new SearchResult();
+	static PagedSearchResult makeTestResult() {
+		final PagedSearchResult result = new PagedSearchResult();
 		
 		final SearchFacetsResult facets = new SearchFacetsResult();
 		

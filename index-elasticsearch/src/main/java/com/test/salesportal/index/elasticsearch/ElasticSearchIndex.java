@@ -60,6 +60,7 @@ import com.test.salesportal.model.DistinctAttribute;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemAttribute;
 import com.test.salesportal.model.ItemAttributeValue;
+import com.test.salesportal.model.SortAttribute;
 import com.test.salesportal.model.SortAttributeAndOrder;
 import com.test.salesportal.model.attributes.AttributeType;
 import com.test.salesportal.model.attributes.facets.FacetedAttributeDecimalRange;
@@ -93,7 +94,6 @@ public class ElasticSearchIndex implements ItemIndex {
 
 	private final RestHighLevelClient client;
 	
-
 	private static final String INDEX_NAME = "items";
 
 	private static final String FIELD_USER_ID = "userId";
@@ -457,6 +457,7 @@ public class ElasticSearchIndex implements ItemIndex {
 			List<Class<? extends Item>> types,
 			String freeText, List<Criterium> criteria,
 			List<SortAttributeAndOrder> sortOrder,
+			boolean returnSortAttributeValues,
 			Set<ItemAttribute> fieldAttributes,
 			Set<ItemAttribute> facetAttributes)
 			throws ItemIndexException {
@@ -563,7 +564,14 @@ public class ElasticSearchIndex implements ItemIndex {
 			
 			// TODO use ES paging? For now optimized to get all data
 			
-			cursor = new ESIndexSearchCursor(response, fieldAttributes);
+			cursor = new ESIndexSearchCursor(
+					response,
+					returnSortAttributeValues && sortOrder != null && !sortOrder.isEmpty()
+						? sortOrder.stream()
+								.map(SortAttributeAndOrder::getAttribute)
+								.collect(Collectors.toSet())
+						: null,
+					fieldAttributes);
 		}
 
 		return cursor;
@@ -571,10 +579,12 @@ public class ElasticSearchIndex implements ItemIndex {
 	
 	private class ESIndexSearchCursor implements IndexSearchCursor {
 		private final SearchResponse response;
+		private final Set<SortAttribute> sortAttributes;
 		private final Set<ItemAttribute> fieldAttributes;
 		
-		public ESIndexSearchCursor(SearchResponse response, Set<ItemAttribute> fieldAttributes) {
+		public ESIndexSearchCursor(SearchResponse response, Set<SortAttribute> sortAttributes, Set<ItemAttribute> fieldAttributes) {
 			this.response = response;
+			this.sortAttributes = sortAttributes;
 			this.fieldAttributes = fieldAttributes;
 		}
 		
@@ -605,7 +615,7 @@ public class ElasticSearchIndex implements ItemIndex {
 
 			for (int i = 0; i < count && (initialIdx + i) < hits.length; ++ i) {
 
-				final FieldValues fieldValues;
+				final FieldValues<ItemAttribute> fieldValues;
 
 				final SearchHit hit = hits[initialIdx + i];
 				
@@ -628,9 +638,24 @@ public class ElasticSearchIndex implements ItemIndex {
 					thumbHeight = null;
 				}
 				
-				if (this.fieldAttributes != null && !fieldAttributes.isEmpty()) {
+				final FieldValues<SortAttribute> sortValues;
+				
+				if (sortAttributes != null && !sortAttributes.isEmpty()) {
+					sortValues = new FieldValues<SortAttribute>() {
 
-					fieldValues = new FieldValues() {
+						@Override
+						public Object getValue(SortAttribute attribute) {
+							return sourceMap.get(ItemIndex.fieldName(attribute));
+						}
+					};
+				}
+				else {
+					sortValues = null;
+				}
+				
+				if (fieldAttributes != null && !fieldAttributes.isEmpty()) {
+
+					fieldValues = new FieldValues<ItemAttribute>() {
 						
 						@Override
 						public Object getValue(ItemAttribute attribute) {
@@ -642,7 +667,7 @@ public class ElasticSearchIndex implements ItemIndex {
 					fieldValues = null;
 				}
 
-				items.add(new IndexSearchItem(hit.getId(), title, thumbWidth, thumbHeight, fieldValues));
+				items.add(new IndexSearchItem(hit.getId(), title, thumbWidth, thumbHeight, sortValues, fieldValues));
 			}
 			
 			return items;

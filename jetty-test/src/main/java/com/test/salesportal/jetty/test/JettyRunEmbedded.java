@@ -5,7 +5,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
-import com.test.salesportal.rest.search.SearchService;
+import com.test.salesportal.rest.search.paged.PagedSearchService;
 
 public class JettyRunEmbedded {
 
@@ -22,7 +22,7 @@ public class JettyRunEmbedded {
 		final ServletHolder servlet = contextHandler.addServlet(ServletContainer.class, "/*");
 		
 		// servlet.setInitParameter("jersey.config.server.provider.classnames", SearchService.class.getName());
-		servlet.setInitParameter("jersey.config.server.provider.classes", SearchService.class.getName());
+		servlet.setInitParameter("jersey.config.server.provider.classes", PagedSearchService.class.getName());
 		
 		try {
 			server.start();

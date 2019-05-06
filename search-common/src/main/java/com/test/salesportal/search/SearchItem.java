@@ -1,11 +1,13 @@
 package com.test.salesportal.search;
 
 import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.SortAttribute;
 
 /**
  * Information for one item returned from search result
  */
 public interface SearchItem {
+	
 	/**
 	 * String ID to pass along to REST service
 	 * 
@@ -36,8 +38,14 @@ public interface SearchItem {
 	Integer getThumbHeight();
 
 	/**
+	 * Sort attribute values
+	 */
+	
+	Object getSortAttributeValue(SortAttribute attribute);
+	
+	/**
 	 * Any attribute value
 	 */
 	
-	Object getAttributeValue(ItemAttribute attribute);
+	Object getFieldAttributeValue(ItemAttribute attribute);
 }

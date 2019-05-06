@@ -197,6 +197,7 @@ public class LuceneItemIndexTest extends TestCase {
 					null,
 					Arrays.asList(new StringCriterium(idAttribute, itemId, ComparisonOperator.EQUALS)),
 					null,
+					false,
 					null,
 					null);
 			
@@ -245,6 +246,7 @@ public class LuceneItemIndexTest extends TestCase {
 					null,
 					Arrays.asList(criterium),
 					null,
+					false,
 					null,
 					null);
 
@@ -276,7 +278,7 @@ public class LuceneItemIndexTest extends TestCase {
 	}
 
 	private static IndexSearchCursor searchSnowboads(ItemIndex index, Criterium criterium) throws ItemIndexException {
-		return index.search(Arrays.asList(Snowboard.class), null, Arrays.asList(criterium), null, null, null);
+		return index.search(Arrays.asList(Snowboard.class), null, Arrays.asList(criterium), null, false, null, null);
 	}
 }
 

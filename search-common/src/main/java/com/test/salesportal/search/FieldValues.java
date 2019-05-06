@@ -1,8 +1,8 @@
 package com.test.salesportal.search;
 
-import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.PropertyAttribute;
 
-public interface FieldValues {
+public interface FieldValues<T extends PropertyAttribute> {
 
-	Object getValue(ItemAttribute attribute);
+	Object getValue(T attribute);
 }

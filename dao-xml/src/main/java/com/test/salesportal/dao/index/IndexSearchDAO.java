@@ -38,6 +38,7 @@ public class IndexSearchDAO implements ISearchDAO {
 			String freeText,
 			List<Criterium> criteria,
 			List<SortAttributeAndOrder> sortOrder,
+			boolean returnSortAttributeValues,
 			Set<ItemAttribute> fieldAttributes,
 			Set<ItemAttribute> facetAttributes) throws SearchException {
 
@@ -47,7 +48,7 @@ public class IndexSearchDAO implements ISearchDAO {
 
 		IndexSearchCursor cursor;
 		try {
-			cursor = index.search(types, freeText, criteria, sortOrder, fieldAttributes, facetAttributes);
+			cursor = index.search(types, freeText, criteria, sortOrder, returnSortAttributeValues, fieldAttributes, facetAttributes);
 		} catch (ItemIndexException ex) {
 			throw new SearchException("Failed to search", ex);
 		}

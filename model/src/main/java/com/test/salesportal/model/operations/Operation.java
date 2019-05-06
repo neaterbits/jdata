@@ -24,6 +24,9 @@ public class Operation {
 	 */
 	@Column(nullable=false)
 	private Date createdTime;
+
+	@Column(nullable=false)
+	private boolean completed;
 	
 	@Column(nullable=false)
 	private byte [] data;
@@ -80,6 +83,18 @@ public class Operation {
 
 	public void setId(long id) {
 		this.id = id;
+	}
+
+	public final long getModelVersion() {
+		return id;
+	}
+	
+	public boolean isCompleted() {
+		return completed;
+	}
+
+	public void setCompleted(boolean completed) {
+		this.completed = completed;
 	}
 
 	public Date getCreatedTime() {
