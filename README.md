@@ -19,11 +19,12 @@ Kjapp informajon om innhold i noen av katalogene
  - dao-xml - implementasjon for lagring av annonsedata som XML-fil.
  - xmlstorage - API som kan kalles fra dao-xml for å lagre XMLer til fil.
  - xmlstorage-filesystem-files - XML storage implementasjon som kaller mot filesystem abstraksjon.
+ - xmlstorage-filesystem-compressed - XML storage implementasjon som lagrer mot zip-fil for atomisitet og spare plass i S3.
  - filesystem - abstraksjon for filsystemer, f.eks lokalt, S3, zip-fil, Azure Blob Storage
  - filesystem-local - benyttes av XMLStorage til å lagre i lokalt filsystem, for test.
  - filesystem-s3 - benyttes av XMLStorage for lagring av filer i Amazon S3.
  - model - datamodell for annonser, denne består av annoterte javaklasser (@Facet), slik at kan lett legge til nye typer annonser og facets.
- - webpages - websider m/plain Javascript-kode for filtreringsview og bildegalleri.
+ - webpages - websider m/plain Javascript-kode for filtreringsview og bildegalleri, JSP for hovedside.
  - notifications - API for meldings-utsending.
  - notifications-aws - implementasjon for utsending via Amazon SNS.
  - search-common - datamodell for søkekriterier.
@@ -34,8 +35,11 @@ Dette er en tidlig versjon, men begynner å fungerer noenlunde hele stacken igje
 # Forbedringer som bør gjøres, og er under utbedring
  - Javadoc dokumentasjon :)
  - lagre XML, miniatyrbilde og mellomstore bilder som en samlet fil i S3. Slipper da antakelig logikk for synkronisering.
+   - implementert m/unittester, ikke integrert.
  - cache miniatyrbilder lokalt på EBS, eller i redis eller lignende.
+   - antakelig bruke redis for dette slik at slipper pakke ut zip-fila i S3 på hver node.
  - cache søkeresultater fra Elasticsearch lokalt i minne på VM i skyen, evt. i redis eller lignende.
+   - mye kode skrivi på dette, cacher i egen cache på hver node, uavhengig av andre noder.
  - bytte implementasjon fra varierende størrelse til fast størrelse i bildegalleri, gjør at kan overføre langt mindre data i initiell søkerespons (kun totalt antall søketreff).
  - side for å vise annonsedetaljer. 
 
