@@ -5,8 +5,6 @@ import java.util.Comparator;
 import com.test.salesportal.model.ItemAttribute;
 
 class SearchRangeUtil {
-
-
 	static boolean matches(
 			Object valueObject,
 			ItemAttribute attribute,
@@ -49,6 +47,4 @@ class SearchRangeUtil {
 		
 		return matches;
 	}
-
-	
 }
