@@ -66,6 +66,14 @@ public class StringUtil {
 	
 	public static boolean containsWholeWord(String toScan, String toScanFor, boolean caseSensitive) {
 
+		if (toScan == null) {
+			throw new IllegalArgumentException("toScan == null");
+		}
+		
+		if (toScanFor == null) {
+			throw new IllegalArgumentException("toScanFor == null");
+		}
+		
 		boolean mayHaveWholeWordMatch = true;
 		
 		boolean contains;

@@ -2,6 +2,8 @@ package com.test.salesportal.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.assertj.core.api.Assertions;
+
 import com.test.salesportal.common.StringUtil;
 
 import junit.framework.TestCase;
@@ -34,8 +36,7 @@ public class StringUtilTest extends TestCase {
 	}
 	
 	public void testContainsWholeWord() {
-
-
+		
 		assertThat(StringUtil.containsWholeWord("abc", "abc", true)).isTrue();
 		assertThat(StringUtil.containsWholeWord("Abc", "abc", true)).isFalse();
 		
@@ -49,4 +50,26 @@ public class StringUtilTest extends TestCase {
 		assertThat(StringUtil.containsWholeWord(" Abc  xyz ", "Abc xyz", true)).isTrue();
 
 	}
+	
+	public void testContainsWholeWordInputCheck() {
+		
+		try {
+			StringUtil.containsWholeWord("abc", null, true);
+		
+			Assertions.fail("Expected exception");
+		}
+		catch (IllegalArgumentException ex) {
+			
+		}
+
+		try {
+			StringUtil.containsWholeWord(null, "abc", true);
+		
+			Assertions.fail("Expected exception");
+		}
+		catch (IllegalArgumentException ex) {
+			
+		}
+}
+
 }
