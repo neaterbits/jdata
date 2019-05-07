@@ -1,6 +1,7 @@
 package com.test.salesportal.model.attributes;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Date;
 
 import com.test.salesportal.model.annotations.SortableType;
@@ -53,6 +54,35 @@ public enum AttributeType {
 		}
 
 		return attributeType;
+	}
+	
+	public Comparator<Object> makeObjectValueComparator() {
+		final Comparator<Object> comparator;
+		
+		switch (this) {
+		
+		case INTEGER:
+			comparator = (obj1, obj2) -> Integer.compare((Integer)obj1, (Integer)obj2);
+			break;
+			
+		case LONG:
+			comparator = (obj1, obj2) -> Long.compare((Long)obj1, (Long)obj2);
+			break;
+			
+		case DECIMAL:
+			comparator = (obj1, obj2) -> ((BigDecimal)obj1).compareTo((BigDecimal)obj2);
+			break;
+			
+		case DATE:
+			comparator = (obj1, obj2) -> ((Date)obj1).compareTo((Date)obj2);
+			break;
+			
+		default:
+			throw new UnsupportedOperationException();
+		
+		}
+
+		return comparator;
 	}
 }
 

@@ -1,9 +1,6 @@
 package com.test.salesportal.rest.search.all.cache;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import com.test.salesportal.common.StringUtil;
@@ -121,59 +118,13 @@ class SearchKeyMatchUtil {
 			matches = false;
 		}
 		else {
-		
-			final Comparator<Object> comparator;
-			
-			switch (attribute.getAttributeType()) {
-			
-			case INTEGER:
-				comparator = (obj1, obj2) -> Integer.compare((Integer)obj1, (Integer)obj2);
-				break;
-				
-			case LONG:
-				comparator = (obj1, obj2) -> Long.compare((Long)obj1, (Long)obj2);
-				break;
-				
-			case DECIMAL:
-				comparator = (obj1, obj2) -> ((BigDecimal)obj1).compareTo((BigDecimal)obj2);
-				break;
-				
-			case DATE:
-				comparator = (obj1, obj2) -> ((Date)obj1).compareTo((Date)obj2);
-				break;
-				
-			default:
-				throw new UnsupportedOperationException();
-			
-			}
-			
-			if (searchRange.getLower() == null && searchRange.getUpper() == null) {
-				throw new IllegalArgumentException();
-			}
-			else if (searchRange.getLower() == null) {
-				
-				final int comparison = comparator.compare(valueObject, searchRange.getUpper());
-				
-				matches = searchRange.includeUpper()
-						? comparison <= 0
-						: comparison < 0;
-			}
-			else if (searchRange.getUpper() == null) {
-
-				final int comparison = comparator.compare(valueObject, searchRange.getLower());
-				
-				matches = searchRange.includeLower()
-						? comparison >= 0
-						: comparison > 0;
-			}
-			else {
-				final int lowerComparison = comparator.compare(valueObject, searchRange.getLower());
-				final int upperComparison = comparator.compare(valueObject, searchRange.getUpper());
-				
-				matches =
-						   (searchRange.includeLower() ? lowerComparison >= 0 : lowerComparison > 0)
-						&& (searchRange.includeUpper() ? upperComparison <= 0 : upperComparison < 0);
-			}
+			matches = SearchRangeUtil.matches(
+					valueObject,
+					attribute,
+					searchRange.getLower(),
+					searchRange.includeLower(),
+					searchRange.getUpper(),
+					searchRange.includeUpper());
 		}
 		
 		return matches;

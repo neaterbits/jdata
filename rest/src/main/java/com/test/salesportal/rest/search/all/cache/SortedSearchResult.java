@@ -5,6 +5,7 @@ import java.util.List;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.SortAttribute;
 import com.test.salesportal.model.SortOrder;
+import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.rest.search.all.AllSearchItemResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetsResult;
 
@@ -72,7 +73,14 @@ public abstract class SortedSearchResult {
 	}
 
 	final void applyItem(SearchKey searchKey, Item item) {
+		
+		// Call subclass to update result items
 		applyItemToCachedItems(searchKey, item);
+		
+		if (facetsResult != null) {
+			// Update facet counts
+			SearchFacetsResultUtil.addItem(facetsResult, item, ItemTypes.getTypeInfo(item));
+		}
 	}
 	
 	final void deleteItem(String itemId) {
