@@ -29,7 +29,7 @@ public final class SearchCriterium {
 		this.otherSelected = otherSelected;
 	}
 
-	public SearchCriterium(String type, String attribute, SearchRange[] ranges, Boolean otherSelected) {
+	public SearchCriterium(String type, String attribute, SearchRange[] ranges) {
 
 		this(type, attribute);
 
@@ -38,7 +38,6 @@ public final class SearchCriterium {
 		}
 		
 		this.ranges = ranges;
-		this.otherSelected = otherSelected;
 	}
 
 	private SearchCriterium(String type, String attribute) {

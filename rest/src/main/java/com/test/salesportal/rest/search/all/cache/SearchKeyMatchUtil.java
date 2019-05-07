@@ -28,12 +28,19 @@ class SearchKeyMatchUtil {
 	
 	private static boolean matchesSearchCriteria(List<SearchCriterium> criteria, Item item, TypeInfo itemTypeInfo) {
 	
-		boolean matches = false;
+		boolean matches;
 		
-		for (SearchCriterium criterium : criteria) {
-			if (matchesSearchCriterium(criterium, item, itemTypeInfo)) {
-				matches = true;
-				break;
+		if (criteria == null) {
+			matches = true;
+		}
+		else {
+			matches = true;
+		
+			for (SearchCriterium criterium : criteria) {
+				if (!matchesSearchCriterium(criterium, item, itemTypeInfo)) {
+					matches = false;
+					break;
+				}
 			}
 		}
 		
@@ -74,7 +81,7 @@ class SearchKeyMatchUtil {
 						}
 					}
 					
-					matches = matchFound;
+					matches = matchFound || (criterium.getOtherSelected() != null && criterium.getOtherSelected());
 					
 				}
 				else if (attribute.isRange()) {
@@ -155,7 +162,7 @@ class SearchKeyMatchUtil {
 						
 						final String attributeText = (String)itemAttribute.getObjectValue(item);
 
-						if (StringUtil.containsWholeWord(attributeText, trimmed, false)) {
+						if (attributeText != null && StringUtil.containsWholeWord(attributeText, trimmed, false)) {
 							matchFound = true;
 							break;
 						}

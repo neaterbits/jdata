@@ -86,8 +86,7 @@ public class SearchKeyTest extends TestCase {
 						new SearchRange(null, true, 150, false),
 						new SearchRange(150, true, 160, false),
 						new SearchRange(160, true, null, false)
-				},
-				true);
+				});
 		
 		final SearchCriterium [] searchCriteria1 = new SearchCriterium [] {
 				snowboardProfileSearchCriterium
