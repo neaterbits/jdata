@@ -7,6 +7,22 @@ public class SearchRange {
 	private Object upper;
 	private boolean includeUpper;
 	
+	public SearchRange() {
+		
+	}
+	
+	public SearchRange(Object lower, boolean includeLower, Object upper, boolean includeUpper) {
+
+		if (lower == null && upper == null) {
+			throw new IllegalArgumentException("Must pass lower or upper or both");
+		}
+		
+		this.lower = lower;
+		this.includeLower = includeLower;
+		this.upper = upper;
+		this.includeUpper = includeUpper;
+	}
+
 	public Object getLower() {
 		return lower;
 	}

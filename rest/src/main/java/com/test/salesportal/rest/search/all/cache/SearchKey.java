@@ -25,10 +25,10 @@ public final class SearchKey {
 			List<SortAttribute> sortAttributes,
 			List<ItemAttribute> fieldAttributes) {
 		
-		this.types = Collections.unmodifiableList(new ArrayList<>(types));
+		this.types = types != null ? Collections.unmodifiableList(new ArrayList<>(types)) : null;
 		this.freeText = freeText;
-		this.criteria = Collections.unmodifiableList(Arrays.asList(criteria));
-		this.sortAttributes = Collections.unmodifiableList(new ArrayList<>(sortAttributes));
+		this.criteria = criteria != null ? Collections.unmodifiableList(Arrays.asList(criteria)) : null;
+		this.sortAttributes = sortAttributes != null ? Collections.unmodifiableList(new ArrayList<>(sortAttributes)) : null;
 		this.fieldAttributes = fieldAttributes != null
 				? Collections.unmodifiableList(new ArrayList<>(fieldAttributes))
 				: null;
@@ -59,6 +59,7 @@ public final class SearchKey {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((criteria == null) ? 0 : criteria.hashCode());
+		result = prime * result + ((fieldAttributes == null) ? 0 : fieldAttributes.hashCode());
 		result = prime * result + ((freeText == null) ? 0 : freeText.hashCode());
 		result = prime * result + ((sortAttributes == null) ? 0 : sortAttributes.hashCode());
 		result = prime * result + ((types == null) ? 0 : types.hashCode());
@@ -78,6 +79,11 @@ public final class SearchKey {
 			if (other.criteria != null)
 				return false;
 		} else if (!criteria.equals(other.criteria))
+			return false;
+		if (fieldAttributes == null) {
+			if (other.fieldAttributes != null)
+				return false;
+		} else if (!fieldAttributes.equals(other.fieldAttributes))
 			return false;
 		if (freeText == null) {
 			if (other.freeText != null)

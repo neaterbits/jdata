@@ -8,6 +8,33 @@ public class SearchCriteriumValue {
 	
 	private SearchCriterium [] subCriteria; // eg. county under state
 
+	public SearchCriteriumValue() {
+		
+	}
+	
+	public SearchCriteriumValue(Object value) {
+		
+		if (value == null) {
+			throw new IllegalArgumentException("value == null");
+		}
+		
+		this.value = value;
+	}
+	
+	public SearchCriteriumValue(Object value, SearchCriterium[] subCriteria) {
+
+		if (value == null) {
+			throw new IllegalArgumentException("value == null");
+		}
+		
+		if (subCriteria == null) {
+			throw new IllegalArgumentException("subCriteria == null");
+		}
+		
+		this.value = value;
+		this.subCriteria = subCriteria;
+	}
+
 	public Object getValue() {
 		return value;
 	}

@@ -2,7 +2,7 @@ package com.test.salesportal.rest.search.model.criteria;
 
 import java.util.Arrays;
 
-public class SearchCriterium {
+public final class SearchCriterium {
 	private String type; // type of object this belongs to
 	private String attribute; // attribute for this one
 
@@ -12,6 +12,48 @@ public class SearchCriterium {
 	
 	// or a set of ranges
 	private SearchRange [] ranges;
+	
+	public SearchCriterium() {
+		
+	}
+	
+	public SearchCriterium(String type, String attribute, SearchCriteriumValue[] values, Boolean otherSelected) {
+
+		this(type, attribute);
+		
+		if (values == null) {
+			throw new IllegalArgumentException();
+		}
+		
+		this.values = values;
+		this.otherSelected = otherSelected;
+	}
+
+	public SearchCriterium(String type, String attribute, SearchRange[] ranges, Boolean otherSelected) {
+
+		this(type, attribute);
+
+		if (ranges == null) {
+			throw new IllegalArgumentException("ranges == null");
+		}
+		
+		this.ranges = ranges;
+		this.otherSelected = otherSelected;
+	}
+
+	private SearchCriterium(String type, String attribute) {
+		
+		if (type == null) {
+			throw new IllegalArgumentException("type == null");
+		}
+		
+		if (attribute == null) {
+			throw new IllegalArgumentException("attribute == null");
+		}
+
+		this.type = type;
+		this.attribute = attribute;
+	}
 	
 	public String getType() {
 		return type;

@@ -19,6 +19,7 @@ import com.test.salesportal.model.ItemAttribute;
 import com.test.salesportal.model.annotations.FacetEntity;
 import com.test.salesportal.model.attributes.ClassAttributes;
 import com.test.salesportal.model.housing.RentalApartment;
+import com.test.salesportal.model.items.sports.DownhillSki;
 import com.test.salesportal.model.items.sports.Ski;
 import com.test.salesportal.model.items.sports.Snowboard;
 import com.test.salesportal.model.items.vehicular.Boat;
@@ -31,6 +32,7 @@ public class ItemTypes {
 	private static final List<Class<? extends Item>> types = Collections.unmodifiableList(Arrays.asList(
 			Snowboard.class,
 			Ski.class,
+			DownhillSki.class,
 			Boat.class,
 			Car.class,
 			RentalApartment.class));
