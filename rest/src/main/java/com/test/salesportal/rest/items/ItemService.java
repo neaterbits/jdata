@@ -25,6 +25,7 @@ import com.test.salesportal.dao.ItemStorageException;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.rest.BaseService;
+import com.test.salesportal.rest.BaseServiceLogic;
 
 @Path("/")
 public class ItemService extends BaseService {
@@ -81,7 +82,7 @@ public class ItemService extends BaseService {
 		final BufferedImage image = ImageIO.read(photoInputStream2);
 
 		// Scale image, keeping aspect ratio
-		final int bb = THUMBNAIL_MAX_SIZE;
+		final int bb = BaseServiceLogic.THUMBNAIL_MAX_SIZE;
 		
 		final int thumbWidth;
 		final int thumbHeight;

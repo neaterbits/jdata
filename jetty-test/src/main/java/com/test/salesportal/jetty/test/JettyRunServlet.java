@@ -22,7 +22,7 @@ import com.test.salesportal.dao.ItemStorageException;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.model.items.TypeInfo;
-import com.test.salesportal.rest.BaseService;
+import com.test.salesportal.rest.BaseServiceLogic;
 import com.test.salesportal.rest.items.ItemService;
 import com.test.salesportal.rest.search.SearchResult;
 import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
@@ -34,7 +34,7 @@ import com.test.salesportal.rest.smslogin.LoginService.LoginResponse;
 public class JettyRunServlet {
 
 	private static boolean isTest() {
-		return BaseService.isTest();
+		return BaseServiceLogic.isTest();
 	}
 	
 

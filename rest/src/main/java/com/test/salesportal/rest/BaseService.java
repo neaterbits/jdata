@@ -4,7 +4,6 @@ import java.io.File;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.test.salesportal.common.EnvVariables;
 import com.test.salesportal.dao.IItemDAO;
 import com.test.salesportal.dao.IItemRetrieval;
 import com.test.salesportal.dao.IItemUpdate;
@@ -16,14 +15,6 @@ import com.test.salesportal.xmlstorage.local.LocalXmlStorage;
 
 public abstract class BaseService {
 	
-	protected static final int THUMBNAIL_MAX_SIZE = 240;
-	
-	public static boolean isTest() {
-		final String test = System.getenv(EnvVariables.SALESPORTAL_LOCALHOST_TEST);
-
-		return "true".equals(test);
-	}
-
 	public enum Storage {
 		JPA_RELATIONAL, // standard relational database
 		AMAZON_S3_ES, // S3 and ElasticSearch in AWS
