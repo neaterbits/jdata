@@ -3,10 +3,9 @@ package com.test.salesportal.rest.search.all.cache;
 import com.test.salesportal.model.ItemAttribute;
 import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.model.items.sports.Snowboard;
+import static com.test.salesportal.rest.search.all.cache.CacheTestUtil.decimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.math.BigDecimal;
 
 import junit.framework.TestCase;
 
@@ -52,9 +51,5 @@ public class SearchRangeUtilTest extends TestCase {
 		
 		assertThat(SearchRangeUtil.matches(2005, yearAttribute, 2005, false, null, true)).isFalse();
 		assertThat(SearchRangeUtil.matches(2005, yearAttribute, 2005, true,  null, true)).isTrue();
-	}
-
-	private static BigDecimal decimal(int value) {
-		return BigDecimal.valueOf(value);
 	}
 }

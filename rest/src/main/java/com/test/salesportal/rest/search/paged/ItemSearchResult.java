@@ -14,5 +14,4 @@ public class ItemSearchResult<T extends SearchItemResult> extends SearchResult {
 	public final void setItems(T[] items) {
 		this.items = items;
 	}
-
 }

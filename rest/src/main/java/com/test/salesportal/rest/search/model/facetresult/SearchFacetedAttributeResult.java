@@ -16,6 +16,15 @@ public abstract class SearchFacetedAttributeResult {
 	}
 
 	public SearchFacetedAttributeResult(String id, String name, Integer noAttributeValueCount) {
+		
+		if (id == null) {
+			throw new IllegalArgumentException("id = null");
+		}
+		
+		if (name == null) {
+			throw new IllegalArgumentException("name == null");
+		}
+		
 		this.id = id;
 		this.name = name;
 		this.noAttributeValueCount = noAttributeValueCount;
@@ -41,7 +50,7 @@ public abstract class SearchFacetedAttributeResult {
 		return noAttributeValueCount;
 	}
 
-	public void setNoAttributeValueCount(int noAttributeValueCount) {
+	public void setNoAttributeValueCount(Integer noAttributeValueCount) {
 		this.noAttributeValueCount = noAttributeValueCount;
 	}
 }

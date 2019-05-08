@@ -86,6 +86,12 @@ public class ItemTypes {
 		return types;
 	}
 
+	public static List<TypeInfo> getAllTypeInfosList() {
+		return types.stream()
+				.map(type -> getTypeInfo(type))
+				.collect(Collectors.toList());
+	}
+
 	public static Set<Class<? extends Item>> getAllTypesSet() {
 		return typesSet;
 	}

@@ -16,4 +16,16 @@ public class CollectionUtil {
 		
 		return null;
 	}
+	
+	public static <T> boolean has(Collection<T> collection, Predicate<T> test) {
+
+		for (T value : collection) {
+			
+			if (test.test(value)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }

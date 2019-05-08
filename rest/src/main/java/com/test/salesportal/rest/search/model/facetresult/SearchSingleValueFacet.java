@@ -29,7 +29,9 @@ public class SearchSingleValueFacet {
 		this.value = value;
 		this.matchCount = matchCount;
 		
-		this.subAttributes = subAttributes.length == 0 ? null : Arrays.asList(subAttributes);
+		if (subAttributes != null) {
+			this.subAttributes = subAttributes.length == 0 ? null : Arrays.asList(subAttributes);
+		}
 	}
 	
 	public Object getValue() {

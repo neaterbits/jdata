@@ -40,6 +40,8 @@ import com.test.salesportal.rest.search.util.SearchTypesUtil;
 public final class AllSearchService
 	extends BaseSearchService<AllSearchItemResult, ItemSearchResult<AllSearchItemResult>> {
 
+	private static final List<TypeInfo> ALL_TYPES = ItemTypes.getAllTypeInfosList();
+	
 	private static final SortedSearchResultFactory SORTED_SEARCH_RESULT_FACTORY = new SortedSearchResultFactory() {
 		
 		@Override
@@ -245,14 +247,14 @@ public final class AllSearchService
 						
 						final StoreItemOperationData storeItemOperationData = (StoreItemOperationData)operationData;
 						
-						SEARCH_RESULT_CACHE.applyToAnyMatchingCachedSearchResults(storeItemOperationData.getItem());
+						SEARCH_RESULT_CACHE.applyToAnyMatchingCachedSearchResults(storeItemOperationData.getItem(), ALL_TYPES);
 						
 					}
 					else if (operationData instanceof UpdateItemOperationData) {
 
 						final UpdateItemOperationData updateItemOperationData = (UpdateItemOperationData)operationData;
 						
-						SEARCH_RESULT_CACHE.applyToAnyMatchingCachedSearchResults(updateItemOperationData.getItem());
+						SEARCH_RESULT_CACHE.applyToAnyMatchingCachedSearchResults(updateItemOperationData.getItem(), ALL_TYPES);
 						
 					}
 					else if (operationData instanceof DeleteItemOperationData) {

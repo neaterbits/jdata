@@ -21,4 +21,10 @@ public class SearchSingleValueFacetedAttributeResult extends SearchFacetedAttrib
 	public void setValues(List<SearchSingleValueFacet> values) {
 		this.values = values;
 	}
+
+	@Override
+	public String toString() {
+		return "SearchSingleValueFacetedAttributeResult [values=" + values + ", getId()=" + getId() + ", getName()="
+				+ getName() + "]";
+	}
 }

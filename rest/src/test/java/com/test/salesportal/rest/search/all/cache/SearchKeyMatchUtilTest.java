@@ -13,6 +13,8 @@ import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
 import com.test.salesportal.rest.search.model.criteria.SearchCriteriumValue;
 import com.test.salesportal.rest.search.model.criteria.SearchRange;
 
+import static com.test.salesportal.rest.search.all.cache.CacheTestUtil.decimal;
+
 import junit.framework.TestCase;
 
 public class SearchKeyMatchUtilTest extends TestCase {
@@ -313,9 +315,5 @@ public class SearchKeyMatchUtilTest extends TestCase {
 
 	private static SearchKey makeCriteriaSearchKey(Class<? extends Item> type, SearchCriterium ... criteria) {
 		return new SearchKey(Arrays.asList(type), null, criteria, null, null);
-	}
-	
-	private static BigDecimal decimal(int num) {
-		return BigDecimal.valueOf(num);
 	}
 }

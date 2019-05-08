@@ -8,6 +8,7 @@ import java.util.Map;
 import com.test.salesportal.common.UUIDGenerator;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.SortOrder;
+import com.test.salesportal.model.items.TypeInfo;
 import com.test.salesportal.rest.search.SearchItemResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetsResult;
 
@@ -110,7 +111,7 @@ public final class SearchResultCache {
 		return results;
 	}
 
-	public void applyToAnyMatchingCachedSearchResults(Item item) {
+	public void applyToAnyMatchingCachedSearchResults(Item item, List<TypeInfo> allTypes) {
 		
 		if (item == null) {
 			throw new IllegalArgumentException("item == null");
@@ -123,7 +124,7 @@ public final class SearchResultCache {
 		}
 		
 		for (Map.Entry<SearchKey, SortedSearchResult> searchResult : searchResults) {
-			searchResult.getValue().applyItem(searchResult.getKey(), item);
+			searchResult.getValue().applyItem(searchResult.getKey(), item, allTypes);
 		}
 	}
 
