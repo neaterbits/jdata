@@ -414,6 +414,7 @@ GalleryCacheBase.prototype._addDivsWithAddFunc = function(level, startIndex, sta
  */
 
 GalleryCacheBase.prototype._computeColumnSpacing = function(rowWidth, totalRowItemWidths, itemsThisRow) {
+	
 	var spacing = (rowWidth - totalRowItemWidths) / (itemsThisRow + 1);
 
 	return spacing;
@@ -451,7 +452,7 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 		'itemsThisRow', itemsThisRow,
 		'numRowsTotal', numRowsTotal,
 		'rowWidth', rowWidth])
-	
+		
 	// Make sure first in row is indeed at first
 	var numColumns = this._computeNumColumns();
 	var indexIntoRow = indexOfFirstInRow % numColumns;
@@ -468,7 +469,7 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 	var spacing = 0;
 	
 	if (itemWidth != null) {
-		var totalRowItemWidths = itemsThisRow * itemWidth;
+		var totalRowItemsWidth = itemsThisRow * itemWidth;
 		
 		spacing = this._computeColumnSpacing(rowWidth, totalRowItemsWidth, itemsThisRow);
 	}
@@ -498,7 +499,6 @@ GalleryCacheBase.prototype._addRowItems = function(level, rowDiv, indexOfFirstIn
 
 		// Add to model at relative offsets
 		// this.log(level, 'set spacing to ' + spacing + '/' + rowWidth + '/' + totalRowItemWidths + '/' + itemsThisRow);
-		
 		this._applyItemStyles(itemElement, rowHeight, itemWidth, itemHeight, spacing, visible);
 
 		addElement(itemElement, j);
