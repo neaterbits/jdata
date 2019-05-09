@@ -48,7 +48,7 @@ public abstract class SortedSearchResult {
 		this.sortAttributes = sortAttributes;
 	}
 	
-	final void initFacetsResult(SearchFacetsResult facetsResult) {
+	final void initResult(SearchFacetsResult facetsResult, AllSearchItemResult [] items) {
 		
 		if (facetsResult == null) {
 			throw new IllegalArgumentException("facetsResult");
@@ -59,6 +59,8 @@ public abstract class SortedSearchResult {
 		}
 		
 		this.facetsResult = facetsResult;
+		
+		insertSearchResults(items);
 	}
 	
 	final SearchFacetsResult getFacetsResult() {

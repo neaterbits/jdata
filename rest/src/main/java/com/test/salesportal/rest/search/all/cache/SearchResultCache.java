@@ -10,6 +10,7 @@ import com.test.salesportal.model.Item;
 import com.test.salesportal.model.SortOrder;
 import com.test.salesportal.model.items.TypeInfo;
 import com.test.salesportal.rest.search.SearchItemResult;
+import com.test.salesportal.rest.search.all.AllSearchItemResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetsResult;
 
 /**
@@ -42,7 +43,7 @@ public final class SearchResultCache {
 	public String cacheSearchResult(
 			SearchKey searchKey,
 			SearchFacetsResult facetsResult,
-			SearchItemResult [] searchResult) {
+			AllSearchItemResult [] searchResult) {
 		
 		if (searchKey == null) {
 			throw new IllegalArgumentException("searchKey == null");
@@ -55,7 +56,7 @@ public final class SearchResultCache {
 				searchKey.getSortAttributes());
 		
 		if (facetsResult != null) {
-			sortedSearchResult.initFacetsResult(facetsResult);
+			sortedSearchResult.initResult(facetsResult, searchResult);
 		}
 		
 		synchronized (this) {
@@ -79,7 +80,10 @@ public final class SearchResultCache {
 		}
 		
 		return searchResult != null
-				? new CachedSearchResult(searchResult.getSearchResultId(), searchResult.getMatchCount(), searchResult.getFacetsResult())
+				? new CachedSearchResult(
+						searchResult.getSearchResultId(),
+						searchResult.getMatchCount(),
+						searchResult.getFacetsResult())
 				: null;
 	}
 	

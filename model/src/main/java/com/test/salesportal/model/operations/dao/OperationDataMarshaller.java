@@ -57,7 +57,7 @@ public class OperationDataMarshaller {
 		try {
 			marshaller.marshal(data, baos);
 		} catch (JAXBException ex) {
-			throw new IllegalStateException("Faield to marshal", ex);
+			throw new IllegalStateException("Failed to marshal", ex);
 		}
 		
 		return baos.toByteArray();

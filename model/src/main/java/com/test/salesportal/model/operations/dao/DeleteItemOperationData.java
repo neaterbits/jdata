@@ -1,5 +1,8 @@
 package com.test.salesportal.model.operations.dao;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class DeleteItemOperationData extends BaseOperationData {
 
 	private String itemId;

@@ -19,7 +19,7 @@ public final class AllSearchService
 	public AllSearchService(String localFileDir, IOperationsDAO operationsDAO) {
 		super(localFileDir);
 		
-		this.searchLogic = new AllSearchLogic(operationsDAO);
+		this.searchLogic = new AllSearchLogic(operationsDAO, null);
 	}
 	
 

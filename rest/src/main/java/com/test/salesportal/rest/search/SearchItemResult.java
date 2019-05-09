@@ -33,6 +33,7 @@ public class SearchItemResult {
 		this.title = title;
 		this.thumbWidth = thumbWidth;
 		this.thumbHeight = thumbHeight;
+		this.sortFields = sortFields;
 		this.fields = fields;
 	}
 

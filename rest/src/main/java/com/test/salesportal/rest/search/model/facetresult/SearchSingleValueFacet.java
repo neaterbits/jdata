@@ -20,18 +20,29 @@ public class SearchSingleValueFacet {
 	public SearchSingleValueFacet() {
 		
 	}
+	
+	public SearchSingleValueFacet(Object value, int matchCount) {
+		this(value, matchCount, null, true);
+	}
 
 	public SearchSingleValueFacet(Object value, int matchCount, SearchFacetedAttributeResult ... subAttributes) {
+		this(
+			value,
+			matchCount,
+			subAttributes != null
+				? subAttributes.length == 0 ? null : Arrays.asList(subAttributes)
+				: null,
+			true);
+	}
+	
+	private SearchSingleValueFacet(Object value, int matchCount, List<SearchFacetedAttributeResult> subAttributes, boolean disambiguate) {
 		if (value == null) {
 			throw new IllegalArgumentException("value == null");
 		}
 		
 		this.value = value;
 		this.matchCount = matchCount;
-		
-		if (subAttributes != null) {
-			this.subAttributes = subAttributes.length == 0 ? null : Arrays.asList(subAttributes);
-		}
+		this.subAttributes = subAttributes;
 	}
 	
 	public Object getValue() {
@@ -64,5 +75,11 @@ public class SearchSingleValueFacet {
 
 	public void setSubAttributes(List<SearchFacetedAttributeResult> subAttributes) {
 		this.subAttributes = subAttributes;
+	}
+
+	@Override
+	public String toString() {
+		return "SearchSingleValueFacet [value=" + value + ", displayValue=" + displayValue + ", matchCount="
+				+ matchCount + ", subAttributes=" + subAttributes + "]";
 	}
 }

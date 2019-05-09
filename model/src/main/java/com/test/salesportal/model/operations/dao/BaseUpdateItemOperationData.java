@@ -6,6 +6,20 @@ public abstract class BaseUpdateItemOperationData extends BaseOperationData {
 
 	private Item item;
 
+	public BaseUpdateItemOperationData() {
+
+	}
+
+	public BaseUpdateItemOperationData(String userId, Item item) {
+		super(userId);
+		
+		if (item == null) {
+			throw new IllegalArgumentException("item == null");
+		}
+		
+		this.item = item;
+	}
+
 	public final Item getItem() {
 		return item;
 	}

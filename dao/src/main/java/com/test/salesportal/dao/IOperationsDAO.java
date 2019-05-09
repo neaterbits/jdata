@@ -1,6 +1,5 @@
 package com.test.salesportal.dao;
 
-import java.util.List;
 import java.util.Map;
 
 import com.test.salesportal.model.operations.Operation;
@@ -12,7 +11,7 @@ import com.test.salesportal.model.operations.Operation;
  * Storage operations should be idempotent so that one can redo operations
  * from the journal in case of shutdown.
  */
-public interface IOperationsDAO {
+public interface IOperationsDAO extends IOperationsRetrieval {
 
 	public static class OperationStorageId {
 
@@ -124,13 +123,4 @@ public interface IOperationsDAO {
 	 */
 	boolean deleteOperationFromLog(String operationId);
 
-	/**
-	 * Return all completed operations that can be applied to local cache.
-	 * 
-	 * @param modelVersion model version to get operations newer than.
-	 * 
-	 * @return list of completed operations in ascending order
-	 */
-	
-	List<Operation> getCompletedOperationsNewerThanSortedOnModelVersionAsc(long modelVersion);
 }

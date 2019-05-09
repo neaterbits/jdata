@@ -111,7 +111,6 @@ public class SearchCriteriaUtil {
 		}
 		else if (searchCriterium.getValues() != null) {
 			
-			
 			switch (attribute.getAttributeType()) {
 			case STRING:
 				criterium = new StringInCriterium(attribute, convertCriteriaValues(searchCriterium, o -> (String)o), includeItemsWithNoValue);

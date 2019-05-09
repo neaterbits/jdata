@@ -58,7 +58,30 @@ class SearchFacetsResultUtil {
 		makeAttributes(item, facetAttributes, typeResult::setAttributes, itemTypeInfo.getAttributes(), null);
 	}
 	
-	private static List<SearchFacetedAttributeResult> makeAttributes(
+	private static boolean matchesSuperAttributeOrIsRootAttribute(ItemAttribute attribute, ItemAttribute superAttribute) {
+		
+		final boolean matches;
+		
+		if (superAttribute == null && attribute.getFacetSuperAttribute() == null) {
+			matches = true;
+		}
+		else if (superAttribute != null && attribute.getFacetSuperAttribute() == null) {
+			matches = false;
+		}
+		else if (superAttribute == null && attribute.getFacetSuperAttribute() != null) {
+			matches = false;
+		}
+		else if (superAttribute != null && attribute.getFacetSuperAttribute() != null) {
+			matches = superAttribute.getName().equals(attribute.getFacetSuperAttribute());
+		}
+		else {
+			throw new IllegalStateException();
+		}
+
+		return matches;
+	}
+	
+	private static void makeAttributes(
 			Item item,
 			List<SearchFacetedAttributeResult> facetAttributes,
 			Consumer<List<SearchFacetedAttributeResult>> setFacetAttributes,
@@ -71,7 +94,7 @@ class SearchFacetsResultUtil {
 				continue;
 			}
 				
-			if (superAttribute != null && !superAttribute.getName().equals(attribute.getFacetSuperAttribute())) {
+			if (!matchesSuperAttributeOrIsRootAttribute(attribute, superAttribute)) {
 				continue;
 			}
 			
@@ -115,35 +138,34 @@ class SearchFacetsResultUtil {
 				
 					List<SearchSingleValueFacet> facets = singleValue.getValues();
 
-					final Supplier<SearchSingleValueFacet> createNewValue = () -> {
-
-						 final List<SearchFacetedAttributeResult> subAttributesList = makeAttributes(item, null, null, attributes, attribute);
-
-						 return new SearchSingleValueFacet(
-								 attributeValue,
-								 1,
-								 subAttributesList != null
-								 	? subAttributesList.toArray(new SearchFacetedAttributeResult[subAttributesList.size()])
-						 			: null);
-					};
+					final Supplier<SearchSingleValueFacet> createNewValue = () -> new SearchSingleValueFacet(attributeValue, 1);
 					
+					SearchSingleValueFacet singleValueFacet;
 					if (facets == null) {
 						facets = new ArrayList<>();
 						
-						facets.add(createNewValue.get());
+						singleValueFacet = createNewValue.get();
+						facets.add(singleValueFacet);
 						singleValue.setValues(facets);
 					}
 					else {
-						
-						final SearchSingleValueFacet singleValueFacet = CollectionUtil.find(facets, f -> f.getValue().equals(attributeValue));
+						singleValueFacet = CollectionUtil.find(facets, f -> f.getValue().equals(attributeValue));
 						
 						if (singleValueFacet == null) {
-							facets.add(createNewValue.get());
+							singleValueFacet = createNewValue.get();
+							facets.add(singleValueFacet);
 						}
 						else {
 							singleValueFacet.setMatchCount(singleValueFacet.getMatchCount() + 1);
 						}
 					}
+
+					makeAttributes(
+							item,
+							singleValueFacet.getSubAttributes(),
+							singleValueFacet::setSubAttributes,
+							attributes,
+							attribute);
 				}
 				else if (attribute.isRange()) {
 					
@@ -189,8 +211,6 @@ class SearchFacetsResultUtil {
 				}
 			}
 		}
-		
-		return facetAttributes;
 	}
 	
 	static void deleteItem(SearchFacetsResult facetsResult, Item item, TypeInfo itemTypeInfo) {
@@ -218,7 +238,7 @@ class SearchFacetsResultUtil {
 					continue;
 				}
 				
-				if (superAttribute != null && !superAttribute.getName().equals(attribute.getFacetSuperAttribute())) {
+				if (!matchesSuperAttributeOrIsRootAttribute(attribute, superAttribute)) {
 					continue;
 				}
 				

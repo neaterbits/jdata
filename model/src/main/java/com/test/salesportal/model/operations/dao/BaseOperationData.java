@@ -17,11 +17,11 @@ public abstract class BaseOperationData {
 		this.userId = userId;
 	}
 
-	public String getUserId() {
+	public final String getUserId() {
 		return userId;
 	}
 
-	public void setUserId(String userId) {
+	public final void setUserId(String userId) {
 		this.userId = userId;
 	}
 }

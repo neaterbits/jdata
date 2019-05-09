@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.xml.bind.Unmarshaller;
 
-import com.test.salesportal.dao.IOperationsDAO;
+import com.test.salesportal.dao.IOperationsRetrieval;
 import com.test.salesportal.dao.ISearchDAO;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemAttribute;
@@ -50,17 +50,20 @@ final class AllSearchLogic extends BaseSearchLogic<AllSearchItemResult, ItemSear
 	
 	private static final OperationDataMarshaller OPERATION_DATA_MARSHALLER = new OperationDataMarshaller();
 	
-	private final IOperationsDAO operationsDAO;
+	private final IOperationsRetrieval operationsRetrieval;
+	private final ITestCriticalSectionCallback criticalSectionCallback;
 	
-	private long currentRefereshedModelVersion;
+	private long currentRefreshedModelVersion;
 
-	AllSearchLogic(IOperationsDAO operationsDAO) {
+	AllSearchLogic(IOperationsRetrieval operationsRetrieval, ITestCriticalSectionCallback criticalSectionCallback) {
 
-		if (operationsDAO == null) {
-			throw new IllegalArgumentException("operationsDAO == null");
+		if (operationsRetrieval == null) {
+			throw new IllegalArgumentException("operationsRetrieval == null");
 		}
 		
-		this.operationsDAO = operationsDAO;
+		this.operationsRetrieval = operationsRetrieval;
+		this.criticalSectionCallback = criticalSectionCallback;
+		this.currentRefreshedModelVersion = -1L;
 	}
 
 	@Override
@@ -72,7 +75,7 @@ final class AllSearchLogic extends BaseSearchLogic<AllSearchItemResult, ItemSear
 	protected AllSearchItemResult createSearchItemResult(String id, String title, Integer thumbWidth,
 			Integer thumbHeight, Object[] sortFields, Object[] fields) {
 		
-		final long modelVersion = Long.parseLong((String)fields[0]);
+		final long modelVersion = (Long)fields[0];
 		
 		final Object [] fieldsWithoutModelVersion = Arrays.copyOfRange(fields, 1, fields.length);
 		
@@ -116,7 +119,8 @@ final class AllSearchLogic extends BaseSearchLogic<AllSearchItemResult, ItemSear
 		
 		final List<SortAttributeAndOrder> sortAttributes = SearchSortUtil.decodeSortOrders(sortOrder, typesList);
 
-		final List<ItemAttribute> responseFieldAttributes = new ArrayList<>(fields.length);
+		final int fieldsLength = (fields != null ? fields.length : 0) + 1;
+		final List<ItemAttribute> responseFieldAttributes = new ArrayList<>(fieldsLength);
 
 		for (Class<? extends Item> type : typesList) {
 
@@ -196,12 +200,20 @@ final class AllSearchLogic extends BaseSearchLogic<AllSearchItemResult, ItemSear
 					null,
 					null,
 					searchDAO);
+
+			final String searchResultId;
 			
+			synchronized (AllSearchLogic.class) {
 			
-			final String searchResultId = SEARCH_RESULT_CACHE.cacheSearchResult(
+				if (criticalSectionCallback != null) {
+					criticalSectionCallback.invoke();
+				}
+
+				searchResultId = SEARCH_RESULT_CACHE.cacheSearchResult(
 					searchKey,
 					result.getFacets(),
 					result.getItems());
+			}
 
 			allSearchResult = new AllSearchResult(
 					result.getTotalItemMatchCount(),
@@ -227,9 +239,13 @@ final class AllSearchLogic extends BaseSearchLogic<AllSearchItemResult, ItemSear
 	
 	private void refreshCacheIfOutdated() {
 
+		final List<Operation> operations = operationsRetrieval.getCompletedOperationsNewerThanSortedOnModelVersionAsc(currentRefreshedModelVersion);
+
 		synchronized (AllSearchService.class) {
 
-			final List<Operation> operations = operationsDAO.getCompletedOperationsNewerThanSortedOnModelVersionAsc(currentRefereshedModelVersion);
+			if (criticalSectionCallback != null) {
+				criticalSectionCallback.invoke();
+			}
 			
 			if (!operations.isEmpty()) {
 				
@@ -237,6 +253,18 @@ final class AllSearchLogic extends BaseSearchLogic<AllSearchItemResult, ItemSear
 				
 				// Apply to cache in order
 				for (Operation operation : operations) {
+					
+					if (currentRefreshedModelVersion == -1) {
+						this.currentRefreshedModelVersion = operation.getModelVersion();
+					}
+					else {
+						if (currentRefreshedModelVersion != operation.getModelVersion() - 1) {
+							throw new IllegalStateException("Non contiguous model versions");
+						}
+						else {
+							++ this.currentRefreshedModelVersion;
+						}
+					}
 
 					final BaseOperationData operationData = OPERATION_DATA_MARSHALLER.decodeOperationData(unmarshaller, operation);
 
@@ -265,7 +293,7 @@ final class AllSearchLogic extends BaseSearchLogic<AllSearchItemResult, ItemSear
 					}
 				}
 				
-				currentRefereshedModelVersion = operations.get(operations.size() - 1).getModelVersion();
+				currentRefreshedModelVersion = operations.get(operations.size() - 1).getModelVersion();
 			}
 		}
 		

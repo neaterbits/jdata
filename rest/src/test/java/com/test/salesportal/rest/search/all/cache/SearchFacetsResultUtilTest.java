@@ -7,7 +7,6 @@ import com.test.salesportal.model.items.TypeInfo;
 import com.test.salesportal.model.items.sports.Snowboard;
 import com.test.salesportal.model.items.sports.SnowboardProfile;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeRangeResult;
-import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetedTypeResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetsResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchRangeFacetedAttributeResult;
@@ -21,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 
 import junit.framework.TestCase;
+
+import static com.test.salesportal.rest.search.all.AllSearchTestUtil.findAttribute;
 
 public class SearchFacetsResultUtilTest extends TestCase {
 	
@@ -57,11 +58,12 @@ public class SearchFacetsResultUtilTest extends TestCase {
 		assertThat(typeResult).isNotNull();
 		assertThat(typeResult.getType()).isEqualTo(snowboardType.getTypeName());
 		
-		final long numFacetAttributes = snowboardType.getAttributes().asSet().stream()
+		final long numFacetAttributesWithoutSuperAttribute = snowboardType.getAttributes().asSet().stream()
 				.filter(ItemAttribute::isFaceted)
+				.filter(attr -> attr.getFacetSuperAttribute() == null)
 				.count();
 		
-		assertThat((long)typeResult.getAttributes().size()).isEqualTo(numFacetAttributes);
+		assertThat((long)typeResult.getAttributes().size()).isEqualTo(numFacetAttributesWithoutSuperAttribute);
 		
 		SearchSingleValueFacetedAttributeResult profileAttribute = findAttribute(typeResult.getAttributes(), "profile");
 		assertThat(profileAttribute.getNoAttributeValueCount()).isNull();
@@ -108,7 +110,7 @@ public class SearchFacetsResultUtilTest extends TestCase {
 		assertThat(typeResult).isNotNull();
 		assertThat(typeResult.getType()).isEqualTo(snowboardType.getTypeName());
 		
-		assertThat((long)typeResult.getAttributes().size()).isEqualTo(numFacetAttributes);
+		assertThat((long)typeResult.getAttributes().size()).isEqualTo(numFacetAttributesWithoutSuperAttribute);
 		
 		assertThat(profileAttribute.getNoAttributeValueCount()).isNull();
 		assertThat(profileAttribute.getValues().size()).isEqualTo(1);
@@ -158,7 +160,7 @@ public class SearchFacetsResultUtilTest extends TestCase {
 		assertThat(typeResult).isNotNull();
 		assertThat(typeResult.getType()).isEqualTo(snowboardType.getTypeName());
 		
-		assertThat((long)typeResult.getAttributes().size()).isEqualTo(numFacetAttributes);
+		assertThat((long)typeResult.getAttributes().size()).isEqualTo(numFacetAttributesWithoutSuperAttribute);
 		
 		assertThat(profileAttribute.getNoAttributeValueCount()).isNull();
 		assertThat(profileAttribute.getValues().size()).isEqualTo(1);
@@ -196,7 +198,7 @@ public class SearchFacetsResultUtilTest extends TestCase {
 		assertThat(typeResult).isNotNull();
 		assertThat(typeResult.getType()).isEqualTo(snowboardType.getTypeName());
 		
-		assertThat((long)typeResult.getAttributes().size()).isEqualTo(numFacetAttributes);
+		assertThat((long)typeResult.getAttributes().size()).isEqualTo(numFacetAttributesWithoutSuperAttribute);
 		
 		assertThat(profileAttribute.getNoAttributeValueCount()).isNull();
 		assertThat(profileAttribute.getValues()).isNull();
@@ -236,7 +238,7 @@ public class SearchFacetsResultUtilTest extends TestCase {
 		assertThat(typeResult).isNotNull();
 		assertThat(typeResult.getType()).isEqualTo(snowboardType.getTypeName());
 		
-		assertThat((long)typeResult.getAttributes().size()).isEqualTo(numFacetAttributes);
+		assertThat((long)typeResult.getAttributes().size()).isEqualTo(numFacetAttributesWithoutSuperAttribute);
 		
 		assertThat(profileAttribute.getNoAttributeValueCount()).isNull();
 		assertThat(profileAttribute.getValues().size()).isEqualTo(1);
@@ -267,7 +269,204 @@ public class SearchFacetsResultUtilTest extends TestCase {
 		checkAttributeValue(lengthAttribute.getRanges().get(2), 0, decimal(160), decimal(170));
 		checkAttributeValue(lengthAttribute.getRanges().get(3), 0, decimal(170), null);
 	}
+
+	public void testSubAttributeForMultipleOfSameSuperAttributeValue() {
+		
+		final SearchFacetsResult result = new SearchFacetsResult();
+		
+		final Snowboard snowboard = new Snowboard();
+		
+		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		
+		snowboard.setProfile(SnowboardProfile.FLAT);
+		snowboard.setMake("Burton");
+
+		snowboard.setLength(decimal(165));
+
+		SearchFacetsResultUtil.addItem(result, snowboard, snowboardType, ALL_TYPES);
+		
+		final Snowboard anotherSnowboard = new Snowboard();
+		
+		anotherSnowboard.setProfile(SnowboardProfile.FLAT);
+		anotherSnowboard.setMake("Burton");
+		anotherSnowboard.setModel("SomeModel");
+		anotherSnowboard.setProductionYear(2015);
+
+		anotherSnowboard.setLength(decimal(170));
 	
+		SearchFacetsResultUtil.addItem(result, anotherSnowboard, snowboardType, ALL_TYPES);
+
+		final SearchFacetedTypeResult typeResult = CollectionUtil.find(
+				result.getTypes(),
+				type -> type.getType().equals(snowboardType.getTypeName()));
+
+		SearchSingleValueFacetedAttributeResult makeAttributeResult
+			= (SearchSingleValueFacetedAttributeResult)findAttribute(typeResult.getAttributes(), "make");
+		
+		assertThat(makeAttributeResult.getValues().size()).isEqualTo(1);
+		assertThat(makeAttributeResult.getValues().get(0).getValue()).isEqualTo("Burton");
+		assertThat(makeAttributeResult.getValues().get(0).getMatchCount()).isEqualTo(2);
+		assertThat(makeAttributeResult.getValues().get(0).getSubAttributes().size()).isEqualTo(1);
+		
+		SearchSingleValueFacetedAttributeResult modelAttributeResult
+			= (SearchSingleValueFacetedAttributeResult)makeAttributeResult.getValues().get(0).getSubAttributes().get(0);
+		assertThat(modelAttributeResult.getId()).isEqualTo("model");
+		assertThat(modelAttributeResult.getNoAttributeValueCount()).isEqualTo(1);
+		assertThat(modelAttributeResult.getValues().size()).isEqualTo(1);
+		assertThat(modelAttributeResult.getValues().get(0).getValue()).isEqualTo("SomeModel");
+		assertThat(modelAttributeResult.getValues().get(0).getMatchCount()).isEqualTo(1);
+		
+		// Delete item again
+		SearchFacetsResultUtil.deleteItem(result, anotherSnowboard, snowboardType);
+		assertThat(makeAttributeResult.getValues().size()).isEqualTo(1);
+		assertThat(makeAttributeResult.getValues().get(0).getValue()).isEqualTo("Burton");
+		assertThat(makeAttributeResult.getValues().get(0).getMatchCount()).isEqualTo(1);
+		assertThat(makeAttributeResult.getValues().get(0).getSubAttributes().size()).isEqualTo(1);
+		
+		modelAttributeResult
+			= (SearchSingleValueFacetedAttributeResult)makeAttributeResult.getValues().get(0).getSubAttributes().get(0);
+		assertThat(modelAttributeResult.getId()).isEqualTo("model");
+		assertThat(modelAttributeResult.getNoAttributeValueCount()).isEqualTo(1);
+		assertThat(modelAttributeResult.getValues()).isNull();
+
+		SearchFacetsResultUtil.deleteItem(result, snowboard, snowboardType);
+		assertThat(makeAttributeResult.getValues()).isNull();
+	}
+
+	public void testSubAttributeForMultipleOfSameSuperAttributeValueWithDifferentValueOnBoth() {
+		
+		final SearchFacetsResult result = new SearchFacetsResult();
+		
+		final Snowboard snowboard = new Snowboard();
+		
+		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		
+		snowboard.setProfile(SnowboardProfile.FLAT);
+		snowboard.setMake("Burton");
+		snowboard.setModel("SomeModel");
+
+		snowboard.setLength(decimal(165));
+
+		SearchFacetsResultUtil.addItem(result, snowboard, snowboardType, ALL_TYPES);
+		
+		final Snowboard anotherSnowboard = new Snowboard();
+		
+		anotherSnowboard.setProfile(SnowboardProfile.FLAT);
+		anotherSnowboard.setMake("Burton");
+		anotherSnowboard.setModel("AnotherModel");
+		anotherSnowboard.setProductionYear(2015);
+
+		anotherSnowboard.setLength(decimal(170));
+	
+		SearchFacetsResultUtil.addItem(result, anotherSnowboard, snowboardType, ALL_TYPES);
+
+		final SearchFacetedTypeResult typeResult = CollectionUtil.find(
+				result.getTypes(),
+				type -> type.getType().equals(snowboardType.getTypeName()));
+
+		SearchSingleValueFacetedAttributeResult makeAttributeResult
+			= (SearchSingleValueFacetedAttributeResult)findAttribute(typeResult.getAttributes(), "make");
+		
+		assertThat(makeAttributeResult.getValues().size()).isEqualTo(1);
+		assertThat(makeAttributeResult.getValues().get(0).getValue()).isEqualTo("Burton");
+		assertThat(makeAttributeResult.getValues().get(0).getMatchCount()).isEqualTo(2);
+		assertThat(makeAttributeResult.getValues().get(0).getSubAttributes().size()).isEqualTo(1);
+		
+		SearchSingleValueFacetedAttributeResult modelAttributeResult
+			= (SearchSingleValueFacetedAttributeResult)makeAttributeResult.getValues().get(0).getSubAttributes().get(0);
+		assertThat(modelAttributeResult.getId()).isEqualTo("model");
+		assertThat(modelAttributeResult.getNoAttributeValueCount()).isNull();
+		assertThat(modelAttributeResult.getValues().size()).isEqualTo(2);
+		assertThat(modelAttributeResult.getValues().get(0).getValue()).isEqualTo("SomeModel");
+		assertThat(modelAttributeResult.getValues().get(0).getMatchCount()).isEqualTo(1);
+		assertThat(modelAttributeResult.getValues().get(1).getValue()).isEqualTo("AnotherModel");
+		assertThat(modelAttributeResult.getValues().get(1).getMatchCount()).isEqualTo(1);
+		
+		// Delete item again
+		SearchFacetsResultUtil.deleteItem(result, anotherSnowboard, snowboardType);
+		assertThat(makeAttributeResult.getValues().size()).isEqualTo(1);
+		assertThat(makeAttributeResult.getValues().get(0).getValue()).isEqualTo("Burton");
+		assertThat(makeAttributeResult.getValues().get(0).getMatchCount()).isEqualTo(1);
+		assertThat(makeAttributeResult.getValues().get(0).getSubAttributes().size()).isEqualTo(1);
+		
+		modelAttributeResult
+			= (SearchSingleValueFacetedAttributeResult)makeAttributeResult.getValues().get(0).getSubAttributes().get(0);
+		assertThat(modelAttributeResult.getId()).isEqualTo("model");
+		assertThat(modelAttributeResult.getNoAttributeValueCount()).isNull();
+		assertThat(modelAttributeResult.getValues().size()).isEqualTo(1);
+		assertThat(modelAttributeResult.getValues().get(0).getValue()).isEqualTo("SomeModel");
+		assertThat(modelAttributeResult.getValues().get(0).getMatchCount()).isEqualTo(1);
+
+		SearchFacetsResultUtil.deleteItem(result, snowboard, snowboardType);
+		assertThat(makeAttributeResult.getValues()).isNull();
+	}
+
+	public void testSubAttributeForMultipleOfSameSuperAttributeValueWithSameValueOnBoth() {
+		
+		final SearchFacetsResult result = new SearchFacetsResult();
+		
+		final Snowboard snowboard = new Snowboard();
+		
+		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		
+		snowboard.setProfile(SnowboardProfile.FLAT);
+		snowboard.setMake("Burton");
+		snowboard.setModel("SomeModel");
+
+		snowboard.setLength(decimal(165));
+
+		SearchFacetsResultUtil.addItem(result, snowboard, snowboardType, ALL_TYPES);
+		
+		final Snowboard anotherSnowboard = new Snowboard();
+		
+		anotherSnowboard.setProfile(SnowboardProfile.FLAT);
+		anotherSnowboard.setMake("Burton");
+		anotherSnowboard.setModel("SomeModel");
+		anotherSnowboard.setProductionYear(2015);
+
+		anotherSnowboard.setLength(decimal(170));
+	
+		SearchFacetsResultUtil.addItem(result, anotherSnowboard, snowboardType, ALL_TYPES);
+
+		final SearchFacetedTypeResult typeResult = CollectionUtil.find(
+				result.getTypes(),
+				type -> type.getType().equals(snowboardType.getTypeName()));
+
+		SearchSingleValueFacetedAttributeResult makeAttributeResult
+			= (SearchSingleValueFacetedAttributeResult)findAttribute(typeResult.getAttributes(), "make");
+		
+		assertThat(makeAttributeResult.getValues().size()).isEqualTo(1);
+		assertThat(makeAttributeResult.getValues().get(0).getValue()).isEqualTo("Burton");
+		assertThat(makeAttributeResult.getValues().get(0).getMatchCount()).isEqualTo(2);
+		assertThat(makeAttributeResult.getValues().get(0).getSubAttributes().size()).isEqualTo(1);
+		
+		SearchSingleValueFacetedAttributeResult modelAttributeResult
+			= (SearchSingleValueFacetedAttributeResult)makeAttributeResult.getValues().get(0).getSubAttributes().get(0);
+		assertThat(modelAttributeResult.getId()).isEqualTo("model");
+		assertThat(modelAttributeResult.getNoAttributeValueCount()).isNull();
+		assertThat(modelAttributeResult.getValues().size()).isEqualTo(1);
+		assertThat(modelAttributeResult.getValues().get(0).getValue()).isEqualTo("SomeModel");
+		assertThat(modelAttributeResult.getValues().get(0).getMatchCount()).isEqualTo(2);
+		
+		// Delete item again
+		SearchFacetsResultUtil.deleteItem(result, anotherSnowboard, snowboardType);
+		assertThat(makeAttributeResult.getValues().size()).isEqualTo(1);
+		assertThat(makeAttributeResult.getValues().get(0).getValue()).isEqualTo("Burton");
+		assertThat(makeAttributeResult.getValues().get(0).getMatchCount()).isEqualTo(1);
+		assertThat(makeAttributeResult.getValues().get(0).getSubAttributes().size()).isEqualTo(1);
+		
+		modelAttributeResult
+			= (SearchSingleValueFacetedAttributeResult)makeAttributeResult.getValues().get(0).getSubAttributes().get(0);
+		assertThat(modelAttributeResult.getId()).isEqualTo("model");
+		assertThat(modelAttributeResult.getNoAttributeValueCount()).isNull();
+		assertThat(modelAttributeResult.getValues().size()).isEqualTo(1);
+		assertThat(modelAttributeResult.getValues().get(0).getValue()).isEqualTo("SomeModel");
+		assertThat(modelAttributeResult.getValues().get(0).getMatchCount()).isEqualTo(1);
+
+		SearchFacetsResultUtil.deleteItem(result, snowboard, snowboardType);
+		assertThat(makeAttributeResult.getValues()).isNull();
+	}
+
 	private void checkAttributeValue(SearchSingleValueFacet valueFacet, int matchCount, Object value) {
 		assertThat(valueFacet.getMatchCount()).isEqualTo(matchCount);
 		assertThat(valueFacet.getValue()).isEqualTo(value);
@@ -306,10 +505,5 @@ public class SearchFacetsResultUtilTest extends TestCase {
 			
 			assertThat(rangeUpperComparable.compareTo(upperComparable)).isEqualTo(0);
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T extends SearchFacetedAttributeResult> T findAttribute(List<SearchFacetedAttributeResult> attributes, String attrId) {
-		return (T)CollectionUtil.find(attributes, attribute -> attribute.getId().equals(attrId));
 	}
 }

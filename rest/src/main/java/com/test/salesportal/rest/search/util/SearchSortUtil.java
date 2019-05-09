@@ -21,8 +21,8 @@ import com.test.salesportal.rest.search.model.sorting.SearchSortOrderAlternative
 
 public class SearchSortUtil {
 	
-	private static final String ASCENDING = "ascending";
-	private static final String DESCENDING = "descending";
+	public static final String ASCENDING = "ascending";
+	public static final String DESCENDING = "descending";
 
 	public static List<SortAttributeAndOrder> decodeSortOrders(String [] sortOrder, List<Class<? extends Item>> typesList) {
 		final List<SortAttributeAndOrder> sortAttributes;

@@ -21,6 +21,7 @@ import com.test.salesportal.rest.search.util.SearchFacetsUtil;
 import com.test.salesportal.rest.search.util.SearchSortUtil;
 import com.test.salesportal.search.SearchItem;
 import com.test.salesportal.search.criteria.Criterium;
+import com.test.salesportal.search.facets.ItemsFacets;
 
 public abstract class BaseSearchLogic<
 		ITEM extends SearchItemResult,
@@ -78,6 +79,7 @@ public abstract class BaseSearchLogic<
 						returnSortAttributeValues,
 						responseFieldSet,
 						ItemTypes.getFacetAttributes(types));
+				
 			} catch (SearchException ex) {
 				throw new IllegalStateException("Failed to search", ex);
 			}
@@ -112,10 +114,12 @@ public abstract class BaseSearchLogic<
 
 			final Set<Class<? extends Item>> sortOrderTypes = new HashSet<>(types);
 
-			if (cursor.getFacets() != null) {
+			final ItemsFacets facets = cursor.getFacets();
+			
+			if (facets != null) {
 				
 				// If facets, only add types from facet result
-				final List<Class<? extends Item>> facetTypes = cursor.getFacets().getTypes()
+				final List<Class<? extends Item>> facetTypes = facets.getTypes()
 						.stream()
 						.filter(facetType -> !facetType.getAttributes().isEmpty())
 						.map(facetType -> facetType.getType())
@@ -123,7 +127,7 @@ public abstract class BaseSearchLogic<
 				
 				sortOrderTypes.retainAll(facetTypes);
 				
-				result.setFacets(SearchFacetsUtil.convertFacets(cursor.getFacets()));
+				result.setFacets(SearchFacetsUtil.convertFacets(facets));
 			}
 			
 			result.setSortOrders(SearchSortUtil.computeAndSortPossibleSortOrders(sortOrderTypes));

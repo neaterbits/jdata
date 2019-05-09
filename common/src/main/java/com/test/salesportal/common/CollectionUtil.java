@@ -1,6 +1,8 @@
 package com.test.salesportal.common;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class CollectionUtil {
@@ -27,5 +29,17 @@ public class CollectionUtil {
 		}
 		
 		return false;
+	}
+	
+	@SafeVarargs
+	public static <T> Set<T> asSet(T ... values) {
+		
+		final HashSet<T> set = new HashSet<>(values.length);
+		
+		for (T value : values) {
+			set.add(value);
+		}
+		
+		return set;
 	}
 }
