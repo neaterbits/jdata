@@ -317,30 +317,25 @@ function SearchView(
 					
 						itemElement.setAttribute('class', 'galleryItem');
 						
-						var styling = 'position : relative; ' +
-							/*
-							'display : inline-block; ' +
-							*/
-							'float : left; ' +
-							'margin-left : ' + spacing + 'px; ';
+						itemElement.style.position = 'relative';
+						itemElement.style.float = 'left';
+						itemElement.style['margin-left'] = spacing + 'px';
 						
 						if (itemHeight != null) {
-							styling += 'top : ' + (rowHeight - itemHeight) / 2 + 'px; ';
-							styling += 'height : ' + itemHeight + 'px; ';
+							itemElement.style.top = '' + (rowHeight - itemHeight) / 2 + 'px';
+							itemElement.style.height = '' + itemHeight + 'px';
 						}
 						
 						if (itemWidth != null) {
 							
 							// TODO: setter ikke width her
-							'width : ' + itemWidth + 'px; ';
+							itemElement.style.width = itemWidth + 'px';
 						}
 						
 						if (!visible) {
 							// set hidden if we need to find item size
-							styling += 'visibility: hidden; '
+							itemElement.style.visibility = 'hidden';
 						}
-							
-						itemElement.setAttribute('style', styling);
 					},
 					
 					applyRowContainerStyling : function(rowDiv, y, width, height) {
