@@ -30,10 +30,10 @@ import com.test.salesportal.model.ItemPhotoCategory;
 import com.test.salesportal.model.attributes.ClassAttributes;
 import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.xmlstorage.api.IItemStorage;
+import com.test.salesportal.xmlstorage.api.ImageMetaData;
+import com.test.salesportal.xmlstorage.api.ImageResult;
 import com.test.salesportal.xmlstorage.api.ItemFileType;
 import com.test.salesportal.xmlstorage.api.StorageException;
-import com.test.salesportal.xmlstorage.api.IItemStorage.ImageMetaData;
-import com.test.salesportal.xmlstorage.api.IItemStorage.ImageResult;
 
 public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 

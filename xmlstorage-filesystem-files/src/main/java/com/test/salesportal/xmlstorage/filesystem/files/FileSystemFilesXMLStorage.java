@@ -9,6 +9,7 @@ import com.test.salesportal.filesystem.api.IFileSystem;
 import com.test.salesportal.filesystem.api.IFileSystem.FileInput;
 import com.test.salesportal.xmlstorage.api.BaseXMLStorage;
 import com.test.salesportal.xmlstorage.api.IItemStorage;
+import com.test.salesportal.xmlstorage.api.ImageResult;
 import com.test.salesportal.xmlstorage.api.ItemFileType;
 import com.test.salesportal.xmlstorage.api.StorageException;
 

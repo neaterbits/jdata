@@ -9,39 +9,6 @@ import com.test.salesportal.common.images.ThumbAndImageUrls;
 
 public interface IItemStorage extends AutoCloseable {
 
-	public static class ImageMetaData {
-		public final String mimeType;
-		public final int imageSize;
-		public final int width;
-		public final int height;
-		
-		public ImageMetaData(String mimeType, int imageSize, int width, int height) {
-			
-			if (mimeType == null) {
-				throw new IllegalArgumentException("mimeType == null");
-			}
-			
-			this.mimeType = mimeType;
-			this.imageSize = imageSize;
-			this.width = width;
-			this.height = height;
-		}
-	}
-
-	public static class ImageResult extends ImageMetaData {
-		public final InputStream inputStream;
-		
-		public ImageResult(String mimeType, int imageSize, InputStream inputStream) {
-			super(mimeType, imageSize, -1, -1);
-			
-			if (inputStream == null) {
-				throw new IllegalArgumentException("inputStream == null");
-			}
-			
-			this.inputStream = inputStream;
-		}
-	}
-
 	InputStream getXMLForItem(String userId, String itemId) throws StorageException;
 
 	void storeXMLForItem(String userId, String itemId, InputStream inputStream, Integer contentLength) throws StorageException;
