@@ -1,101 +1,6 @@
 /**
- * Code for creating the HTML elements that are displayed in the gallery
+ * Gallery item factory for rental apartments
  */
-
-function SimpleGalleryItemFactory() {
-
-	this.getGalleryConfig = function() {
-		return {
-			columnSpacing : 20,
-			rowSpacing : 20,
-			widthHint : 300,
-			heightHint : 300
-		};
-	}
-	
-	this.getItemFields = function () {
-		return null;
-	}
-
-
-	this.makeProvisionalItem = function(index, data) {
-		var div = document.createElement('div');
-
-		var provisionalImage = document.createElement('div');
-		
-		provisionalImage.setAttribute('class', 'provisionalImage');
-
-		provisionalImage.style.width = data.thumbWidth;
-		provisionalImage.style.height = data.thumbHeight;
-
-		div.append(provisionalImage);
-		
-		var textDiv = document.createElement('div');
-
-		// Add index as a text to the element
-		var textSpan = document.createElement('span');
-		
-		textSpan.innerHTML = _makeTitle(index, data.title);
-
-		// Don't make text wider than thumb
-		textDiv.style.width = data.thumbWidth;
-		textDiv.style['text-align'] = 'center';
-			
-		textDiv.append(textSpan);
-
-		div.append(textDiv);
-
-		//textDiv.setAttribute('style', 'text-align : center;');
-		
-		return div;
-	}
-	
-	this.makeImageItem = function(index, provisionalData, imageData) {
-		var div = document.createElement('div');
-		
-		var image = document.createElement('img');
-
-		image.setAttribute('class', 'thumbnailImage');
-
-		image.width = provisionalData.thumbWidth;
-		image.height = provisionalData.thumbHeight;
-		
-		/*
-		provisionalImage.style.width = thumbWidth;
-		provisionalImage.style.height = thumbHeight;
-		 */
-		
-		/*
-		var url = URL.createObjectURL(imageData);
-		image.src = url;
-
-		image.onload = function() {
-			URL.revokeObjectURL(url);
-		}
-		 */
-		
-		image.src = imageData;
-		
-		div.append(image);
-		
-		var textDiv = document.createElement('div');
-		
-		// Add index as a text to the element
-		var textSpan = document.createElement('span');
-		
-		textSpan.innerHTML = _makeTitle(provisionalData.title);
-
-		textDiv.style.width = provisionalData.thumbWidth;
-		textDiv.style['text-align'] = 'center';
-
-		textDiv.append(textSpan);
-		
-		div.append(textDiv);
-
-		return div;
-	}
-
-}
 
 function RentalApartmentGalleryItemFactory(ajax, getPhotoCountUrl, getPhotoUrl) {
 	var ITEM_WIDTH = 430;
@@ -387,8 +292,4 @@ function appendBr(element) {
 	var br = document.createElement('br');
 	
 	element.append(br);
-}
-
-function _makeTitle(index, title) {
-	return '' + index + ': ' + title;
 }

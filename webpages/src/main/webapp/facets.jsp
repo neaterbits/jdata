@@ -21,10 +21,12 @@
 <script src="js/gallery_mode_width_hint.js" type="text/javascript"></script>
 <script src="js/gallery_mode_height_specific.js" type="text/javascript"></script>
 <script src="js/gallery_mode_height_hint.js" type="text/javascript"></script>
+<script src="js/gallery_item_factory_base.js" type="text/javascript"></script>
+<script src="js/gallery_item_factory_simple_dynamic_size.js" type="text/javascript"></script>
+<script src="js/gallery_item_factory_rental_apartment.js" type="text/javascript"></script>
 <script src="js/gallery.js" type="text/javascript"></script>
 
 <script src="js/ajax.js" type="text/javascript"></script>
-<script src="js/galleryitemfactories.js" type="text/javascript"></script>
 <script src="js/searchview.js" type="text/javascript"></script>
 </head>
 <body style='height: 100%; margin: 0;'>
@@ -101,7 +103,7 @@
 					'fulltextButton',
 					'numberOfItemsCount',
 					'sortListBox',
-					new SimpleGalleryItemFactory()
+					new SimpleDynamicSizeGalleryItemFactory()
 					// new RentalApartmentGalleryItemFactory(ajax, getPhotoCountUrl, getPhotoUrl)
 		);
 
