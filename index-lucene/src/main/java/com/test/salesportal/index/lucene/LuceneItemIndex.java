@@ -736,7 +736,9 @@ public class LuceneItemIndex implements ItemIndex {
 										
 										final IndexableField field = d.getField(ItemIndex.fieldName(attribute));
 										
-										return field != null ? getObjectValueFromField(attribute, field) : null;
+										return field != null && !isNoValueField(attribute, field)
+												? getObjectValueFromField(attribute, field)
+												: null;
 									}
 								};
 							}
@@ -753,7 +755,9 @@ public class LuceneItemIndex implements ItemIndex {
 										
 										final IndexableField field = d.getField(ItemIndex.fieldName(attribute));
 										
-										return field != null ? getObjectValueFromField(attribute, field) : null;
+										return field != null && !isNoValueField(attribute, field)
+												? getObjectValueFromField(attribute, field)
+											: null;
 									}
 								};
 							}
@@ -1442,7 +1446,7 @@ public class LuceneItemIndex implements ItemIndex {
 		return result;
 	}
 	
-	private static boolean isNoValueField(ItemAttribute attribute, IndexableField field) {
+	private static boolean isNoValueField(PropertyAttribute attribute, IndexableField field) {
 		final AttributeType attributeType = attribute.getAttributeType();
 		
 		final boolean result;
