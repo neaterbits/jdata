@@ -116,12 +116,22 @@
 	/*
 	writing-mode:vertical-lr;
 	text-orientation: upright;
+	*/
+	/*
 	display: inline;
-	font-size: 0.7em;
 	*/
 
-	/* display: inline-block; */
+	/*
+	display: inline-block;
+	*/
 	
+	width: 0;
+	height: 0;
+	
+	z-index: 50;
+	
+	position: relative;
+
 	display: none;
 }
 
@@ -132,6 +142,11 @@
 	
 	align: center;
 	justify-content: end;
+
+	z-index: 50;
+	
+	top: 5px;
+	left: 5px;
 }
 
 #hideSidebarBorder {
@@ -152,16 +167,22 @@
 	/*
 	vertical-align: middle;
 	*/
+	
+	/*
 	display: inline-block;
+	*/
+	display : none;
 }
 
 #hideSidebarArrow {
 	font-family: sans-serif;
 	font-weight: bold;
-	color: #777777;
-	transform: scaleX(0.5);
-	font-size: 1.5em;
+	color: #AAAAAA;
+	transform: scaleX(0.3);
+	font-size: 2.5em;
 	display: inline-block;
+	
+	text-align: center;
   }
 }
 
@@ -189,6 +210,10 @@
 	position: absolute;
 	
 	right: 1px;
+}
+
+#gallery_wrapper {
+	/* position: relative; */
 }
 
 #gallery {

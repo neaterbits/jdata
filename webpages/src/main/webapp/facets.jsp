@@ -61,16 +61,8 @@
 					 	
 					</div>
 				</div>
+			</div>
 				
-			 	<div id="hideSidebarDiv">
-				 	<div id="hideSidebarFlex">
-						<div id="hideSidebarBorder">
-							<span id="hideSidebarArrow">&lt;</span>
-							<span id="hideSidebarText">Hide</span>
-						</div>
-					 </div>
-				   </div>
-				</div>
 
 			<div id='facets'></div>
 		</div>
@@ -78,7 +70,15 @@
 	</div>
 	
 	<!-- TODO not set wrapper? Create wrapper in gallery so not setting style on gallery -->
-	<div style='display: inline-block; width: 74.5%; height: 100%; margin : 0; padding: 0; vertical-align: top;'>
+	<div id="gallery_wrapper" style='display: inline-block; width: 74.5%; height: 100%; margin : 0; padding: 0; vertical-align: top;'>
+	 	<div id="hideSidebarDiv">
+		 	<div id="hideSidebarFlex">
+				<div id="hideSidebarBorder">
+					<span id="hideSidebarArrow">&lt;&lt;</span>
+					<span id="hideSidebarText">Hide</span>
+				</div>
+			</div>
+		</div>
 	<div id = "gallery_frame" style='display: inline-block; width: 100%; height: 100%;'>
 		<div id='gallery' style='height: 100%'></div>
 	</div>
