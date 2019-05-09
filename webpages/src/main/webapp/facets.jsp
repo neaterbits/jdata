@@ -1,6 +1,5 @@
 <html style='height: 100%'>
 <head>
-
 <link rel="stylesheet" type="text/css" href="css/facets.css">
 <link rel="stylesheet" type="text/css" href="css/searchview.css">
 
@@ -9,7 +8,6 @@
 <script src="js/facetview.js" type="text/javascript"></script>
 <script src="js/facetmodel.js" type="text/javascript"></script>
 <script src="js/facetcontroller.js" type="text/javascript"></script>
-
 
 <script src="js/gallery_base.js" type="text/javascript"></script>
 <script src="js/gallery_sizes.js" type="text/javascript"></script>
@@ -28,7 +26,6 @@
 <script src="js/ajax.js" type="text/javascript"></script>
 <script src="js/galleryitemfactories.js" type="text/javascript"></script>
 <script src="js/searchview.js" type="text/javascript"></script>
-
 </head>
 <body style='height: 100%; margin: 0;'>
 <div style='width: 100%; height: 100%; margin: 0; padding: 0.5em; box-sizing: border-box;'>
@@ -104,7 +101,9 @@
 					'fulltextButton',
 					'numberOfItemsCount',
 					'sortListBox',
-					new RentalApartmentGalleryItemFactory(ajax, getPhotoCountUrl, getPhotoUrl));
+					new SimpleGalleryItemFactory()
+					// new RentalApartmentGalleryItemFactory(ajax, getPhotoCountUrl, getPhotoUrl)
+		);
 
 		searchView.refresh(true);
 	}
