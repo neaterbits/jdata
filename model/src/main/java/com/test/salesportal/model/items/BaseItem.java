@@ -22,7 +22,6 @@ public abstract class BaseItem extends Item {
 	
 	@Column
 	private Date publicationDate;
-	
 
 	@Freetext
 	@Column

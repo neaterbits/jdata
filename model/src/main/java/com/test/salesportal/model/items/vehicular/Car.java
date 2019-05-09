@@ -4,7 +4,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.test.salesportal.model.annotations.DecimalRange;
 import com.test.salesportal.model.annotations.Facet;
+import com.test.salesportal.model.annotations.FacetAttribute;
+import com.test.salesportal.model.annotations.FacetAttributes;
 import com.test.salesportal.model.annotations.FacetEntity;
 import com.test.salesportal.model.annotations.IntegerRange;
 import com.test.salesportal.model.annotations.Sortable;
@@ -14,6 +17,7 @@ import com.test.salesportal.model.annotations.Sortable;
 	"carType",
 	"size",
 	"fuel",
+	"price",
 	"transmission",
 	"cylinders",
 	"drive",
@@ -21,6 +25,19 @@ import com.test.salesportal.model.annotations.Sortable;
 	"odometer",
 	"paintColor"
 	})
+@FacetAttributes({
+	@FacetAttribute(name="price", displayName="Price", decimalRanges={
+			@DecimalRange(upper=5000),
+			@DecimalRange(lower=5000,  upper=10000),
+			@DecimalRange(lower=10000, upper=15000),
+			@DecimalRange(lower=15000, upper=20000),
+			@DecimalRange(lower=20000, upper=25000),
+			@DecimalRange(lower=25000, upper=30000),
+			@DecimalRange(lower=30000, upper=35000),
+			@DecimalRange(lower=35000)
+	})
+})
+
 @XmlRootElement
 public class Car extends Vehicle {
 	

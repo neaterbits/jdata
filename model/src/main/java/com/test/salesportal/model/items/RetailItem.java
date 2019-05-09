@@ -5,7 +5,7 @@ import javax.persistence.Column;
 import com.test.salesportal.model.annotations.Facet;
 import com.test.salesportal.model.annotations.Sortable;
 
-public abstract class RetailItem extends BaseItem {
+public abstract class RetailItem extends PurchasableItem {
 
 	@Sortable(priority=4)
 	@Facet("Make")

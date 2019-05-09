@@ -10,10 +10,10 @@ import com.test.salesportal.model.annotations.DecimalRange;
 import com.test.salesportal.model.annotations.Facet;
 import com.test.salesportal.model.annotations.Freetext;
 import com.test.salesportal.model.annotations.IndexItemAttribute;
-import com.test.salesportal.model.items.BaseItem;
+import com.test.salesportal.model.items.PurchasableItem;
 
 @MappedSuperclass
-public class Housing extends BaseItem {
+public class Housing extends PurchasableItem {
 
 	@Column
 	@Facet("City")

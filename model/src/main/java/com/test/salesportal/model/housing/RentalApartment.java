@@ -1,15 +1,14 @@
 package com.test.salesportal.model.housing;
 
-import java.math.BigDecimal;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.test.salesportal.model.annotations.DecimalRange;
 import com.test.salesportal.model.annotations.Facet;
+import com.test.salesportal.model.annotations.FacetAttribute;
+import com.test.salesportal.model.annotations.FacetAttributes;
 import com.test.salesportal.model.annotations.FacetEntity;
-import com.test.salesportal.model.annotations.Sortable;
 
 @Entity(name="rental_apartment")
 @FacetEntity(value = "Rental apartments", propertyOrder = {
@@ -31,13 +30,8 @@ import com.test.salesportal.model.annotations.Sortable;
 	"currency",
 	"costPeriod",
 })
-@XmlRootElement
-public class RentalApartment extends Housing {
-
-	@Column
-	@Sortable
-	@Facet(value = "Price",
-			decimalRanges={
+@FacetAttributes({
+	@FacetAttribute(name="price", displayName="Price", decimalRanges={
 			@DecimalRange(upper=500),
 			@DecimalRange(lower=500,  upper=1000),
 			@DecimalRange(lower=1000, upper=1500),
@@ -47,11 +41,10 @@ public class RentalApartment extends Housing {
 			@DecimalRange(lower=3000, upper=3500),
 			@DecimalRange(lower=3500)
 	})
-	private BigDecimal price;
-	
-	@Column
-	@Facet("Currency")
-	private String currency;
+})
+@XmlRootElement
+public class RentalApartment extends Housing {
+
 	
 	@Column
 	@Facet("Cost period")
@@ -128,22 +121,6 @@ public class RentalApartment extends Housing {
 	@Column
 	@Facet(value = "Dogs allowed", trueString="Yes", falseString="No")
 	private Boolean dogs;
-
-	public BigDecimal getPrice() {
-		return price;
-	}
-
-	public void setPrice(BigDecimal price) {
-		this.price = price;
-	}
-
-	public String getCurrency() {
-		return currency;
-	}
-
-	public void setCurrency(String currency) {
-		this.currency = currency;
-	}
 
 	public CostPeriod getCostPeriod() {
 		return costPeriod;
