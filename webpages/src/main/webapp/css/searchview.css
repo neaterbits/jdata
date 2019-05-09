@@ -201,6 +201,7 @@
 	margin : 3px;
 	box-shadow: 2px 2px 1px #777777;
 	box-sizing: border-box;
+	border-radius: 5px;
 }
 
 .provisionalImage, .thumbnailImage {
