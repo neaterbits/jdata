@@ -1609,7 +1609,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		this._checkAndRemoveFromArray(this.types, obj);
 	}
 
-	// List of faceted attributes ("With", "Price")
+	// List of faceted attributes ("Width", "Price")
 	function FacetAttributeList(viewElementFactory, modelType, listItem) {
 		FacetsElementBase.call(this, 'FacetAttributeList', viewElementFactory, modelType, listItem);
 
@@ -1689,7 +1689,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		this.attributeValueOrRangeList = null;
 	}
 
-	// List of faceted attributes ("With", "Price")
+	// List of faceted attributes ("Width", "Price")
 	function FacetAttributeValueList(viewElementFactory, modelType, attributeId, listItem) {
 		FacetsElementBase.call(this, 'FacetAttributeValueList', viewElementFactory, modelType, listItem);
 
