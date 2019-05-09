@@ -1363,6 +1363,10 @@ public class LuceneItemIndex implements ItemIndex {
 		return field.numericValue().intValue();
 	}
 
+	private static Long getLongValueFromField(IndexableField field) {
+		return field.numericValue().longValue();
+	}
+
 	private static BigDecimal getDecimalValueFromField(IndexableField field) {
 		return BigDecimal.valueOf(field.numericValue().doubleValue());
 	}
@@ -1415,6 +1419,10 @@ public class LuceneItemIndex implements ItemIndex {
 			result = getIntegerValueFromField(field);
 			break;
 			
+		case LONG:
+			result = getLongValueFromField(field);
+			break;
+			
 		case DECIMAL:
 			result = getDecimalValueFromField(field);
 			break;
@@ -1446,6 +1454,10 @@ public class LuceneItemIndex implements ItemIndex {
 			
 		case INTEGER:
 			result = INTEGER_NONE == getIntegerValueFromField(field);
+			break;
+			
+		case LONG:
+			result = LONG_NONE == getLongValueFromField(field);
 			break;
 			
 		case DECIMAL:
