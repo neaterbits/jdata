@@ -227,7 +227,7 @@ function SearchView(
 		
 		this.facetModel.updateFacets(facets);
 		
-		// If this is not a facet selecton or just a sort order change, we will have to update facets completely
+		// If this is not a facet selection or just a sort order change, we will have to update facets completely
 		var isFullUpdate = reason != REFRESH_FACET_SELECTION && reason != REFRESH_SORT_CHANGE;
 		
 		this.facetController.refresh(isFullUpdate);
