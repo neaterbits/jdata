@@ -22,7 +22,7 @@ function SimpleStaticSizeGalleryItemFactory() {
 	}
 	
 	this.getItemFields = function () {
-		return null;
+		return [ 'publicationDate', 'price' ];
 	}
 
 	this.makeProvisionalItem = function(index, data) {
@@ -45,22 +45,7 @@ function SimpleStaticSizeGalleryItemFactory() {
 		
 		div.append(provisionalImage);
 		
-		var textDiv = document.createElement('div');
-
-		// Add index as a text to the element
-		var textSpan = document.createElement('span');
-		
-		textSpan.innerHTML = _makeTitle(index, data.title);
-
-		// Don't make text wider than thumb
-		textDiv.style.width = ITEM_WIDTH;
-		textDiv.style['text-align'] = 'center';
-			
-		textDiv.append(textSpan);
-
-		div.append(textDiv);
-
-		//textDiv.setAttribute('style', 'text-align : center;');
+		_appendText(div, index, data);
 		
 		return div;
 	}
@@ -115,6 +100,13 @@ function SimpleStaticSizeGalleryItemFactory() {
 		
 		div.append(image);
 		
+		_appendText(div, index, provisionalData);
+		
+		return div;
+	}
+	
+	function _appendText(div, index, provisionalData) {
+		
 		var textDiv = document.createElement('div');
 		
 		// textDiv.style.width = 
@@ -122,7 +114,11 @@ function SimpleStaticSizeGalleryItemFactory() {
 		// Add index as a text to the element
 		var textSpan = document.createElement('span');
 		
-		textSpan.innerHTML = _makeTitle(index, provisionalData.title);
+		var titleSpan = document.createElement('span');
+		
+		titleSpan.innerHTML = _makeTitle(index, provisionalData.title);
+		
+		textSpan.append(titleSpan);
 
 		textDiv.style.width = ITEM_WIDTH;
 		textDiv.style['text-align'] = 'center';
@@ -130,8 +126,6 @@ function SimpleStaticSizeGalleryItemFactory() {
 		textDiv.append(textSpan);
 		
 		div.append(textDiv);
-
-		return div;
 	}
 	
 	/**
