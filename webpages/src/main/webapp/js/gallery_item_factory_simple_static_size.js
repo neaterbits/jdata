@@ -122,7 +122,7 @@ function SimpleStaticSizeGalleryItemFactory() {
 		// Add index as a text to the element
 		var textSpan = document.createElement('span');
 		
-		textSpan.innerHTML = _makeTitle(provisionalData.title) + ' ' + provisionalData.id;
+		textSpan.innerHTML = _makeTitle(index, provisionalData.title);
 
 		textDiv.style.width = ITEM_WIDTH;
 		textDiv.style['text-align'] = 'center';
