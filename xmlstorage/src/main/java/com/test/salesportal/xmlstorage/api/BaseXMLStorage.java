@@ -542,7 +542,6 @@ public abstract class BaseXMLStorage implements IItemStorage, AutoCloseable {
 	@Override
 	public void retrieveThumbnails(ItemId[] itemIds, BiConsumer<ImageResult, ItemId> consumer) throws StorageException {
 
-		
 		final BlockingQueue<ReadImage> imageQueue = new ArrayBlockingQueue<>(itemIds.length);
 		
 		// Retrieve thumbnails for all that have such
@@ -551,73 +550,80 @@ public abstract class BaseXMLStorage implements IItemStorage, AutoCloseable {
 			final Images imageList = getImageList(itemId.getUserId(), itemId.getItemId());
 
 			if (imageList == null) {
-				throw new IllegalStateException("Should have had image list");
-			}
-
-			// TODO this is slow for S3, just store some flag in image list
-			if (getNumThumbnailFilesForItem(itemId.getUserId(), itemId.getItemId()) > 0) {
+				System.err.println("Should have had image list " + itemId.getItemId());
 				
-				thumbDownloadService.submit(() -> {
-
-					ImageResult image = nullImageResult();
-					try {
-						final String fileName = getImageFileName(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, imageList, 0);
-
-						try {
-							image = getImageFileForItem(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, fileName);
-						} catch (StorageException ex) {
-							ex.printStackTrace();
-						}
-					}
-					catch (Throwable t) {
-						t.printStackTrace(System.err);
-					}
-
-					try {
-						imageQueue.put(new ReadImage(itemId, image));
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				});
+				try {
+					imageQueue.put(new ReadImage(itemId, nullImageResult()));
+				} catch (InterruptedException ex) {
+					ex.printStackTrace();
+				}
 			}
 			else {
-				// No image files, retrieve from URLs asynchronously
-				
-				final String thumbUrl;
-				
-				if (imageList.getImages() == null) {
-					thumbUrl = null;
+
+				// TODO this is slow for S3, just store some flag in image list
+				if (getNumThumbnailFilesForItem(itemId.getUserId(), itemId.getItemId()) > 0) {
+					
+					thumbDownloadService.submit(() -> {
+	
+						ImageResult image = nullImageResult();
+						try {
+							final String fileName = getImageFileName(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, imageList, 0);
+	
+							try {
+								image = getImageFileForItem(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, fileName);
+							} catch (StorageException ex) {
+								ex.printStackTrace();
+							}
+						}
+						catch (Throwable t) {
+							t.printStackTrace(System.err);
+						}
+	
+						try {
+							imageQueue.put(new ReadImage(itemId, image));
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					});
 				}
 				else {
-					thumbUrl = imageList.getImages().isEmpty()
-							? null
-							: imageList.getImages().get(0).getThumbUrl();
-				}
-				
-				thumbDownloadService.submit(() -> {
-					ImageResult image = nullImageResult();
-
-					// Download thumb data
-					try {
-						if (thumbUrl != null) {
-							image = downloadFileFromNet(thumbUrl);
+					// No image files, retrieve from URLs asynchronously
+					
+					final String thumbUrl;
+					
+					if (imageList.getImages() == null) {
+						thumbUrl = null;
+					}
+					else {
+						thumbUrl = imageList.getImages().isEmpty()
+								? null
+								: imageList.getImages().get(0).getThumbUrl();
+					}
+					
+					thumbDownloadService.submit(() -> {
+						ImageResult image = nullImageResult();
+	
+						// Download thumb data
+						try {
+							if (thumbUrl != null) {
+								image = downloadFileFromNet(thumbUrl);
+							}
 						}
-					}
-					catch (Throwable t) {
-						t.printStackTrace(System.err);
-					}
-
-					try {
-						imageQueue.put(new ReadImage(itemId, image));
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				});
+						catch (Throwable t) {
+							t.printStackTrace(System.err);
+						}
+	
+						try {
+							imageQueue.put(new ReadImage(itemId, image));
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					});
+				}
 			}
 		}
 		
 		// Read all items back
-		
 		
 		// Loop around until have processed all
 		int nextIndexToSendOn = 0;
