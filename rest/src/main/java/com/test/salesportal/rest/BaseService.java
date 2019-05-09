@@ -8,10 +8,13 @@ import com.test.salesportal.dao.IItemDAO;
 import com.test.salesportal.dao.IItemRetrieval;
 import com.test.salesportal.dao.IItemUpdate;
 import com.test.salesportal.dao.xml.XMLItemDAO;
+import com.test.salesportal.filesystem.api.IFileSystem;
+import com.test.salesportal.filesystem.local.LocalFileSystem;
 import com.test.salesportal.index.ItemIndex;
 import com.test.salesportal.integrationtest.IntegrationTestHelper;
 import com.test.salesportal.model.cv.Language;
-import com.test.salesportal.xmlstorage.local.LocalXmlStorage;
+import com.test.salesportal.xmlstorage.api.IItemStorage;
+import com.test.salesportal.xmlstorage.filesystem.files.ParameterFileSystemFilesXMLStorage;
 
 public abstract class BaseService {
 	
@@ -61,8 +64,15 @@ public abstract class BaseService {
 		}
 	}
 			
-	protected final LocalXmlStorage getLocalXMLStorage() {
-		return new LocalXmlStorage(localBaseDir);
+	protected final LocalFileSystem getLocalFileSystem() {
+		return new LocalFileSystem(localBaseDir);
+	}
+	
+	protected final IItemStorage getLocalXMLStorage() {
+		final IFileSystem fileSystem = getLocalFileSystem();
+		final ParameterFileSystemFilesXMLStorage localStorage = new ParameterFileSystemFilesXMLStorage(fileSystem);
+
+		return localStorage;
 	}
 
 	private static ItemIndex luceneIndex;
@@ -96,8 +106,8 @@ public abstract class BaseService {
 		
 		switch (storage) {
 		case LOCAL_FILE_LUCENE:
-			final LocalXmlStorage localXmlStorage = getLocalXMLStorage();
-			ret = new XMLItemDAO(localXmlStorage, assureIndex());
+			
+			ret = new XMLItemDAO(getLocalXMLStorage(), assureIndex());
 			break;
 
 		default:
