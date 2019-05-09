@@ -33,7 +33,10 @@
 <body style='height: 100%; margin: 0;'>
 <div style='width: 100%; height: 100%; margin: 0; padding: 0.5em; box-sizing: border-box;'>
 	
-	<div id="leftSideSearchPanel" style='width: 25%; height: 100%;'>
+	<!-- For padding to the right of search panel -->
+	<div id="leftSidePaddingContainer" style='width: 25%; height: 100%;'>
+	
+	<div id="leftSideSearchPanel" style='width: 100%; height: 100%;'>
 		<div id="leftSideSearchPanelFlex">
 			<div id="fulltextAndResultsDiv">
 				<div id="fulltextDiv">
@@ -72,10 +75,13 @@
 			<div id='facets'></div>
 		</div>
 	</div>
+	</div>
 	
 	<!-- TODO not set wrapper? Create wrapper in gallery so not setting style on gallery -->
-	<div id = "gallery_frame" style='display: inline-block; width: 70%; height: 100%;'>
+	<div style='display: inline-block; width: 74.5%; height: 100%; margin : 0; padding: 0; vertical-align: top;'>
+	<div id = "gallery_frame" style='display: inline-block; width: 100%; height: 100%;'>
 		<div id='gallery' style='height: 100%'></div>
+	</div>
 	</div>
 </div>
 </body>

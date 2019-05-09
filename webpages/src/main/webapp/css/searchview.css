@@ -13,13 +13,19 @@
 	padding: 4px;
 }
 
+#leftSidePaddingContainer {
+	margin : 0;
+	padding : 0;
+	vertical-align : top;
+	padding-right: 0.Zem;
+	display : inline-block;
+}
+
 #leftSideSearchPanel {
 	margin: 0;
 	display: inline-block;
 	vertical-align: top;
 	box-sizing: border-box;
-
-	margin-right: 1em;
 
 	height: 100%;
 }
