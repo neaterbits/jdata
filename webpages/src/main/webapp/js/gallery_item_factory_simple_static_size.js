@@ -22,7 +22,7 @@ function SimpleStaticSizeGalleryItemFactory() {
 	}
 	
 	this.getItemFields = function () {
-		return [ 'publicationDate', 'price' ];
+		return [ 'publicationDate', 'price', 'currency' ];
 	}
 
 	this.makeProvisionalItem = function(index, data) {
@@ -112,20 +112,42 @@ function SimpleStaticSizeGalleryItemFactory() {
 		// textDiv.style.width = 
 		
 		// Add index as a text to the element
-		var textSpan = document.createElement('span');
+		var textSpan = document.createElement('div');
+		textSpan.setAttribute('class', 'galleryItemTextDiv');
+		textSpan.style.display = 'block';
 		
 		var titleSpan = document.createElement('span');
-		
 		titleSpan.innerHTML = _makeTitle(index, provisionalData.title);
-		
+		titleSpan.setAttribute('class', 'galleryItemTitleSpan');
 		textSpan.append(titleSpan);
 
+		var currency = provisionalData.fields[2];
+		
+		var priceSpan = document.createElement('span');
+		priceSpan.innerHTML = _makePrice(provisionalData.fields[1], currency);
+		priceSpan.setAttribute('class', 'galleryItemPriceSpan');
+		textSpan.append(priceSpan);
+		
 		textDiv.style.width = ITEM_WIDTH;
 		textDiv.style['text-align'] = 'center';
 
 		textDiv.append(textSpan);
 		
 		div.append(textDiv);
+	}
+	
+	function _makePrice(price, currency) {
+		
+		var result;
+		
+		if (typeof currency === 'undefined' || currency === null || currency === 'USD') {
+			result = '&#36;' + price;
+		}
+		else {
+			result = price;
+		}
+		
+		return result;
 	}
 	
 	/**

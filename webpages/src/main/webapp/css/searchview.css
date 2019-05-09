@@ -223,3 +223,20 @@
 	margin-bottom: 4px;	
 }
 
+.galleryItemTextDiv {
+	padding-top : 3px;	
+}
+
+.galleryItemTitleSpan {
+	font-family: sans-serif;
+	font-size: 14px;
+}
+
+.galleryItemPriceSpan {
+	font-size: 12px;
+	margin-left: 3px;
+	border : 1px solid #AAAAAA;
+	border-radius: 2px;
+	
+	padding: 1px;
+}
