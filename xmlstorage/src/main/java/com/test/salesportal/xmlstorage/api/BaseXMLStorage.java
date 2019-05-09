@@ -450,7 +450,7 @@ public abstract class BaseXMLStorage implements IItemStorage, AutoCloseable {
 			
 			byte[] thumbData = null;
 			try {
-				thumbData = IOUtil.readAll(connection.getInputStream());
+				thumbData = IOUtil.readAllAndClose(connection.getInputStream());
 			} catch (IOException e) {
 			}
 
@@ -562,7 +562,7 @@ public abstract class BaseXMLStorage implements IItemStorage, AutoCloseable {
 					ImageResult image = nullImageResult();
 					try {
 						final String fileName = getImageFileName(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, imageList, 0);
-		
+
 						try {
 							image = getImageFileForItem(itemId.getUserId(), itemId.getItemId(), ItemFileType.THUMBNAIL, fileName);
 						} catch (StorageException ex) {
@@ -582,7 +582,6 @@ public abstract class BaseXMLStorage implements IItemStorage, AutoCloseable {
 			}
 			else {
 				// No image files, retrieve from URLs asynchronously
-				
 				
 				final String thumbUrl;
 				
@@ -635,7 +634,7 @@ public abstract class BaseXMLStorage implements IItemStorage, AutoCloseable {
 				e.printStackTrace();
 				continue;
 			}
-
+			
 			retrievedThumbs.put(read.itemId.getItemId(), read.imageResult);
 			
 			// Check first if more to be processed
