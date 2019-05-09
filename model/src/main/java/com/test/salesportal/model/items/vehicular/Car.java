@@ -15,15 +15,16 @@ import com.test.salesportal.model.annotations.Sortable;
 @Entity(name="car")
 @FacetEntity(value="Cars", propertyOrder = {
 	"carType",
-	"size",
 	"fuel",
 	"price",
+	"odometer",
 	"transmission",
+	"make",
+	"size",
+	"paintColor",
 	"cylinders",
 	"drive",
-	"titleStatus",
-	"odometer",
-	"paintColor"
+	"titleStatus"
 	})
 @FacetAttributes({
 	@FacetAttribute(name="price", displayName="Price", decimalRanges={
