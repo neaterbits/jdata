@@ -720,7 +720,10 @@ public class ElasticSearchIndex implements ItemIndex {
 
 			processSubAggregations(typeInfo, sb.getAggregations().asList(), attributes, attributeResults);
 			
-			final TypeFacets typeFacets = new TypeFacets(typeInfo.getType(), attributes);
+			final TypeFacets typeFacets = new TypeFacets(
+					typeInfo.getType(),
+					typeInfo.getAttributes().getAutoExpandPropertiesCount(),
+					attributes);
 			
 			types.add(typeFacets);
 		}

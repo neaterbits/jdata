@@ -67,7 +67,7 @@ public class FacetUtils {
 					.filter(item -> functions.isType(item, typeName))
 					.collect(Collectors.toList());
 			
-			final TypeFacets tf = computeFacetsForType(itemType, typeDocuments, typeAttributes, functions);
+			final TypeFacets tf = computeFacetsForType(itemType, typeInfo, typeDocuments, typeAttributes, functions);
 			
 			typeFacets.add(tf);
 		}
@@ -99,7 +99,12 @@ public class FacetUtils {
 		return result;
 	};
 	
-	private static <I, F> TypeFacets computeFacetsForType(Class<? extends Item> itemType, List<I> documents, List<ItemAttribute> typeAttributes, FacetFunctions<I, F> functions) {
+	private static <I, F> TypeFacets computeFacetsForType(
+			Class<? extends Item> itemType,
+			TypeInfo typeInfo,
+			List<I> documents,
+			List<ItemAttribute> typeAttributes,
+			FacetFunctions<I, F> functions) {
 		
 		// LinkedHashMap to maintain order
 		// TODO iterate over attributes first? But worse with regards to cache locality
@@ -125,7 +130,10 @@ public class FacetUtils {
 			processSubAttributes(documents, typeAttributes, attribute, attributeResults, functions);
 		}
 
-		final TypeFacets typeFacets = new TypeFacets(itemType, new ArrayList<>(attributeResults.values()));
+		final TypeFacets typeFacets = new TypeFacets(
+				itemType,
+				typeInfo.getAttributes().getAutoExpandPropertiesCount(),
+				new ArrayList<>(attributeResults.values()));
 
 		return typeFacets;
 	}

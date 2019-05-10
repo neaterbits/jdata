@@ -9,6 +9,7 @@ public class SearchFacetedTypeResult {
 
 	private String type;
 	private String displayName;
+	private Integer autoExpandAttributesCount;
 	
 	public SearchFacetedTypeResult() {
 
@@ -39,6 +40,14 @@ public class SearchFacetedTypeResult {
 		this.displayName = displayName;
 	}
 	
+	public Integer getAutoExpandAttributesCount() {
+		return autoExpandAttributesCount;
+	}
+
+	public void setAutoExpandAttributesCount(Integer autoExpandAttributesCount) {
+		this.autoExpandAttributesCount = autoExpandAttributesCount;
+	}
+
 	public List<SearchFacetedTypeResult> getSubTypes() {
 		return subTypes;
 	}

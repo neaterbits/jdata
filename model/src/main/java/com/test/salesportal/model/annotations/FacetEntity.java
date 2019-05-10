@@ -11,4 +11,6 @@ public @interface FacetEntity {
 	public String value();
 	
 	public String [] propertyOrder() default {};
+	
+	public int expandProperties() default 0;
 }

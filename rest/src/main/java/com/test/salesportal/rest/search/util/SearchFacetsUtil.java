@@ -33,12 +33,17 @@ public class SearchFacetsUtil {
 		final List<SearchFacetedTypeResult> typeFacetsResult = new ArrayList<>(facets.getTypes().size());
 		
 		for (TypeFacets typeFacet : facets.getTypes()) {
+			
 			final SearchFacetedTypeResult typeResult = new SearchFacetedTypeResult();
 
 			final List<SearchFacetedAttributeResult> facetAttributesResult = convertAttributeList(typeFacet.getAttributes());
 			
 			typeResult.setType(getTypeId(typeFacet.getType()));
 			typeResult.setDisplayName(getTypeDisplayName(typeFacet.getType()));
+			typeResult.setAutoExpandAttributesCount(
+					typeFacet.getAutoExpandAttributesCount() != 0
+						? typeFacet.getAutoExpandAttributesCount()
+						: null);
 			typeResult.setAttributes(facetAttributesResult);
 			
 			typeFacetsResult.add(typeResult);

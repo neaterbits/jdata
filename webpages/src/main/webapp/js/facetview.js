@@ -102,7 +102,18 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 						cur = t._addFacetType(viewElementFactory, cur, element);
 					}
 					else if (kind == 'attribute') {
-						cur = t._addFacetAttribute(viewElementFactory, cur, element);
+						
+						var autoExpandAttribute = false;
+						var type = stack[stack.length - 2];
+						
+						if (type.getClassName() === 'FacetTypeContainer') {
+
+							if (typeof type.autoExpandAttributesCount !== 'undefined' && index < type.autoExpandAttributesCount) {
+								autoExpandAttribute = true;
+							}
+						}
+						
+						cur = t._addFacetAttribute(viewElementFactory, cur, element, index, autoExpandAttribute);
 					}
 					else if (kind == 'attributeValue') {
 						cur = t._addFacetSingleValue(viewElementFactory, cur, element, index, stack);
@@ -215,6 +226,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				element.type,
 				typeElements.typeElement,
 				element.displayName,
+				element.autoExpandAttributesCount,
 				typeElements.checkboxElement,
 				typeElements.thisOnlyButtonElement);
 
@@ -258,9 +270,12 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		}
 	}
 
-	this._addFacetAttribute = function(viewElementFactory, cur, element, index) {
+	this._addFacetAttribute = function(viewElementFactory, cur, element, index, autoExpandAttribute) {
 		// Attribute within a type in list of attributes
-		var attributeElement = viewElementFactory.createAttributeListElement(cur.getViewElement(), element.name, false);
+		var attributeElement = viewElementFactory.createAttributeListElement(
+				cur.getViewElement(),
+				element.name,
+				autoExpandAttribute);
 		
 		var attribute = new FacetAttribute(viewElementFactory, cur.getModelType(), element.id, attributeElement);
 		
@@ -738,7 +753,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 						// FacetTypeContainer or FacetAttributeSingleValue (for subattributes)
 						var sub = cur.findAttribute(element.id);
 						if (sub == null) {
-							cur = t._addFacetAttribute(cur.getViewElementFactory(), cur, element, index);
+							cur = t._addFacetAttribute(cur.getViewElementFactory(), cur, element, index, false);
 						}
 						else {
 							cur = sub;
@@ -1676,9 +1691,11 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	}
 		
 	// Container for a facet type
-	function FacetTypeContainer(viewElementFactory, modelType, container, displayName, checkboxElement, thisOnlyButtonElement) {
+	function FacetTypeContainer(viewElementFactory, modelType, container, displayName, autoExpandAttributesCount, checkboxElement, thisOnlyButtonElement) {
 		FacetsElementBase.call(this, 'FacetTypeContainer', viewElementFactory, modelType, container);
 
+		this.displayName = displayName;
+		this.autoExpandAttributesCount = autoExpandAttributesCount;
 		this.checkboxElement = checkboxElement;
 		this.thisOnlyButtonElement = thisOnlyButtonElement;
 	}

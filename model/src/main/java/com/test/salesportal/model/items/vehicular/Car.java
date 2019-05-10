@@ -16,7 +16,7 @@ import com.test.salesportal.model.annotations.Sortable;
 import com.test.salesportal.model.annotations.UpdateFacetDisplayName;
 
 @Entity(name="car")
-@FacetEntity(value="Cars", propertyOrder = {
+@FacetEntity(value="Cars", expandProperties = 4, propertyOrder = {
 	"carType",
 	"price",
 	"productionYear",

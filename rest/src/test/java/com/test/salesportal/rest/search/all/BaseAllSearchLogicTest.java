@@ -94,6 +94,7 @@ public abstract class BaseAllSearchLogicTest extends TestCase {
 					Arrays.asList(
 						new TypeFacets(
 							Snowboard.class,
+							0,
 							Arrays.asList(
 								new IndexSingleValueFacetedAttributeResult(
 										makeAttribute,

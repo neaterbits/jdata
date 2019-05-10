@@ -8,8 +8,12 @@ public class TypeFacets {
 
 	private final Class<? extends Item> type;
 	private final List<IndexFacetedAttributeResult> attributes;
+	private final int autoExpandAttributesCount;
 
-	public TypeFacets(Class<? extends Item> type, List<IndexFacetedAttributeResult> attributes) {
+	public TypeFacets(
+			Class<? extends Item> type,
+			int autoExpandAttributesCount,
+			List<IndexFacetedAttributeResult> attributes) {
 		
 		if (type == null) {
 			throw new IllegalArgumentException("type == null");
@@ -18,9 +22,10 @@ public class TypeFacets {
 		if (attributes == null) {
 			throw new IllegalArgumentException("attributes == null");
 		}
-
+		
 		this.type = type;
 		this.attributes = attributes;
+		this.autoExpandAttributesCount = autoExpandAttributesCount;
 	}
 
 	public Class<? extends Item> getType() {
@@ -29,5 +34,9 @@ public class TypeFacets {
 
 	public List<IndexFacetedAttributeResult> getAttributes() {
 		return attributes;
+	}
+
+	public int getAutoExpandAttributesCount() {
+		return autoExpandAttributesCount;
 	}
 }

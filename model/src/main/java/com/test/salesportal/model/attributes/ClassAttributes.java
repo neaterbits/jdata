@@ -96,6 +96,15 @@ public class ClassAttributes {
 		return attributesInFacetOrder;
 	}
 	
+	public int getAutoExpandPropertiesCount() {
+		
+		final FacetEntity facetEntity = type.getAnnotation(FacetEntity.class);
+		
+		return facetEntity != null
+				? facetEntity.expandProperties()
+				: 0;
+	}
+	
 	public Set<ItemAttribute> asSet() {
 		return attributeSet;
 	}
