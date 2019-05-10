@@ -13,6 +13,7 @@ import com.test.salesportal.model.annotations.FacetEntity;
 import com.test.salesportal.model.annotations.IntegerRange;
 import com.test.salesportal.model.annotations.NumericAttributeFiltering;
 import com.test.salesportal.model.annotations.Sortable;
+import com.test.salesportal.model.annotations.UpdateFacetDisplayName;
 
 @Entity(name="car")
 @FacetEntity(value="Cars", propertyOrder = {
@@ -40,7 +41,7 @@ import com.test.salesportal.model.annotations.Sortable;
 			@DecimalRange(lower=35000)
 	})
 })
-
+@UpdateFacetDisplayName(attributeName="productionYear", updatedDisplayName="Model")
 @XmlRootElement
 public class Car extends Vehicle {
 	

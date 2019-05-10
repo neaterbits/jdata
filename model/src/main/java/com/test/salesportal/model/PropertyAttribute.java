@@ -24,8 +24,12 @@ public abstract class PropertyAttribute {
 		this.fieldNameOverride = other.fieldNameOverride;
 	}
 
-	public final String getName() {
+	public static String getName(String fieldNameOverride, PropertyDescriptor property) {
 		return fieldNameOverride != null ? fieldNameOverride : property.getName();
+	}
+	
+	public final String getName() {
+		return getName(fieldNameOverride, property);
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })

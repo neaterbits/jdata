@@ -20,6 +20,7 @@ import com.test.salesportal.model.FacetFiltering;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemAttribute;
 import com.test.salesportal.model.ItemAttributeValue;
+import com.test.salesportal.model.PropertyAttribute;
 import com.test.salesportal.model.annotations.DecimalRange;
 import com.test.salesportal.model.annotations.Facet;
 import com.test.salesportal.model.annotations.FacetAttribute;
@@ -31,6 +32,7 @@ import com.test.salesportal.model.annotations.IndexItemAttributeTransient;
 import com.test.salesportal.model.annotations.IntegerRange;
 import com.test.salesportal.model.annotations.NumericAttributeFiltering;
 import com.test.salesportal.model.annotations.Sortable;
+import com.test.salesportal.model.annotations.UpdateFacetDisplayName;
 import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.model.items.TypeInfo;
 
@@ -183,7 +185,7 @@ public class ClassAttributes {
 			}
 					
 			final boolean isFacet;
-			final String facetDisplayName;
+			String facetDisplayName;
 			final String facetSuperAttribute;
 			final IntegerRange [] integerRanges;
 			final DecimalRange [] decimalRanges;
@@ -227,6 +229,7 @@ public class ClassAttributes {
 			
 			final FacetFiltering facetFiltering;
 			if (isFacet) {
+				
 				final AttributeType attributeType = AttributeType.fromClass(propertyDescriptor.getPropertyType());
 				
 				if (attributeType.isNumeric()) {
@@ -273,6 +276,16 @@ public class ClassAttributes {
 					? indexItemAttribute.name()
 					: null;
 
+			if (isFacet) {
+				final UpdateFacetDisplayName updateFacetDisplayName = type.getAnnotation(UpdateFacetDisplayName.class);
+				
+				final String attributeName = PropertyAttribute.getName(fieldNameOverride, propertyDescriptor);
+				
+				if (updateFacetDisplayName != null && updateFacetDisplayName.attributeName().equals(attributeName)) {
+					facetDisplayName = updateFacetDisplayName.updatedDisplayName();
+				}
+			}
+					
 			final ItemAttribute attribute = new ItemAttribute(
 					type,
 					propertyDescriptor,
