@@ -18,9 +18,10 @@ import com.test.salesportal.model.annotations.UpdateFacetDisplayName;
 @Entity(name="car")
 @FacetEntity(value="Cars", propertyOrder = {
 	"carType",
-	"fuel",
 	"price",
+	"productionYear",
 	"odometer",
+	"fuel",
 	"transmission",
 	"make",
 	"size",
