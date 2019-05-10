@@ -30,6 +30,20 @@
 	padding-left: 1em;
 }
 
+.facetRangeInputDiv {
+	padding: 3px 0px 2px 1em;	
+}
+
+.facetRangeLowerInput, .facetRangeUpperInput {
+	border: 1px solid #AAAAAA;
+	padding: 2px;
+	border-radius: 3px;
+}
+
+.facetRangeLowerInput {
+	margin-right: 3px;
+}
+
 .attributeExpander {
 	width: 0px;
 	height: 0px;

@@ -278,14 +278,70 @@ function FacetViewElements() {
 		return ul;
 	}
 
-	this.createAttributeRangeList = function(parentElement) {
-		var ul = document.createElement('ul');
-
-		append(parentElement, ul);
-
-		ul.setAttribute("class", "facetAttributeRangeList");
+	this.createAttributeRangesView = function(parentElement, refreshOnUpdate) {
 		
-		return ul;
+		var viewElement;
+		
+		var rangeSelectionMode;
+		
+		if (false) {
+			var ul = document.createElement('ul');
+	
+			append(parentElement, ul);
+	
+			ul.setAttribute("class", "facetAttributeRangeList");
+			
+			rangeSelectionMode = 'RANGES';
+			
+			viewElement = ul;
+		}
+		else {
+			rangeSelectionMode = 'INPUTS';
+			
+			var div = document.createElement('div');
+			
+			div.setAttribute('class', 'facetRangeInputDiv');
+			
+			_addRangeInput(div, refreshOnUpdate, 'min', 'facetRangeLowerInput');
+			_addRangeInput(div, refreshOnUpdate, 'max', 'facetRangeUpperInput');
+			
+			append(parentElement, div);
+			
+			viewElement = div;
+		}
+		
+		return { 'viewElement' : viewElement, 'rangeSelectionMode' : rangeSelectionMode }
+	}
+	
+	function _addRangeInput(div, refreshOnUpdate, placeholderText, cssClass) {
+		var input = document.createElement('input');
+		
+		input.type = 'number';
+		input.placeholder = placeholderText;
+		input.size = 10;
+		input.min = 0;
+		input.max = 100000000;
+		input.onchange = function() {
+			refreshOnUpdate();
+		};
+		
+		input.setAttribute('class', cssClass);
+		
+		append(div, input);
+	}
+	
+	this.getRangeInput = function(div) {
+		
+		var inputs = div.getElementsByTagName('input');
+		
+		return {
+			'lower' : _toNumberOrNull(inputs[0].value),
+			'upper' : _toNumberOrNull(inputs[1].value)
+		};
+	}
+	
+	function _toNumberOrNull(text) {
+		return text !== '' ? new Number(text) : null;
 	}
 
 	this._makeAttributeValueText = function(value, matchCount) {

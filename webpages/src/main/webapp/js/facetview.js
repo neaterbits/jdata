@@ -3,9 +3,11 @@
  * but does not operate on the DOM directly, rather calls separate instance for that
  */
 
-
 function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
+	const INCLUDE_LOWER = true;
+	const INCLUDE_UPPER = true;
+	
 	var DEBUG_MODEL_UPDATE = false;
 	
 	var ITER_CONTINUE = 1; 	// Continue recursive iteration
@@ -73,7 +75,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 						cur = t._addFacetAttributeValueList(cur.getViewElementFactory(), cur);
 					}
 					else if (kind === 'attributeRange') {
-						cur = t._addFacetAttributeRangeList(cur.getViewElementFactory(), cur);
+						cur = t._addFacetAttributeRangesView(cur.getViewElementFactory(), cur);
 					}
 					else {
 						throw "Neither type nor attribute: " + kind;
@@ -127,8 +129,6 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				}
 		);
 		
-		var x = 123;
-		
 	};
 	
 	this._addFacetAttributeList = function(viewElementFactory, cur) {
@@ -157,17 +157,47 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		return attributeValueList;
 	}
 	
-	this._addFacetAttributeRangeList = function(viewElementFactor, cur) {
+	this._addFacetAttributeRangesView = function(viewElementFactor, cur) {
 		var viewElementFactory = cur.getViewElementFactory();
 
-		// Array of attributes
-		var attributeListElement = viewElementFactory.createAttributeRangeList(cur.getViewElement());
-
-		var attributeRangeList = new FacetAttributeRangeList(viewElementFactory, cur.getModelType(), cur.getAttributeId(), attributeListElement);
+		var t = this;
 		
-		cur.setAttributeValueOrRangeList(attributeRangeList);
+		var refreshOnUpdate = function() {
+			t._collectAndTriggerCriteriaChange();
+		};
+		
+		// Array of attributes
+		var rangesViewResult = viewElementFactory.createAttributeRangesView(cur.getViewElement(), refreshOnUpdate);
 
-		return attributeRangeList;
+		var attributeRangeElement;
+		
+		switch (rangesViewResult.rangeSelectionMode) {
+		case 'RANGES':
+			var attributeListElement = rangesViewResult.viewElement;
+		
+			attributeRangeElement = new FacetAttributeRangeList(
+					viewElementFactory,
+					cur.getModelType(),
+					cur.getAttributeId(),
+					attributeListElement);
+			break;
+			
+		case 'INPUTS':
+			var attributeInputElement = rangesViewResult.viewElement;
+			attributeRangeElement = new FacetAttributeRangeInput(
+					viewElementFactory,
+					cur.getModelType(),
+					cur.getAttributeId(),
+					attributeInputElement);
+			break;
+		
+		default:
+			throw "Unknown rangeSelectionMode " + rangesViewResult.rangeSelectionMode;
+		}
+		
+		cur.setAttributeValueOrRangeList(attributeRangeElement);
+
+		return attributeRangeElement;
 	}
 	
 	this._addFacetType = function(viewElementFactory, cur, element, index) {
@@ -273,38 +303,57 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	}
 	
 	this._addFacetAttributeRange = function(viewElementFactory, cur, element, index, elementStack) {
-		var text = '';
 		
-		text += (typeof element.lower !== 'undefined' && element.lower != null ? element.lower : ' ');
+		var result;
 		
-		text += ' - ';
-		text += (typeof element.upper !== 'undefined' && element.upper != null ? element.upper : '');
+		switch (cur.getClassName()) {
 
-		// Attribute within a type in list of attributes
-		var attributeElement = viewElementFactory.createAttributeValueElement(
-				cur.getViewElement(),
-				text,
-				element.matchCount,
-				false,
-				false,
-				true);
+		case 'FacetAttributeRangeInput':
+			result = null;
+			break;
 		
-		var attributeRange = new FacetAttributeRange(
-				viewElementFactory,
-				cur.getModelType(),
-				cur.getAttributeId(),
-				element,
-				attributeElement.listItem,
-				attributeElement.checkboxItem,
-				attributeElement.thisOnlyItem,
-				text);
+		case 'FacetAttributeRangeList':
+		
+			var range;
+			var text = '';
+			
+			text += (typeof element.lower !== 'undefined' && element.lower != null ? element.lower : ' ');
+			
+			text += ' - ';
+			text += (typeof element.upper !== 'undefined' && element.upper != null ? element.upper : '');
+	
+			// Attribute within a type in list of attributes
+			var attributeElement = viewElementFactory.createAttributeValueElement(
+					cur.getViewElement(),
+					text,
+					element.matchCount,
+					false,
+					false,
+					true);
+			
+			var attributeRange = new FacetAttributeRange(
+					viewElementFactory,
+					cur.getModelType(),
+					cur.getAttributeId(),
+					element,
+					attributeElement.listItem,
+					attributeElement.checkboxItem,
+					attributeElement.thisOnlyItem,
+					text);
+	
+			this._setAttributeCheckboxListener(viewElementFactory, cur, attributeRange, false, elementStack);
+	
+			cur.addRange(attributeRange, index);
+	
+			result = attributeRange;
+			break;
+			
+		default:
+			throw "Unknown classname " + cur.getClassName();
+		}
 
-		this._setAttributeCheckboxListener(viewElementFactory, cur, attributeRange, false, elementStack);
-
-		cur.addRange(attributeRange, index);
-
-		return attributeRange;
-	};
+		return result;
+	}
 	
 	
 	this._collectAndTriggerCriteriaChangeWithAttributeList = function(attributeList) {
@@ -482,34 +531,65 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 	}
 
 	this._addFacetUnknown = function(viewElementFactory, cur, element, index, elementStack) {
-		var attributeRange = this._addFacetUnknownValueOrRange(viewElementFactory, cur, element, index, 'Unknown', elementStack);
 		
-		cur.addRange(attributeRange, index);
+		switch (cur.getClassName()) {
+
+		case 'FacetAttributeRangeInput':
+			break;
+		
+		case 'FacetAttributeRangeList':
+
+			var attributeRange = this._addFacetUnknownValueOrRange(viewElementFactory, cur, element, index, 'Unknown', elementStack);
+			
+			cur.addRange(attributeRange, index);
+			break;
+
+		default:
+			throw "Unknown classname " + cur.getClassName();
+		}
 	}
 
 	this._addFacetUnknownValueOrRange = function(viewElementFactory, cur, element, index, displayText, elementStack) {
 
-		// Attribute within a type in list of attributes
-		var attributeElement = viewElementFactory.createAttributeValueElement(
-				cur.getViewElement(),
-				displayText,
-				element.matchCount,
-				false,
-				false,
-				true);
+		var result;
+		
+		switch (cur.getClassName()) {
 
-		var attributeValue = new FacetAttributeOtherOrUnknown(
-								viewElementFactory,
-								cur.getModelType(),
-								cur.getAttributeId(),
-								attributeElement.listItem,
-								attributeElement.checkboxItem,
-								attributeElement.thisOnlyItem,
-								displayText);
+		case 'FacetAttributeRangeInput':
+			result = null;
+			break;
+		
+		case 'FacetAttributeValueList':
+		case 'FacetAttributeRangeList':
 
-		this._setAttributeCheckboxListener(viewElementFactory, cur, attributeValue, false, elementStack);
-				
-		return attributeValue;
+			// Attribute within a type in list of attributes
+			var attributeElement = viewElementFactory.createAttributeValueElement(
+					cur.getViewElement(),
+					displayText,
+					element.matchCount,
+					false,
+					false,
+					true);
+	
+			var attributeValue = new FacetAttributeOtherOrUnknown(
+									viewElementFactory,
+									cur.getModelType(),
+									cur.getAttributeId(),
+									attributeElement.listItem,
+									attributeElement.checkboxItem,
+									attributeElement.thisOnlyItem,
+									displayText);
+	
+			this._setAttributeCheckboxListener(viewElementFactory, cur, attributeValue, false, elementStack);
+					
+			result = attributeValue;
+			break;
+			
+		default:
+			throw "Unknown classname " + cur.getClassName();
+		}
+		
+		return result;
 	}
 	
 	/**
@@ -611,7 +691,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 							cur = cur.getAttributeValueOrRangeList();
 						}
 						else {
-							cur = t._addFacetAttributeRangeList(cur.getViewElementFactory(), cur);
+							cur = t._addFacetAttributeRangesView(cur.getViewElementFactory(), cur);
 						}
 					}
 					else {
@@ -666,16 +746,28 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 						cur = sub;
 					}
 					else if (kind === 'attributeRange') {
-						// cur is FacetAttributeValueList
-						var sub = cur.findRange(element);
-						
-						if (cur == null) {
-							sub = t._addFacetAttributeRange(cur.getViewElementFactory(), cur, element, index);
+						// cur is FacetAttributeRangeInput or FacetAttributeRangeList
+						switch (cur.getClassName()) {
 
-							facetUpdate.onInDataModelButNotInViewMode(cur, sub, element.matchCount);
-						}
+						case 'FacetAttributeRangeInput':
+							cur = null;
+							break;
 						
-						cur = sub;
+						case 'FacetAttributeRangeList':
+							var sub = cur.findRange(element);
+							
+							if (cur == null) {
+								sub = t._addFacetAttributeRange(cur.getViewElementFactory(), cur, element, index);
+	
+								facetUpdate.onInDataModelButNotInViewMode(cur, sub, element.matchCount);
+							}
+							
+							cur = sub;
+							break;
+
+						default:
+							throw "Unknown classname " + cur.getClassName();
+						}
 					}
 					else if (kind === 'attributeValueUnknown') {
 						// cur is FacetAttributeValueList
@@ -690,22 +782,37 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 						cur = sub;
 					}
 					else if (kind === 'attributeRangeUnknown') {
-						// cur is FacetAttributeValueList
-						var sub = cur.findValueUnknown();
 						
-						if (cur == null) {
-							sub = t._addFacetUnknown(cur.getViewElementFactory(), cur, element, index, stack);
+						// cur is FacetAttributeRangeInput or FacetAttributeRangeList
+						switch (cur.getClassName()) {
 
-							facetUpdate.onInDataModelButNotInViewMode(cur, sub, element.matchCount);
+						case 'FacetAttributeRangeInput':
+							cur = null;
+							break;
+						
+						case 'FacetAttributeRangeList':
+							var sub = cur.findValueUnknown();
+							
+							if (cur == null) {
+								sub = t._addFacetUnknown(cur.getViewElementFactory(), cur, element, index, stack);
+	
+								facetUpdate.onInDataModelButNotInViewMode(cur, sub, element.matchCount);
+							}
+	
+							cur = sub;
+							break;
+
+						default:
+							throw "Unknown classname " + cur.getClassName();
 						}
-
-						cur = sub;
 					}
 					else {
 						throw "Unknown data element type for addAllNew: " + kind;
 					}
 					
-					stack.push(cur);
+					if (cur != null) {
+						stack.push(cur);
+					}
 					
 					return cur;
 				},
@@ -825,14 +932,40 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 						sub = cur.findAttributeValue(element.value);
 					}
 					else if (kind === 'attributeRange') {
-						// cur is FacetAttributeValueList
-						sub = cur.findRange(element);
+						
+						// cur is FacetAttributeRangeInput or FacetAttributeRangeList
+						switch (cur.getClassName()) {
+						
+						case 'FacetAttributeRangeInput':
+							sub = null;
+							break;
+						
+						case 'FacetAttributeRangeList':
+							sub = cur.findRange(element);
+							break;
+							
+						default:
+							throw "Unknown classmame " + cur.getClassName();
+						}
 					}
 					else if (kind === 'attributeValueUnknown') {
 						sub = cur.findValueUnknown();
 					}
 					else if (kind === 'attributeRangeUnknown') {
-						sub = cur.findValueUnknown();
+						
+						switch (cur.getClassName()) {
+
+						case 'FacetAttributeRangeInput':
+							sub = null;
+							break;
+						
+						case 'FacetAttributeRangeList':
+							sub = cur.findValueUnknown();
+							break;
+
+						default:
+							throw "Unknown classname " + cur.getClassName();
+						}
 					}
 					else {
 						throw "Unknown data element type for markAllStillInUse: " + kind;
@@ -849,10 +982,9 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 						sub.setPresentInDataModel(true);
 
 						cur = sub;
+
+						t._updateVisibilityStateForElement(facetUpdate, sub, element);
 					}
-
-					t._updateVisibilityStateForElement(facetUpdate, sub, element);
-
 					
 					return cur;
  				},
@@ -980,7 +1112,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		
 		// A stack for figuring out whether should add to model as subattributes to a current value
 		// Eg model is a subattribute of make and hence should put model criteria under make so
-		// can qualify that in DB query (eg two different makes withs same model or more likely two states in a country with counties wtih same name)
+		// can qualify that in DB query (eg two different makes withs same model or more likely two states in a country with counties with same name)
 		var valuesStack = [];
 		
 		this.rootTypes.iterate(function(className, obj) {
@@ -1092,12 +1224,12 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 								
 								if (typeof mr.lower !== 'undefined') {
 									range.lower = mr.lower;
-									range.includeLower = true;
+									range.includeLower = INCLUDE_LOWER;
 								}
 								
 								if (typeof mr.upper !== 'undefined') {
 									range.upper = mr.upper;
-									range.includeUpper = true;
+									range.includeUpper = INCLUDE_UPPER;
 								}
 								
 								criterium.ranges.push(range);
@@ -1111,6 +1243,47 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 				valuesStack.push({ type : 'list', criterium : criterium })
 			}
+			else if (className === 'FacetAttributeRangeInput') {
+
+				var criterium = {
+						type : obj.getModelType(),
+						attribute : obj.getAttributeId(),
+						ranges : []
+				};
+				
+				var input = obj.getViewElementFactory().getRangeInput(obj.getViewElement());
+
+				var range = { };
+				
+				if (typeof input.lower !== 'undefined' && input.lower != null) {
+					
+					if (typeof input.lower !== 'object') {
+						throw "Expected number";
+					}
+					
+					range.lower = input.lower;
+					range.includeLower = INCLUDE_LOWER;
+				}
+				
+				if (typeof input.upper !== 'undefined' && input.upper != null) {
+
+					if (typeof input.upper !== 'object') {
+						throw "Expected number: " + typeof input.upper;
+					}
+
+					range.upper = input.upper;
+					range.includeUpper = INCLUDE_UPPER;
+				}
+				
+				criterium.ranges.push(range);
+
+				console.log('## adding criterium ' + JSON.stringify(criterium));
+				
+				valuesStack.push({ type : 'list', criterium : criterium })
+
+				// push to toplevel
+				toplevelCriteria.push(criterium);
+			}
 			else if (className === 'FacetAttributeSingleValue') {
 				valuesStack.push({ type : 'value', modelValue : obj.getModelValue() })
 			}
@@ -1118,7 +1291,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		
 		// after recursion to subelements
 		function(className, obj) {
-			if (   (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeList')
+			if (   (className == 'FacetAttributeValueList' || className === 'FacetAttributeRangeInput' || className === 'FacetAttributeRangeList')
 				&& typeof selectedTypes[obj.getModelType()] !== 'undefined') { // type for this attribute must be selected
 
 				var item = valuesStack.pop();
@@ -1135,6 +1308,8 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				}
 			}
 		});
+		
+		console.log('## querying ' + JSON.stringify(toplevelCriteria));
 
 		return { 'types' : Object.keys(types), 'criteria' : toplevelCriteria };
 	};
@@ -1215,7 +1390,6 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		return pathLevel;
 	};
 
-	
 	function FacetsElementBase(className, viewElementFactory, modelType, viewElement) {
 		
 		if (typeof viewElement === 'undefined' || viewElement == null) {
@@ -1361,7 +1535,6 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		
 		var stack = [];
 		
-		
 		var callbacks = this._wrapIfDebug(function(className, obj, parent) {
 				return before(className, obj, parent);
 			},
@@ -1398,7 +1571,6 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 		return exitCode;
 	}
-
 
 	FacetsElementBase.prototype._iterateCurAndSub = function(before, after, parent) {
 		
@@ -1800,7 +1972,6 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 		return -1;
 	}
 	
-
 	FacetAttributeRangeList.prototype.findRange = function(range) {
 		var idx = this._findRangeIdx(range);
 		
@@ -1813,6 +1984,26 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 
 	FacetAttributeRangeList.prototype.findValueUnknown = function() {
 		return this._arrayFindWithClassName(this.ranges, 'FacetAttributeOtherOrUnknown');
+	}
+
+	function FacetAttributeRangeInput(viewElementFactory, modelType, attributeId, inputItems) {
+		FacetsElementBase.call(this, 'FacetAttributeRangeInput', viewElementFactory, modelType, inputItems);
+
+		this.attributeId = attributeId;
+	}
+
+	FacetAttributeRangeInput.prototype = Object.create(FacetsElementBase.prototype);
+
+	FacetAttributeRangeInput.prototype.toDebugString = function() {
+		return this.attributeId;
+	}
+
+	FacetAttributeRangeInput.prototype.getAttributeId = function() {
+		return this.attributeId;
+	}
+
+	FacetAttributeRangeInput.prototype._iterateSub = function(before, after) {
+		return ITER_CONTINUE;
 	}
 
 	function FacetAttributeValue(className, viewElementFactory, modelType, attributeId, listItem, checkboxItem, thisOnlyItem, displayText) {
