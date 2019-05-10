@@ -27,6 +27,7 @@ public final class ItemAttribute extends PropertyAttribute {
 	// Does this attribute have facets?
 	private final boolean isFaceted;
 	private final String facetDisplayName;
+	private final FacetFiltering facetFiltering;
 	
 	// For sub-attributes
 	private final String facetSuperAttribute;
@@ -49,6 +50,7 @@ public final class ItemAttribute extends PropertyAttribute {
 				boolean isFaceted,
 				String facetDisplayName,
 				String facetSuperAttribute,
+				FacetFiltering facetFiltering,
 				IntegerRange [] integerRanges, DecimalRange [] decimalRanges,
 				String trueString, String falseString) {
 		
@@ -60,6 +62,10 @@ public final class ItemAttribute extends PropertyAttribute {
 		
 		if (property == null) {
 			throw new IllegalArgumentException("property == null");
+		}
+		
+		if (isFaceted && facetFiltering == null) {
+			throw new IllegalArgumentException("facetFiltering == null");
 		}
 		
 		this.itemType = itemType;
@@ -83,6 +89,7 @@ public final class ItemAttribute extends PropertyAttribute {
 
 		this.isFaceted = isFaceted;
 		this.facetDisplayName = facetDisplayName;
+		this.facetFiltering = facetFiltering;
 		this.facetSuperAttribute = facetSuperAttribute;
 		this.integerRanges = integerRanges == null || integerRanges.length == 0 ? null : convertIntegerRanges(integerRanges);
 		this.decimalRanges = decimalRanges == null || decimalRanges.length == 0 ? null : convertDecimalRanges(decimalRanges);
@@ -245,6 +252,10 @@ public final class ItemAttribute extends PropertyAttribute {
 
 	public String getFacetSuperAttribute() {
 		return facetSuperAttribute;
+	}
+	
+	public FacetFiltering getFacetFiltering() {
+		return facetFiltering;
 	}
 
 	public FacetedAttributeIntegerRange[] getIntegerRanges() {

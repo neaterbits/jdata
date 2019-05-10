@@ -2,7 +2,9 @@ package com.test.salesportal.model.items;
 
 import javax.persistence.Column;
 
+import com.test.salesportal.model.FacetFiltering;
 import com.test.salesportal.model.annotations.Facet;
+import com.test.salesportal.model.annotations.NumericAttributeFiltering;
 import com.test.salesportal.model.annotations.Sortable;
 
 public abstract class RetailItem extends PurchasableItem {
@@ -19,6 +21,7 @@ public abstract class RetailItem extends PurchasableItem {
 	
 	@Sortable(priority=2)
 	@Facet("Production year")
+	@NumericAttributeFiltering(FacetFiltering.INPUT)
 	@Column
 	private Integer productionYear;
 	

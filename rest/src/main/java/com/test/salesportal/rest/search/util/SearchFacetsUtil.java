@@ -3,6 +3,7 @@ package com.test.salesportal.rest.search.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.test.salesportal.model.FacetFiltering;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemAttribute;
 import com.test.salesportal.model.attributes.AttributeType;
@@ -13,6 +14,7 @@ import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttribute
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetedTypeResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetsResult;
+import com.test.salesportal.rest.search.model.facetresult.SearchInputFacetedAttributeResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchRangeFacetedAttributeResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchSingleValueFacet;
 import com.test.salesportal.rest.search.model.facetresult.SearchSingleValueFacetedAttributeResult;
@@ -54,7 +56,14 @@ public class SearchFacetsUtil {
 		for (IndexFacetedAttributeResult indexFacetedAttribute : attributes) {
 			final SearchFacetedAttributeResult searchFacetedAttribute;
 
-			if (indexFacetedAttribute instanceof IndexSingleValueFacetedAttributeResult) {
+			final FacetFiltering filtering = indexFacetedAttribute.getAttribute().getFacetFiltering();
+
+			if (filtering == FacetFiltering.INPUT) {
+				final SearchInputFacetedAttributeResult searchInputFacetedAttributeResult = new SearchInputFacetedAttributeResult();
+				
+				searchFacetedAttribute = searchInputFacetedAttributeResult;
+			}
+			else if (indexFacetedAttribute instanceof IndexSingleValueFacetedAttributeResult) {
 				final IndexSingleValueFacetedAttributeResult indexSingleValueFacetedAttributeResult
 						= (IndexSingleValueFacetedAttributeResult)indexFacetedAttribute;
 				

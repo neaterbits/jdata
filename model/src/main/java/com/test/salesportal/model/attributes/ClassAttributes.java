@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import com.test.salesportal.model.FacetFiltering;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemAttribute;
 import com.test.salesportal.model.ItemAttributeValue;
@@ -28,6 +29,7 @@ import com.test.salesportal.model.annotations.Freetext;
 import com.test.salesportal.model.annotations.IndexItemAttribute;
 import com.test.salesportal.model.annotations.IndexItemAttributeTransient;
 import com.test.salesportal.model.annotations.IntegerRange;
+import com.test.salesportal.model.annotations.NumericAttributeFiltering;
 import com.test.salesportal.model.annotations.Sortable;
 import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.model.items.TypeInfo;
@@ -222,6 +224,31 @@ public class ClassAttributes {
 					falseString = null;
 				}
 			}
+			
+			final FacetFiltering facetFiltering;
+			if (isFacet) {
+				final AttributeType attributeType = AttributeType.fromClass(propertyDescriptor.getPropertyType());
+				
+				if (attributeType.isNumeric()) {
+					final NumericAttributeFiltering numericFacetFiltering = findAnnotation(NumericAttributeFiltering.class, type, propertyDescriptor);
+				
+					if (numericFacetFiltering != null) {
+						facetFiltering = numericFacetFiltering.value();
+					}
+					else if (hasRanges(integerRanges, decimalRanges)) {
+						facetFiltering = FacetFiltering.RANGES;
+					}
+					else {
+						facetFiltering = FacetFiltering.VALUE;
+					}
+				}
+				else {
+					facetFiltering = FacetFiltering.VALUE;
+				}
+			}
+			else {
+				facetFiltering = null;
+			}
 
 			final boolean storeFieldInIndex;
 			
@@ -258,6 +285,7 @@ public class ClassAttributes {
 					isFacet,
 					facetDisplayName,
 					facetSuperAttribute != null ? (facetSuperAttribute.trim().isEmpty() ? null : facetSuperAttribute.trim()) : null,
+					facetFiltering,
 					integerRanges,
 					decimalRanges,
 					trueString,
@@ -268,6 +296,12 @@ public class ClassAttributes {
 
 		return new ClassAttributes(type, attributes);
 	}
+
+	
+	private static boolean hasRanges(IntegerRange [] integerRanges, DecimalRange [] decimalRanges) {
+		return     (integerRanges != null && integerRanges.length > 0)
+				|| (decimalRanges != null && decimalRanges.length > 0);
+	}
 	
 	private static <T extends Annotation> T findAnnotation(Class<T> annotationType, Class<?> cl, PropertyDescriptor propertyDescriptor) {
 		T annotation = propertyDescriptor.getReadMethod().getAnnotation(annotationType);
@@ -276,24 +310,24 @@ public class ClassAttributes {
 			// Try get from field
 			final String fieldName = propertyDescriptor.getName();
 
-			Field found = null;
+			Field foundField = null;
 			
 			for (Class<?> t = cl; t != null; t = t.getSuperclass()) {
 				for (Field field : t.getDeclaredFields()) {
 					if (field.getName().equals(fieldName)) {
 						
 						// Verify that not multiple fields of the same name
-						if (found != null) {
+						if (foundField != null) {
 							throw new IllegalStateException("Multiple fields named " + fieldName + " for " + cl);
 						}
 						
-						found = field;
+						foundField = field;
 					}
 				}
 			}
 
-			if (found != null) {
-				annotation = found.getAnnotation(annotationType);
+			if (foundField != null) {
+				annotation = foundField.getAnnotation(annotationType);
 			}
 		}
 		

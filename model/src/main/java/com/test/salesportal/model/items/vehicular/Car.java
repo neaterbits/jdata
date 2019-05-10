@@ -4,12 +4,14 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.test.salesportal.model.FacetFiltering;
 import com.test.salesportal.model.annotations.DecimalRange;
 import com.test.salesportal.model.annotations.Facet;
 import com.test.salesportal.model.annotations.FacetAttribute;
 import com.test.salesportal.model.annotations.FacetAttributes;
 import com.test.salesportal.model.annotations.FacetEntity;
 import com.test.salesportal.model.annotations.IntegerRange;
+import com.test.salesportal.model.annotations.NumericAttributeFiltering;
 import com.test.salesportal.model.annotations.Sortable;
 
 @Entity(name="car")
@@ -81,6 +83,7 @@ public class Car extends Vehicle {
 			@IntegerRange(lower=250000, upper=300000),
 			@IntegerRange(lower=300000),
 	})
+	@NumericAttributeFiltering(FacetFiltering.INPUT)
 	private Integer odometer;
 	
 	@Column

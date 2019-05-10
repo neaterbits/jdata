@@ -54,8 +54,15 @@ function FacetModel() {
 			}
 			else if (kind === 'attribute') {
 				
-				// Iterate over values
-				if (typeof element.values !== 'undefined' && element.values != null) {
+				if (element.filtering === 'INPUT') {
+					
+					var inputArrayCur = onArray('attributeInput', 0, arrayElementCur);
+
+					if (onArrayEnd != null) {
+						onArrayEnd('attributeInput', inputArrayCur);
+					}
+				}
+				else if (typeof element.values !== 'undefined' && element.values != null) {
 					
 					var valuesArrayCur = onArray('attributeValue', element.values.length, arrayElementCur);
 					
@@ -139,7 +146,7 @@ function FacetModel() {
 				cur = cur.types[pathLevel.index];
 			}
 			else if (pathLevel.kind === 'attribute') {
-				cur = cur.attrubutes[pathLevel.index];
+				cur = cur.attributes[pathLevel.index];
 			}
 			else {
 				throw "Unknown path level kind: " + pathLevel.kind;

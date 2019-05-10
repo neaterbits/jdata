@@ -25,6 +25,10 @@ public enum AttributeType {
 		return sortableType;
 	}
 
+	public boolean isNumeric() {
+		return sortableType == SortableType.NUMERICAL;
+	}
+	
 	public static AttributeType fromClass(Class<?> propertyType) {
 		final AttributeType attributeType;
 		

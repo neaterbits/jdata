@@ -278,39 +278,31 @@ function FacetViewElements() {
 		return ul;
 	}
 
-	this.createAttributeRangesView = function(parentElement, refreshOnUpdate) {
+	this.createAttributeRangesList = function(parentElement, refreshOnUpdate) {
 		
 		var viewElement;
 		
-		var rangeSelectionMode;
+		var ul = document.createElement('ul');
+
+		append(parentElement, ul);
+
+		ul.setAttribute("class", "facetAttributeRangeList");
 		
-		if (false) {
-			var ul = document.createElement('ul');
-	
-			append(parentElement, ul);
-	
-			ul.setAttribute("class", "facetAttributeRangeList");
-			
-			rangeSelectionMode = 'RANGES';
-			
-			viewElement = ul;
-		}
-		else {
-			rangeSelectionMode = 'INPUTS';
-			
-			var div = document.createElement('div');
-			
-			div.setAttribute('class', 'facetRangeInputDiv');
-			
-			_addRangeInput(div, refreshOnUpdate, 'min', 'facetRangeLowerInput');
-			_addRangeInput(div, refreshOnUpdate, 'max', 'facetRangeUpperInput');
-			
-			append(parentElement, div);
-			
-			viewElement = div;
-		}
+		return ul;
+	}
+
+	this.createAttributeInputView = function(parentElement, refreshOnUpdate) {
+
+		var div = document.createElement('div');
 		
-		return { 'viewElement' : viewElement, 'rangeSelectionMode' : rangeSelectionMode }
+		div.setAttribute('class', 'facetRangeInputDiv');
+		
+		_addRangeInput(div, refreshOnUpdate, 'min', 'facetRangeLowerInput');
+		_addRangeInput(div, refreshOnUpdate, 'max', 'facetRangeUpperInput');
+		
+		append(parentElement, div);
+
+		return div;
 	}
 	
 	function _addRangeInput(div, refreshOnUpdate, placeholderText, cssClass) {
