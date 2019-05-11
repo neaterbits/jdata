@@ -11,9 +11,9 @@ import java.util.TreeMap;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
-import com.test.salesportal.model.AttributeEnum;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.attributes.ClassAttributes;
 import com.test.salesportal.model.attributes.facets.FacetedAttributeComparableRange;
 import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.model.items.TypeInfo;
@@ -274,7 +274,7 @@ public class FacetUtils {
 		IndexSingleValueFacet valueFacet = singleValueResult.getForValue(value);
 		
 		if (valueFacet == null) {
-			final Object displayValue = getAttributeDisplayValue(attribute, value);
+			final Object displayValue = ClassAttributes.getAttributeDisplayValue(attribute, value);
 			
 			valueFacet = new IndexSingleValueFacet(value, displayValue, null);
 			
@@ -319,32 +319,6 @@ public class FacetUtils {
 		return new IndexSingleValueFacetedAttributeResult(attribute, new TreeMap<>(ATTRIBUTE_VALUE_COMPARATOR));
 	}
 	
-	private static Object getAttributeDisplayValue(ItemAttribute attribute, Object value) {
-		final Object displayValue;
-		
-		if (value instanceof AttributeEnum) {
-			displayValue = ((AttributeEnum)value).getDisplayName();
-		}
-		else if (value instanceof Boolean) {
-			final boolean val = (Boolean)value;
-			
-			if (val && attribute.getTrueString() != null) {
-				displayValue = attribute.getTrueString();
-			}
-			else if (!val && attribute.getFalseString() != null) {
-				displayValue = attribute.getFalseString();
-			}
-			else {
-				displayValue = value;
-			}
-		}
-		else {
-			displayValue = value;
-		}
-
-		return displayValue;
-	}
-
 
 	private static <T extends Comparable<T>, R extends FacetedAttributeComparableRange<T>> void computeFacetsForRange(
 			ItemAttribute attribute,

@@ -1,0 +1,82 @@
+@CHARSET "UTF-8";
+
+#single_ad_view_wrapper {
+	position: absolute;;
+	z-index: 100;
+	
+	left: 2%;
+	top: 2%;
+	width: 93%;
+	height: 93%;
+	background-color: white;
+	display: none;
+	box-sizing: border-box;
+	
+	border: 3px solid #777777;
+	border-radius: 25px;
+	
+	padding: 20px;
+}
+
+
+#single_ad_view {
+	overflow: auto;
+	
+	width: 100%;
+	height: 100%;
+}
+
+#ad_view_title {
+	text-align: center;
+	width: 100%;
+	font-size: 1.5em;
+}
+
+#ad_view_main_div {
+	display: inline-block;
+	
+	vertical-align: top;
+}
+
+#ad_view_details_div {
+	display: inline-block;
+}
+
+#ad_view_photos_div {
+	position: relative;
+	display: inline-block;
+	vertical-align: top;
+}
+
+#ad_view_photo_div {
+	position: absolute;
+
+	display: block;
+
+	box-shadow: 2px 2px 1px #CCCCCC;
+}
+
+#ad_view_map_and_photos_div {
+	display: inline-block;
+}
+
+#ad_view_description_div {
+	display: block;
+}
+
+.adViewAttributeDiv {
+	font-family: sans-serif;
+	font-size: 12px;
+
+	padding: 3 0 3 1em;
+}
+
+.adViewAttributeNameSpan {
+	font-weight: bold;
+	
+	padding-right: 0.3em;
+}
+
+.adViewAttributeValueSpan {
+	
+}

@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import javax.persistence.Column;
 
 import com.test.salesportal.model.FacetFiltering;
+import com.test.salesportal.model.annotations.DisplayAttribute;
 import com.test.salesportal.model.annotations.Facet;
 import com.test.salesportal.model.annotations.NumericAttributeFiltering;
 import com.test.salesportal.model.annotations.Sortable;
@@ -16,7 +17,8 @@ public abstract class PurchasableItem extends BaseItem {
 	private BigDecimal price;
 	
 	@Column
-	@Facet("Currency")
+	@Facet
+	@DisplayAttribute("Currency")
 	private String currency;
 
 	@NumericAttributeFiltering(FacetFiltering.INPUT)

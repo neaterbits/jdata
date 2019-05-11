@@ -2,8 +2,14 @@
 <head>
 <link rel="stylesheet" type="text/css" href="css/facets.css">
 <link rel="stylesheet" type="text/css" href="css/searchview.css">
+<link rel="stylesheet" type="text/css" href="css/adview.css">
 
+<script src="js/utils.js" type="text/javascript"></script>
 <script src="js/base64.js" type="text/javascript"></script>
+<script src="js/navigator.js" type="text/javascript"></script>
+<script src="js/navigator_overlay.js" type="text/javascript"></script>
+<script src="js/photoview_navigator.js" type="text/javascript"></script>
+<script src="js/adview.js" type="text/javascript"></script>
 <script src="js/facetpath.js" type="text/javascript"></script>
 <script src="js/facetviewelements.js" type="text/javascript"></script>
 <script src="js/facetview.js" type="text/javascript"></script>
@@ -85,6 +91,27 @@
 	</div>
 	</div>
 </div>
+
+<!-- Single ad view, displayed atop of gallery -->
+<div id="single_ad_view_wrapper">
+<div id="single_ad_view">
+	<h1 id="ad_view_title"></h1>
+	<div>
+		<div id="ad_view_details_div">
+		</div>
+		
+		<div id="ad_view_main_div">
+			<div id="ad_view_photos_div">
+				<div id="ad_view_photo_div">
+					<img id="ad_view_photo"/>
+				</div>
+			</div>
+			<div id="ad_view_map_and_photos_div">Map view</div>
+			<div id="ad_view_description_div"></div>
+		</div>
+	</div>
+</div>
+</div>
 </body>
 <script type="text/javascript">
 	window.onload = function() {
@@ -105,6 +132,16 @@
 			return getBaseUrl() + "/items/" + itemId + "/thumbs/" + thumbNo;
 		}
 
+		var loadItem = function(itemId, onSuccess, onError) {
+			ajax.getAjax(
+				getBaseUrl() + "/items/" + itemId,
+				'json',
+				onSuccess
+			);
+		}
+		
+		var adView = new AdView(document.getElementById('single_ad_view_wrapper'), loadItem, getPhotoUrl);
+		
 		var searchView = new SearchView(
 					getSearchUrl(useTestData),
 					getThumbsUrl(useTestData),
@@ -115,7 +152,7 @@
 					'fulltextButton',
 					'numberOfItemsCount',
 					'sortListBox',
-					new SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl)
+					new SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl, adView)
 					// new SimpleDynamicSizeGalleryItemFactory()
 					// new RentalApartmentGalleryItemFactory(ajax, getPhotoCountUrl, getPhotoUrl)
 		);

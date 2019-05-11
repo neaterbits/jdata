@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.test.salesportal.model.annotations.DecimalRange;
+import com.test.salesportal.model.annotations.DisplayAttribute;
 import com.test.salesportal.model.annotations.Facet;
 import com.test.salesportal.model.annotations.FacetEntity;
 import com.test.salesportal.model.annotations.IntegerRange;
@@ -23,7 +24,6 @@ public class Boat extends Vehicle {
 
 	@Column
 	@Facet(
-		value = "Overall length",
 		decimalRanges={
 			@DecimalRange(upper=10.0),
 			@DecimalRange(lower=10.0, upper=20.0),
@@ -32,15 +32,16 @@ public class Boat extends Vehicle {
 			@DecimalRange(lower=40.0, upper=50.0),
 			@DecimalRange(lower=50.0)
 	})
+	@DisplayAttribute("Overall length")
 	private BigDecimal lengthOverall;
 
 	@Column
-	@Facet("Propulsion type")
+	@Facet
+	@DisplayAttribute("Propulsion type")
 	private BoatPropulsionType propulsionType;
 
 	@Column
 	@Facet(
-		value = "Engine hours",
 		integerRanges={
 			@IntegerRange(upper=500),
 			@IntegerRange(lower=500, upper=1000),
@@ -48,6 +49,7 @@ public class Boat extends Vehicle {
 			@IntegerRange(lower=5000, upper=10000),
 			@IntegerRange(lower=10000)
 	})
+	@DisplayAttribute("Engine hours")
 	private Integer engineHours;
 	
 	public BigDecimal getLengthOverall() {

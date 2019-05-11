@@ -19,11 +19,6 @@ import com.test.salesportal.model.Item;
  */
 public interface IItemUpdate extends AutoCloseable {
 	
-	/**
-	 * Find detailed information about an item
-	 */
-	IFoundItem getItem(String userId, String itemId) throws ItemStorageException;
-	
 
 	/**
 	 * Get all photo thumbnails for a particular item as binary data

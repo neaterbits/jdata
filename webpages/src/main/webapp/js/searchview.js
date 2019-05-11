@@ -187,9 +187,7 @@ function SearchView(
 		
 		var existingSelection = this._getCurrentSortOrder();
 
-		while (this.sortListboxElement.firstChild) {
-			this.sortListboxElement.removeChild(this.sortListboxElement.firstChild);
-		}
+		removeAll(this.sortListboxElement);
 
 		var indexOfExistingSelection = -1;
 
@@ -288,9 +286,7 @@ function SearchView(
 					createRowContainer : function (rowNo) { return document.createElement('div'); },
 					
 					clearRenderContainer : function (container) {
-						while (container.firstChild) {
-							container.removeChild(container.firstChild);
-						}
+						removeAll(container);
 					},
 					appendPlaceholderToRenderContainer	: appendToContainer,
 					appendRowToRenderContainer 			: appendToContainer,

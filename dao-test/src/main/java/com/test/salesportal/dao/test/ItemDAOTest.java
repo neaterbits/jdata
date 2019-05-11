@@ -55,7 +55,7 @@ public abstract class ItemDAOTest extends TestCase {
 		
 		// Obtain DAO anew to make sure we skip any caching
 			
-		try (IItemUpdate itemDAO = getItemDAO()) {
+		try (IItemDAO itemDAO = getItemDAO()) {
 			try {
 				final IFoundItem retrieved = itemDAO.getItem(userId, itemId);
 				

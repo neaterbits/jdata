@@ -51,11 +51,45 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		super(jaxbContext, xmlStorage, index);
 	}
 
+	
+	@Override
+	public Item getItem(String itemId) throws ItemStorageException {
+		
+		final ItemId id;
+		try {
+			id = index.expandToItemIdUserId(itemId);
+		} catch (ItemIndexException ex) {
+			throw new ItemStorageException("Failed to get user id");
+		}
+
+		return getItem(id.getUserId(), itemId, item -> item);
+	}
+
+	interface CreateItem<T> {
+		T create(Item item) throws StorageException;
+	}
+
 	@Override
 	public IFoundItem getItem(String userId, String itemId) throws ItemStorageException {
+		
+		return getItem(userId, itemId, item -> {
+			
+			final ImageMetaData thumb = xmlStorage.getThumbnailMetaDataForItem(userId, itemId, 0);
+			
+			return new XMLFoundItem(
+					item,
+					itemId,
+					thumb != null ? thumb.width : null,
+					thumb != null ? thumb.height : null);
+
+		});
+	}
+	
+	private <T> T getItem(String userId, String itemId, CreateItem<T> createItem) throws ItemStorageException {
+	
 		// ID is a file name
 		
-		final IFoundItem found;
+		final T found;
 		
 		InputStream inputStream;
 		try {
@@ -72,13 +106,7 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 			
 				final Item item = (Item)unmarshaller.unmarshal(inputStream);
 				
-				final ImageMetaData thumb = xmlStorage.getThumbnailMetaDataForItem(userId, itemId, 0);
-	
-				found = new XMLFoundItem(
-						item,
-						itemId,
-						thumb != null ? thumb.width : null,
-						thumb != null ? thumb.height : null);
+				found = createItem.create(item);
 
 			} catch (JAXBException ex) {
 				throw new IllegalStateException("Failed to unmarshall XML for ID " + itemId, ex);

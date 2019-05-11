@@ -8,6 +8,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
@@ -23,9 +29,15 @@ import com.test.salesportal.common.IOUtil;
 import com.test.salesportal.common.images.ThumbAndImageUrls;
 import com.test.salesportal.dao.ItemStorageException;
 import com.test.salesportal.model.Item;
+import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.ItemAttributeValue;
+import com.test.salesportal.model.attributes.ClassAttributes;
 import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.TypeInfo;
 import com.test.salesportal.rest.BaseService;
 import com.test.salesportal.rest.BaseServiceLogic;
+import com.test.salesportal.rest.items.model.ServiceItem;
+import com.test.salesportal.rest.items.model.ServiceItemAttribute;
 
 @Path("/")
 public class ItemService extends BaseService {
@@ -183,6 +195,63 @@ public class ItemService extends BaseService {
 		
 	}
 
+	// Get item data
+	@GET
+	@Path("items/{itemId}")
+	public ServiceItem getItem(
+			@PathParam("itemId") String itemId,
+			HttpServletRequest request) throws IOException, ItemStorageException {
+		
+		final Item item = getItemRetrievalDAO(request).getItem(itemId);
+		
+		final int photoCount = getPhotoCount(itemId, request);
+
+		final List<ItemAttributeValue<?>> itemAttributes = ClassAttributes.getValues(item);
+		
+		final Map<ItemAttribute, ItemAttributeValue<?>> attributesMap = itemAttributes.stream()
+				.collect(Collectors.toMap(ItemAttributeValue::getAttribute, Function.identity()));
+		
+		final Map<String, Object> serviceAttributes = new HashMap<>(itemAttributes.size());
+		
+		final TypeInfo typeInfo = ItemTypes.getTypeInfo(item);
+		
+		final List<ItemAttribute> displayAttributes = itemAttributes.stream()
+				.map(ItemAttributeValue::getAttribute)
+				.filter(ItemAttribute::isDisplayAttribute)
+				.collect(Collectors.toList());
+		
+		final List<ItemAttribute> sortedDisplayAttributes = typeInfo.getAttributes().sortInFacetOrder(
+				displayAttributes,
+				false);
+		
+		final List<ServiceItemAttribute> displayResultAttributes = new ArrayList<>(itemAttributes.size());
+		
+		for (ItemAttributeValue<?> itemAttribute : itemAttributes) {
+			
+			final ItemAttribute attribute = itemAttribute.getAttribute();
+			
+			if (attribute.isServiceAttribute()) {
+				serviceAttributes.put(attribute.getName(), itemAttribute.getValue());
+			}
+		}
+		
+		for (ItemAttribute displayAttribute : sortedDisplayAttributes) {
+			
+			if (displayAttribute.isDisplayAttribute()) {
+			
+				final ItemAttributeValue<?> itemAttributeValue = attributesMap.get(displayAttribute);
+				
+				final Object displayValue = ClassAttributes.getAttributeDisplayValue(
+						displayAttribute,
+						itemAttributeValue.getValue());
+				
+				displayResultAttributes.add(new ServiceItemAttribute(displayAttribute.getDisplayAttributeName(), displayValue));
+			}
+		}
+
+		return new ServiceItem(photoCount, displayResultAttributes, serviceAttributes);
+	}
+	
 	// Get total number of images for item
 	@GET
 	@Path("items/{itemId}/photoCount")

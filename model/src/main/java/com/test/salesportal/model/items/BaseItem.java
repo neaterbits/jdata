@@ -10,6 +10,7 @@ import javax.persistence.InheritanceType;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.annotations.Freetext;
 import com.test.salesportal.model.annotations.IndexItemAttribute;
+import com.test.salesportal.model.annotations.ServiceAttribute;
 
 
 @Entity
@@ -24,6 +25,7 @@ public abstract class BaseItem extends Item {
 	private Date publicationDate;
 
 	@Freetext
+	@ServiceAttribute
 	@Column
 	private String descriptionHtml;
 	
@@ -66,5 +68,4 @@ public abstract class BaseItem extends Item {
 	public void setDescriptionHtml(String descriptionHtml) {
 		this.descriptionHtml = descriptionHtml;
 	}
-	
 }

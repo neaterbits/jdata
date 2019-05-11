@@ -40,10 +40,18 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 
 	@Override
 	public IFoundItem getItem(String userId, String itemId) {
-		final Item item = entityManager.find(Item.class, Long.parseLong(itemId));
+		final Item item = getItem(itemId);
+		
 		return item == null ? null : new JPAFoundItem(item);
 	}
 	
+	@Override
+	public Item getItem(String itemId) {
+		final Item item = entityManager.find(Item.class, Long.parseLong(itemId));
+
+		return item;
+	}
+
 	@Override
 	public List<IFoundItemPhotoThumbnail> getPhotoThumbnails(String userId, String itemId) {
 

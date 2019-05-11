@@ -5,17 +5,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Attribute to be displayed, eg. in ad details view
+ */
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Facet {
-	public String displayName() default "";
+public @interface DisplayAttribute {
 
-	public String superAttribute() default "";
+	// Inherited by facets, if not set there
+	public String value();
 
-	public IntegerRange [] integerRanges() default {};
-	public DecimalRange [] decimalRanges() default {};
-
-	// For boolean facets, what to show as true or false in display
 	public String trueString() default "";
 	public String falseString() default "";
+
 }

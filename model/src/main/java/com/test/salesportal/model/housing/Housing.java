@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 import com.test.salesportal.model.annotations.DecimalRange;
+import com.test.salesportal.model.annotations.DisplayAttribute;
 import com.test.salesportal.model.annotations.Facet;
 import com.test.salesportal.model.annotations.Freetext;
 import com.test.salesportal.model.annotations.IndexItemAttribute;
@@ -16,15 +17,15 @@ import com.test.salesportal.model.items.PurchasableItem;
 public class Housing extends PurchasableItem {
 
 	@Column
-	@Facet("City")
+	@Facet(displayName = "City")
 	private String city;
 
 	@Column
-	@Facet(value = "Area", superAttribute = "city")
+	@Facet(displayName = "Area", superAttribute = "city")
 	private String area;
 
 	@Column
-	@Facet(value = "District", superAttribute = "area")
+	@Facet(displayName = "District", superAttribute = "area")
 	private String district;
 
 	@Column
@@ -33,23 +34,27 @@ public class Housing extends PurchasableItem {
 	private String address;
 
 	@Column
-	@Facet("Number of rooms")
+	@Facet
+	@DisplayAttribute("Number of rooms")
 	private BigDecimal numberOfRooms;
 
 	@Column
-	@Facet("Number of bedrooms")
+	@Facet
+	@DisplayAttribute("Number of bedrooms")
 	private Integer numberOfBedrooms;
 
 	@Column
-	@Facet("Number of bathrooms")
+	@Facet
+	@DisplayAttribute("Number of bathrooms")
 	private BigDecimal numberOfBathrooms; // can have 1.5 bathrooms, eg one with shower and toilet, one with only topilet
 
 	@Column
-	@Facet("Building status")
+	@Facet
+	@DisplayAttribute("Building status")
 	private BuildingStatus buildingStatus;
 	
 	@Column
-	@Facet(value = "Squarage",
+	@Facet(
 	/*
 			decimalRanges = {
 					@DecimalRange(upper=500),
@@ -72,13 +77,15 @@ public class Housing extends PurchasableItem {
 					@DecimalRange(lower=100)
 			}
 	)
+	@DisplayAttribute("Squarage")
 	private BigDecimal squarage;
 	
 	@Column
 	private Date availableDate;
 	
 	@Column
-	@Facet(value = "Wheelchair accesible", trueString="Yes", falseString="No")
+	@Facet
+	@DisplayAttribute(value = "Wheelchair accesible", trueString="Yes", falseString="No")
 	private Boolean wheelchairAccessible; 
 
 	public String getCity() {

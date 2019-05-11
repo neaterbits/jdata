@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import com.test.salesportal.model.annotations.Freetext;
 import com.test.salesportal.model.annotations.IndexItemAttribute;
 import com.test.salesportal.model.annotations.IndexItemAttributeTransient;
+import com.test.salesportal.model.annotations.ServiceAttribute;
 import com.test.salesportal.model.annotations.Sortable;
 
 // Base class for all storable structured items
@@ -31,6 +32,7 @@ public abstract class Item {
 
 	// Only there to support indexing ID as string in Lucene so can retrieve based on ID
 	@IndexItemAttribute(name="id", storeValue=true)
+	@ServiceAttribute(name="id")
 	private String idString;
 	
 	@IndexItemAttribute(storeValue=true)
@@ -40,6 +42,7 @@ public abstract class Item {
 	@Sortable(value="Title", priority=5)
 	@Freetext
 	@IndexItemAttribute(storeValue=true) // must store for quick-lookup in search results
+	@ServiceAttribute
 	@Column(nullable=false)
 	private String title;
 	

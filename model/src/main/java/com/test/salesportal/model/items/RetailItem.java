@@ -3,6 +3,7 @@ package com.test.salesportal.model.items;
 import javax.persistence.Column;
 
 import com.test.salesportal.model.FacetFiltering;
+import com.test.salesportal.model.annotations.DisplayAttribute;
 import com.test.salesportal.model.annotations.Facet;
 import com.test.salesportal.model.annotations.NumericAttributeFiltering;
 import com.test.salesportal.model.annotations.Sortable;
@@ -10,22 +11,26 @@ import com.test.salesportal.model.annotations.Sortable;
 public abstract class RetailItem extends PurchasableItem {
 
 	@Sortable(priority=4)
-	@Facet("Make")
+	@Facet
+	@DisplayAttribute("Make")
 	@Column
 	private String make;
 
 	@Sortable(priority=3)
-	@Facet(value = "Model", superAttribute="make")
+	@Facet(superAttribute="make")
+	@DisplayAttribute("Model")
 	@Column
 	private String model;
 	
 	@Sortable(priority=2)
-	@Facet("Production year")
+	@Facet
 	@NumericAttributeFiltering(FacetFiltering.INPUT)
+	@DisplayAttribute("Production year")
 	@Column
 	private Integer productionYear;
 	
-	@Facet("Seller")
+	@Facet
+	@DisplayAttribute("Seller")
 	@Column
 	private Seller seller;
 

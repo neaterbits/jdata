@@ -24,6 +24,9 @@ public final class ItemAttribute extends PropertyAttribute {
 	private final int sortablePriority;
 	private final boolean isFreetext;
 	
+	private final String serviceAttributeName;
+	private final String displayAttributeName;
+	
 	// Does this attribute have facets?
 	private final boolean isFaceted;
 	private final String facetDisplayName;
@@ -47,6 +50,8 @@ public final class ItemAttribute extends PropertyAttribute {
 				boolean isSortable,
 				String sortableTitle,
 				int sortablePriority,
+				String serviceAttributeName,
+				String displayAttributeName,
 				boolean isFaceted,
 				String facetDisplayName,
 				String facetSuperAttribute,
@@ -82,6 +87,9 @@ public final class ItemAttribute extends PropertyAttribute {
 		}
 		
 		this.storeValueInSearchIndex = storeValueInSearchIndex;
+		
+		this.serviceAttributeName = serviceAttributeName;
+		this.displayAttributeName = displayAttributeName;
 		
 		if (integerRanges != null && integerRanges.length > 0 && decimalRanges != null && decimalRanges.length > 0) {
 			throw new IllegalArgumentException("Cannot have both integer and decimal ranges for property " + property.getName());
@@ -240,6 +248,22 @@ public final class ItemAttribute extends PropertyAttribute {
 
 	public boolean isFreetext() {
 		return isFreetext;
+	}
+
+	public boolean isServiceAttribute() {
+		return serviceAttributeName != null;
+	}
+
+	public String getServiceAttributeName() {
+		return serviceAttributeName;
+	}
+
+	public boolean isDisplayAttribute() {
+		return displayAttributeName != null;
+	}
+	
+	public String getDisplayAttributeName() {
+		return displayAttributeName;
 	}
 
 	public boolean isFaceted() {

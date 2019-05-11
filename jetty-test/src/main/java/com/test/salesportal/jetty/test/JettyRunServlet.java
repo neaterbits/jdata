@@ -3,6 +3,7 @@ package com.test.salesportal.jetty.test;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 
 import javax.servlet.ServletException;
@@ -24,6 +25,7 @@ import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.model.items.TypeInfo;
 import com.test.salesportal.rest.BaseServiceLogic;
 import com.test.salesportal.rest.items.ItemService;
+import com.test.salesportal.rest.items.model.ServiceItem;
 import com.test.salesportal.rest.search.SearchResult;
 import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
 import com.test.salesportal.rest.search.paged.PagedSearchService;
@@ -278,11 +280,13 @@ public class JettyRunServlet {
 			if (isTest()) {
 				resp.setHeader("Access-Control-Allow-Origin", "*");
 			}
+			
+			String [] path;
 
 			if (req.getPathInfo() != null && req.getPathInfo().contains("thumbs")) {
 				
-				// items/{itemId/photos/{photoNo}
-				final String [] path = req.getPathInfo().split("/");
+				// items/{itemId}/photos/{photoNo}
+				path = req.getPathInfo().split("/");
 				final String itemId = path[1];
 				final int thumbNo = Integer.parseInt(path[3]);
 				
@@ -311,8 +315,8 @@ public class JettyRunServlet {
 			}
 			else if (req.getPathInfo() != null && req.getPathInfo().contains("photos")) {
 				
-				// items/{itemId/photos/{photoNo}
-				final String [] path = req.getPathInfo().split("/");
+				// items/{itemId}/photos/{photoNo}
+				path = req.getPathInfo().split("/");
 				final String itemId = path[1];
 				final int photoNo = Integer.parseInt(path[3]);
 				
@@ -323,6 +327,24 @@ public class JettyRunServlet {
 					resp.getOutputStream().close();
 				} catch (ItemStorageException ex) {
 					throw new ServletException("Failed to get photo", ex);
+				}
+			}
+			else if ((path = req.getPathInfo().split("/")).length == 2) {
+				// items/{itemId}
+				final String itemId = path[1];
+
+				try {
+					final ServiceItem item = itemService.getItem(itemId, req);
+					
+					if (item == null) {
+						resp.sendError(404);
+					}
+					else {
+						encodeJson(item, resp.getOutputStream());
+						resp.getOutputStream().close();
+					}
+				} catch (ItemStorageException ex) {
+					throw new ServletException("Failed to get item", ex);
 				}
 			}
 			else {
@@ -338,7 +360,15 @@ public class JettyRunServlet {
 		
 		return mapper.readValue(new ByteArrayInputStream(data), type);
 	}
-	
+
+	private static <T> void encodeJson(T item, OutputStream outputStream) throws IOException {
+		final ObjectMapper mapper = new ObjectMapper();
+		
+		mapper.setDateFormat(new StdDateFormat());
+		
+		mapper.writeValue(outputStream, item);
+	}
+
 	public static class LoginServlet extends HttpServlet {
 
 		private static final long serialVersionUID = 1L;

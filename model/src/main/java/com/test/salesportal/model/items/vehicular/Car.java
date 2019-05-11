@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.test.salesportal.model.FacetFiltering;
 import com.test.salesportal.model.annotations.DecimalRange;
+import com.test.salesportal.model.annotations.DisplayAttribute;
 import com.test.salesportal.model.annotations.Facet;
 import com.test.salesportal.model.annotations.FacetAttribute;
 import com.test.salesportal.model.annotations.FacetAttributes;
@@ -47,36 +48,43 @@ import com.test.salesportal.model.annotations.UpdateFacetDisplayName;
 public class Car extends Vehicle {
 	
 	@Column
-	@Facet("Type")
+	@Facet
+	@DisplayAttribute("Type")
 	private CarType carType;
 	
 	@Column
-	@Facet("Size")
+	@Facet
+	@DisplayAttribute("Size")
 	private CarSize size;
 
 	@Column
-	@Facet("Fuel")
+	@Facet
+	@DisplayAttribute(("Fuel"))
 	private Fuel fuel;
 
 	@Column
-	@Facet("Transmission")
+	@Facet
+	@DisplayAttribute("Transmission")
 	private Transmission transmission;
 
 	@Column
-	@Facet("Cylinders")
+	@Facet
+	@DisplayAttribute("Cylinders")
 	private Integer cylinders;
 
 	@Column
-	@Facet("Drive")
+	@Facet
+	@DisplayAttribute("Drive")
 	private Drive drive;
 
 	@Column
-	@Facet("Title status")
+	@Facet
+	@DisplayAttribute("Title status")
 	private TitleStatus titleStatus;
 	
 	@Sortable
 	@Column
-	@Facet(value = "Odometer", integerRanges = {
+	@Facet(integerRanges = {
 			@IntegerRange(upper=50000),
 			@IntegerRange(lower=50000,  upper=100000),
 			@IntegerRange(lower=100000, upper=150000),
@@ -86,10 +94,12 @@ public class Car extends Vehicle {
 			@IntegerRange(lower=300000),
 	})
 	@NumericAttributeFiltering(FacetFiltering.INPUT)
+	@DisplayAttribute("Odometer")
 	private Integer odometer;
 	
 	@Column
-	@Facet("Paint color")
+	@Facet
+	@DisplayAttribute("Paint color")
 	private String paintColor;
 	
 	@Column

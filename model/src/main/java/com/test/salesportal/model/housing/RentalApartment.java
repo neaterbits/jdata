@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.test.salesportal.model.annotations.DecimalRange;
+import com.test.salesportal.model.annotations.DisplayAttribute;
 import com.test.salesportal.model.annotations.Facet;
 import com.test.salesportal.model.annotations.FacetAttribute;
 import com.test.salesportal.model.annotations.FacetAttributes;
@@ -47,79 +48,98 @@ public class RentalApartment extends Housing {
 
 	
 	@Column
-	@Facet("Cost period")
+	@Facet
+	@DisplayAttribute("Cost period")
 	private CostPeriod costPeriod;
 	
 	@Column
-	@Facet("Apartment type")
+	@Facet
+	@DisplayAttribute("Apartment type")
 	private ApartmentType apartmentType;
 	
 	@Column
-	@Facet("Condition")
+	@Facet
+	@DisplayAttribute("Condition")
 	private ApartmentCondition condition;
 
 	@Column
-	@Facet("Renter")
+	@Facet
+	@DisplayAttribute("Renter")
 	private ApartmentRenter renter;
 	
 	@Column
-	@Facet("Agent company")
+	@Facet
+	@DisplayAttribute("Agent company")
 	private String agentCompany;
 
 	@Column
-	@Facet(value = "Agent", superAttribute = "agentCompany")
+	@Facet(superAttribute = "agentCompany")
+	@DisplayAttribute("Agent")
 	private String agent;
 
 	@Column
-	@Facet("Floor")
+	@Facet
+	@DisplayAttribute("Floor")
 	private Integer floor;
 
 	@Column
-	@Facet("Building floors")
+	@Facet
+	@DisplayAttribute(("Building floors"))
 	private Integer buildingFloors;
 
 	@Column
-	@Facet("Laundry")
+	@Facet
+	@DisplayAttribute("Laundry")
 	private Laundry laundry;
 	
 	@Column
-	@Facet("Parking")
+	@Facet
+	@DisplayAttribute("Parking")
 	private Parking parking;
 	
 	@Column
-	@Facet("Furnishment")
+	@Facet
+	@DisplayAttribute("Furnishment")
 	private Furnishment furnishment;
 
 	@Column
-	@Facet("Appliances")
+	@Facet
+	@DisplayAttribute("Appliances")
 	private Appliances appliances;
 
 	@Column
-	@Facet("Storeroom")
+	@Facet
+	@DisplayAttribute("Storeroom")
 	private StoreRoom storeRoom;
 
 	@Column
-	@Facet("Heating")
+	@Facet
+	@DisplayAttribute("Heating")
 	private Heating heating;
 
 	@Column
-	@Facet("Air conditioning")
+	@Facet
+	@DisplayAttribute("Air conditioning")
 	private AirConditioning airConditioning;
 
 	@Column
-	@Facet("Internet")
+	@Facet
+	@DisplayAttribute("Internet")
 	private Internet internet;
 
 	@Column
-	@Facet(value = "Smoking allowed", trueString="Yes", falseString="No")
+	@Facet
+	@DisplayAttribute(value = "Smoking allowed", trueString="Yes", falseString="No")
 	private Boolean smoking;
 
 	@Column
-	@Facet(value = "Cats allowed", trueString="Yes", falseString="No")
+	@Facet
+	@DisplayAttribute(value = "Cats allowed", trueString="Yes", falseString="No")
 	private Boolean cats;
 
 	@Column
-	@Facet(value = "Dogs allowed", trueString="Yes", falseString="No")
+	@Facet
+	@DisplayAttribute(value = "Dogs allowed", trueString="Yes", falseString="No")
 	private Boolean dogs;
 
 	public CostPeriod getCostPeriod() {

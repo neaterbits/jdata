@@ -2,7 +2,7 @@
  * Simple gallery item factory with static size elements
  */
 
-function SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl) {
+function SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl, adView) {
 
 	const ITEM_WIDTH = 300;
 	const ITEM_HEIGHT = 300;
@@ -11,10 +11,10 @@ function SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl) {
 	
 	const IMAGE_WIDTH = ITEM_WIDTH;
 	const IMAGE_HEIGHT = ITEM_HEIGHT - TEXT_HEIGHT;
-	
 
 	this.ajax = ajax;
 	this.getThumbUrl = getThumbUrl;
+	this.adView = adView;
 
 	this.getGalleryConfig = function() {
 		return {
@@ -51,6 +51,12 @@ function SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl) {
 		
 		_appendText(div, index, -1, data);
 		
+		div.onclick = function() {
+			if (!adView.isDisplayed()) {
+				adView.displayAd(data.id);
+			}
+		};
+		
 		return div;
 	}
 	
@@ -61,72 +67,24 @@ function SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl) {
 		div.style.height = ITEM_HEIGHT;
 
 		div.style.position = 'relative';
-		
-		var curShownThumbnail = 0;
-		
-		var currentImageDiv = document.createElement('div')
-		
-		
-		currentImageDiv.style.position = 'absolute';
-		currentImageDiv.style.left = 0;
-		currentImageDiv.style.top = 0;
-		currentImageDiv.style.width = ITEM_WIDTH;
-		currentImageDiv.style['z-index'] = 50;
-		
-		currentImageDiv.setAttribute('class', 'galleryCurrentThumbDiv');
-		
-		_setGalleryItemOverlayVisible(currentImageDiv, false);
 
+		var t = this;
+		
 		var numItemThumbnails = imageData.numItemThumbnails;
 
-		_updateCurrentImageDivText(currentImageDiv, curShownThumbnail, numItemThumbnails);
-		
-		div.append(currentImageDiv);
-		
-		var lastNavigatorDiv = _createNavigatorDiv(
-				div,
-				'galleryLastThumbDiv',
-				'galleryLastThumbArrowDiv',
-				function (navigatorWidth) { return 0; });
-
-		var nextNavigatorDiv = _createNavigatorDiv(
-				div,
-				'galleryNextThumbDiv',
-				'galleryNextThumbArrowDiv',
-				function (navigatorWidth) { return ITEM_WIDTH - navigatorWidth; });
-		
-		var isLastNavigatorEnabled = function(curShown) {
-			return curShownThumbnail != 0;
-		};
-		
-		var isNextNavigatorEnabled = function() {
-			return curShownThumbnail < numItemThumbnails - 1;
-		};
-		
-		var updateNavigators = function() {
-			_setGalleryItemOverlayVisible(lastNavigatorDiv, isLastNavigatorEnabled(curShownThumbnail));
-			_setGalleryItemOverlayVisible(nextNavigatorDiv, isNextNavigatorEnabled(curShownThumbnail));
-		};
-		
-		div.onmouseover = function() {
-			_setGalleryItemOverlayVisible(currentImageDiv, true);
-			
-			updateNavigators();
-		};
-		
-		div.onmouseout = function() {
-			
-			_setGalleryItemOverlayVisible(currentImageDiv, false);
-			_setGalleryItemOverlayVisible(lastNavigatorDiv, false);
-			_setGalleryItemOverlayVisible(nextNavigatorDiv, false);
-
-			/*
-			lastNavigatorDiv.visibility = 'hidden';
-			nextNavigatorDiv.visibility = 'hidden';
-			*/
-		};
-		
 		var image = document.createElement('img');
+
+		var navigator = new NavigatorOverlay(
+				numItemThumbnails,
+				div,
+				ITEM_WIDTH,
+				ITEM_HEIGHT,
+				function() { return ITEM_WIDTH / 6; },
+				function() { return ITEM_HEIGHT / 2; },
+				function (toShow, callback) {
+					t._onNavigate(image, provisionalData, toShow, callback);
+				});
+		
 
 		image.setAttribute('class', 'thumbnailImage');
 
@@ -139,125 +97,44 @@ function SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl) {
 
 		image.src = imageData.data;
 
-		var t = this;
-
-		lastNavigatorDiv.onclick = function() {
-
-			t._navigate(
-					image,
-					provisionalData,
-					isLastNavigatorEnabled,
-					function () { return curShownThumbnail - 1; },
-					function() {
-						-- curShownThumbnail;
-						_updateCurrentImageDivText(currentImageDiv, curShownThumbnail, numItemThumbnails);
-					},
-					updateNavigators
-			);
-		};
-
-		nextNavigatorDiv.onclick = function() {
-
-			t._navigate(
-					image,
-					provisionalData,
-					isNextNavigatorEnabled,
-					function () { return curShownThumbnail + 1; },
-					function() {
-						++ curShownThumbnail;
-						_updateCurrentImageDivText(currentImageDiv, curShownThumbnail, numItemThumbnails);
-					},
-					updateNavigators
-			);
-		};
-
 		div.append(image);
 		
 		_appendText(div, index, imageData.numItemThumbnails, provisionalData);
 		
+		div.onclick = function() {
+			if (!adView.isDisplayed()) {
+				adView.displayAd(provisionalData.id);
+			}
+		};
+
 		return div;
 	}
 	
-	
-	function _setGalleryItemOverlayVisible(div, visible) {
-		div.style.display = visible ? 'inline-block' : 'none';
-	}
-	
-	function _updateCurrentImageDivText(div, cur, count) {
-		div.innerHTML = 'Showing image ' + (cur + 1) + ' out of ' + count;
-	}
-	
-	this._navigate = function(image, provisionalData, isNavigatorEnabled, getToShowThumbnailNo, changeCurShownIndex, updateNavigatorsVisibility) {
+	this._onNavigate = function(image, provisionalData, toShow, callback) {
 		
-		if (isNavigatorEnabled()) {
-			
-			var itemId = provisionalData.id;
+		var itemId = provisionalData.id;
 
-			console.log('## navigator enabled');
-			
-			var toShow = getToShowThumbnailNo();
-			
-			var url = this.getThumbUrl(itemId, toShow);
-			
-			console.log('## load thumb from ' + url);
-			
-			this.ajax.getAjax(
-					url,
-					'arraybuffer',
-					function (buffer) {
-						changeCurShownIndex();
-						
-						updateNavigatorsVisibility();
-						
-						var dataView = new DataView(buffer);
-						
-						// base 64 encode binary data
-						var encoded = base64_encode(dataView, 0, dataView.byteLength);
-	
-						var data = 'data:image/jpeg;base64,' + encoded;
-						
-						var jsImage = new Image(300, 300);
-						jsImage.src = data;
-						
-						console.log('## image width ' + jsImage.clientWidth + '/' + jsImage);
-						
-						image.src = data;
-						console.log('## image width ' + image.naturalWidth + '/' + image.naturalHeight);
+		var url = this.getThumbUrl(itemId, toShow);
+		
+		this.ajax.getAjax(
+				url,
+				'arraybuffer',
+				function (buffer) {
+					
+					callback();
+					
+					var dataView = new DataView(buffer);
+					
+					// base 64 encode binary data
+					var encoded = base64_encode(dataView, 0, dataView.byteLength);
 
-						_adjustImageWidthAndHeight(image, image.naturalWidth, image.naturalHeight);
-					}
-			);
-		}
-		else {
-			console.log('## navigator not enabled');
-		}
-	}
-	
-	function _createNavigatorDiv(div, navigatorDivCSSClass, arrowDivCSSClass, getLeft, getTop) {
-		
-		var navigatorWidth = ITEM_WIDTH / 6;
-		var navigatorHeight = ITEM_HEIGHT / 2;
-		
-		var navigatorDiv = document.createElement('div');
-		navigatorDiv.style['z-index'] = 50;
-		navigatorDiv.style.position = 'absolute';
-		navigatorDiv.style.width = navigatorWidth;
-		navigatorDiv.style.height = navigatorHeight;
-		navigatorDiv.style.left = getLeft(navigatorWidth);
-		navigatorDiv.style.top = (ITEM_HEIGHT - navigatorHeight) / 2;
-		navigatorDiv.style.display = 'none';
-		
-		var arrowDiv = document.createElement('div');
-		
-		arrowDiv.setAttribute('class', arrowDivCSSClass);
-		
-		navigatorDiv.append(arrowDiv);
-		
-		navigatorDiv.setAttribute('class', navigatorDivCSSClass);
-		
-		div.append(navigatorDiv);
-	
-		return navigatorDiv;
+					var data = 'data:image/jpeg;base64,' + encoded;
+					
+					image.src = data;
+
+					_adjustImageWidthAndHeight(image, image.naturalWidth, image.naturalHeight);
+				}
+		);
 	}
 	
 	function _appendText(div, index, numItemThumbnails, provisionalData) {
@@ -379,5 +256,9 @@ function SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl) {
 		}
 		
 		return { 'width' : adjustedWidth, 'crop' : crop };
+	}
+
+	function _adjustImageWidthAndHeight(image, width, height) {
+		adjustImageWidthAndHeight(image, width, height, IMAGE_WIDTH, IMAGE_HEIGHT);
 	}
 }

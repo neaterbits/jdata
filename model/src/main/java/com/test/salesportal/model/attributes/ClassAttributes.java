@@ -15,13 +15,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
+import com.test.salesportal.model.AttributeEnum;
 import com.test.salesportal.model.FacetFiltering;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemAttribute;
 import com.test.salesportal.model.ItemAttributeValue;
 import com.test.salesportal.model.PropertyAttribute;
 import com.test.salesportal.model.annotations.DecimalRange;
+import com.test.salesportal.model.annotations.DisplayAttribute;
 import com.test.salesportal.model.annotations.Facet;
 import com.test.salesportal.model.annotations.FacetAttribute;
 import com.test.salesportal.model.annotations.FacetAttributes;
@@ -31,6 +34,7 @@ import com.test.salesportal.model.annotations.IndexItemAttribute;
 import com.test.salesportal.model.annotations.IndexItemAttributeTransient;
 import com.test.salesportal.model.annotations.IntegerRange;
 import com.test.salesportal.model.annotations.NumericAttributeFiltering;
+import com.test.salesportal.model.annotations.ServiceAttribute;
 import com.test.salesportal.model.annotations.Sortable;
 import com.test.salesportal.model.annotations.UpdateFacetDisplayName;
 import com.test.salesportal.model.items.ItemTypes;
@@ -192,7 +196,9 @@ public class ClassAttributes {
 				sortableTitle = null;
 				sortablePriority = -1;
 			}
-					
+			
+			final DisplayAttribute displayAttribute = findAnnotation(DisplayAttribute.class, type, propertyDescriptor);
+		
 			final boolean isFacet;
 			String facetDisplayName;
 			final String facetSuperAttribute;
@@ -205,12 +211,12 @@ public class ClassAttributes {
 
 			if (fieldFacet != null) {
 				isFacet = true;
-				facetDisplayName = fieldFacet.value();
+				facetDisplayName = getStringValue(fieldFacet, f -> f.displayName(), displayAttribute, d -> d.value());
 				facetSuperAttribute = fieldFacet.superAttribute();
 				integerRanges = fieldFacet.integerRanges();
 				decimalRanges = fieldFacet.decimalRanges();
-				trueString = fieldFacet.trueString();
-				falseString = fieldFacet.falseString();
+				trueString = getStringValue(fieldFacet, f -> f.trueString(), displayAttribute, d -> d.trueString());
+				falseString = getStringValue(fieldFacet, f -> f.falseString(), displayAttribute, d -> d.falseString());
 			}
 			else {
 				// Check if specified in subclass
@@ -218,12 +224,12 @@ public class ClassAttributes {
 				
 				if (facetAttribute != null) {
 					isFacet = true;
-					facetDisplayName = facetAttribute.displayName();
+					facetDisplayName = getStringValue(facetAttribute, f -> f.displayName(), displayAttribute, d -> d.value());
 					facetSuperAttribute = facetAttribute.superAttribute();
 					integerRanges = facetAttribute.integerRanges();
 					decimalRanges = facetAttribute.decimalRanges();
-					trueString = facetAttribute.trueString();
-					falseString = facetAttribute.falseString();
+					trueString = getStringValue(facetAttribute, f -> f.trueString(), displayAttribute, d -> d.trueString());
+					falseString = getStringValue(facetAttribute, f -> f.falseString(), displayAttribute, d -> d.falseString());
 				}
 				else {
 					isFacet = false;
@@ -285,16 +291,35 @@ public class ClassAttributes {
 					? indexItemAttribute.name()
 					: null;
 
+
+			final String attributeName = PropertyAttribute.getName(fieldNameOverride, propertyDescriptor);
+
 			if (isFacet) {
 				final UpdateFacetDisplayName updateFacetDisplayName = type.getAnnotation(UpdateFacetDisplayName.class);
-				
-				final String attributeName = PropertyAttribute.getName(fieldNameOverride, propertyDescriptor);
 				
 				if (updateFacetDisplayName != null && updateFacetDisplayName.attributeName().equals(attributeName)) {
 					facetDisplayName = updateFacetDisplayName.updatedDisplayName();
 				}
 			}
+			
+			final ServiceAttribute serviceAttribute = findAnnotation(
+					ServiceAttribute.class,
+					type,
+					propertyDescriptor);
 					
+			final String serviceAttributeName;
+			
+			if (serviceAttribute != null) {
+				serviceAttributeName = getStringValue(
+						serviceAttribute,
+						sa -> sa.name(),
+						attributeName,
+						Function.identity());
+			}
+			else {
+				serviceAttributeName = null;
+			}
+			
 			final ItemAttribute attribute = new ItemAttribute(
 					type,
 					propertyDescriptor,
@@ -304,6 +329,8 @@ public class ClassAttributes {
 					isSortable,
 					sortableTitle,
 					sortablePriority,
+					serviceAttributeName,
+					displayAttribute != null ? displayAttribute.value().trim() : null,
 					isFacet,
 					facetDisplayName,
 					facetSuperAttribute != null ? (facetSuperAttribute.trim().isEmpty() ? null : facetSuperAttribute.trim()) : null,
@@ -317,6 +344,37 @@ public class ClassAttributes {
 		}
 
 		return new ClassAttributes(type, attributes);
+	}
+	
+	private static <T, U> String getStringValue(T value1, Function<T, String> value1String, U value2, Function<U, String> value2String) {
+		
+		final String value1Str = getStringValueOrNull(value1, value1String);
+		
+		return value1Str != null ? value1Str : getStringValueOrNull(value2, value2String);
+	}
+
+	
+	private static <T> String getStringValueOrNull(T value1, Function<T, String> value1String) {
+		
+		String valueStr;
+		
+		if (value1 == null) {
+			valueStr = null;
+		}
+		else {
+			valueStr = value1String.apply(value1);
+			
+			final String trimmed = valueStr.trim();
+			
+			if (trimmed.isEmpty()) {
+				valueStr = null;
+			}
+			else {
+				valueStr = trimmed;
+			}
+		}
+		
+		return valueStr;
 	}
 
 	
@@ -394,4 +452,31 @@ public class ClassAttributes {
 	public void forEach(Consumer<ItemAttribute> consumer) {
 		attributes.forEach(consumer);
 	}
+
+	public static Object getAttributeDisplayValue(ItemAttribute attribute, Object value) {
+		final Object displayValue;
+		
+		if (value instanceof AttributeEnum) {
+			displayValue = ((AttributeEnum)value).getDisplayName();
+		}
+		else if (value instanceof Boolean) {
+			final boolean val = (Boolean)value;
+			
+			if (val && attribute.getTrueString() != null) {
+				displayValue = attribute.getTrueString();
+			}
+			else if (!val && attribute.getFalseString() != null) {
+				displayValue = attribute.getFalseString();
+			}
+			else {
+				displayValue = value;
+			}
+		}
+		else {
+			displayValue = value;
+		}
+
+		return displayValue;
+	}
 }
+

@@ -2,10 +2,18 @@ package com.test.salesportal.dao;
 
 import java.io.InputStream;
 
+import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemPhoto;
 
 public interface IItemRetrieval extends AutoCloseable {
 	
+	/**
+	 * Find detailed information about an item
+	 */
+	IFoundItem getItem(String userId, String itemId) throws ItemStorageException;
+
+	Item getItem(String itemId) throws ItemStorageException;
+
 	InputStream getItemThumb(String itemId, int thumbNo) throws ItemStorageException;
 
 	int getPhotoCount(String itemId) throws ItemStorageException;

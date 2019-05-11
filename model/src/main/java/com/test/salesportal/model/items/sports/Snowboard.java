@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.test.salesportal.model.annotations.DecimalRange;
+import com.test.salesportal.model.annotations.DisplayAttribute;
 import com.test.salesportal.model.annotations.Facet;
 import com.test.salesportal.model.annotations.FacetAttribute;
 import com.test.salesportal.model.annotations.FacetAttributes;
@@ -32,7 +33,8 @@ import com.test.salesportal.model.annotations.FacetEntity;
 @XmlRootElement
 public class Snowboard extends SportsItem {
 
-	@Facet("Profile")
+	@Facet
+	@DisplayAttribute("Profile")
 	@Column
 	private SnowboardProfile profile;
 	
