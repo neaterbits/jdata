@@ -53,8 +53,16 @@ public interface IItemStorage extends AutoCloseable {
 	 * @param consumer
 	 * @throws StorageException
 	 */
+	
+	@FunctionalInterface
+	public interface OnThumbnails {
+		void onThumbnails(ImageResult imageResult, ItemId itemId, int numItemThumbnails);
+	}
+	
 	void retrieveThumbnails(ItemId [] itemIds, BiConsumer<ImageResult, ItemId> consumer) throws StorageException;
 
+	void retrieveThumbnailsWithCount(ItemId [] itemIds, OnThumbnails consumer) throws StorageException;
+	
 	void movePhotoAndThumbnailForItem(String userId, String itemId, int photoNo, int toIndex) throws StorageException;
 	
 	int getNumFiles(String userId, String itemId, ItemFileType itemFileType) throws StorageException;

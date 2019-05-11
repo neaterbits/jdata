@@ -194,6 +194,28 @@ public class ItemService extends BaseService {
 	}
 	
 	@GET
+	@Path("items/{itemId}/thumbs") 
+	@Produces({"image/jpeg"})
+	public byte [] getThumb(
+			@PathParam("itemId") String itemId,
+			@QueryParam("thumbNo") int photoNo,
+			HttpServletRequest request) throws IOException, ItemStorageException {
+	
+		final InputStream photoStream = getItemRetrievalDAO(request).getItemThumb(itemId, photoNo);
+
+		final byte[] data;
+		try {
+			data = IOUtil.readAll(photoStream);
+		}
+		finally {
+			photoStream.close();
+		}
+
+		return data;
+	}
+
+	
+	@GET
 	@Path("items/{itemId}/photos") 
 	@Produces({"image/jpeg"})
 	public byte [] getPhoto(
@@ -214,8 +236,6 @@ public class ItemService extends BaseService {
 		return data;
 	}
 	
-
-	
 	private static RenderedImage imageToRenderedImage(Image image) {
 		final BufferedImage bufferedImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
 		
@@ -225,5 +245,4 @@ public class ItemService extends BaseService {
 		
 		return bufferedImage;
 	}
-
 }

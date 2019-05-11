@@ -279,7 +279,23 @@ public class JettyRunServlet {
 				resp.setHeader("Access-Control-Allow-Origin", "*");
 			}
 
-			if (req.getPathInfo() != null && req.getPathInfo().contains("photoCount")) {
+			if (req.getPathInfo() != null && req.getPathInfo().contains("thumbs")) {
+				
+				// items/{itemId/photos/{photoNo}
+				final String [] path = req.getPathInfo().split("/");
+				final String itemId = path[1];
+				final int thumbNo = Integer.parseInt(path[3]);
+				
+				try {
+					final byte [] data = itemService.getThumb(itemId, thumbNo, req);
+
+					resp.getOutputStream().write(data);
+					resp.getOutputStream().close();
+				} catch (ItemStorageException ex) {
+					throw new ServletException("Failed to get photo", ex);
+				}
+			}
+			else if (req.getPathInfo() != null && req.getPathInfo().contains("photoCount")) {
 				final String itemId = req.getPathInfo().split("/")[1];
 
 				try {

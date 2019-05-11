@@ -6,6 +6,8 @@ import com.test.salesportal.model.ItemPhoto;
 
 public interface IItemRetrieval extends AutoCloseable {
 	
+	InputStream getItemThumb(String itemId, int thumbNo) throws ItemStorageException;
+
 	int getPhotoCount(String itemId) throws ItemStorageException;
 
 	/**

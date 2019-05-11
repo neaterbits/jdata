@@ -79,6 +79,11 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	}
 
 	@Override
+	public InputStream getItemThumb(String itemId, int thumbNo) throws ItemStorageException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public ItemPhoto getItemPhoto(String userId, IFoundItemPhotoThumbnail thumbnail) {
 		
 		final long thumbnailId = Long.parseLong(thumbnail.getId());
@@ -460,8 +465,8 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	private static class JPAThumbnail extends Thumbnail {
 		private final String itemId;
 
-		public JPAThumbnail(String mimeType, int thumbnailSize, InputStream thumbnail, String itemId) {
-			super(mimeType, thumbnailSize, thumbnail);
+		public JPAThumbnail(String mimeType, int thumbnailSize, InputStream thumbnail, int numItemThumbnails, String itemId) {
+			super(mimeType, thumbnailSize, thumbnail, numItemThumbnails);
 
 			this.itemId = itemId;
 		}
@@ -499,7 +504,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 		}
 		
 		final List<JPAThumbnail> thumbnails = rows.stream()
-			.map(row -> new JPAThumbnail((String)row[1], -1, new ByteArrayInputStream((byte[])row[2]), String.valueOf((Long)row[0])))
+			.map(row -> new JPAThumbnail((String)row[1], -1, new ByteArrayInputStream((byte[])row[2]), -1, String.valueOf((Long)row[0])))
 			.collect(Collectors.toList());
 		
 		// Sort the thumbnails according to their place
@@ -507,7 +512,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 		
 		for (int i = 0; i < itemIds.length; ++ i) {
 			// Set to empty thumbnail by default
-			sorted.add(new JPAThumbnail("", 0, null, itemIds[i]));
+			sorted.add(new JPAThumbnail("", 0, null, 1, itemIds[i]));
 		}
 		
 		for (JPAThumbnail thumbnail : thumbnails) {

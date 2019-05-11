@@ -21,12 +21,14 @@ public abstract class RetrieveThumbnailsInputStream extends InputStream {
 		public final String mimeType;
 		public final int thumbnailSize;
 		public final InputStream thumbnail;
+		public final int numItemThumbnails;
 
-		public Thumbnail(String mimeType, int thumbnailSize, InputStream thumbnail) {
+		public Thumbnail(String mimeType, int thumbnailSize, InputStream thumbnail, int numItemThumbnails) {
 			
 			this.mimeType = mimeType;
 			this.thumbnailSize = thumbnailSize;
 			this.thumbnail = thumbnail;
+			this.numItemThumbnails = numItemThumbnails;
 		}
 
 		@Override
@@ -146,7 +148,7 @@ public abstract class RetrieveThumbnailsInputStream extends InputStream {
 			// Unknown size, just read all into byte buffer in order to figure out size
 			final byte [] data = IOUtil.readAll(thumbnail.thumbnail);
 		
-			result = new Thumbnail(thumbnail.mimeType, data.length, new ByteArrayInputStream(data));
+			result = new Thumbnail(thumbnail.mimeType, data.length, new ByteArrayInputStream(data), thumbnail.numItemThumbnails);
 			
 			try {
 				thumbnail.thumbnail.close();
@@ -161,7 +163,7 @@ public abstract class RetrieveThumbnailsInputStream extends InputStream {
 		
 		if (result.thumbnailSize == 0) {
 			// just add empty data to metadata
-			this.metadata = new byte[5];
+			this.metadata = new byte[9];
 			Arrays.fill(metadata, (byte)0);
 		}
 		else {
@@ -171,6 +173,7 @@ public abstract class RetrieveThumbnailsInputStream extends InputStream {
 			final DataOutputStream dataOut = new DataOutputStream(baos);
 			
 			dataOut.writeInt(result.thumbnailSize);
+			dataOut.writeInt(result.numItemThumbnails);
 			
 			dataOut.writeBytes(result.mimeType);
 			dataOut.writeByte(0);

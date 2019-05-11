@@ -153,6 +153,20 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 
 		return result;
 	}
+	
+	private ImageResult getThumb(String userId, String itemId, int thumbNo) throws ItemStorageException {
+
+		final ImageResult image;
+
+		try {
+			image = xmlStorage.getThumbnailForItem(userId, itemId, thumbNo);
+		} catch (StorageException ex) {
+			throw new ItemStorageException("Failed to get photo", ex);
+		}
+
+		return image;
+	}
+
 
 	private ImageResult getPhoto(String userId, String itemId, int photoNo) throws ItemStorageException {
 
@@ -166,7 +180,22 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 
 		return image;
 	}
-	
+
+	@Override
+	public InputStream getItemThumb(String itemId, int photoNo) throws ItemStorageException {
+
+		final ItemId id;
+		try {
+			id = index.expandToItemIdUserId(itemId);
+		} catch (ItemIndexException ex) {
+			throw new ItemStorageException("Failed to get user id");
+		}
+
+		final ImageResult image = getThumb(id.getUserId(), itemId, photoNo);
+
+		return image.inputStream;
+	}
+
 	@Override
 	public ItemPhoto getItemPhoto(String userId, IFoundItemPhotoThumbnail thumbnail) throws ItemStorageException {
 
@@ -379,11 +408,11 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		
 		// default to no thumbnail
 		for (int i = 0; i < itemIds.length; ++ i) {
-			sorted.add(new Thumbnail("", 0, null));
+			sorted.add(new Thumbnail("", 0, null, 0));
 		}
 
 		try {
-			xmlStorage.retrieveThumbnails(itemIds, (imageResult, itemId) -> {
+			xmlStorage.retrieveThumbnailsWithCount(itemIds, (imageResult, itemId, numThumbnailsForItem) -> {
 				
 				if (imageResult == null) {
 					throw new IllegalArgumentException("imageResult == null");
@@ -399,7 +428,7 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 
 				final int index = map.get(itemId.getItemId());
 
-				sorted.set(index, new Thumbnail(imageResult.mimeType, imageResult.imageSize, imageResult.inputStream));
+				sorted.set(index, new Thumbnail(imageResult.mimeType, imageResult.imageSize, imageResult.inputStream, numThumbnailsForItem));
 			});
 		}
 		catch (StorageException ex) {

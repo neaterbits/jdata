@@ -3,6 +3,7 @@
 <link rel="stylesheet" type="text/css" href="css/facets.css">
 <link rel="stylesheet" type="text/css" href="css/searchview.css">
 
+<script src="js/base64.js" type="text/javascript"></script>
 <script src="js/facetpath.js" type="text/javascript"></script>
 <script src="js/facetviewelements.js" type="text/javascript"></script>
 <script src="js/facetview.js" type="text/javascript"></script>
@@ -100,6 +101,10 @@
 			return getBaseUrl() + "/items/" + itemId + "/photos/" + photoNo;
 		}
 
+		var getThumbUrl = function(itemId, thumbNo) {
+			return getBaseUrl() + "/items/" + itemId + "/thumbs/" + thumbNo;
+		}
+
 		var searchView = new SearchView(
 					getSearchUrl(useTestData),
 					getThumbsUrl(useTestData),
@@ -110,7 +115,7 @@
 					'fulltextButton',
 					'numberOfItemsCount',
 					'sortListBox',
-					new SimpleStaticSizeGalleryItemFactory()
+					new SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl)
 					// new SimpleDynamicSizeGalleryItemFactory()
 					// new RentalApartmentGalleryItemFactory(ajax, getPhotoCountUrl, getPhotoUrl)
 		);
@@ -120,6 +125,10 @@
 	
 	function getBaseUrl() {
 		return "http://localhost:8080";
+	}
+	
+	function getItemsBaseUrl() {
+		return getBaseUrl() + '/items'
 	}
 	
 	function getSearchBaseUrl() {
@@ -135,7 +144,7 @@
 
 		return url;
 	}
-
+	
 	function getThumbsUrl(testdata) {
 		var url = getSearchUrl() + "/thumbnails";
 
