@@ -108,7 +108,14 @@
 			</div>
 			<div id="ad_view_description_div"></div>
 		</div>
-		<div id="ad_view_map_and_contact_div">Map view</div>
+		<div id="ad_view_map_and_contact_div">
+		<iframe id="ad_view_map_iframe"
+			width="300"
+			height="300"
+			frameborder="0" style="border:0"
+			allowfullscreen>
+		</iframe>
+		</div>
 	</div>
 </div>
 </div>

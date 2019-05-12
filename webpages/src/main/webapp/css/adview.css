@@ -66,6 +66,10 @@
 	display: inline-block;
 }
 
+#ad_view_map_iframe {
+	display : block;
+}
+
 #ad_view_description_div {
 	display: block;
 }

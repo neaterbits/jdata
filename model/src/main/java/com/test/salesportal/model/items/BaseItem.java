@@ -29,6 +29,14 @@ public abstract class BaseItem extends Item {
 	@Column
 	private String descriptionHtml;
 	
+	@ServiceAttribute
+	@Column
+	private String latitude;
+	
+	@ServiceAttribute
+	@Column
+	private String longtitude;
+	
 	// Non-searchable sub items, eg items that are part of the same package and
 	// not sold separately, eg ski poles that belong to skies or snowboard bindings not sold separately
 	// TODO better way to model this?
@@ -67,5 +75,21 @@ public abstract class BaseItem extends Item {
 
 	public void setDescriptionHtml(String descriptionHtml) {
 		this.descriptionHtml = descriptionHtml;
+	}
+
+	public String getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getLongtitude() {
+		return longtitude;
+	}
+
+	public void setLongtitude(String longtitude) {
+		this.longtitude = longtitude;
 	}
 }

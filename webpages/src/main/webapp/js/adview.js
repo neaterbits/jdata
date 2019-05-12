@@ -105,6 +105,17 @@ function AdView(div, loadItemData, getPhotoUrl) {
 			photoViewer.displayPhoto(0);
 		}
 		
+		var mapIFrame = document.getElementById('ad_view_map_iframe');
+		
+		var latitude = itemData.serviceAttributes.latitude;
+		var longtitude = itemData.serviceAttributes.longtitude;
+		
+		if (typeof latitude !== 'undefined' && typeof longtitude !== 'undefined') {
+			mapIFrame.src = "https://www.google.com/maps/embed/v1/place"
+				+ "?q=+" + latitude + ",+" + longtitude
+				+ "&key=AIzaSyA_out7Cciix5uutqxCEKQg0qFmHln9HtQ";
+		}
+		
 		var descriptionDiv = document.getElementById('ad_view_description_div');
 		
 		console.log('## setting description to ' + itemData.serviceAttributes.descriptionHtml);
