@@ -35,6 +35,8 @@
 #ad_view_main_div {
 	display: inline-block;
 	
+	width: 50%;
+	
 	vertical-align: top;
 }
 
@@ -44,7 +46,7 @@
 
 #ad_view_photos_div {
 	position: relative;
-	display: inline-block;
+	display: block;
 	vertical-align: top;
 }
 
@@ -60,7 +62,7 @@
 	display: block;
 }
 
-#ad_view_map_and_photos_div {
+#ad_view_map_and_contact_div {
 	display: inline-block;
 }
 

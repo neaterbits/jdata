@@ -106,9 +106,9 @@
 					<img id="ad_view_photo"/>
 				</div>
 			</div>
-			<div id="ad_view_map_and_photos_div">Map view</div>
 			<div id="ad_view_description_div"></div>
 		</div>
+		<div id="ad_view_map_and_contact_div">Map view</div>
 	</div>
 </div>
 </div>
