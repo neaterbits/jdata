@@ -84,8 +84,12 @@ function AdView(div, loadItemData, getPhotoUrl) {
 		
 		photosDiv.style.width = PHOTO_WIDTH;
 		photosDiv.style.height = PHOTO_HEIGHT;
-		
+	
 		var photoDiv = document.getElementById('ad_view_photo_div');
+		
+		photoDiv.style.width = PHOTO_WIDTH;
+		photoDiv.style.height = PHOTO_HEIGHT;
+		
 		var photoImage = document.getElementById('ad_view_photo');
 		
 		if (itemData.photoCount > 0) {

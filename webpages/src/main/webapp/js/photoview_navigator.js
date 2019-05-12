@@ -32,16 +32,15 @@ function PhotoViewWithNavigator(
 	
 	this.displayPhoto = function(index) {
 		
-		console.log('## displayPhoto ' + index);
-
 		// Set image URL to download image
-		this.image.src = this.getPhotoUrl(itemId, index);
-		this.image.style.width = containerWidth;
-		this.image.style.height = containerHeight;
+
+		this.image.onload = function() {
+			adjustImageWidthAndHeight(
+					image,
+					image.naturalWidth, image.naturalHeight,
+					containerWidth, containerHeight);
+		}
 		
-		adjustImageWidthAndHeight(
-				image,
-				image.naturalWidth, image.naturalHeight,
-				containerWidth, containerHeight);
+		this.image.src = this.getPhotoUrl(itemId, index);
 	}
 }

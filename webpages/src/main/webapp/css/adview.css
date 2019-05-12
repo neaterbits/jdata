@@ -56,6 +56,10 @@
 	box-shadow: 2px 2px 1px #CCCCCC;
 }
 
+#ad_view_photo {
+	display: block;
+}
+
 #ad_view_map_and_photos_div {
 	display: inline-block;
 }
