@@ -1,13 +1,13 @@
 @CHARSET "UTF-8";
 
 #single_ad_view_wrapper {
-	position: absolute;;
+	position: absolute;
 	z-index: 100;
 	
 	left: 2%;
 	top: 2%;
-	width: 93%;
-	height: 93%;
+	width: 96%;
+	height: 96%;
 	background-color: white;
 	display: none;
 	box-sizing: border-box;
@@ -16,14 +16,69 @@
 	border-radius: 25px;
 	
 	padding: 20px;
+	
+	box-sizing: border-box;
 }
 
 
 #single_ad_view {
+	/* position: relative; */
 	overflow: auto;
 	
 	width: 100%;
 	height: 100%;
+}
+
+#ad_view_navigation_div {
+	position: absolute;
+	z-index: 50;
+	
+	left: 50%;
+	top: -15px;
+
+	transform: translateX(-50%);
+}
+
+.ad_view_header_button {
+/*
+	background-color: #101010;
+	color: white;
+*/
+
+	background-color: white;
+	border: 2px solid #777777;
+	
+	display: inline-block;
+	text-align: center;
+	
+	user-select: none;
+}
+
+.ad_view_header_button:hover {
+	background-color: #F0F0F0;
+}
+
+.ad_view_navigation_button {
+	border-radius: 3px;
+	width: 4em;
+	height: 25px;
+	font-size: 20px;
+}
+
+#ad_view_close_button {
+	position: absolute;
+	right: -10px;
+	top: -15px;
+	width: 30px;
+	height: 30px;
+	border-radius: 17px;
+	font-family: sans-serif;
+	display: table;
+}
+
+#ad_view_close_button_inner {
+	display: table-cell;
+	vertical-align: middle;
 }
 
 #ad_view_title {
@@ -42,6 +97,8 @@
 
 #ad_view_details_div {
 	display: inline-block;
+	vertical-align: top;
+	width: 25%;
 }
 
 #ad_view_photos_div {
@@ -56,6 +113,7 @@
 	display: block;
 
 	box-shadow: 2px 2px 1px #CCCCCC;
+	border: 1px solid #AAAAAA;
 }
 
 #ad_view_photo {
@@ -70,7 +128,16 @@
 	display : block;
 }
 
+#ad_view_map_div {
+	border: 1px solid #AAAAAA;
+}
+
+#ad_view_map_iframe {
+
+}
+
 #ad_view_description_div {
+	margin-top: 0.75em;
 	display: block;
 }
 

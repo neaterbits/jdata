@@ -49,6 +49,7 @@ function NavigatorOverlay(
 	var t = this;
 
 	var navigator = new Navigator(
+			0,
 			numItems,
 			lastNavigatorDiv,
 			nextNavigatorDiv,

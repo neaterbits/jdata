@@ -3,10 +3,10 @@
  * 
  */
 
-function Navigator(numItems, lastNavigatorDiv, nextNavigatorDiv, startUpdate) {
+function Navigator(itemIndex, numItems, lastNavigatorDiv, nextNavigatorDiv, startUpdate) {
 	
-	this.curShownIndex = 0;
-	this.numItems = numItems;
+	_reset(this, itemIndex, numItems);
+
 	this.startUpdate = startUpdate;
 	
 	this._isLastNavigatorEnabled = function(curShown) {
@@ -48,6 +48,10 @@ function Navigator(numItems, lastNavigatorDiv, nextNavigatorDiv, startUpdate) {
 
 		event.stopPropagation();
 	};
+	
+	this.reset = function(itemIndex, numItems) {
+		_reset(this, itemIndex, numItems);
+	}
 
 	this._navigate = function(isNavigatorEnabled, getToShowIndex, changeCurShownIndex, startUpdate) {
 		
@@ -83,4 +87,22 @@ function Navigator(numItems, lastNavigatorDiv, nextNavigatorDiv, startUpdate) {
 	this.getNavigatorState = function() {
 		return this._getNavigatorState(this.curShownIndex);
 	};
+	
+	function _reset(navigator, itemIndex, numItems) {
+		
+		if (itemIndex >= numItems) {
+			throw "itemIndex >= numItems";
+		}
+		
+		if (itemIndex < 0) {
+			throw "itemIndex < 0";
+		}
+		
+		if (numItems < 0) {
+			throw "numItems < 0";
+		}
+		
+		navigator.curShownIndex = itemIndex;
+		navigator.numItems = numItems;
+	}
 }

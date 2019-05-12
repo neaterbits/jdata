@@ -94,6 +94,14 @@
 
 <!-- Single ad view, displayed atop of gallery -->
 <div id="single_ad_view_wrapper">
+	<div id="ad_view_navigation_div">
+		<div id="ad_view_last_button" class="ad_view_navigation_button ad_view_header_button">&lt;</div>
+		<div id="ad_view_next_button" class="ad_view_navigation_button ad_view_header_button">&gt;</div>
+	</div>
+	
+	<div id="ad_view_close_button" class="ad_view_header_button">
+		<div id="ad_view_close_button_inner">x</div>
+	</div>
 <div id="single_ad_view">
 	<h1 id="ad_view_title"></h1>
 	<div>
@@ -109,12 +117,14 @@
 			<div id="ad_view_description_div"></div>
 		</div>
 		<div id="ad_view_map_and_contact_div">
-		<iframe id="ad_view_map_iframe"
-			width="300"
-			height="300"
-			frameborder="0" style="border:0"
-			allowfullscreen>
-		</iframe>
+			<div id="ad_view_map_div">
+				<iframe id="ad_view_map_iframe"
+					width="300"
+					height="300"
+					frameborder="0" style="border:0"
+					allowfullscreen>
+				</iframe>
+			</div>
 		</div>
 	</div>
 </div>
@@ -139,15 +149,13 @@
 			return getBaseUrl() + "/items/" + itemId + "/thumbs/" + thumbNo;
 		}
 
-		var loadItem = function(itemId, onSuccess, onError) {
+		var loadItemByItemId = function(itemId, onSuccess, onError) {
 			ajax.getAjax(
 				getBaseUrl() + "/items/" + itemId,
 				'json',
 				onSuccess
 			);
 		}
-		
-		var adView = new AdView(document.getElementById('single_ad_view_wrapper'), loadItem, getPhotoUrl);
 		
 		var searchView = new SearchView(
 					getSearchUrl(useTestData),
@@ -159,7 +167,16 @@
 					'fulltextButton',
 					'numberOfItemsCount',
 					'sortListBox',
-					new SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl, adView)
+					loadItemByItemId,
+					function (loadItemDataByIndex) {
+						return new AdView(
+								document.getElementById('single_ad_view_wrapper'),
+								loadItemDataByIndex,
+								getPhotoUrl);
+					},
+					function (getAdView) {
+						return new SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl, getAdView);
+					}
 					// new SimpleDynamicSizeGalleryItemFactory()
 					// new RentalApartmentGalleryItemFactory(ajax, getPhotoCountUrl, getPhotoUrl)
 		);

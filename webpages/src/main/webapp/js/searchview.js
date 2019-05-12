@@ -15,7 +15,9 @@ function SearchView(
 		searchButtonId,
 		searchHitsCountId,
 		sortListboxId,
-		galleryItemFactory) {
+		loadItemByItemId,
+		makeAdView,
+		makeGalleryItemFactory) {
 
 	// Reasons for refreshing
 	var REFRESH_INITIAL = 0; 			// Initial refresh, ie. when retrieving initial model
@@ -48,12 +50,35 @@ function SearchView(
 	this.thumbsUrl = thumbsUrl;
 	
 	this.ajax = ajax;
-	this.galleryItemFactory = galleryItemFactory;
 	
 	this.facetView = facetView;
 	this.facetModel = facetModel;
 	this.facetController = facetController;
-	this.gallery = _initGallery(this, galleryDivId);
+	
+	var adView = makeAdView(function (index, onSuccess, onError) {
+		
+		var itemId = t.curResponse.items[index].id;
+
+		loadItemByItemId(
+				itemId,
+				function (item) {
+					onSuccess(item);
+				},
+				function (errorMesage) {
+					onError(errorMesage);
+				});
+		
+	});
+
+	this.galleryItemFactory = makeGalleryItemFactory(function() {
+		return {
+			'isDisplayed' : function() { return adView.isDisplayed(); },
+			'displayAd' : function(index) { return adView.displayAd(index, t.curResponse.items.length); }
+		};
+	});
+
+	
+	this.gallery = _initGallery(this, galleryDivId, this.galleryItemFactory);
 
 	this.hasPerformedInitialSearch = false;
 	this.curResponse = null;
@@ -262,7 +287,7 @@ function SearchView(
 		ajax.sendAjax(url, method, responseType, requestContentType, requestContent, onsuccess);
 	};
 
-	function _initGallery(searchView, galleryDivId) {
+	function _initGallery(searchView, galleryDivId, galleryItemFactory) {
 		
 		var appendToContainer = function(container, element) { container.append(element); };
 		var setElementHeight = function(element, heightPx) {
@@ -278,8 +303,12 @@ function SearchView(
 					getCompleteData 	: function (index, count, onsuccess) { searchView._getGalleryThumbnailImages(index, count, onsuccess); }
 				},
 				{
-					makeProvisionalHTMLElement 	: _makeGalleryProvisionalItem,
-					makeCompleteHTMLElement 	: _makeGalleryImageItem,
+					makeProvisionalHTMLElement 	: function(index, data) {
+						return _makeGalleryProvisionalItem(index, data, galleryItemFactory);
+					},
+					makeCompleteHTMLElement 	: function(index, provisionalData, imageData) {
+						return _makeGalleryImageItem(index, provisionalData, imageData, galleryItemFactory);
+					},
 					
 					// Element access methods
 					createUpperPlaceHolder : function () { return document.createElement('div'); },
@@ -348,11 +377,11 @@ function SearchView(
 		);
 	}
 
-	function _makeGalleryProvisionalItem(index, data) {
+	function _makeGalleryProvisionalItem(index, data, galleryItemFactory) {
 		return galleryItemFactory.makeProvisionalItem(index, data);
 	}
 	
-	function _makeGalleryImageItem(index, provisionalData, imageData) {
+	function _makeGalleryImageItem(index, provisionalData, imageData, galleryItemFactory) {
 		return galleryItemFactory.makeImageItem(index, provisionalData, imageData);
 	}
 	

@@ -2,7 +2,7 @@
  * 
  */
 
-function AdView(div, loadItemData, getPhotoUrl) {
+function AdView(div, loadItemDataByIndex, getPhotoUrl) {
 	
 	const PHOTO_WIDTH = 600;
 	const PHOTO_HEIGHT = 450;
@@ -12,36 +12,61 @@ function AdView(div, loadItemData, getPhotoUrl) {
 	}
 	
 	this.div = div;
-	this.loadItemData = loadItemData;
+	this.loadItemDataByIndex = loadItemDataByIndex;
 	this.getPhotoUrl = getPhotoUrl;
 	
 	this.displayed = false;
 	
 	var t = this;
 
-	/*
-	div.onclick = function() {
+	var closeButton = document.getElementById('ad_view_close_button');
+	
+	var lastButton = document.getElementById('ad_view_last_button');
+	var nextButton = document.getElementById('ad_view_next_button');
+	
+	this.navigator = new Navigator(
+			0,
+			1,
+			lastButton,
+			nextButton,
+			function (toShow, callback) {
+				
+				t._loadAndRenderAd(toShow, function() {
+					callback();
+				});
+			}
+	);
+	
+	closeButton.onclick = function() {
 		div.style.display = 'none';
 
 		t.displayed = false;
 	}
-	*/
 
-	this.displayAd = function(itemId) {
-		
+	this.displayAd = function(itemIndex, itemCount) {
+	
 		if (this.displayed) {
 			throw "Already displayed";
 		}
-		
+
+		this.navigator.reset(itemIndex, itemCount);
+
+		this._loadAndRenderAd(itemIndex, function() {
+			t.div.style.display = 'inline-block';
+			t.displayed = true;
+		});
+	}
+
+	this._loadAndRenderAd = function(itemIndex, onDisplayed) {
+
 		var t = this;
 		
-		loadItemData(
-				itemId,
+		this.loadItemDataByIndex(
+				itemIndex,
 				function(itemData) {
-					t._displayAd(itemData);
+					t._constructAd(itemData);
 					
-					t.div.style.display = 'inline-block';
-					t.displayed = true;
+					onDisplayed();
 				},
 				function (errorMessage) {
 					t._displayErrorMessage(errorMessage);
@@ -49,7 +74,7 @@ function AdView(div, loadItemData, getPhotoUrl) {
 		);
 	};
 	
-	this._displayAd = function(itemData) {
+	this._constructAd = function(itemData) {
 		
 		var titleElement = document.getElementById('ad_view_title');
 		
@@ -118,15 +143,10 @@ function AdView(div, loadItemData, getPhotoUrl) {
 		
 		var descriptionDiv = document.getElementById('ad_view_description_div');
 		
-		console.log('## setting description to ' + itemData.serviceAttributes.descriptionHtml);
-		
 		descriptionDiv.innerHTML = itemData.serviceAttributes.descriptionHtml;
 	}
 	
 	this.isDisplayed = function() {
-		
-		console.log('## ad view is displayed ' + this.displayed);
-		
 		return this.displayed;
 	}
 }

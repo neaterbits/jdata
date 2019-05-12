@@ -2,7 +2,7 @@
  * Simple gallery item factory with static size elements
  */
 
-function SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl, adView) {
+function SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl, getAdView) {
 
 	const ITEM_WIDTH = 300;
 	const ITEM_HEIGHT = 300;
@@ -14,7 +14,7 @@ function SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl, adView) {
 
 	this.ajax = ajax;
 	this.getThumbUrl = getThumbUrl;
-	this.adView = adView;
+	this.getAdView = getAdView;
 
 	this.getGalleryConfig = function() {
 		return {
@@ -51,9 +51,13 @@ function SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl, adView) {
 		
 		_appendText(div, index, -1, data);
 		
+		var t = this;
+		
 		div.onclick = function() {
+			var adView = t.getAdView();
+			
 			if (!adView.isDisplayed()) {
-				adView.displayAd(data.id);
+				adView.displayAd(index);
 			}
 		};
 		
@@ -102,8 +106,11 @@ function SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl, adView) {
 		_appendText(div, index, imageData.numItemThumbnails, provisionalData);
 		
 		div.onclick = function() {
+			
+			var adView = t.getAdView();
+			
 			if (!adView.isDisplayed()) {
-				adView.displayAd(provisionalData.id);
+				adView.displayAd(index);
 			}
 		};
 
