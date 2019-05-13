@@ -40,8 +40,7 @@ Dette er en tidlig versjon, men begynner å fungerer noenlunde hele stacken igje
    - antakelig bruke redis for dette slik at slipper pakke ut zip-fila i S3 på hver node.
  - cache søkeresultater fra Elasticsearch lokalt i minne på VM i skyen, evt. i redis eller lignende.
    - mye kode skrivi på dette, cacher i egen cache på hver node, uavhengig av andre noder.
- - bytte implementasjon fra varierende størrelse til fast størrelse i bildegalleri, gjør at kan overføre langt mindre data i initiell søkerespons (kun totalt antall søketreff).
- - side for å vise annonsedetaljer. 
+ - bytte implementasjon fra varierende bildestørrelse til fast størrelse i bildegalleri, gjør at kan overføre langt mindre data i initiell søkerespons (kun totalt antall søketreff).
 
 Å legge til websider for å legge inn annonser m/innlogging osv. er ute av scope enn så lenge, er søk/filtrering som er mest interessant for egen kompetanseheving.
 
