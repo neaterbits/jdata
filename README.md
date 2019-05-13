@@ -24,13 +24,13 @@ Kjapp informajon om innhold i noen av katalogene
  - filesystem-local - benyttes av XMLStorage til å lagre i lokalt filsystem, for test.
  - filesystem-s3 - benyttes av XMLStorage for lagring av filer i Amazon S3.
  - model - datamodell for annonser, denne består av annoterte javaklasser (@Facet), slik at kan lett legge til nye typer annonser og facets.
- - webpages - websider m/plain Javascript-kode for filtreringsview og bildegalleri, JSP for hovedside.
+ - webpages - websider m/plain Javascript-kode for filtreringsview og bildegalleri, JSP for hovedside og annonsevisning.
  - notifications - API for meldings-utsending.
  - notifications-aws - implementasjon for utsending via Amazon SNS.
  - search-common - datamodell for søkekriterier.
  - rest - selve API-tjenestene som kalles fra klientsiden, implementert som JAX-WS (men kalles fra HTTP servlet for tiden siden problemer med å få JAX-WS til å fungere i Jetty).
 
-Dette er en tidlig versjon, men begynner å fungerer noenlunde hele stacken igjennom.
+Begynner nå fungerer noenlunde hele stacken igjennom, kreves mere testing.
 
 # Forbedringer som bør gjøres, og er under utbedring
  - Javadoc dokumentasjon :)
@@ -41,7 +41,11 @@ Dette er en tidlig versjon, men begynner å fungerer noenlunde hele stacken igje
  - cache søkeresultater fra Elasticsearch lokalt i minne på VM i skyen, evt. i redis eller lignende.
    - mye kode skrivi på dette, cacher i egen cache på hver node, uavhengig av andre noder.
  - bytte implementasjon fra varierende bildestørrelse til fast størrelse i bildegalleri, gjør at kan overføre langt mindre data i initiell søkerespons (kun totalt antall søketreff).
-
+ - favorites
+ - lagrede søk
+ - webside for opprette annonser
+ - bruker-registrering
+ 
 Å legge til websider for å legge inn annonser m/innlogging osv. er ute av scope enn så lenge, er søk/filtrering som er mest interessant for egen kompetanseheving.
 
 Har et annet prosjekt for å gjøre snill webscraping mot craigslist for å hente inn noe testdata.
