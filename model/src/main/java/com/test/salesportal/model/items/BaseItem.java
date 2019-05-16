@@ -11,6 +11,7 @@ import com.test.salesportal.model.Item;
 import com.test.salesportal.model.annotations.Freetext;
 import com.test.salesportal.model.annotations.IndexItemAttribute;
 import com.test.salesportal.model.annotations.ServiceAttribute;
+import com.test.salesportal.model.annotations.Sortable;
 
 
 @Entity
@@ -21,6 +22,7 @@ public abstract class BaseItem extends Item {
 	@IndexItemAttribute(storeValue=true) // store in index so that can be retrieved straight from index
 	private String originalUrl;
 	
+	@Sortable(value="Publication date", priority=1)
 	@Column
 	private Date publicationDate;
 
