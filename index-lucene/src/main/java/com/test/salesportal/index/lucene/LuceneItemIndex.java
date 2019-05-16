@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1397,13 +1398,19 @@ public class LuceneItemIndex implements ItemIndex {
 	private static Boolean getBooleanValueFromField(IndexableField field) {
 		return field.numericValue().intValue() != 0 ? true : false;
 	}
-	
+
+	private static Date getDateValueFromField(IndexableField field) {
+		final long value = field.numericValue().longValue();
+		
+		return value != LONG_NONE ? new Date(value) : null;
+	}
+
 	private static Comparable<?> getObjectValueFromDocument(Document document, PropertyAttribute attribute) {
 	
 		final String fieldName = ItemIndex.fieldName(attribute);
 		final IndexableField field = document.getField(fieldName);
 
-		final Comparable<?> result = getObjectValueFromField(attribute, field);
+		final Comparable<?> result = field != null ? getObjectValueFromField(attribute, field) : null;
 
 		return result;
 	}
@@ -1437,6 +1444,10 @@ public class LuceneItemIndex implements ItemIndex {
 			
 		case BOOLEAN:
 			result = getBooleanValueFromField(field);
+			break;
+			
+		case DATE:
+			result = getDateValueFromField(field);
 			break;
 			
 		default:
@@ -1474,6 +1485,10 @@ public class LuceneItemIndex implements ItemIndex {
 			
 		case BOOLEAN:
 			result = BOOLEAN_NONE == field.numericValue().intValue();
+			break;
+			
+		case DATE:
+			result = null == getDateValueFromField(field);
 			break;
 			
 		default:
