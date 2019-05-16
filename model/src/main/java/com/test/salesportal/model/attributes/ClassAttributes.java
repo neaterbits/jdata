@@ -273,9 +273,9 @@ public class ClassAttributes {
 			// Depends on attribute annotation
 			final IndexItemAttribute indexItemAttribute = findAnnotation(IndexItemAttribute.class, type, propertyDescriptor);
 	
-			if (isFacet) {
+			if (isFacet || isSortable) {
 				// Faceting requires store
-				// TODO perhaps not for elasticsearh
+				// TODO perhaps not for elasticsearch
 				storeFieldInIndex = true;
 			}
 			else {
