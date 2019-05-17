@@ -1,5 +1,6 @@
 <html style='height: 100%'>
 <head>
+<link rel="stylesheet" type="text/css" href="css/spinner.css">
 <link rel="stylesheet" type="text/css" href="css/facets.css">
 <link rel="stylesheet" type="text/css" href="css/searchview.css">
 <link rel="stylesheet" type="text/css" href="css/adview.css">
@@ -37,8 +38,8 @@
 <script src="js/ajax.js" type="text/javascript"></script>
 <script src="js/searchview.js" type="text/javascript"></script>
 </head>
-<body style='height: 100%; margin: 0;'>
-<div style='width: 100%; height: 100%; margin: 0; padding: 0.5em; box-sizing: border-box;'>
+<body style='height: 100%; margin: 0; position: relative;'>
+<div style='width: 100%; height: 100%; margin: 0; padding: 0.5em; box-sizing: border-box; '>
 	
 	<!-- For padding to the right of search panel -->
 	<div id="leftSidePaddingContainer" style='width: 25%; height: 100%;'>
@@ -129,6 +130,21 @@
 	</div>
 </div>
 </div>
+
+<div id="mid_spinner" class="sk-fading-circle" style="z-index: 100; display: none;">
+  <div class="sk-circle1 sk-circle"></div>
+  <div class="sk-circle2 sk-circle"></div>
+  <div class="sk-circle3 sk-circle"></div>
+  <div class="sk-circle4 sk-circle"></div>
+  <div class="sk-circle5 sk-circle"></div>
+  <div class="sk-circle6 sk-circle"></div>
+  <div class="sk-circle7 sk-circle"></div>
+  <div class="sk-circle8 sk-circle"></div>
+  <div class="sk-circle9 sk-circle"></div>
+  <div class="sk-circle10 sk-circle"></div>
+  <div class="sk-circle11 sk-circle"></div>
+  <div class="sk-circle12 sk-circle"></div>
+</div>
 </body>
 <script type="text/javascript">
 	window.onload = function() {
@@ -172,7 +188,15 @@
 						return new AdView(
 								document.getElementById('single_ad_view_wrapper'),
 								loadItemDataByIndex,
-								getPhotoUrl);
+								getPhotoUrl,
+								function (showSpinner) {
+									
+									
+									var display = showSpinner ? 'block' : 'none';
+									console.log('Show spinner ' + showSpinner + '/' + display);
+									
+									document.getElementById('mid_spinner').style.display = display;
+								});
 					},
 					function (getAdView) {
 						return new SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl, getAdView);

@@ -2,7 +2,7 @@
  * 
  */
 
-function AdView(div, loadItemDataByIndex, getPhotoUrl) {
+function AdView(div, loadItemDataByIndex, getPhotoUrl, changeSpinner) {
 	
 	const PHOTO_WIDTH = 600;
 	const PHOTO_HEIGHT = 450;
@@ -16,6 +16,8 @@ function AdView(div, loadItemDataByIndex, getPhotoUrl) {
 	this.getPhotoUrl = getPhotoUrl;
 	
 	this.displayed = false;
+	
+	this.changeSpinner = changeSpinner;
 	
 	var t = this;
 
@@ -61,12 +63,24 @@ function AdView(div, loadItemDataByIndex, getPhotoUrl) {
 
 		var t = this;
 		
+		this.changeSpinner(true);
+		
 		this.loadItemDataByIndex(
 				itemIndex,
 				function(itemData) {
-					t._constructAd(itemData);
 					
-					onDisplayed();
+					if (itemData.photoCount > 0) {
+						t._updatePhotos(itemData, function() {
+							t._constructAd(itemData);
+							t.changeSpinner(false);
+							onDisplayed();
+						});
+					}
+					else {
+						t._constructAd(itemData);
+						t.changeSpinner(false);
+						onDisplayed();
+					}
 				},
 				function (errorMessage) {
 					t._displayErrorMessage(errorMessage);
@@ -81,8 +95,6 @@ function AdView(div, loadItemDataByIndex, getPhotoUrl) {
 		titleElement.innerHTML = itemData.serviceAttributes.title;
 
 		this._updateDetails(itemData);
-
-		this._updatePhotos(itemData);
 
 		this._updateMap(itemData);
 		
@@ -118,8 +130,12 @@ function AdView(div, loadItemDataByIndex, getPhotoUrl) {
 		}
 	}
 	
-	this._updatePhotos = function(itemData) {
+	this._updatePhotos = function(itemData, onComplete) {
 		
+		if (itemData.photoCount <= 0) {
+			throw "No photos";
+		}
+
 		var photosDiv = document.getElementById('ad_view_photos_div');
 		
 		photosDiv.style.width = PHOTO_WIDTH;
@@ -132,18 +148,16 @@ function AdView(div, loadItemDataByIndex, getPhotoUrl) {
 		
 		var photoImage = document.getElementById('ad_view_photo');
 		
-		if (itemData.photoCount > 0) {
-			var photoViewer = new PhotoViewWithNavigator(
-				itemData.serviceAttributes.id,
-				itemData.photoCount,
-				photoDiv,
-				photoImage,
-				PHOTO_WIDTH, PHOTO_HEIGHT,
-				this.getPhotoUrl
-			);
-		
-			photoViewer.displayPhoto(0);
-		}
+		var photoViewer = new PhotoViewWithNavigator(
+			itemData.serviceAttributes.id,
+			itemData.photoCount,
+			photoDiv,
+			photoImage,
+			PHOTO_WIDTH, PHOTO_HEIGHT,
+			this.getPhotoUrl
+		);
+	
+		photoViewer.displayPhoto(0, onComplete);
 	}
 	
 	this._updateMap = function(itemData) {

@@ -34,7 +34,7 @@ function PhotoViewWithNavigator(
 	// May adjust image to negative margin for cropping
 	outerDiv.style['overflow'] = 'hidden';
 
-	this.displayPhoto = function(index) {
+	this.displayPhoto = function(index, onComplete) {
 		
 		// Set image URL to download image
 
@@ -43,6 +43,8 @@ function PhotoViewWithNavigator(
 					image,
 					image.naturalWidth, image.naturalHeight,
 					containerWidth, containerHeight);
+			
+			onComplete();
 		}
 		
 		this.image.src = this.getPhotoUrl(itemId, index);
