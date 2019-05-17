@@ -46,7 +46,9 @@
   		<groupId>javax.servlet</groupId>
   		<artifactId>javax.servlet-api</artifactId>
   		<version>3.1.0</version>
+<!--
   		<scope>provided</scope>
+-->
   	</dependency>
  	
  	<dependency>
@@ -96,6 +98,17 @@
 					</descriptorRefs>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <configuration>
+                    <mainClass>com.test.salesportal.jetty.test.JettyRunServlet</mainClass>
+                    <arguments>
+                        <argument>${env.HOME}/craigslist</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 </project>
