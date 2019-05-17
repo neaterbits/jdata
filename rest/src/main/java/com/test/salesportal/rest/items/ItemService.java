@@ -60,7 +60,13 @@ public class ItemService extends BaseService {
 	@POST
 	@Path("items/{itemId}/thumbAndImageUrls")
 	@Consumes("application/json")
-	public void storeThumbAndImageUrls(@QueryParam("userId") String userId, @QueryParam("itemId") String itemId, @QueryParam("itemType") String itemType, ThumbAndImageUrls urls, HttpServletRequest request) throws ItemStorageException {
+	public void storeThumbAndImageUrls(
+			@QueryParam("userId") String userId,
+			@QueryParam("itemId") String itemId,
+			@QueryParam("itemType") String itemType,
+			ThumbAndImageUrls urls,
+			HttpServletRequest request) throws ItemStorageException {
+		
 		if (userId == null || userId.trim().isEmpty()) {
 			throw new IllegalArgumentException("No userId");
 		}
@@ -78,7 +84,15 @@ public class ItemService extends BaseService {
 	@POST
 	@Path("items/{itemId}/image")
 	@Consumes({ "image/jpeg", "image/png" })
-	public void storeImage(@QueryParam("userId") String userId, @PathParam("itemId") String itemId, @QueryParam("itemType") String itemType, @QueryParam("index") int index, byte [] imageData, HttpServletRequest request) throws IOException, ItemStorageException {
+	public void storeImage(
+			@QueryParam("userId") String userId,
+			@PathParam("itemId") String itemId,
+			@QueryParam("itemType") String itemType,
+			@QueryParam("index") int index,
+			byte [] imageData,
+			HttpServletRequest request) throws IOException, ItemStorageException {
+		
+		
 		if (userId == null || userId.trim().isEmpty()) {
 			throw new IllegalArgumentException("No userId");
 		}
