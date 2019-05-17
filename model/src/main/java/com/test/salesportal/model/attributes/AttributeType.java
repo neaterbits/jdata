@@ -1,6 +1,7 @@
 package com.test.salesportal.model.attributes;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.Date;
 
@@ -13,7 +14,8 @@ public enum AttributeType {
 	DECIMAL(SortableType.NUMERICAL),
 	ENUM(SortableType.ALPHABETICAL),
 	BOOLEAN(SortableType.BOOLEAN),
-	DATE(SortableType.TIME);
+	DATE(SortableType.TIME),
+	TZDATE(SortableType.TIME);
 	
 	AttributeType(SortableType sortableType) {
 		this.sortableType = sortableType;
@@ -52,6 +54,9 @@ public enum AttributeType {
 		}
 		else if (propertyType.equals(Date.class)) {
 			attributeType = AttributeType.DATE;
+		}
+		else if (propertyType.equals(OffsetDateTime.class)) {
+			attributeType = AttributeType.TZDATE;
 		}
 		else {
 			attributeType = null;

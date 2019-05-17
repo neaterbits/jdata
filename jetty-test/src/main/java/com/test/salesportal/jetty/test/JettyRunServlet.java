@@ -1,9 +1,7 @@
 package com.test.salesportal.jetty.test;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Arrays;
 
 import javax.servlet.ServletException;
@@ -16,7 +14,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.test.salesportal.common.IOUtil;
 import com.test.salesportal.common.images.ThumbAndImageUrls;
 import com.test.salesportal.dao.ItemStorageException;
@@ -121,7 +118,7 @@ public class JettyRunServlet {
 			
 			final SearchCriterium [] searchCriteria;
 			
-			final ObjectMapper mapper = new ObjectMapper();
+			final ObjectMapper mapper = JSONUtil.createMapper();
 			
 			mapper.setSerializationInclusion(Include.NON_NULL);
 			
@@ -200,7 +197,7 @@ public class JettyRunServlet {
 			final String userId = req.getParameter("userId");
 
 			if (req.getPathInfo() != null && req.getPathInfo().contains("thumbAndImageUrls")) {
-				final ThumbAndImageUrls thumbAndImageUrls = decodeJson(IOUtil.readAll(req.getInputStream()), ThumbAndImageUrls.class);
+				final ThumbAndImageUrls thumbAndImageUrls = JSONUtil.decodeJson(IOUtil.readAll(req.getInputStream()), ThumbAndImageUrls.class);
 
 				final String itemId = req.getPathInfo().split("/")[1];
 				
@@ -261,7 +258,7 @@ public class JettyRunServlet {
 				
 				System.out.println("Received data:\n" + new String(data));
 				
-				final Item item = decodeJson(data, typeInfo.getType());
+				final Item item = JSONUtil.decodeJson(data, typeInfo.getType());
 				
 				try {
 					final String itemId = itemService.storeItem(userId, item, req);
@@ -340,7 +337,7 @@ public class JettyRunServlet {
 						resp.sendError(404);
 					}
 					else {
-						encodeJson(item, resp.getOutputStream());
+						JSONUtil.encodeJson(item, resp.getOutputStream());
 						resp.getOutputStream().close();
 					}
 				} catch (ItemStorageException ex) {
@@ -353,22 +350,6 @@ public class JettyRunServlet {
 		}
 	}
 	
-	private static <T> T decodeJson(byte [] data, Class<T> type) throws IOException {
-		final ObjectMapper mapper = new ObjectMapper();
-		
-		mapper.setDateFormat(new StdDateFormat());
-		
-		return mapper.readValue(new ByteArrayInputStream(data), type);
-	}
-
-	private static <T> void encodeJson(T item, OutputStream outputStream) throws IOException {
-		final ObjectMapper mapper = new ObjectMapper();
-		
-		mapper.setDateFormat(new StdDateFormat());
-		
-		mapper.writeValue(outputStream, item);
-	}
-
 	public static class LoginServlet extends HttpServlet {
 
 		private static final long serialVersionUID = 1L;
@@ -386,9 +367,7 @@ public class JettyRunServlet {
 				
 				final LoginResponse response =  loginService.checkPhoneNo(req.getParameter("phoneNo"));
 
-				final ObjectMapper mapper = new ObjectMapper();
-				mapper.writeValue(resp.getOutputStream(), response);
-				
+				JSONUtil.encodeJson(response, resp.getOutputStream());
 			}
 			else if (req.getPathInfo() != null && req.getPathInfo().contains("/checkcode")) {
 				// This is register or login scenario, check if user exist
@@ -396,8 +375,7 @@ public class JettyRunServlet {
 				
 				final CheckCodeResponse response =  loginService.checkCode(req.getParameter("phoneNo"), req.getParameter("code"));
 
-				final ObjectMapper mapper = new ObjectMapper();
-				mapper.writeValue(resp.getOutputStream(), response);
+				JSONUtil.encodeJson(response, resp.getOutputStream());
 			}
 			else {
 				super.doPost(req, resp);

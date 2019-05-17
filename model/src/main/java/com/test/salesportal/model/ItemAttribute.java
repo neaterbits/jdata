@@ -3,6 +3,7 @@ package com.test.salesportal.model;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.Date;
 
 import com.test.salesportal.model.annotations.DecimalRange;
@@ -191,6 +192,10 @@ public final class ItemAttribute extends PropertyAttribute {
 				
 			case DATE:
 				itemAttributeValue = new DateAttributeValue(this, (Date)value);
+				break;
+				
+			case TZDATE:
+				itemAttributeValue = new TZDateAttributeValue(this, (OffsetDateTime)value);
 				break;
 
 			default:

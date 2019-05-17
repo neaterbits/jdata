@@ -8,6 +8,8 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -71,6 +73,7 @@ import com.test.salesportal.model.PropertyAttribute;
 import com.test.salesportal.model.SortAttribute;
 import com.test.salesportal.model.SortAttributeAndOrder;
 import com.test.salesportal.model.StringAttributeValue;
+import com.test.salesportal.model.TZDateAttributeValue;
 import com.test.salesportal.model.attributes.AttributeType;
 import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.model.items.TypeInfo;
@@ -110,6 +113,8 @@ public class LuceneItemIndex implements ItemIndex {
 	private static final String TYPE_FIELD = "type";
 	private static final String USERID_FIELD = "userId";
 
+	private static final DateTimeFormatter TZDATE_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+	
 	private final Directory directory;
 	private IndexWriter writer;
 	private DirectoryReader reader;
@@ -266,6 +271,22 @@ public class LuceneItemIndex implements ItemIndex {
 				}
 
 				field = new LongPoint(fieldName, value);
+
+				if (storeValue) {
+					storedField = new StoredField(fieldName, value);
+				}
+			}
+			else if (attributeValue instanceof TZDateAttributeValue) {
+				
+				final OffsetDateTime offsetDateTime = ((TZDateAttributeValue)attributeValue).getValue();
+
+				if (offsetDateTime == null) {
+					throw new IllegalArgumentException("Trying to index tzdate no-value");
+				}
+				
+				final String value = offsetDateTime.format(TZDATE_FORMATTER);
+
+				field = new StringField(fieldName, value,  storeValue ? Field.Store.YES : Field.Store.NO);
 
 				if (storeValue) {
 					storedField = new StoredField(fieldName, value);
@@ -1405,6 +1426,12 @@ public class LuceneItemIndex implements ItemIndex {
 		return value != LONG_NONE ? new Date(value) : null;
 	}
 
+	private static OffsetDateTime getTZDateValueFromField(IndexableField field) {
+		final String value = field.stringValue();
+		
+		return value != null && !STRING_NONE.equals(value) ? OffsetDateTime.parse(value, TZDATE_FORMATTER) : null;
+	}
+
 	private static Comparable<?> getObjectValueFromDocument(Document document, PropertyAttribute attribute) {
 	
 		final String fieldName = ItemIndex.fieldName(attribute);
@@ -1450,6 +1477,10 @@ public class LuceneItemIndex implements ItemIndex {
 			result = getDateValueFromField(field);
 			break;
 			
+		case TZDATE:
+			result = getTZDateValueFromField(field);
+			break;
+			
 		default:
 			throw new UnsupportedOperationException("Unknown attribute type " + attributeType);
 		}
@@ -1489,6 +1520,10 @@ public class LuceneItemIndex implements ItemIndex {
 			
 		case DATE:
 			result = null == getDateValueFromField(field);
+			break;
+			
+		case TZDATE:
+			result = null == getTZDateValueFromField(field);
 			break;
 			
 		default:

@@ -50,7 +50,7 @@ public class ItemTypes {
 		typesSet = Collections.unmodifiableSet(new HashSet<>(types));
 		
 		jaxbTypes = new ArrayList<>(baseTypes.size() + types.size());
-		jaxbTypes.addAll(baseTypes);
+		//jaxbTypes.addAll(baseTypes);
 		jaxbTypes.addAll(types);
 	}
 	

@@ -1,11 +1,12 @@
 package com.test.salesportal.model.items;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.annotations.Freetext;
@@ -24,7 +25,7 @@ public abstract class BaseItem extends Item {
 	
 	@Sortable(value="Publication date", priority=1)
 	@Column
-	private Date publicationDate;
+	private OffsetDateTime publicationDate;
 
 	@Freetext
 	@ServiceAttribute
@@ -63,11 +64,12 @@ public abstract class BaseItem extends Item {
 	}
 	*/
 
-	public Date getPublicationDate() {
+	@XmlJavaTypeAdapter(OffsetDateTimeAdapter.class)
+	public final OffsetDateTime getPublicationDate() {
 		return publicationDate;
 	}
 
-	public void setPublicationDate(Date publicationDate) {
+	public final void setPublicationDate(OffsetDateTime publicationDate) {
 		this.publicationDate = publicationDate;
 	}
 

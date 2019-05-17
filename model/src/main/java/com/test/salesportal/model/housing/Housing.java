@@ -21,7 +21,7 @@ public class Housing extends PurchasableItem {
 	private String city;
 
 	@Column
-	@Facet(displayName = "Area", superAttribute = "city")
+	@Facet(displayName = "Urban Area", superAttribute = "city")
 	private String area;
 
 	@Column
