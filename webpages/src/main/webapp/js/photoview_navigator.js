@@ -30,6 +30,9 @@ function PhotoViewWithNavigator(
 				callback();
 			});
 	
+	// May adjust image to negative margin for cropping
+	outerDiv.style['overflow'] = 'hidden';
+
 	this.displayPhoto = function(index) {
 		
 		// Set image URL to download image
