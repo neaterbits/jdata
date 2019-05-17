@@ -256,7 +256,7 @@ DisplayState._validateY = function(firstVisibleY, lastVisibleY, firstRenderedY, 
 	}
  	
 	if (lastVisibleY > lastRenderedY) {
-		throw "lastVisibleY > lastRenderedY";
+		throw "lastVisibleY > lastRenderedY " + lastVisibleY + "/" + lastRenderedY;
 	}
 }
 

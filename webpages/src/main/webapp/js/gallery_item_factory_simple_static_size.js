@@ -81,6 +81,7 @@ function SimpleStaticSizeGalleryItemFactory(ajax, getThumbUrl, getAdView) {
 		var navigator = new NavigatorOverlay(
 				numItemThumbnails,
 				div,
+				false,
 				ITEM_WIDTH,
 				ITEM_HEIGHT,
 				function() { return ITEM_WIDTH / 6; },

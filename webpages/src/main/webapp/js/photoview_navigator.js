@@ -20,6 +20,7 @@ function PhotoViewWithNavigator(
 	var navigator = new NavigatorOverlay(
 			photoCount,
 			outerDiv,
+			true,
 			containerWidth,
 			containerHeight,
 			function() { return 65; },

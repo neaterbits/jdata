@@ -2,14 +2,22 @@
  * 
  */
 
+
 function NavigatorOverlay(
 		numItems,
 		container,
+		alwaysVisible,
 		containerWidth, containerHeight,
 		getWidth, getHeight,
 		startUpdate) {
 	
-	var currentImageDiv = document.createElement('div')
+	var currentImageDiv;
+	
+	_removeElementsWithClass(container, 'navigatorCurrentDiv');
+	_removeElementsWithClass(container, 'navigatorLastDiv');
+	_removeElementsWithClass(container, 'navigatorNextDiv');
+	
+	currentImageDiv = document.createElement('div')
 	
 	currentImageDiv.style.position = 'absolute';
 	currentImageDiv.style.left = 0;
@@ -21,7 +29,7 @@ function NavigatorOverlay(
 
 	_updateCurrentImageDivText(currentImageDiv, 0, numItems);
 
-	_setItemOverlayVisible(currentImageDiv, false);
+	_setItemOverlayVisible(currentImageDiv, alwaysVisible);
 
 	container.append(currentImageDiv);
 	
@@ -70,23 +78,28 @@ function NavigatorOverlay(
 			}
 	);
 	
-	container.onmouseover = function() {
-		_setItemOverlayVisible(currentImageDiv, true);
-		
+	if (alwaysVisible) {
 		updateNavigators(navigator.getNavigatorState());
-	};
-	
-	container.onmouseout = function() {
+	}
+	else {
+		container.onmouseover = function() {
+			_setItemOverlayVisible(currentImageDiv, true);
+			
+			updateNavigators(navigator.getNavigatorState());
+		};
 		
-		_setItemOverlayVisible(currentImageDiv, false);
-		_setItemOverlayVisible(lastNavigatorDiv, false);
-		_setItemOverlayVisible(nextNavigatorDiv, false);
-
-		/*
-		lastNavigatorDiv.visibility = 'hidden';
-		nextNavigatorDiv.visibility = 'hidden';
-		*/
-	};
+		container.onmouseout = function() {
+			
+			_setItemOverlayVisible(currentImageDiv, false);
+			_setItemOverlayVisible(lastNavigatorDiv, false);
+			_setItemOverlayVisible(nextNavigatorDiv, false);
+	
+			/*
+			lastNavigatorDiv.visibility = 'hidden';
+			nextNavigatorDiv.visibility = 'hidden';
+			*/
+		};
+	}
 
 	function _setItemOverlayVisible(div, visible) {
 		div.style.display = visible ? 'inline-block' : 'none';
@@ -129,5 +142,17 @@ function NavigatorOverlay(
 		div.append(navigatorDiv);
 	
 		return navigatorDiv;
+	}
+
+	function _removeElementsWithClass(element, className) {
+
+		var found = element.getElementsByClassName(className);
+
+		if (typeof found !== 'undefined' && found.length > 0) {
+			
+			for (var i = 0; i < found.length; ++ i) {
+				found[i].remove();
+			}
+		}
 	}
 }
