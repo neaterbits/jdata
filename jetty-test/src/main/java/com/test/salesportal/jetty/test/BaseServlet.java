@@ -10,4 +10,7 @@ public abstract class BaseServlet extends HttpServlet {
 		return getServletContext().getInitParameter("localFileDir");
 	}
 	
+	final String getPagesDir() {
+		return getServletContext().getInitParameter("pagesDir");
+	}
 }

@@ -1,6 +1,7 @@
 package com.test.salesportal.jetty.test;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -56,17 +57,38 @@ public class JettyRunServlet {
 		else {
 			throw new IllegalArgumentException("Must pass local file dir");
 		}
+
+		final String pagesDir;
+		
+		if (args.length >= 2) {
+			pagesDir = args[1];
+			
+			final File dir = new File(pagesDir);
+			
+			if (!dir.exists() || !dir.isDirectory()) {
+				throw new IllegalArgumentException("No directory at " + pagesDir);
+			}
+		}
+		else {
+			pagesDir = null;
+		}
+
+		contextHandler.setInitParameter("localFileDir", localFileDir);
+		
+		if (pagesDir != null) {
+			contextHandler.setInitParameter("pagesDir", pagesDir);
+		}
 		
 		final Server server = new Server(8080);
 		
 		server.setHandler(contextHandler);
-		
-		contextHandler.setInitParameter("localFileDir", localFileDir);
-		
+
 		contextHandler.addServlet(SearchServlet.class, "/searchpaged/*");
 		contextHandler.addServlet(ItemServlet.class, "/items/*");
 		contextHandler.addServlet(LoginServlet.class, "/login/*");
 		//contextHandler.addServletWithMapping(SearchServlet.class, "/search/*");
+
+		contextHandler.addServlet(PagesServlet.class, "/*");
 		
 		try {
 			server.start();
@@ -74,6 +96,53 @@ public class JettyRunServlet {
 		}
 		finally {
 			server.destroy();
+		}
+	}
+	
+	
+	public static class PagesServlet extends BaseServlet {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+			final String pathInfo = req.getPathInfo();
+			
+			String trimmed = pathInfo.trim();
+			
+			if (trimmed.isEmpty() || "/".equals(trimmed)) {
+				trimmed = "facets.jsp";
+			}
+			else if (trimmed.startsWith("/")) {
+				trimmed = trimmed.substring(1);
+			}
+			
+			final String path = getPagesDir() + '/' + trimmed;
+
+			if (path.endsWith("/facets.jsp")) {
+				final String address = req.getServerName() + ':' + req.getServerPort();
+				
+				// replace local address
+				try (FileInputStream inputStream = new FileInputStream(path)) {
+					final byte [] data = IOUtil.readAll(inputStream);
+					
+					final String string = new String(data)
+							.replace("localhost:8080", address);
+					
+					resp.getOutputStream().write(string.getBytes());
+				
+					resp.setStatus(200);
+				}
+			}
+			else {
+			
+				try (FileInputStream inputStream = new FileInputStream(path)) {
+					IOUtil.copyStreams(inputStream, resp.getOutputStream());
+					
+					resp.setStatus(200);
+				}
+			}
 		}
 	}
 
