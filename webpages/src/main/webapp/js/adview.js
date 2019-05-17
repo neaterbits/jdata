@@ -80,6 +80,18 @@ function AdView(div, loadItemDataByIndex, getPhotoUrl) {
 		
 		titleElement.innerHTML = itemData.serviceAttributes.title;
 
+		this._updateDetails(itemData);
+
+		this._updatePhotos(itemData);
+
+		this._updateMap(itemData);
+		
+		var descriptionDiv = document.getElementById('ad_view_description_div');
+		
+		descriptionDiv.innerHTML = itemData.serviceAttributes.descriptionHtml;
+	}
+	
+	this._updateDetails = function(itemData) {
 		var attributes = itemData.displayAttributes;
 		
 		var detailsDiv = document.getElementById('ad_view_details_div');
@@ -104,6 +116,9 @@ function AdView(div, loadItemDataByIndex, getPhotoUrl) {
 			attributeValueSpan.setAttribute('class', 'adViewAttributeValueSpan');
 			attributeDiv.append(attributeValueSpan);
 		}
+	}
+	
+	this._updatePhotos = function(itemData) {
 		
 		var photosDiv = document.getElementById('ad_view_photos_div');
 		
@@ -129,7 +144,10 @@ function AdView(div, loadItemDataByIndex, getPhotoUrl) {
 		
 			photoViewer.displayPhoto(0);
 		}
-		
+	}
+	
+	this._updateMap = function(itemData) {
+
 		var mapIFrame = document.getElementById('ad_view_map_iframe');
 		
 		var latitude = itemData.serviceAttributes.latitude;
@@ -140,10 +158,6 @@ function AdView(div, loadItemDataByIndex, getPhotoUrl) {
 				+ "?q=+" + latitude + ",+" + longtitude
 				+ "&key=AIzaSyA_out7Cciix5uutqxCEKQg0qFmHln9HtQ";
 		}
-		
-		var descriptionDiv = document.getElementById('ad_view_description_div');
-		
-		descriptionDiv.innerHTML = itemData.serviceAttributes.descriptionHtml;
 	}
 	
 	this.isDisplayed = function() {
