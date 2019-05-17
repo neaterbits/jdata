@@ -343,7 +343,12 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 			// Index all thumb sizes
 			for (int i = 0; i < urls.getUrls().size(); ++ i) {
 				final ThumbAndImageUrl url = urls.getUrls().get(i);
-				index.indexThumbnailSize(itemId, type, i, url.getThumbWidth(), url.getThumbHeight());
+				index.indexThumbnailSize(
+						itemId,
+						type,
+						i,
+						url.getThumbWidth() != null ? url.getThumbWidth() : -1,
+						url.getThumbHeight() != null ? url.getThumbHeight() : -1);
 			}
 		} catch (StorageException ex) {
 			throw new ItemStorageException("Failed to store thumbnail", ex);
