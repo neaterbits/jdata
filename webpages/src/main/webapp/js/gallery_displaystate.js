@@ -254,10 +254,12 @@ DisplayState._validateY = function(firstVisibleY, lastVisibleY, firstRenderedY, 
 	if (firstVisibleY < firstRenderedY) {
 		throw "firstVisibleY < firstRenderedY";
 	}
- 	
+
+	/* Might happen if fewer to render than visible area
 	if (lastVisibleY > lastRenderedY) {
-		throw "lastVisibleY > lastRenderedY " + lastVisibleY + "/" + lastRenderedY;
+		throw "lastVisibleY > lastRenderedY";
 	}
+	*/
 }
 
 DisplayState.prototype.sameWithUpdateVisibleIndices - function(firstVisibleIndex, lastVisibleIndex) {
