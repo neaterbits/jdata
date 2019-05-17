@@ -1279,8 +1279,11 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				var input = obj.getViewElementFactory().getRangeInput(obj.getViewElement());
 
 				var range = { };
+
+				var gotLower = typeof input.lower !== 'undefined' && input.lower != null;
+				var gotUpper = typeof input.upper !== 'undefined' && input.upper != null;
 				
-				if (typeof input.lower !== 'undefined' && input.lower != null) {
+				if (gotLower) {
 					
 					if (typeof input.lower !== 'object') {
 						throw "Expected number";
@@ -1290,7 +1293,7 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 					range.includeLower = INCLUDE_LOWER;
 				}
 				
-				if (typeof input.upper !== 'undefined' && input.upper != null) {
+				if (gotUpper) {
 
 					if (typeof input.upper !== 'object') {
 						throw "Expected number: " + typeof input.upper;
@@ -1302,6 +1305,10 @@ function FacetView(divId, facetViewElements, onCriteriaChanged) {
 				
 				criterium.ranges.push(range);
 
+				if (!gotLower && !gotUpper) {
+					criterium.otherSelected = true;
+				}
+				
 				console.log('## adding criterium ' + JSON.stringify(criterium));
 				
 				valuesStack.push({ type : 'list', criterium : criterium })
