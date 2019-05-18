@@ -11,29 +11,27 @@ function NavigatorOverlay(
 		getWidth, getHeight,
 		startUpdate) {
 	
-	var currentImageDiv;
-	
 	_removeElementsWithClass(container, 'navigatorCurrentDiv');
 	_removeElementsWithClass(container, 'navigatorLastDiv');
 	_removeElementsWithClass(container, 'navigatorNextDiv');
 	
-	currentImageDiv = document.createElement('div')
+	this.currentImageDiv = document.createElement('div')
 	
-	currentImageDiv.style.position = 'absolute';
-	currentImageDiv.style.left = 0;
-	currentImageDiv.style.top = 0;
-	currentImageDiv.style.width = containerWidth;
-	currentImageDiv.style['z-index'] = 50;
+	this.currentImageDiv.style.position = 'absolute';
+	this.currentImageDiv.style.left = 0;
+	this.currentImageDiv.style.top = 0;
+	this.currentImageDiv.style.width = containerWidth;
+	this.currentImageDiv.style['z-index'] = 50;
 	
-	currentImageDiv.setAttribute('class', 'navigatorCurrentDiv');
+	this.currentImageDiv.setAttribute('class', 'navigatorCurrentDiv');
 
-	_updateCurrentImageDivText(currentImageDiv, 0, numItems);
+	_updateCurrentImageDivText(this.currentImageDiv, 0, numItems);
 
-	_setItemOverlayVisible(currentImageDiv, alwaysVisible);
+	_setItemOverlayVisible(this.currentImageDiv, alwaysVisible);
 
-	container.append(currentImageDiv);
+	container.append(this.currentImageDiv);
 	
-	var lastNavigatorDiv = _createNavigatorDiv(
+	this.lastNavigatorDiv = _createNavigatorDiv(
 			container,
 			'navigatorLastDiv',
 			'navigatorLastArrowDiv',
@@ -41,7 +39,7 @@ function NavigatorOverlay(
 			containerHeight,
 			getWidth, getHeight);
 
-	var nextNavigatorDiv = _createNavigatorDiv(
+	this.nextNavigatorDiv = _createNavigatorDiv(
 			container,
 			'navigatorNextDiv',
 			'navigatorNextArrowDiv',
@@ -49,18 +47,18 @@ function NavigatorOverlay(
 			containerHeight,
 			getWidth, getHeight);
 	
+	var t = this;
+	
 	var updateNavigators = function(navigatorState) {
-		_setItemOverlayVisible(lastNavigatorDiv, navigatorState.isLastEnabled);
-		_setItemOverlayVisible(nextNavigatorDiv, navigatorState.isNextEnabled);
+		_setItemOverlayVisible(t.lastNavigatorDiv, navigatorState.isLastEnabled);
+		_setItemOverlayVisible(t.nextNavigatorDiv, navigatorState.isNextEnabled);
 	};
 	
-	var t = this;
-
 	var navigator = new Navigator(
 			0,
 			numItems,
-			lastNavigatorDiv,
-			nextNavigatorDiv,
+			this.lastNavigatorDiv,
+			this.nextNavigatorDiv,
 			
 			function (toShow, callback) {
 
@@ -70,7 +68,7 @@ function NavigatorOverlay(
 
 					updateNavigators(navigatorState);
 
-					_updateCurrentImageDivText(currentImageDiv, navigatorState.index, navigatorState.count);
+					_updateCurrentImageDivText(t.currentImageDiv, navigatorState.index, navigatorState.count);
 					
 					return navigatorState;
 				})
@@ -83,22 +81,30 @@ function NavigatorOverlay(
 	}
 	else {
 		container.onmouseover = function() {
-			_setItemOverlayVisible(currentImageDiv, true);
+			_setItemOverlayVisible(t.currentImageDiv, true);
 			
 			updateNavigators(navigator.getNavigatorState());
 		};
 		
 		container.onmouseout = function() {
 			
-			_setItemOverlayVisible(currentImageDiv, false);
-			_setItemOverlayVisible(lastNavigatorDiv, false);
-			_setItemOverlayVisible(nextNavigatorDiv, false);
+			t._setVisible(false);
 	
 			/*
 			lastNavigatorDiv.visibility = 'hidden';
 			nextNavigatorDiv.visibility = 'hidden';
 			*/
 		};
+	}
+	
+	this._setVisible = function(visible) {
+		_setItemOverlayVisible(this.currentImageDiv, false);
+		_setItemOverlayVisible(this.lastNavigatorDiv, false);
+		_setItemOverlayVisible(this.nextNavigatorDiv, false);
+	}
+	
+	this.reset = function(numItems) {
+		this._setVisible(numItems === 0);
 	}
 
 	function _setItemOverlayVisible(div, visible) {

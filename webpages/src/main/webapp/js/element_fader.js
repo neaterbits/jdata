@@ -19,6 +19,10 @@ function ElementFader(outerDiv, tagName, createElement) {
 		return _getDisplayed(this.outerDiv, this.tagName).hidden;
 	}
 
+	this.getFadeOutElement = function() {
+		return _getDisplayed(this.outerDiv, this.tagName).displayed;
+	}
+
 	this.crossFade = function() {
 
 		console.log('');

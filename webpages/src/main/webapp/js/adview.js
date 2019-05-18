@@ -77,6 +77,11 @@ function AdView(div, loadItemDataByIndex, getPhotoUrl, changeSpinner) {
 						});
 					}
 					else {
+						
+						if (t.photoViewer) {
+							t.photoViewer.clearPhoto();
+						}
+						
 						t._constructAd(itemData);
 						t.changeSpinner(false);
 						onDisplayed();
@@ -146,7 +151,7 @@ function AdView(div, loadItemDataByIndex, getPhotoUrl, changeSpinner) {
 		photoDiv.style.width = PHOTO_WIDTH;
 		photoDiv.style.height = PHOTO_HEIGHT;
 		
-		var photoViewer = new PhotoViewWithNavigator(
+		this.photoViewer = new PhotoViewWithNavigator(
 			itemData.serviceAttributes.id,
 			itemData.photoCount,
 			photoDiv,
@@ -157,7 +162,7 @@ function AdView(div, loadItemDataByIndex, getPhotoUrl, changeSpinner) {
 			}
 		);
 	
-		photoViewer.displayPhoto(0, onComplete);
+		this.photoViewer.displayPhoto(0, onComplete);
 	}
 	
 	this._updateMap = function(itemData) {

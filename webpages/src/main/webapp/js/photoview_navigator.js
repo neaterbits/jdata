@@ -19,7 +19,7 @@ function PhotoViewWithNavigator(
 	this.containerHeight = containerHeight;
 	this.changeSpinner = changeSpinner;
 	
-	var navigator = new NavigatorOverlay(
+	this.navigator = new NavigatorOverlay(
 			photoCount,
 			outerDiv,
 			true,
@@ -44,6 +44,15 @@ function PhotoViewWithNavigator(
 		this._displayPhoto(index, true, onComplete);
 	}
 	
+	var noImg = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+	
+	this.clearPhoto = function() {
+		this.fader.getFadeInElement().src = noImg;
+		this.fader.getFadeOutElement().src = noImg;
+	
+		this.navigator.reset(0, 0);
+	}
+	
 	this._displayPhoto = function(index, initial, onComplete) {
 		
 		// Set image URL to download image
@@ -58,9 +67,6 @@ function PhotoViewWithNavigator(
 			changeSpinner(true);
 		}
 
-		console.log('## change photo');
-		
-		
 		fadeInImg.src = url;
 		
 		fadeInImg.onload = function() {
@@ -73,13 +79,18 @@ function PhotoViewWithNavigator(
 			if (size.width < containerWidth) {
 				fadeInImg.style.left = (containerWidth - size.width) / 2;
 			}
+			else {
+				fadeInImg.style.left = 0;
+			}
 
 			t.fader.crossFade();
 
 			if (t.changeSpinner) {
 				changeSpinner(false);
 			}
-
+			
+			fadeInImg.onload = null;
+			
 			onComplete();
 		}
 		
