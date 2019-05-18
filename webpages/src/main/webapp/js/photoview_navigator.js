@@ -7,7 +7,8 @@ function PhotoViewWithNavigator(
 		photoCount,
 		outerDiv, // image,
 		containerWidth, containerHeight,
-		getPhotoUrl) {
+		getPhotoUrl,
+		changeSpinner) {
 	
 	var t = this;
 	
@@ -16,6 +17,7 @@ function PhotoViewWithNavigator(
 	this.getPhotoUrl = getPhotoUrl;
 	this.containerWidth = containerWidth;
 	this.containerHeight = containerHeight;
+	this.changeSpinner = changeSpinner;
 	
 	var navigator = new NavigatorOverlay(
 			photoCount,
@@ -26,7 +28,7 @@ function PhotoViewWithNavigator(
 			function() { return 65; },
 			function() { return 150; },
 			function(toShow, callback) {
-				t.displayPhoto(toShow, function() {
+				t._displayPhoto(toShow, false, function() {
 					
 					callback();
 				})
@@ -39,6 +41,10 @@ function PhotoViewWithNavigator(
 	outerDiv.style['overflow'] = 'hidden';
 
 	this.displayPhoto = function(index, onComplete) {
+		this._displayPhoto(index, true, onComplete);
+	}
+	
+	this._displayPhoto = function(index, initial, onComplete) {
 		
 		// Set image URL to download image
 		var url = this.getPhotoUrl(itemId, index);
@@ -47,6 +53,13 @@ function PhotoViewWithNavigator(
 
 		// Image we are cross fading to
 		var fadeInImg = this.fader.getFadeInElement();
+		
+		if (!initial && this.changeSpinner) {
+			changeSpinner(true);
+		}
+
+		console.log('## change photo');
+		
 		
 		fadeInImg.src = url;
 		
@@ -62,7 +75,11 @@ function PhotoViewWithNavigator(
 			}
 
 			t.fader.crossFade();
-			
+
+			if (t.changeSpinner) {
+				changeSpinner(false);
+			}
+
 			onComplete();
 		}
 		

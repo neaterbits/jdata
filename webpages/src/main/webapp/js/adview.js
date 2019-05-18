@@ -151,7 +151,10 @@ function AdView(div, loadItemDataByIndex, getPhotoUrl, changeSpinner) {
 			itemData.photoCount,
 			photoDiv,
 			PHOTO_WIDTH, PHOTO_HEIGHT,
-			this.getPhotoUrl
+			this.getPhotoUrl,
+			function (photoSpinner) {
+				document.getElementById('photo_spinner').style.display = photoSpinner ? 'block' : 'none';
+			}
 		);
 	
 		photoViewer.displayPhoto(0, onComplete);
