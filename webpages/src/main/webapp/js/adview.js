@@ -146,13 +146,10 @@ function AdView(div, loadItemDataByIndex, getPhotoUrl, changeSpinner) {
 		photoDiv.style.width = PHOTO_WIDTH;
 		photoDiv.style.height = PHOTO_HEIGHT;
 		
-		var photoImage = document.getElementById('ad_view_photo');
-		
 		var photoViewer = new PhotoViewWithNavigator(
 			itemData.serviceAttributes.id,
 			itemData.photoCount,
 			photoDiv,
-			photoImage,
 			PHOTO_WIDTH, PHOTO_HEIGHT,
 			this.getPhotoUrl
 		);

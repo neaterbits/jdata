@@ -29,6 +29,8 @@ function adjustImageWidthAndHeight(image, width, height, containerWidth, contain
 		image.style['margin-left'] = 'auto';
 		image.style['margin-right'] = 'auto';
 	}
+	
+	return size;
 }
 
 

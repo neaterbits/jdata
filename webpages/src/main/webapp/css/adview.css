@@ -120,6 +120,39 @@
 	display: block;
 }
 
+.photo_view_fade {
+	transition: opacity 0.5s;
+}
+
+/*
+.photo_view_fade_in {
+	animation-duration: 0.5s ease-in;
+	animation-name: fade_in;
+
+	transition: opacity 0.5s;
+}
+
+.photo_view_fade_out {
+	
+	animation-duration: 0.5s ease-out;
+	animation-name: fade_out;
+	
+	transition: opacity 0.5s;
+}
+*/
+
+/*
+@keyframes fade_in {
+	0%   { opacity : 0; }
+	100% { opacity : 1; }
+}
+
+@keyframes fade_out {
+	0%   { opacity : 1; }
+	100% { opacity : 0; }
+}
+*/
+
 #ad_view_map_and_contact_div {
 	display: inline-block;
 }

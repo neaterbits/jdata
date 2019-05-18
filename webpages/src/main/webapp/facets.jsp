@@ -9,6 +9,7 @@
 <script src="js/base64.js" type="text/javascript"></script>
 <script src="js/navigator.js" type="text/javascript"></script>
 <script src="js/navigator_overlay.js" type="text/javascript"></script>
+<script src="js/element_fader.js" type="text/javascript"></script>
 <script src="js/photoview_navigator.js" type="text/javascript"></script>
 <script src="js/adview.js" type="text/javascript"></script>
 <script src="js/facetpath.js" type="text/javascript"></script>
@@ -112,7 +113,9 @@
 		<div id="ad_view_main_div">
 			<div id="ad_view_photos_div">
 				<div id="ad_view_photo_div">
+				<!-- 
 					<img id="ad_view_photo"/>
+				 -->
 				</div>
 			</div>
 			<div id="ad_view_description_div"></div>
