@@ -13,8 +13,6 @@ function ElementFader(outerDiv, tagName, createElement) {
 	
 	var elements = _initElements(outerDiv, tagName, createElement);
 	
-	console.log('## initialized elements ' + JSON.stringify(elements));
-	
 	this.getFadeInElement = function() {
 		return _getDisplayed(this.outerDiv, this.tagName).hidden;
 	}
@@ -25,41 +23,8 @@ function ElementFader(outerDiv, tagName, createElement) {
 
 	this.crossFade = function() {
 
-		console.log('');
-		console.log('## start crossfade');
-		
-		console.log('## get displayed tagname ' + this.tagName);
-		
 		var displayState = _getDisplayed(this.outerDiv, this.tagName);
 
-		/*
-		var fadeOutListener = function() {
-			
-			console.log('## faded out ' + displayState.displayed.src
-					+ ' ' + getComputedStyle(displayState.displayed).opacity);
-			
-			displayState.displayed.classList.remove('photo_view_fade_out');
-			displayState.displayed.removeEventListener('animationend', fadeOutListener);
-		}
-		
-		displayState.displayed.addEventListener('animationend', fadeOutListener);
-
-		var fadeInListener = function() {
-			
-			console.log('## faded in ' + displayState.hidden.src + ' ' + 
-					getComputedStyle(displayState.hidden).opacity);
-			
-			displayState.hidden.classList.remove('photo_view_fade_in');
-			displayState.hidden.removeEventListener('animationend', fadeInListener);
-		}
-		
-		displayState.hidden.addEventListener('animationend', fadeInListener);
-
-		displayState.displayed.classList.add('photo_view_fade_out');
-		displayState.hidden.classList.add('photo_view_fade_in');
-		*/
-
-		
 		displayState.displayed.removeAttribute(DISPLAYED);
 		displayState.hidden.setAttribute(DISPLAYED, true);
 		

@@ -210,7 +210,6 @@
 									
 									
 									var display = showSpinner ? 'block' : 'none';
-									console.log('Show spinner ' + showSpinner + '/' + display);
 									
 									document.getElementById('mid_spinner').style.display = display;
 								});
