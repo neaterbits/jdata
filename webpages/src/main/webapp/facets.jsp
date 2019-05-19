@@ -139,8 +139,7 @@
 				<iframe id="ad_view_map_iframe"
 					width="300"
 					height="300"
-					frameborder="0" style="border:0"
-					allowfullscreen>
+					style="border:0">
 				</iframe>
 			</div>
 		</div>
