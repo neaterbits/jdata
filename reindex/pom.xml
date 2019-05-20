@@ -19,7 +19,13 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>xmlstorage-local</artifactId>
+			<artifactId>filesystem-local</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>xmlstorage-filesystem-files</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

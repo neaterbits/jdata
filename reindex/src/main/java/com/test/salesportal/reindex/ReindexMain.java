@@ -11,12 +11,14 @@ import com.test.salesportal.dao.IFoundItemPhotoThumbnail;
 import com.test.salesportal.dao.IItemDAO;
 import com.test.salesportal.dao.IItemUpdate;
 import com.test.salesportal.dao.xml.XMLItemDAO;
+import com.test.salesportal.filesystem.local.LocalFileSystem;
 import com.test.salesportal.index.IndexSearchCursor;
 import com.test.salesportal.index.lucene.LuceneItemIndex;
 import com.test.salesportal.model.Item;
 import com.test.salesportal.model.ItemPhoto;
 import com.test.salesportal.model.items.ItemTypes;
-import com.test.salesportal.xmlstorage.local.LocalXmlStorage;
+import com.test.salesportal.xmlstorage.api.BaseXMLStorage;
+import com.test.salesportal.xmlstorage.filesystem.files.ParameterFileSystemFilesXMLStorage;
 
 public class ReindexMain {
 
@@ -49,12 +51,12 @@ public class ReindexMain {
 			}
 		}
 		
-		final LocalXmlStorage srcStorage = new LocalXmlStorage(srcDir);
+		final BaseXMLStorage srcStorage = makeXmlStorage(srcDir);
 		final LuceneItemIndex srcIndex = new LuceneItemIndex(indexDir(srcDir));
 		
 		try (IItemDAO srcDao = new XMLItemDAO(srcStorage, srcIndex)) {
 		
-			final LocalXmlStorage dstStorage = new LocalXmlStorage(dstDir);
+			final BaseXMLStorage dstStorage = makeXmlStorage(dstDir);
 			final LuceneItemIndex dstIndex = new LuceneItemIndex(indexDir(dstDir));
 
 			try (IItemUpdate dstDao = new XMLItemDAO(dstStorage, dstIndex)) {
@@ -103,6 +105,10 @@ public class ReindexMain {
 				}
 			}
 		}
+	}
+	
+	private static ParameterFileSystemFilesXMLStorage makeXmlStorage(File file) {
+		return new ParameterFileSystemFilesXMLStorage(new LocalFileSystem(file));
 	}
 	
 	private static String indexDir(File baseDir) {
