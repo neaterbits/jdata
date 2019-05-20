@@ -13,22 +13,26 @@
 				<class>com.test.salesportal.model.login.LoginUser</class>
 				<class>com.test.salesportal.model.lock.ItemLock</class>
 				<class>com.test.salesportal.model.operations.Operation</class>
-
-<!--
-				<class>com.test.salesportal.model.Item</class>
-				<class>com.test.salesportal.model.ItemPhotoThumbnail</class>
-				<class>com.test.salesportal.model.ItemPhoto</class>
-				<class>com.test.salesportal.model.ItemPhotoCategory</class>
+				
+				<class>com.test.salesportal.model.items.Item</class>
+				<class>com.test.salesportal.model.items.base.TitleItem</class>
+				<class>com.test.salesportal.model.items.base.TitlePhotoItem</class>
+				<class>com.test.salesportal.model.items.base.BaseItem</class>
 				<class>com.test.salesportal.model.text.Text</class>
 				<class>com.test.salesportal.model.text.Translation</class>
-				<class>com.test.salesportal.model.items.BaseItem</class>
-				<class>com.test.salesportal.model.items.PhysicalItem</class>
-				<class>com.test.salesportal.model.items.SportsItem</class>
-				<class>com.test.salesportal.model.items.Snowboard</class>
-				<class>com.test.salesportal.model.items.Car</class>
-				<class>com.test.salesportal.model.items.RentalApartment</class>
+				<class>com.test.salesportal.model.items.photo.ItemPhotoThumbnail</class>
+				<class>com.test.salesportal.model.items.photo.ItemPhoto</class>
+				<class>com.test.salesportal.model.items.photo.ItemPhotoCategory</class>
+				<class>com.test.salesportal.model.items.sales.PurchasableItem</class>
+				<class>com.test.salesportal.model.items.sales.RetailIem</class>
+				<class>com.test.salesportal.model.items.sales.PhysicalItem</class>
+				<class>com.test.salesportal.model.items.sports.SportsItem</class>
+				<class>com.test.salesportal.model.items.sports.Snowboard</class>
+				<class>com.test.salesportal.model.items.vehicular.Vehicle</class>
+				<class>com.test.salesportal.model.items.vehicular.Car</class>
+				<class>com.test.salesportal.model.items.housing.Housing</class>
+				<class>com.test.salesportal.model.items.housing.RentalApartment</class>
 
- -->
                 <exclude-unlisted-classes>false</exclude-unlisted-classes>
                 
                 <properties>

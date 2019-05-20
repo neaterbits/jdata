@@ -3,12 +3,9 @@ package com.test.salesportal.model.items.sales;
 import java.math.BigDecimal;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.MappedSuperclass;
 
-@Entity
-@Inheritance(strategy=InheritanceType.JOINED)
+@MappedSuperclass
 public abstract class PhysicalItem extends RetailItem {
 
 	// measurements in centimeters

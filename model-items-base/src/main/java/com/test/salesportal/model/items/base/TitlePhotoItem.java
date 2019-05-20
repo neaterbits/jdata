@@ -4,12 +4,17 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 
 import com.test.salesportal.model.items.annotations.IndexItemAttribute;
 import com.test.salesportal.model.items.photo.ItemPhoto;
 import com.test.salesportal.model.items.photo.ItemPhotoThumbnail;
 
+@Entity
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class TitlePhotoItem extends TitleItem {
 
 	// Attributes here for cascade delete only, must be accessed through DAO queries

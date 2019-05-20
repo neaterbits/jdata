@@ -1,14 +1,15 @@
 package com.test.salesportal.model.items.sales;
 
 import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
 
 import com.test.salesportal.model.items.FacetFiltering;
 import com.test.salesportal.model.items.annotations.DisplayAttribute;
 import com.test.salesportal.model.items.annotations.Facet;
 import com.test.salesportal.model.items.annotations.NumericAttributeFiltering;
 import com.test.salesportal.model.items.annotations.Sortable;
-import com.test.salesportal.model.items.base.PurchasableItem;
 
+@MappedSuperclass
 public abstract class RetailItem extends PurchasableItem {
 
 	@Sortable(priority=4)

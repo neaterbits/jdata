@@ -11,10 +11,10 @@ import com.test.salesportal.model.items.annotations.DisplayAttribute;
 import com.test.salesportal.model.items.annotations.Facet;
 import com.test.salesportal.model.items.annotations.Freetext;
 import com.test.salesportal.model.items.annotations.IndexItemAttribute;
-import com.test.salesportal.model.items.base.PurchasableItem;
+import com.test.salesportal.model.items.sales.PurchasableItem;
 
 @MappedSuperclass
-public class Housing extends PurchasableItem {
+public abstract class Housing extends PurchasableItem {
 
 	@Column
 	@Facet(displayName = "City")
