@@ -19,7 +19,7 @@ public class TitleItem extends Item {
 	@Freetext
 	@IndexItemAttribute(storeValue=true) // must store for quick-lookup in search results
 	@ServiceAttribute
-	@Column(nullable=false)
+	@Column
 	private String title;
 
 	public String getTitle() {
