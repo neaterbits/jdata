@@ -62,68 +62,73 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			Set<ItemAttribute> fieldAttributes,
 			Set<ItemAttribute> facetAttributes) {
 
-		// Must dynamically construct criteria from database by mapping to table
-		final LinkedHashMap<EntityType<?>, String> typeToVarName = new LinkedHashMap<>(types.size());
-		
-		for (Class<? extends Item> type : types) {
-			final EntityType<?> entity = entityManager.getMetamodel().entity(type);
+		final ISearchCursor searchCursor;
 
-			if (entity == null) {
-				throw new IllegalArgumentException("no entity for type " + type.getName());
-			}
-			
-			if (typeToVarName.containsKey(entity)) {
-				throw new IllegalArgumentException("Duplicate entity " + entity.getName());
-			}
-
-			typeToVarName.put(entity, "item" + entity.getName());
+		if (types.isEmpty()) {
+			searchCursor = ISearchCursor.emptyCursor();
 		}
-
-		final StringBuilder fromListBuilder = new StringBuilder();
+		else {
+			// Must dynamically construct criteria from database by mapping to table
+			final LinkedHashMap<EntityType<?>, String> typeToVarName = new LinkedHashMap<>(types.size());
+			
+			for (Class<? extends Item> type : types) {
+				final EntityType<?> entity = entityManager.getMetamodel().entity(type);
+	
+				if (entity == null) {
+					throw new IllegalArgumentException("no entity for type " + type.getName());
+				}
+				
+				if (typeToVarName.containsKey(entity)) {
+					throw new IllegalArgumentException("Duplicate entity " + entity.getName());
+				}
+	
+				typeToVarName.put(entity, "item" + entity.getName());
+			}
+	
+			final StringBuilder fromListBuilder = new StringBuilder();
+			
+			boolean first = true;
+			for (Map.Entry<EntityType<?>, String> entry : typeToVarName.entrySet()) {
+				final EntityType<?> entity = entry.getKey();
+				final String entityName = entity.getName();
+				final String itemVarName = entry.getValue();
+	
+				if (first) {
+					first = false;
+				}
+				else {
+					fromListBuilder.append(", ");
+				}
+	
+				fromListBuilder.append(entityName).append(' ').append(itemVarName);
+			}
+	
+			final String fromList = fromListBuilder.toString();
+	
+			final String whereClause;
+			final List<Object> allParams;
+			
+			if (criteria != null && !criteria.isEmpty()) {
+				
+				// Must order criteria by type so that we search on the right item
+				// However some criteria may be for base types as well, but we can just apply those to all types
+				final StringBuilder whereSb = new StringBuilder(" where ");
+				
+				allParams = constructWhereClause(typeToVarName, criteria, whereSb);
 		
-		boolean first = true;
-		for (Map.Entry<EntityType<?>, String> entry : typeToVarName.entrySet()) {
-			final EntityType<?> entity = entry.getKey();
-			final String entityName = entity.getName();
-			final String itemVarName = entry.getValue();
-
-			if (first) {
-				first = false;
+				whereClause = whereSb.toString();
 			}
 			else {
-				fromListBuilder.append(", ");
+				whereClause = "";
+				allParams = null;
 			}
-
-			fromListBuilder.append(entityName).append(' ').append(itemVarName);
-		}
-
-		final String fromList = fromListBuilder.toString();
-
-		final String whereClause;
-		final List<Object> allParams;
-		
-		if (criteria != null && !criteria.isEmpty()) {
 			
-			// Must order criteria by type so that we search on the right item
-			// However some criteria may be for base types as well, but we can just apply those to all types
-			final StringBuilder whereSb = new StringBuilder(" where ");
-			
-			allParams = constructWhereClause(typeToVarName, criteria, whereSb);
-	
-			whereClause = whereSb.toString();
-		}
-		else {
-			whereClause = "";
-			allParams = null;
-		}
-		
-		final ISearchCursor searchCursor;
-		
-		if (facetAttributes == null || facetAttributes.isEmpty()) {
-			searchCursor = makeSearchCursorForNonFacetedQuery(typeToVarName, fromListBuilder.toString(), whereClause, allParams);
-		}
-		else {
-			searchCursor = makeSearchCursorForFacetedQuery(typeToVarName, facetAttributes, fromList, whereClause, allParams);
+			if (facetAttributes == null || facetAttributes.isEmpty()) {
+				searchCursor = makeSearchCursorForNonFacetedQuery(typeToVarName, fromListBuilder.toString(), whereClause, allParams);
+			}
+			else {
+				searchCursor = makeSearchCursorForFacetedQuery(typeToVarName, facetAttributes, fromList, whereClause, allParams);
+			}
 		}
 
 		return searchCursor;

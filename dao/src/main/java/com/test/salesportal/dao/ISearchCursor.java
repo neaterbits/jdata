@@ -1,5 +1,6 @@
 package com.test.salesportal.dao;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.test.salesportal.search.SearchItem;
@@ -7,6 +8,31 @@ import com.test.salesportal.search.facets.ItemsFacets;
 
 public interface ISearchCursor {
 
+	public static ISearchCursor emptyCursor() {
+		return new ISearchCursor() {
+			
+			@Override
+			public int getTotalMatchCount() {
+				return 0;
+			}
+			
+			@Override
+			public List<SearchItem> getItemIDsAndTitles(int initialIdx, int count) {
+				return Collections.emptyList();
+			}
+			
+			@Override
+			public List<String> getItemIDs(int initialIdx, int count) {
+				return Collections.emptyList();
+			}
+			
+			@Override
+			public ItemsFacets getFacets() {
+				return new ItemsFacets(Collections.emptyList());
+			}
+		};
+	}
+	
 	/**
 	 * Get IDs of the next items
 	 * @param initialIdx
