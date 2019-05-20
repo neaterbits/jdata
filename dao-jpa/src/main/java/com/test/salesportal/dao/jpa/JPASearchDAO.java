@@ -2,7 +2,6 @@ package com.test.salesportal.dao.jpa;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +25,7 @@ import com.test.salesportal.model.items.base.TitlePhotoItem;
 import com.test.salesportal.search.criteria.ComparisonCriterium;
 import com.test.salesportal.search.criteria.Criterium;
 import com.test.salesportal.search.criteria.InCriterium;
+import com.test.salesportal.search.criteria.InCriteriumValue;
 import com.test.salesportal.search.criteria.Range;
 import com.test.salesportal.search.criteria.RangesCriterium;
 import com.test.salesportal.search.facets.FacetUtils;
@@ -413,7 +413,7 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 				
 				sb.append(" in :param").append(paramNo ++);
 
-				params.add(Arrays.asList(ic.getValues()));
+				params.add(ic.getValues().stream().map(InCriteriumValue::getValue).collect(Collectors.toList()));
 			}
 			else if (c instanceof RangesCriterium<?, ?>) {
 				final RangesCriterium<?, ?> rc = (RangesCriterium<?, ?>)c;
