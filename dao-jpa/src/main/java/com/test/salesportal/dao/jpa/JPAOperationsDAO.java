@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import com.test.salesportal.common.UUIDGenerator;
@@ -124,19 +125,21 @@ public class JPAOperationsDAO extends JPABaseDAO implements IOperationsDAO {
 	@Override
 	public boolean completeOperation(OperationStorageId operationStorageId) {
 
-		return performInTransaction(() -> {
+		final boolean updated = performInTransaction(() -> {
 			final int numUpdated = entityManager.createQuery(
 					  "update Operation operation"
-					+ " set operation.completed = true,"
-					+ "     operation.aquireId = null"
+					+ " set operation.completed = TRUE,"
+					+ "     operation.aquireId = NULL"
 					+ " where operation.id = :id"
 					+ "   and operation.aquireId = :aquireId")
-			.setParameter("id", Long.parseLong(operationStorageId.getOperationId()))
+			.setParameter("id", parseOperationId(operationStorageId.getOperationId()))
 			.setParameter("aquireId", operationStorageId.getAquireId())
 			.executeUpdate();
 			
 			return numUpdated != 0;
 		});
+		
+		return updated;
 	}
 	
 	
@@ -166,14 +169,54 @@ public class JPAOperationsDAO extends JPABaseDAO implements IOperationsDAO {
 				.getResultList();
 	}
 	
+	long getNumOperations() {
+		return entityManager.createQuery(" select count(operation.id) from Operation operation", Long.class)
+				.getSingleResult();
+	}
+	
 	// For testing
 	Operation getOperation(String operationId) {
-		return entityManager.createQuery(
+		
+		final Operation operation = 
+				// performInTransaction(() ->
+				
+				getSingleOrNull(entityManager.createQuery(
 				  "from Operation operation"
 				+ " where operation.id = :id", Operation.class)
-				.setParameter("id", parseOperationId(operationId))
-				.getSingleResult();
-		// return entityManager.find(Operation.class, parseOperationId(operationId));
+				.setParameter("id", parseOperationId(operationId)));
+				// .setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache)
+
+		if (operation != null) {
+			// Avoid caching
+			entityManager.refresh(operation);
+		}
+
+		return operation;
+	}
+	
+	private static <T> T getSingleOrNull(Query query) {
+		final T result;
+		
+		@SuppressWarnings("unchecked")
+		final List<T> list = (List<T>)query.getResultList();
+		
+		switch (list.size()) {
+		case 0:
+			result = null;
+			break;
+			
+		case 1:
+			System.out.println("## row 0");
+			result = list.get(0);
+			
+			break;
+			
+	
+		default:
+			throw new IllegalStateException();
+		}
+		
+		return result;
 	}
 
 	private static long parseOperationId(String operationId) {

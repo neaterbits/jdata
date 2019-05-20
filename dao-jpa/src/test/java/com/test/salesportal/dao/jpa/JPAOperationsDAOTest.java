@@ -34,6 +34,7 @@ public class JPAOperationsDAOTest extends TestCase {
 			assertThat(readBackOperation).isNotNull();
 			assertThat(readBackOperation.getId()).isEqualTo(Long.parseLong(operationStorageId.getOperationId()));
 			assertThat(readBackOperation.getAquireId()).isEqualTo(operationStorageId.getAquireId());
+			assertThat(readBackOperation.isCompleted()).isFalse();
 			assertThat(readBackOperation.getCreatedTime()).isEqualTo(createTime);
 			assertThat(readBackOperation.getUserId()).isEqualTo(USER_ID);
 			
@@ -44,9 +45,27 @@ public class JPAOperationsDAOTest extends TestCase {
 					System.currentTimeMillis() - createTime.getTime());
 			assertThat(nonCompleted.isEmpty());
 
+			assertThat(dao.getOperation(operationStorageId.getOperationId()).isCompleted()).isFalse();
+
+			assertThat(dao.getCompletedOperationsNewerThanSortedOnModelVersionAsc(-1L)
+					.size()).isEqualTo(0);
+
 			final boolean operationFound = dao.completeOperation(operationStorageId);
 			
 			assertThat(operationFound).isTrue();
+			
+			assertThat(dao.getCompletedOperationsNewerThanSortedOnModelVersionAsc(-1L)
+					.size()).isEqualTo(1);
+			
+			assertThat(dao.getNumOperations()).isEqualTo(1);
+			
+			final Operation completed = dao.getOperation(operationStorageId.getOperationId());
+			
+			assertThat(completed.getId()).isEqualTo(Long.parseLong(operationStorageId.getOperationId()));
+			assertThat(completed.isCompleted()).isTrue();
+			assertThat(completed.getAquireId()).isNull();
+			
+			assertThat(dao.deleteOperationFromLog(operationStorageId.getOperationId())).isTrue();
 			
 			assertThat(dao.getOperation(operationStorageId.getOperationId())).isNull();
 		}
@@ -82,8 +101,11 @@ public class JPAOperationsDAOTest extends TestCase {
 
 			assertThat(nonCompleteEntry.getKey().getOperationId()).isEqualTo(anotherOperationStorageId.getOperationId());
 			assertThat(nonCompleteEntry.getKey().getOperationId()).isNotEqualTo(operationStorageId.getOperationId());
-			assertThat(dao.getOperation(nonCompleteEntry.getKey().getOperationId()).getAquireId())
-				.isNotEqualTo(anotherOperationStorageId.getAquireId());
+			
+			final Operation readBackOperation = dao.getOperation(nonCompleteEntry.getKey().getOperationId());
+			assertThat(readBackOperation).isNotSameAs(operation);
+			
+			assertThat(readBackOperation.getAquireId()).isNotEqualTo(anotherOperationStorageId.getAquireId());
 
 			boolean operationFound = dao.completeOperation(anotherOperationStorageId);
 			assertThat(operationFound).isFalse(); // aquired by other
