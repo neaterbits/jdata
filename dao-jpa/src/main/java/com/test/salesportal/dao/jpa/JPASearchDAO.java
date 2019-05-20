@@ -64,6 +64,10 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 
 		final ISearchCursor searchCursor;
 
+		if (types == null) {
+			throw new IllegalArgumentException("types == null");
+		}
+		
 		if (types.isEmpty()) {
 			searchCursor = ISearchCursor.emptyCursor();
 		}
