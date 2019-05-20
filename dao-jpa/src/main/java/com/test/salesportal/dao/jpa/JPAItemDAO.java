@@ -122,6 +122,10 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 	@Override
 	public String addItem(String userId, Item item) {
 
+		if (item.getIdString() != null) {
+			throw new IllegalStateException();
+		}
+
 		final EntityTransaction tx = entityManager.getTransaction();
 		
 		tx.begin();
@@ -135,7 +139,11 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 			
 		}
 		
-		return String.valueOf(item.getId());
+		final String itemIdString = String.valueOf(item.getId());
+		
+		item.setIdString(itemIdString);
+		
+		return itemIdString;
 	}
 
 	private void lockItem(Item item) {
@@ -429,6 +437,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 
 	@Override
 	public void deleteItem(String userId, String itemId, Class<? extends Item> type) {
+
 		final Item item = getItem(userId, itemId).getItem();
 		
 		final EntityTransaction tx = entityManager.getTransaction();
