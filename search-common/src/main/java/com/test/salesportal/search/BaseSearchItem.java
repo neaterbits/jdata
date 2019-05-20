@@ -1,7 +1,8 @@
 package com.test.salesportal.search;
 
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttribute;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttribute;
+import com.test.salesportal.model.items.base.ItemTypes;
 
 public abstract class BaseSearchItem implements SearchItem {
 
@@ -48,7 +49,7 @@ public abstract class BaseSearchItem implements SearchItem {
 	}
 	
 	@Override
-	public Object getSortAttributeValue(SortAttribute attribute) {
+	public Object getSortAttributeValue(SortAttribute attribute, ItemTypes itemTypes) {
 		
 		if (attribute == null) {
 			throw new IllegalArgumentException("attribute == null");

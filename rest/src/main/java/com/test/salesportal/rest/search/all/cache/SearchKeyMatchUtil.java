@@ -4,11 +4,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.test.salesportal.common.StringUtil;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.attributes.AttributeType;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.attributes.AttributeType;
+import com.test.salesportal.model.items.base.ItemTypes;
 import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
 import com.test.salesportal.rest.search.model.criteria.SearchCriteriumValue;
 import com.test.salesportal.rest.search.model.criteria.SearchRange;
@@ -16,9 +16,9 @@ import com.test.salesportal.rest.search.model.criteria.SearchRange;
 
 class SearchKeyMatchUtil {
 
-	static boolean matchesSearchKey(SearchKey searchKey, Item item) {
+	static boolean matchesSearchKey(SearchKey searchKey, Item item, ItemTypes itemTypes) {
 		
-		final TypeInfo itemTypeInfo = ItemTypes.getTypeInfo(item);
+		final TypeInfo itemTypeInfo = itemTypes.getTypeInfo(item);
 		
 		return matchesSearchCriteria(searchKey.getCriteria(), item, itemTypeInfo)
 				&& matchesFreeText(searchKey.getFreeText(), item, itemTypeInfo);

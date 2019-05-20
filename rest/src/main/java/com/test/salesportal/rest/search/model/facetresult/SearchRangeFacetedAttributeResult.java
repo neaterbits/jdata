@@ -2,7 +2,7 @@ package com.test.salesportal.rest.search.model.facetresult;
 
 import java.util.List;
 
-import com.test.salesportal.model.FacetFiltering;
+import com.test.salesportal.model.items.FacetFiltering;
 
 public class SearchRangeFacetedAttributeResult extends SearchFacetedAttributeResult {
 	

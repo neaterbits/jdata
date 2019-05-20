@@ -24,11 +24,12 @@ import com.test.salesportal.dao.RetrieveThumbnailsInputStream;
 import com.test.salesportal.dao.RetrieveThumbnailsInputStream.Thumbnail;
 import com.test.salesportal.index.ItemIndex;
 import com.test.salesportal.index.ItemIndexException;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemPhoto;
-import com.test.salesportal.model.ItemPhotoCategory;
-import com.test.salesportal.model.attributes.ClassAttributes;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.photo.ItemPhoto;
+import com.test.salesportal.model.items.photo.ItemPhotoCategory;
+import com.test.salesportal.model.items.attributes.ClassAttributes;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.base.TitlePhotoItem;
 import com.test.salesportal.xmlstorage.api.IItemStorage;
 import com.test.salesportal.xmlstorage.api.ImageMetaData;
 import com.test.salesportal.xmlstorage.api.ImageResult;
@@ -37,23 +38,46 @@ import com.test.salesportal.xmlstorage.api.StorageException;
 
 public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 
-	private static final JAXBContext jaxbContext;
+	private static JAXBContext jaxbContext;
 	
-	static {
+	private static synchronized void init(ItemTypes itemTypes) {
+		
+		if (jaxbContext != null) {
+			throw new IllegalStateException();
+		}
+		
 		try {
-			jaxbContext = JAXBContext.newInstance(ItemTypes.getJAXBTypeClasses());
+			jaxbContext = JAXBContext.newInstance(itemTypes.getJAXBTypeClasses());
 		} catch (JAXBException ex) {
 			throw new IllegalStateException("Failed to initialize JAXB context", ex);
 		}
 	}
 	
-	public XMLItemDAO(IItemStorage xmlStorage, ItemIndex index) {
-		super(jaxbContext, xmlStorage, index);
+	
+	private static synchronized JAXBContext initIfNotSet(ItemTypes itemTypes) {
+		
+		if (jaxbContext == null) {
+			init(itemTypes);
+		}
+		
+		return jaxbContext;
+	}
+	
+	private final ItemTypes itemTypes;
+	
+	public XMLItemDAO(IItemStorage xmlStorage, ItemIndex index, ItemTypes itemTypes) {
+		super(initIfNotSet(itemTypes), xmlStorage, index);
+		
+		if (itemTypes == null) {
+			throw new IllegalArgumentException("itemTypes == null");
+		}
+		
+		this.itemTypes = itemTypes;
 	}
 
 	
 	@Override
-	public Item getItem(String itemId) throws ItemStorageException {
+	public TitlePhotoItem getItem(String itemId) throws ItemStorageException {
 		
 		final ItemId id;
 		try {
@@ -66,7 +90,7 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 	}
 
 	interface CreateItem<T> {
-		T create(Item item) throws StorageException;
+		T create(TitlePhotoItem item) throws StorageException;
 	}
 
 	@Override
@@ -104,7 +128,7 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		else {
 			try {
 			
-				final Item item = (Item)unmarshaller.unmarshal(inputStream);
+				final TitlePhotoItem item = (TitlePhotoItem)unmarshaller.unmarshal(inputStream);
 				
 				found = createItem.create(item);
 
@@ -278,7 +302,7 @@ public class XMLItemDAO extends XMLBaseDAO implements IItemDAO {
 		item.setIdString(itemId);
 		
 		try {
-			store(userId, itemId, item, ItemTypes.getType(item), ClassAttributes.getValues(item));
+			store(userId, itemId, item, ItemTypes.getType(item), ClassAttributes.getValues(itemTypes, item));
 		} catch (XMLStorageException ex) {
 			throw new ItemStorageException("Failed to store item", ex);
 		}

@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.ItemAttribute;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.base.ItemTypes;
 import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
 import com.test.salesportal.rest.search.model.criteria.SearchCriteriumValue;
 import com.test.salesportal.rest.search.model.criteria.SearchRange;
@@ -25,11 +25,11 @@ import com.test.salesportal.search.criteria.StringInCriterium;
 
 public class SearchCriteriaUtil {
 
-	public static List<Criterium> convertCriteria(SearchCriterium [] searchCriteria) {
+	public static List<Criterium> convertCriteria(SearchCriterium [] searchCriteria, ItemTypes itemTypes) {
 		final List<Criterium> criteria = new ArrayList<>(searchCriteria.length);
 		
 		for (int i = 0; i < searchCriteria.length; ++ i) {
-			final Criterium criterium = convertCriterium(searchCriteria[i]);
+			final Criterium criterium = convertCriterium(searchCriteria[i], itemTypes);
 			
 			if (criterium == null) {
 				// Probably no checkboxes were selected
@@ -42,13 +42,13 @@ public class SearchCriteriaUtil {
 		return criteria;
 	}
 
-	private static Criterium convertCriterium(SearchCriterium searchCriterium) {
+	private static Criterium convertCriterium(SearchCriterium searchCriterium, ItemTypes itemTypes) {
 		
 		// Figure out the type first
 		final String typeName = searchCriterium.getType();
 		
 		// This is a Java type, look it up from the types list
-		final TypeInfo type = ItemTypes.getTypeByName(typeName);
+		final TypeInfo type = itemTypes.getTypeByName(typeName);
 		
 		if (type == null) {
 			throw new IllegalArgumentException("Unknown type " + typeName);
@@ -113,20 +113,20 @@ public class SearchCriteriaUtil {
 			
 			switch (attribute.getAttributeType()) {
 			case STRING:
-				criterium = new StringInCriterium(attribute, convertCriteriaValues(searchCriterium, o -> (String)o), includeItemsWithNoValue);
+				criterium = new StringInCriterium(attribute, convertCriteriaValues(searchCriterium, itemTypes, o -> (String)o), includeItemsWithNoValue);
 				break;
 
 			case INTEGER:
-				criterium = new IntegerInCriterium(attribute, convertCriteriaValues(searchCriterium, o -> (Integer)o), includeItemsWithNoValue);
+				criterium = new IntegerInCriterium(attribute, convertCriteriaValues(searchCriterium, itemTypes, o -> (Integer)o), includeItemsWithNoValue);
 				break;
 
 			case DECIMAL:
-				criterium = new DecimalInCriterium(attribute, convertCriteriaValues(searchCriterium, o -> toDecimal(o)), includeItemsWithNoValue);
+				criterium = new DecimalInCriterium(attribute, convertCriteriaValues(searchCriterium, itemTypes, o -> toDecimal(o)), includeItemsWithNoValue);
 				break;
 				
 			case ENUM:
 				// Find enum-class from attribute
-				criterium = makeEnumCriterium(attribute, searchCriterium, includeItemsWithNoValue);
+				criterium = makeEnumCriterium(attribute, searchCriterium, includeItemsWithNoValue, itemTypes);
 				break;
 
 			default:
@@ -146,7 +146,8 @@ public class SearchCriteriaUtil {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static <T extends Comparable<T>> List<InCriteriumValue<T>> convertCriteriaValues(SearchCriterium sc, Function<Object, T> convertValue) {
+	private static <T extends Comparable<T>>
+	List<InCriteriumValue<T>> convertCriteriaValues(SearchCriterium sc, ItemTypes itemTypes, Function<Object, T> convertValue) {
 		
 		final SearchCriteriumValue [] values = sc.getValues();
 		
@@ -159,7 +160,7 @@ public class SearchCriteriaUtil {
 
 			if (subCriteria != null) {
 				// Convert subcriteria as well
-				sub = (List)convertCriteria(subCriteria);
+				sub = (List)convertCriteria(subCriteria, itemTypes);
 			}
 			else {
 				sub = null;
@@ -174,12 +175,18 @@ public class SearchCriteriaUtil {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static <E extends Enum<E>> EnumInCriterium<E> makeEnumCriterium(ItemAttribute attribute, SearchCriterium searchCriterium, boolean includeItemsWithNoValue) {
+	private static <E extends Enum<E>>
+	EnumInCriterium<E> makeEnumCriterium(
+			ItemAttribute attribute,
+			SearchCriterium searchCriterium,
+			boolean includeItemsWithNoValue,
+			ItemTypes itemTypes) {
+
 		final Class enumClass = attribute.getAttributeValueClass();
 
 		return new EnumInCriterium<E>(
 				attribute,
-				convertCriteriaValues(searchCriterium, o -> (E)Enum.valueOf(enumClass, (String)o)),
+				convertCriteriaValues(searchCriterium, itemTypes, o -> (E)Enum.valueOf(enumClass, (String)o)),
 				includeItemsWithNoValue);
 	}
 

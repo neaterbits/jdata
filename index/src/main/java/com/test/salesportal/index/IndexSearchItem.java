@@ -1,7 +1,7 @@
 package com.test.salesportal.index;
 
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttribute;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttribute;
 import com.test.salesportal.search.BaseSearchItem;
 import com.test.salesportal.search.FieldValues;
 

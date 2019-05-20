@@ -13,13 +13,13 @@ import com.test.salesportal.model.cv.DescribedItem;
 import com.test.salesportal.model.cv.Education;
 import com.test.salesportal.model.cv.ItemVisitor;
 import com.test.salesportal.model.cv.Job;
-import com.test.salesportal.model.cv.Language;
 import com.test.salesportal.model.cv.Project;
 import com.test.salesportal.model.cv.SelfEmployed;
 import com.test.salesportal.model.cv.Skill;
 import com.test.salesportal.model.cv.SkillCategory;
 import com.test.salesportal.model.cv.SkillsAquiringItem;
 import com.test.salesportal.model.cv.Work;
+import com.test.salesportal.model.text.Language;
 import com.test.salesportal.model.text.Text;
 import com.test.salesportal.model.text.Translation;
 

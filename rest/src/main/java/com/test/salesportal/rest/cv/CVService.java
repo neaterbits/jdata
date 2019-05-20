@@ -14,10 +14,23 @@ import com.test.salesportal.dao.xml.XMLCVDAO;
 import com.test.salesportal.model.cv.CV;
 import com.test.salesportal.model.cv.CVItem;
 import com.test.salesportal.model.cv.Personalia;
+import com.test.salesportal.model.items.base.ItemTypes;
 import com.test.salesportal.rest.BaseService;
 
 @Path("/cv")
 public class CVService extends BaseService {
+
+	private final ItemTypes itemTypes;
+	
+	public CVService(String localFileDir, ItemTypes itemTypes) {
+		super(localFileDir);
+		
+		if (itemTypes == null) {
+			throw new IllegalArgumentException("itemTypes == null");
+		}
+		
+		this.itemTypes = itemTypes;
+	}
 
 	private ICVDAO getDAO(HttpServletRequest request) {
 		
@@ -27,7 +40,7 @@ public class CVService extends BaseService {
 		
 		switch (storage) {
 		case LOCAL_FILE_LUCENE:
-			ret = new XMLCVDAO(getLocalXMLStorage(), null);
+			ret = new XMLCVDAO(getLocalXMLStorage(), null, itemTypes);
 			break;
 			
 		default:
@@ -35,10 +48,6 @@ public class CVService extends BaseService {
 		}
 		
 		return ret;
-	}
-
-	public CVService(String localFileDir) {
-		super(localFileDir);
 	}
 
 	// return the complete CV

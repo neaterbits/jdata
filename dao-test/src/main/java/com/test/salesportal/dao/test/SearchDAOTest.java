@@ -15,10 +15,12 @@ import com.test.salesportal.dao.IItemUpdate;
 import com.test.salesportal.dao.ISearchCursor;
 import com.test.salesportal.dao.ISearchDAO;
 import com.test.salesportal.dao.SearchException;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttributeAndOrder;
-import com.test.salesportal.model.SortOrder;
-import com.test.salesportal.model.attributes.ClassAttributes;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttributeAndOrder;
+import com.test.salesportal.model.items.SortOrder;
+import com.test.salesportal.model.items.attributes.ClassAttributes;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.sales.SalesItemTypes;
 import com.test.salesportal.model.items.sports.Snowboard;
 import com.test.salesportal.model.items.sports.SnowboardProfile;
 import com.test.salesportal.model.items.vehicular.Car;
@@ -41,6 +43,8 @@ import junit.framework.TestCase;
 
 public abstract class SearchDAOTest extends TestCase {
 
+	protected static final ItemTypes ITEM_TYPES = SalesItemTypes.INSTANCE;
+	
 	protected abstract IItemUpdate getItemDAO();
 	protected abstract ISearchDAO getSearchDAO();
 

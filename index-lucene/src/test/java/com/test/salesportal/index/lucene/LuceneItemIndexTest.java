@@ -14,13 +14,14 @@ import com.test.salesportal.index.IndexSearchCursor;
 import com.test.salesportal.index.ItemIndex;
 import com.test.salesportal.index.ItemIndexException;
 import com.test.salesportal.index.lucene.LuceneItemIndex;
-import com.test.salesportal.model.DecimalAttributeValue;
-import com.test.salesportal.model.IntegerAttributeValue;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.StringAttributeValue;
-import com.test.salesportal.model.attributes.ClassAttributes;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.DecimalAttributeValue;
+import com.test.salesportal.model.items.IntegerAttributeValue;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.StringAttributeValue;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.attributes.ClassAttributes;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.sales.SalesItemTypes;
 import com.test.salesportal.model.items.sports.Snowboard;
 import com.test.salesportal.model.items.vehicular.Car;
 import com.test.salesportal.model.items.vehicular.Fuel;
@@ -43,11 +44,13 @@ import static org.assertj.core.api.Assertions.*;
 
 public class LuceneItemIndexTest extends TestCase {
 
+	private static final ItemTypes ITEM_TYPES = SalesItemTypes.INSTANCE;
+	
 	public void testAddAndSearch() throws Exception {
 
 		final String userId = "user123";
 		
-		try (LuceneItemIndex index = new LuceneItemIndex(new RAMDirectory())) {
+		try (LuceneItemIndex index = new LuceneItemIndex(new RAMDirectory(), ITEM_TYPES)) {
 		
 			final ClassAttributes attributes = ClassAttributes.getFromClass(Snowboard.class);
 			
@@ -174,7 +177,7 @@ public class LuceneItemIndexTest extends TestCase {
 
 		final String userId = "user123";
 
-		try (LuceneItemIndex index = new LuceneItemIndex(new RAMDirectory())) {
+		try (LuceneItemIndex index = new LuceneItemIndex(new RAMDirectory(), ITEM_TYPES)) {
 			
 			final ClassAttributes attributes = ClassAttributes.getFromClass(Snowboard.class);
 			
@@ -229,12 +232,12 @@ public class LuceneItemIndexTest extends TestCase {
 		openIndexAndStoreAndCloseIndex(userId, car1, FSDirectory.open(directory.toPath()));
 		openIndexAndStoreAndCloseIndex(userId, car2, FSDirectory.open(directory.toPath()));
 		
-		try (LuceneItemIndex index = new LuceneItemIndex(directory.getAbsolutePath())) {
+		try (LuceneItemIndex index = new LuceneItemIndex(directory.getAbsolutePath(), ITEM_TYPES)) {
 			
 			// index.indexItemAttributes(userId, Car.class, ItemTypes.getTypeName(Car.class), ClassAttributes.getValues(car1));
 			// index.indexItemAttributes(userId, Car.class, ItemTypes.getTypeName(Car.class), ClassAttributes.getValues(car2));
 			
-			final TypeInfo carTypeInfo = ItemTypes.getTypeInfo(Car.class);
+			final TypeInfo carTypeInfo = ITEM_TYPES.getTypeInfo(Car.class);
 			
 			// Search by make should return 2 entries
 			final Criterium criterium = new EnumInCriterium<>(
@@ -255,13 +258,13 @@ public class LuceneItemIndexTest extends TestCase {
 	}
 	
 	private void openIndexAndStoreAndCloseIndex(String userId, Car car, Directory directory) throws IOException, Exception {
-		try (LuceneItemIndex index = new LuceneItemIndex(directory)) {
+		try (LuceneItemIndex index = new LuceneItemIndex(directory, ITEM_TYPES)) {
 			final Car car1 = new Car();
 			car1.setIdString("itemId1");
 			car1.setMake("Honda");
 			car1.setFuel(Fuel.GAS);
 
-			index.indexItemAttributes(userId, Car.class, ItemTypes.getTypeName(Car.class), ClassAttributes.getValues(car1));
+			index.indexItemAttributes(userId, Car.class, ItemTypes.getTypeName(Car.class), ClassAttributes.getValues(ITEM_TYPES, car1));
 		}
 	}
 	

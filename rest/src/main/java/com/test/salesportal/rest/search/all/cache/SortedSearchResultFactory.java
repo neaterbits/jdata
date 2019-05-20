@@ -2,7 +2,7 @@ package com.test.salesportal.rest.search.all.cache;
 
 import java.util.List;
 
-import com.test.salesportal.model.SortAttribute;
+import com.test.salesportal.model.items.SortAttribute;
 
 public interface SortedSearchResultFactory {
 

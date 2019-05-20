@@ -23,10 +23,11 @@ import com.test.salesportal.dao.IItemDAO;
 import com.test.salesportal.dao.ItemStorageException;
 import com.test.salesportal.dao.RetrieveThumbnailsInputStream;
 import com.test.salesportal.dao.RetrieveThumbnailsInputStream.Thumbnail;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemPhoto;
-import com.test.salesportal.model.ItemPhotoCategory;
-import com.test.salesportal.model.ItemPhotoThumbnail;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.base.TitlePhotoItem;
+import com.test.salesportal.model.items.photo.ItemPhoto;
+import com.test.salesportal.model.items.photo.ItemPhotoCategory;
+import com.test.salesportal.model.items.photo.ItemPhotoThumbnail;
 
 public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 
@@ -40,14 +41,14 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 
 	@Override
 	public IFoundItem getItem(String userId, String itemId) {
-		final Item item = getItem(itemId);
+		final TitlePhotoItem item = getItem(itemId);
 		
 		return item == null ? null : new JPAFoundItem(item);
 	}
 	
 	@Override
-	public Item getItem(String itemId) {
-		final Item item = entityManager.find(Item.class, Long.parseLong(itemId));
+	public TitlePhotoItem getItem(String itemId) {
+		final TitlePhotoItem item = entityManager.find(TitlePhotoItem.class, Long.parseLong(itemId));
 
 		return item;
 	}

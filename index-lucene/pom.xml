@@ -30,5 +30,12 @@
 
 	<!-- test dependencies --> 
 
+  	<dependency>
+  		<groupId>${project.groupId}</groupId>
+  		<artifactId>model-items-sales</artifactId>
+  		<version>${project.version}</version>
+  		<scope>test</scope>
+  	</dependency>
+
   </dependencies>
 </project>

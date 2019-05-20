@@ -1,7 +1,7 @@
 package com.test.salesportal.dao;
 
 import com.test.salesportal.model.cv.CV;
-import com.test.salesportal.model.cv.Language;
+import com.test.salesportal.model.text.Language;
 
 /**
  * For storing structured CVs, like in job portals.

@@ -2,11 +2,11 @@ package com.test.salesportal.rest.search.all.cache;
 
 import java.util.List;
 
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.SortAttribute;
-import com.test.salesportal.model.SortOrder;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.SortAttribute;
+import com.test.salesportal.model.items.SortOrder;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.base.TitlePhotoItem;
 import com.test.salesportal.rest.search.all.AllSearchItemResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetsResult;
 
@@ -26,7 +26,7 @@ public abstract class SortedSearchResult {
 	
 	abstract int getMatchCount();
 
-	abstract void applyItemToCachedItems(SearchKey searchKey, Item item);
+	abstract void applyItemToCachedItems(SearchKey searchKey, TitlePhotoItem item, ItemTypes itemTypes);
 	
 	abstract void deleteItemFromCachedItems(String itemId);
 	
@@ -75,14 +75,14 @@ public abstract class SortedSearchResult {
 		return sortAttributes;
 	}
 
-	final void applyItem(SearchKey searchKey, Item item, List<TypeInfo> allTypes) {
+	final void applyItem(SearchKey searchKey, TitlePhotoItem item, List<TypeInfo> allTypes, ItemTypes itemTypes) {
 		
 		// Call subclass to update result items
-		applyItemToCachedItems(searchKey, item);
+		applyItemToCachedItems(searchKey, item, itemTypes);
 		
 		if (facetsResult != null) {
 			// Update facet counts
-			SearchFacetsResultUtil.addItem(facetsResult, item, ItemTypes.getTypeInfo(item), allTypes);
+			SearchFacetsResultUtil.addItem(facetsResult, item, itemTypes.getTypeInfo(item), allTypes);
 		}
 	}
 	

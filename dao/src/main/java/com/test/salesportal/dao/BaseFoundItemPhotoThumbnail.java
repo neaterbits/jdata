@@ -2,7 +2,7 @@ package com.test.salesportal.dao;
 
 import java.util.List;
 
-import com.test.salesportal.model.ItemPhotoCategory;
+import com.test.salesportal.model.items.photo.ItemPhotoCategory;
 
 public class BaseFoundItemPhotoThumbnail implements IFoundItemPhotoThumbnail {
 

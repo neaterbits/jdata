@@ -3,11 +3,12 @@ package com.test.salesportal.rest.search.all.cache;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttribute;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttribute;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.sales.SalesItemTypes;
 import com.test.salesportal.model.items.sports.DownhillSki;
 import com.test.salesportal.model.items.sports.Snowboard;
 import com.test.salesportal.model.items.sports.SnowboardProfile;
@@ -21,6 +22,8 @@ import junit.framework.TestCase;
 
 public class SearchKeyTest extends TestCase {
 
+	private static final ItemTypes ITEM_TYPES = SalesItemTypes.INSTANCE;
+	
 	public void testEqualsHashCodeTypes() {
 
 		final List<Class<? extends Item>> types = new ArrayList<>();
@@ -62,8 +65,8 @@ public class SearchKeyTest extends TestCase {
 
 	public void testEqualsHashCodeSearchCriteria() {
 
-		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
-		final TypeInfo downhillSkiType = ItemTypes.getTypeInfo(DownhillSki.class);
+		final TypeInfo snowboardType = ITEM_TYPES.getTypeInfo(Snowboard.class);
+		final TypeInfo downhillSkiType = ITEM_TYPES.getTypeInfo(DownhillSki.class);
 		
 		final ItemAttribute profileAttribute = snowboardType.getAttributes().getByName("profile");
 		assertThat(profileAttribute).isNotNull();
@@ -119,7 +122,7 @@ public class SearchKeyTest extends TestCase {
 
 		final List<SortAttribute> sortAttributes = new ArrayList<>();
 
-		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		final TypeInfo snowboardType = ITEM_TYPES.getTypeInfo(Snowboard.class);
 		
 		final SortAttribute titleAttribute = snowboardType.getAttributes().getByName("title").makeSortAttribute();
 		assertThat(titleAttribute).isNotNull();
@@ -151,7 +154,7 @@ public class SearchKeyTest extends TestCase {
 
 		final List<ItemAttribute> fieldAttributes = new ArrayList<>();
 
-		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		final TypeInfo snowboardType = ITEM_TYPES.getTypeInfo(Snowboard.class);
 		
 		final ItemAttribute titleAttribute = snowboardType.getAttributes().getByName("title");
 		assertThat(titleAttribute).isNotNull();

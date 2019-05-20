@@ -2,9 +2,10 @@ package com.test.salesportal.rest.search.all.cache;
 
 import java.util.List;
 
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.SortAttribute;
-import com.test.salesportal.model.SortOrder;
+import com.test.salesportal.model.items.SortAttribute;
+import com.test.salesportal.model.items.SortOrder;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.base.TitlePhotoItem;
 import com.test.salesportal.rest.search.all.AllSearchItemResult;
 
 /**
@@ -36,7 +37,7 @@ final class RadixSortSearchResult extends SortedSearchResult {
 	}
 
 	@Override
-	void applyItemToCachedItems(SearchKey searchKey, Item item) {
+	void applyItemToCachedItems(SearchKey searchKey, TitlePhotoItem item, ItemTypes itemTypes) {
 		// TODO Auto-generated method stub
 		
 	}

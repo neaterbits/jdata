@@ -3,9 +3,9 @@ package com.test.salesportal.search.facets;
 import java.util.Comparator;
 import java.util.List;
 
-import com.test.salesportal.model.SortAttribute;
-import com.test.salesportal.model.SortAttributeAndOrder;
-import com.test.salesportal.model.SortOrder;
+import com.test.salesportal.model.items.SortAttribute;
+import com.test.salesportal.model.items.SortAttributeAndOrder;
+import com.test.salesportal.model.items.SortOrder;
 
 public class SortUtils {
 

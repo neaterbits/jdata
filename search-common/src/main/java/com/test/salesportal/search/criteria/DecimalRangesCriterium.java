@@ -2,7 +2,7 @@ package com.test.salesportal.search.criteria;
 
 import java.math.BigDecimal;
 
-import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.items.ItemAttribute;
 
 public class DecimalRangesCriterium extends RangesCriterium<BigDecimal, DecimalRange> {
 

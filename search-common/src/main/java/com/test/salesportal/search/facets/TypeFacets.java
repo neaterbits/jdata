@@ -2,7 +2,7 @@ package com.test.salesportal.search.facets;
 
 import java.util.List;
 
-import com.test.salesportal.model.Item;
+import com.test.salesportal.model.items.Item;
 
 public class TypeFacets {
 

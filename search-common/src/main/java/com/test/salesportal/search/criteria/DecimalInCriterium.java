@@ -3,7 +3,7 @@ package com.test.salesportal.search.criteria;
 import java.math.BigDecimal;
 import java.util.List;
 
-import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.items.ItemAttribute;
 
 public class DecimalInCriterium extends InCriterium<BigDecimal> {
 

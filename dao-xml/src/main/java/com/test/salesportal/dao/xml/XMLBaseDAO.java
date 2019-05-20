@@ -14,9 +14,9 @@ import javax.xml.bind.Unmarshaller;
 import com.test.salesportal.common.ItemId;
 import com.test.salesportal.index.ItemIndex;
 import com.test.salesportal.index.ItemIndexException;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttributeValue;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttributeValue;
+import com.test.salesportal.model.items.base.ItemTypes;
 import com.test.salesportal.xmlstorage.api.IItemStorage;
 import com.test.salesportal.xmlstorage.api.StorageException;
 

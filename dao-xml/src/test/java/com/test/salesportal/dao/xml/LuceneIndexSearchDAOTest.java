@@ -28,7 +28,7 @@ public class LuceneIndexSearchDAOTest extends SearchDAOTest {
 		try {
 			final Directory luceneDirectory = FSDirectory.open(baseDir.toPath());
 		
-			index = new LuceneItemIndex(luceneDirectory);
+			index = new LuceneItemIndex(luceneDirectory, ITEM_TYPES);
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException("Failed to create lucene index", ex);
@@ -38,7 +38,7 @@ public class LuceneIndexSearchDAOTest extends SearchDAOTest {
 	@Override
 	protected IItemUpdate getItemDAO() {
 		final IItemStorage localXmlStorage = new ParameterFileSystemFilesXMLStorage(new LocalFileSystem(baseDir));
-		return new XMLItemDAO(localXmlStorage, index);
+		return new XMLItemDAO(localXmlStorage, index, ITEM_TYPES);
 	}
 
 	@Override

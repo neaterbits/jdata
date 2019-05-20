@@ -3,9 +3,9 @@ package com.test.salesportal.dao;
 import java.util.List;
 import java.util.Set;
 
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttributeAndOrder;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttributeAndOrder;
 import com.test.salesportal.search.criteria.Criterium;
 
 /**

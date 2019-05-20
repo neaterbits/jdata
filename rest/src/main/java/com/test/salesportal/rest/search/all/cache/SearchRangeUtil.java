@@ -2,7 +2,7 @@ package com.test.salesportal.rest.search.all.cache;
 
 import java.util.Comparator;
 
-import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.items.ItemAttribute;
 
 class SearchRangeUtil {
 	static boolean matches(

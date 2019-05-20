@@ -1,8 +1,8 @@
 package com.test.salesportal.dao.jpa;
 
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttribute;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttribute;
+import com.test.salesportal.model.items.base.TitlePhotoItem;
 import com.test.salesportal.search.AttributeValues;
 import com.test.salesportal.search.BaseSearchItem;
 import com.test.salesportal.search.SearchItem;
@@ -31,7 +31,7 @@ final class JPASearchItem extends BaseSearchItem implements SearchItem {
 		super(id, title, thumbWidth, thumbHeight, null, fieldValues);
 	}
 
-	public JPASearchItem(Item item) {
+	public JPASearchItem(TitlePhotoItem item) {
 		this(String.valueOf(item.getId()), item.getTitle(), item.getThumbWidth(), item.getThumbHeight(), null, null);
 	}
 }

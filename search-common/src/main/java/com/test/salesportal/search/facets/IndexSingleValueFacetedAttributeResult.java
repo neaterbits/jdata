@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.items.ItemAttribute;
 
 /**
  * Single value eg. non-range facet match

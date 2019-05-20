@@ -15,6 +15,7 @@ import javax.ws.rs.Path;
 
 import com.test.salesportal.common.IOUtil;
 import com.test.salesportal.dao.ItemStorageException;
+import com.test.salesportal.model.items.base.ItemTypes;
 import com.test.salesportal.rest.search.BaseSearchService;
 import com.test.salesportal.rest.search.SearchItemResult;
 import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
@@ -23,16 +24,22 @@ import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
 @Path("/searchpaged")
 public class PagedSearchService extends BaseSearchService<SearchItemResult, PagedSearchResult> {
 	
-	private static final PagedSearchLogic SEARCH_LOGIC = new PagedSearchLogic();
-	public PagedSearchService(String localFileDir) {
+	private final ItemTypes itemTypes;
+	private final PagedSearchLogic searchLogic;
+	
+	public PagedSearchService(String localFileDir, ItemTypes itemTypes) {
 		super(localFileDir);
+		
+		this.itemTypes = itemTypes;
+		
+		this.searchLogic = new PagedSearchLogic(itemTypes);
 	}
 
 	@GET
 	@Path("search")
 	// TODO check that we adhere to best practices for pageNo and itemsPerPage
 	public PagedSearchResult search(String [] types, String freeText, SearchCriterium [] criteria, String [] sortOrder, String [] fields, Integer pageNo, Integer itemsPerPage, Boolean testdata, HttpServletRequest request) {
-		return SEARCH_LOGIC.search(
+		return searchLogic.search(
 				types,
 				freeText,
 				criteria,
@@ -113,7 +120,7 @@ public class PagedSearchService extends BaseSearchService<SearchItemResult, Page
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream(50000);
 
 		try {
-			inputStream = getItemRetrievalDAO(request).retrieveAndConcatenateThumbnails(itemIds);
+			inputStream = getItemRetrievalDAO(request, itemTypes).retrieveAndConcatenateThumbnails(itemIds);
 
 			IOUtil.copyStreams(inputStream, baos);
 		} catch (ItemStorageException ex) {

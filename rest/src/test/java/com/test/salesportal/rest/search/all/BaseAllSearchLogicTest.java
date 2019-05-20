@@ -13,10 +13,12 @@ import com.test.salesportal.dao.ISearchCursor;
 import com.test.salesportal.dao.ISearchDAO;
 import com.test.salesportal.dao.SearchException;
 import com.test.salesportal.index.IndexSearchItem;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttribute;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttribute;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.operations.dao.OperationDataMarshaller;
+import com.test.salesportal.model.items.sales.SalesItemTypes;
 import com.test.salesportal.model.items.sports.Snowboard;
 import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
 import com.test.salesportal.rest.search.model.criteria.SearchCriteriumValue;
@@ -31,7 +33,10 @@ import junit.framework.TestCase;
 
 public abstract class BaseAllSearchLogicTest extends TestCase {
 
-	final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+	protected static final ItemTypes ITEM_TYPES = SalesItemTypes.INSTANCE;
+	protected static final OperationDataMarshaller OPERATION_DATA_MARSHALLER = new OperationDataMarshaller(ITEM_TYPES.getJAXBTypeClasses());
+	
+	final TypeInfo snowboardType = ITEM_TYPES.getTypeInfo(Snowboard.class);
 	
 	final AllSearchResult searchSnowboard(AllSearchLogic searchLogic, ISearchDAO searchDAO, Boolean getOtherSelected) {
 		

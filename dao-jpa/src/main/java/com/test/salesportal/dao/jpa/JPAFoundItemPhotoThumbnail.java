@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.test.salesportal.dao.BaseFoundItemPhotoThumbnail;
 import com.test.salesportal.dao.IFoundItemPhotoThumbnail;
-import com.test.salesportal.model.ItemPhotoCategory;
+import com.test.salesportal.model.items.photo.ItemPhotoCategory;
 
 final class JPAFoundItemPhotoThumbnail extends BaseFoundItemPhotoThumbnail implements IFoundItemPhotoThumbnail {
 

@@ -59,24 +59,24 @@ import com.test.salesportal.index.IndexSearchCursor;
 import com.test.salesportal.index.IndexSearchItem;
 import com.test.salesportal.index.ItemIndex;
 import com.test.salesportal.index.ItemIndexException;
-import com.test.salesportal.model.BooleanAttributeValue;
-import com.test.salesportal.model.DateAttributeValue;
-import com.test.salesportal.model.DecimalAttributeValue;
-import com.test.salesportal.model.DistinctAttribute;
-import com.test.salesportal.model.EnumAttributeValue;
-import com.test.salesportal.model.IntegerAttributeValue;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.ItemAttributeValue;
-import com.test.salesportal.model.LongAttributeValue;
-import com.test.salesportal.model.PropertyAttribute;
-import com.test.salesportal.model.SortAttribute;
-import com.test.salesportal.model.SortAttributeAndOrder;
-import com.test.salesportal.model.StringAttributeValue;
-import com.test.salesportal.model.TZDateAttributeValue;
-import com.test.salesportal.model.attributes.AttributeType;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.BooleanAttributeValue;
+import com.test.salesportal.model.items.DateAttributeValue;
+import com.test.salesportal.model.items.DecimalAttributeValue;
+import com.test.salesportal.model.items.DistinctAttribute;
+import com.test.salesportal.model.items.EnumAttributeValue;
+import com.test.salesportal.model.items.IntegerAttributeValue;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.ItemAttributeValue;
+import com.test.salesportal.model.items.LongAttributeValue;
+import com.test.salesportal.model.items.PropertyAttribute;
+import com.test.salesportal.model.items.SortAttribute;
+import com.test.salesportal.model.items.SortAttributeAndOrder;
+import com.test.salesportal.model.items.StringAttributeValue;
+import com.test.salesportal.model.items.TZDateAttributeValue;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.attributes.AttributeType;
+import com.test.salesportal.model.items.base.ItemTypes;
 import com.test.salesportal.search.FieldValues;
 import com.test.salesportal.search.SearchItem;
 import com.test.salesportal.search.criteria.ComparisonCriterium;
@@ -115,16 +115,23 @@ public class LuceneItemIndex implements ItemIndex {
 
 	private static final DateTimeFormatter TZDATE_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 	
+	private final ItemTypes itemTypes;
+	
 	private final Directory directory;
 	private IndexWriter writer;
 	private DirectoryReader reader;
 	
-	public LuceneItemIndex(String indexPath) throws IOException {
-		this(FSDirectory.open(new File(indexPath).toPath()));
+	public LuceneItemIndex(String indexPath, ItemTypes itemTypes) throws IOException {
+		this(FSDirectory.open(new File(indexPath).toPath()), itemTypes);
 	}
 
-	public LuceneItemIndex(Directory directory) throws IOException {
+	public LuceneItemIndex(Directory directory, ItemTypes itemTypes) throws IOException {
 
+		if (itemTypes == null) {
+			throw new IllegalArgumentException("itemTypes == null");
+		}
+		
+		this.itemTypes = itemTypes;
 		this.directory = directory;
 
 		final IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer());
@@ -144,7 +151,7 @@ public class LuceneItemIndex implements ItemIndex {
 	public synchronized void indexItemAttributes(String userId, Class<? extends Item> itemType, String typeName, List<ItemAttributeValue<?>> attributeValues) throws ItemIndexException {
 		final Document document = new Document();
 
-		final boolean idFound = addToDocument(document, ItemTypes.getTypeInfo(itemType), userId, attributeValues);
+		final boolean idFound = addToDocument(document, itemTypes.getTypeInfo(itemType), userId, attributeValues);
 
 		if (!idFound) {
 			throw new IllegalArgumentException("No ID attribute supplied");
@@ -545,7 +552,7 @@ public class LuceneItemIndex implements ItemIndex {
 
 		// Seems like update resets string fields to TextField etc so matching does not work,
 		// just recreate document from attributes
-		final Set<ItemAttribute> attributes = ItemTypes.getTypeInfo(type).getAttributes().asSet();
+		final Set<ItemAttribute> attributes = itemTypes.getTypeInfo(type).getAttributes().asSet();
 		
 		final List<ItemAttributeValue<?>> values = getValuesFromDocument(doc, attributes);
 
@@ -554,7 +561,7 @@ public class LuceneItemIndex implements ItemIndex {
 		// Get user id from existing doc
 		final String userId = doc.getField("userId").stringValue();
 		
-		addToDocument(newDoc, ItemTypes.getTypeInfo(type), userId, values);
+		addToDocument(newDoc, itemTypes.getTypeInfo(type), userId, values);
 		
 		newDoc.add(new StoredField(THUMBS_FIELD, bytes));
 
@@ -634,7 +641,7 @@ public class LuceneItemIndex implements ItemIndex {
 				
 				if (trimmedFreetext != null) {
 					// Make freetext query over all fields that are marked as freetext for all the types specified
-					final Query freetextQuery = createFreetextQuery(types, trimmedFreetext);
+					final Query freetextQuery = createFreetextQuery(types, trimmedFreetext, itemTypes);
 					
 					if (freetextQuery != null) {
 						appendQueries.add(freetextQuery);
@@ -646,7 +653,7 @@ public class LuceneItemIndex implements ItemIndex {
 			}
 			else {
 				final Set<Class<? extends Item>> typesSet = new HashSet<>(types);
-				final Set<Class<? extends Item>> allTypesSet = ItemTypes.getAllTypesSet();
+				final Set<Class<? extends Item>> allTypesSet = itemTypes.getAllTypesSet();
 
 				if (typesSet.equals(allTypesSet)) {
 					// All supported types included so can just call MatchAllDocsQuery()
@@ -681,7 +688,7 @@ public class LuceneItemIndex implements ItemIndex {
 		}
 
 		final ItemsFacets facets = facetAttributes != null
-				? computeFacets(documents, facetAttributes)
+				? computeFacets(documents, facetAttributes, itemTypes)
 				: null;
 		
 		return new IndexSearchCursor() {
@@ -873,11 +880,11 @@ public class LuceneItemIndex implements ItemIndex {
 		}
 	}
 	
-	private static Query createFreetextQuery(Collection<Class<? extends Item>> types, String freeText) {
+	private static Query createFreetextQuery(Collection<Class<? extends Item>> types, String freeText, ItemTypes itemTypes) {
 		
 		// Get SortAttribute since this has equals() and hashCode() on base class,
 		// this makes us find distinct attributes
-		final Set<DistinctAttribute> distinctAttributes = ItemTypes.getFreetextAttributes(types);
+		final Set<DistinctAttribute> distinctAttributes = itemTypes.getFreetextAttributes(types);
 		
 		final Query query;
 		
@@ -1534,8 +1541,8 @@ public class LuceneItemIndex implements ItemIndex {
 	}
 
 	
-	private static ItemsFacets computeFacets(List<Document> documents, Set<ItemAttribute> facetedAttributes) {
-		return FacetUtils.computeFacets(documents, facetedAttributes, new FacetUtils.FacetFunctions<Document, IndexableField>() {
+	private static ItemsFacets computeFacets(List<Document> documents, Set<ItemAttribute> facetedAttributes, ItemTypes itemTypes) {
+		return FacetUtils.computeFacets(documents, facetedAttributes, itemTypes, new FacetUtils.FacetFunctions<Document, IndexableField>() {
 			@Override
 			public boolean isType(Document d, String typeName) {
 				return d.getField(TYPE_FIELD).stringValue().equals(typeName);

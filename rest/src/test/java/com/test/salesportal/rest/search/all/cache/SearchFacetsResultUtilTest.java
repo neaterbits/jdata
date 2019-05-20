@@ -1,9 +1,10 @@
 package com.test.salesportal.rest.search.all.cache;
 
 import com.test.salesportal.common.CollectionUtil;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.ItemAttribute;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.sales.SalesItemTypes;
 import com.test.salesportal.model.items.sports.Snowboard;
 import com.test.salesportal.model.items.sports.SnowboardProfile;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeRangeResult;
@@ -25,7 +26,9 @@ import static com.test.salesportal.rest.search.all.AllSearchTestUtil.findAttribu
 
 public class SearchFacetsResultUtilTest extends TestCase {
 	
-	private static final List<TypeInfo> ALL_TYPES = ItemTypes.getAllTypeInfosList();
+	private static final ItemTypes ITEM_TYPES = SalesItemTypes.INSTANCE;
+	
+	private static final List<TypeInfo> ALL_TYPES = ITEM_TYPES.getAllTypeInfosList();
 	
 	public void testAddAndDeleteItems() {
 	
@@ -33,9 +36,9 @@ public class SearchFacetsResultUtilTest extends TestCase {
 		
 		final Snowboard snowboard = new Snowboard();
 		
-		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		final TypeInfo snowboardType = ITEM_TYPES.getTypeInfo(Snowboard.class);
 		
-		final int typesCount = ItemTypes.getAllTypesSet().size();
+		final int typesCount = ITEM_TYPES.getAllTypesSet().size();
 
 		/*
 		System.out.println("Types : " + ItemTypes.getAllTypesSet().stream()
@@ -276,7 +279,7 @@ public class SearchFacetsResultUtilTest extends TestCase {
 		
 		final Snowboard snowboard = new Snowboard();
 		
-		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		final TypeInfo snowboardType = ITEM_TYPES.getTypeInfo(Snowboard.class);
 		
 		snowboard.setProfile(SnowboardProfile.FLAT);
 		snowboard.setMake("Burton");
@@ -339,7 +342,7 @@ public class SearchFacetsResultUtilTest extends TestCase {
 		
 		final Snowboard snowboard = new Snowboard();
 		
-		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		final TypeInfo snowboardType = ITEM_TYPES.getTypeInfo(Snowboard.class);
 		
 		snowboard.setProfile(SnowboardProfile.FLAT);
 		snowboard.setMake("Burton");
@@ -407,7 +410,7 @@ public class SearchFacetsResultUtilTest extends TestCase {
 		
 		final Snowboard snowboard = new Snowboard();
 		
-		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		final TypeInfo snowboardType = ITEM_TYPES.getTypeInfo(Snowboard.class);
 		
 		snowboard.setProfile(SnowboardProfile.FLAT);
 		snowboard.setMake("Burton");

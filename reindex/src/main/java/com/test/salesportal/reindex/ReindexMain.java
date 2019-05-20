@@ -14,15 +14,18 @@ import com.test.salesportal.dao.xml.XMLItemDAO;
 import com.test.salesportal.filesystem.local.LocalFileSystem;
 import com.test.salesportal.index.IndexSearchCursor;
 import com.test.salesportal.index.lucene.LuceneItemIndex;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemPhoto;
-import com.test.salesportal.model.items.ItemTypes;
 import com.test.salesportal.xmlstorage.api.BaseXMLStorage;
 import com.test.salesportal.xmlstorage.filesystem.files.ParameterFileSystemFilesXMLStorage;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.photo.ItemPhoto;
+import com.test.salesportal.model.items.sales.SalesItemTypes;
 
 public class ReindexMain {
 
 	public static void main(String [] args) throws Exception {
+		
+		final ItemTypes itemTypes = SalesItemTypes.INSTANCE;
 		
 		if (args.length != 2) {
 			throw new IllegalArgumentException("Expected <srcdir> <dstdir>");
@@ -52,16 +55,16 @@ public class ReindexMain {
 		}
 		
 		final BaseXMLStorage srcStorage = makeXmlStorage(srcDir);
-		final LuceneItemIndex srcIndex = new LuceneItemIndex(indexDir(srcDir));
+		final LuceneItemIndex srcIndex = new LuceneItemIndex(indexDir(srcDir), itemTypes);
 		
-		try (IItemDAO srcDao = new XMLItemDAO(srcStorage, srcIndex)) {
+		try (IItemDAO srcDao = new XMLItemDAO(srcStorage, srcIndex, itemTypes)) {
 		
 			final BaseXMLStorage dstStorage = makeXmlStorage(dstDir);
-			final LuceneItemIndex dstIndex = new LuceneItemIndex(indexDir(dstDir));
+			final LuceneItemIndex dstIndex = new LuceneItemIndex(indexDir(dstDir), itemTypes);
 
-			try (IItemUpdate dstDao = new XMLItemDAO(dstStorage, dstIndex)) {
+			try (IItemUpdate dstDao = new XMLItemDAO(dstStorage, dstIndex, itemTypes)) {
 				// Just call on source index to get all items
-				final List<Class<? extends Item>> allTypes = ItemTypes.getAllTypesList();
+				final List<Class<? extends Item>> allTypes = itemTypes.getAllTypesList();
 		
 				final IndexSearchCursor cursor = srcIndex.search(allTypes, null, null, null, false, null, null);
 				

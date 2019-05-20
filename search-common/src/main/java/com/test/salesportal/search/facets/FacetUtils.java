@@ -11,12 +11,12 @@ import java.util.TreeMap;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.attributes.ClassAttributes;
-import com.test.salesportal.model.attributes.facets.FacetedAttributeComparableRange;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.attributes.ClassAttributes;
+import com.test.salesportal.model.items.attributes.facets.FacetedAttributeComparableRange;
+import com.test.salesportal.model.items.base.ItemTypes;
 
 public class FacetUtils {
 	public interface FacetFunctions<I, F> {
@@ -38,7 +38,11 @@ public class FacetUtils {
 		boolean isNoValue(ItemAttribute attribute, F field);
 	}
 
-	public static <I, F> ItemsFacets computeFacets(List<I> documents, Set<ItemAttribute> facetedAttributes, FacetFunctions<I, F> functions) {
+	public static <I, F> ItemsFacets computeFacets(
+			List<I> documents,
+			Set<ItemAttribute> facetedAttributes,
+			ItemTypes itemTypes,
+			FacetFunctions<I, F> functions) {
 		
 		// Sort by type of item
 		final Set<Class<? extends Item>> distinctTypesSet =
@@ -48,7 +52,7 @@ public class FacetUtils {
 		
 		final List<Class<? extends Item>> distinctTypes = new ArrayList<>(distinctTypesSet);
 		
-		distinctTypes.sort((t1, t2) -> String.CASE_INSENSITIVE_ORDER.compare(ItemTypes.getTypeDisplayName(t1), ItemTypes.getTypeDisplayName(t2)));
+		distinctTypes.sort((t1, t2) -> String.CASE_INSENSITIVE_ORDER.compare(itemTypes.getTypeDisplayName(t1), itemTypes.getTypeDisplayName(t2)));
 		
 		final List<TypeFacets> typeFacets = new ArrayList<>(distinctTypes.size());
 		
@@ -58,7 +62,7 @@ public class FacetUtils {
 				.filter(attribute -> attribute.getItemType().equals(itemType))
 				.collect(Collectors.toList());
 			
-			final TypeInfo typeInfo = ItemTypes.getTypeInfo(itemType);
+			final TypeInfo typeInfo = itemTypes.getTypeInfo(itemType);
 			final List<ItemAttribute> typeAttributes = typeInfo.getAttributes().sortInFacetOrder(typeAttributesUnsorted, false);
 			
 			final String typeName = ItemTypes.getTypeName(itemType);

@@ -1,7 +1,7 @@
 package com.test.salesportal.rest.search.all.cache;
 
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.sales.SalesItemTypes;
 import com.test.salesportal.model.items.sports.Snowboard;
 import static com.test.salesportal.rest.search.all.cache.CacheTestUtil.decimal;
 
@@ -13,7 +13,7 @@ public class SearchRangeUtilTest extends TestCase {
 
 	public void testSearchRangeMatchesDecimal() {
 		
-		final ItemAttribute widthAttribute = ItemTypes.getTypeInfo(Snowboard.class).getAttributes().getByName("width");
+		final ItemAttribute widthAttribute = SalesItemTypes.INSTANCE.getTypeInfo(Snowboard.class).getAttributes().getByName("width");
 		assertThat(widthAttribute).isNotNull();
 		
 		assertThat(SearchRangeUtil.matches(decimal(165), widthAttribute, null, true, decimal(165), false)).isFalse();
@@ -34,7 +34,7 @@ public class SearchRangeUtilTest extends TestCase {
 
 	public void testSearchRangeMatchesInteger() {
 		
-		final ItemAttribute yearAttribute = ItemTypes.getTypeInfo(Snowboard.class).getAttributes().getByName("productionYear");
+		final ItemAttribute yearAttribute = SalesItemTypes.INSTANCE.getTypeInfo(Snowboard.class).getAttributes().getByName("productionYear");
 		assertThat(yearAttribute).isNotNull();
 		
 		assertThat(SearchRangeUtil.matches(2005, yearAttribute, null, true, 2005, false)).isFalse();

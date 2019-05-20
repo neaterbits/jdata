@@ -12,9 +12,9 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.base.ItemTypes;
 
 /**
  * Store multiple types in one index.
@@ -23,6 +23,17 @@ import com.test.salesportal.model.items.ItemTypes;
 
 @Deprecated
 public class ESTypeHandlingBuiltinType extends ESTypeHandling {
+
+	private final ItemTypes itemTypes;
+	
+	public ESTypeHandlingBuiltinType(ItemTypes itemTypes) {
+
+		if (itemTypes == null) {
+			throw new IllegalArgumentException("itemTypes == null");
+		}
+		
+		this.itemTypes = itemTypes;
+	}
 
 	@Override
 	Set<String> getESIndexTypes(Collection<Class<? extends Item>> allTypes) {
@@ -35,7 +46,7 @@ public class ESTypeHandlingBuiltinType extends ESTypeHandling {
 	Set<ItemAttribute> getCreateIndexAttributes(String esType) {
 		final Set<ItemAttribute> attributes = new HashSet<>();
 		
-		ItemTypes.getTypeByName(esType).getAttributes().forEach(a -> attributes.add(a));
+		itemTypes.getTypeByName(esType).getAttributes().forEach(a -> attributes.add(a));
 		
 		return Collections.unmodifiableSet(attributes);
 	}

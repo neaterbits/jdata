@@ -15,6 +15,12 @@
 	  	<version>${project.version}</version>
   	</dependency>
 
+  	<dependency>
+  		<groupId>${project.groupId}</groupId>
+  		<artifactId>model-items-sales</artifactId>
+  		<version>${project.version}</version>
+  	</dependency>
+
 	<dependency>
 		<groupId>org.assertj</groupId>
 		<artifactId>assertj-core</artifactId>

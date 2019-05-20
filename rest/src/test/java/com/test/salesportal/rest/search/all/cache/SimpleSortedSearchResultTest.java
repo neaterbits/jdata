@@ -3,7 +3,7 @@ package com.test.salesportal.rest.search.all.cache;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.assertj.core.api.Assertions;
 
-import com.test.salesportal.model.SortOrder;
+import com.test.salesportal.model.items.SortOrder;
 import com.test.salesportal.rest.search.all.cache.SimpleSortedSearchResult;
 
 import junit.framework.TestCase;

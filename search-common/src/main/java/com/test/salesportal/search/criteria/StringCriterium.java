@@ -1,6 +1,6 @@
 package com.test.salesportal.search.criteria;
 
-import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.items.ItemAttribute;
 
 public class StringCriterium extends ComparisonCriterium<String> {
 

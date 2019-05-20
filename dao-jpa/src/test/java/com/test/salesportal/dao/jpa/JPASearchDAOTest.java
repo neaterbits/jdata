@@ -20,6 +20,6 @@ public class JPASearchDAOTest extends SearchDAOTest {
 
 	@Override
 	protected ISearchDAO getSearchDAO() {
-		return new JPASearchDAO(emf);
+		return new JPASearchDAO(emf, ITEM_TYPES);
 	}
 }

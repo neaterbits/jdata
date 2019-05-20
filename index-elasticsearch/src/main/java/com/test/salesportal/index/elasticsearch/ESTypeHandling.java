@@ -7,8 +7,8 @@ import java.util.Set;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
 
 // Base class for various handling of ES types
 public abstract class ESTypeHandling {

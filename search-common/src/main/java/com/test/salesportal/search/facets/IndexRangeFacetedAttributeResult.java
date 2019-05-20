@@ -1,6 +1,6 @@
 package com.test.salesportal.search.facets;
 
-import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.items.ItemAttribute;
 
 /**
  * Facet result for ranges of values

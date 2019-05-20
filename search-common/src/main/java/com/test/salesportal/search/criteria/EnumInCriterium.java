@@ -2,7 +2,7 @@ package com.test.salesportal.search.criteria;
 
 import java.util.List;
 
-import com.test.salesportal.model.ItemAttribute;
+import com.test.salesportal.model.items.ItemAttribute;
 
 public class EnumInCriterium<E extends Enum<E>> extends InCriterium<E> {
 

@@ -17,6 +17,12 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>model-items-sales</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
 		<!-- test dependencies -->
 
 	</dependencies>

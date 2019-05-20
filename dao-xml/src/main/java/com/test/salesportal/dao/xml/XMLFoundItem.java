@@ -2,9 +2,11 @@ package com.test.salesportal.dao.xml;
 
 import com.test.salesportal.dao.BaseFoundItem;
 import com.test.salesportal.dao.IFoundItem;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttribute;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttribute;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.base.TitlePhotoItem;
 
 final class XMLFoundItem extends BaseFoundItem implements IFoundItem {
 
@@ -12,7 +14,7 @@ final class XMLFoundItem extends BaseFoundItem implements IFoundItem {
 	private final Integer thumbWidth;
 	private final Integer thumbHeight;
 	
-	XMLFoundItem(Item item, String itemId, Integer thumbWidth, Integer thumbHeight) {
+	XMLFoundItem(TitlePhotoItem item, String itemId, Integer thumbWidth, Integer thumbHeight) {
 		super(item);
 		
 		this.itemId = itemId;
@@ -36,11 +38,11 @@ final class XMLFoundItem extends BaseFoundItem implements IFoundItem {
 	}
 	
 	@Override
-	public Object getSortAttributeValue(SortAttribute attribute) {
+	public Object getSortAttributeValue(SortAttribute attribute, ItemTypes itemTypes) {
 
 		final Item item = getItem();
 		
-		return attribute.getObjectValue(item);
+		return attribute.getObjectValue(item, itemTypes);
 	}
 
 	@Override

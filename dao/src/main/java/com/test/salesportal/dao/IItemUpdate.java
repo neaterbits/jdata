@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import com.test.salesportal.common.images.ThumbAndImageUrls;
-import com.test.salesportal.model.Item;
+import com.test.salesportal.model.items.Item;
 
 /**
  * DAO for retrieving items and all their subinformation.

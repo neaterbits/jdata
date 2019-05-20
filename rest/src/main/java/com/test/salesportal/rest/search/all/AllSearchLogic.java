@@ -9,18 +9,19 @@ import javax.xml.bind.Unmarshaller;
 
 import com.test.salesportal.dao.IOperationsRetrieval;
 import com.test.salesportal.dao.ISearchDAO;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttribute;
-import com.test.salesportal.model.SortAttributeAndOrder;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttribute;
+import com.test.salesportal.model.items.SortAttributeAndOrder;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.base.TitlePhotoItem;
 import com.test.salesportal.model.operations.Operation;
-import com.test.salesportal.model.operations.dao.BaseOperationData;
-import com.test.salesportal.model.operations.dao.DeleteItemOperationData;
-import com.test.salesportal.model.operations.dao.OperationDataMarshaller;
-import com.test.salesportal.model.operations.dao.StoreItemOperationData;
-import com.test.salesportal.model.operations.dao.UpdateItemOperationData;
+import com.test.salesportal.model.items.operations.dao.BaseOperationData;
+import com.test.salesportal.model.items.operations.dao.DeleteItemOperationData;
+import com.test.salesportal.model.items.operations.dao.OperationDataMarshaller;
+import com.test.salesportal.model.items.operations.dao.StoreItemOperationData;
+import com.test.salesportal.model.items.operations.dao.UpdateItemOperationData;
 import com.test.salesportal.rest.search.BaseSearchLogic;
 import com.test.salesportal.rest.search.all.cache.CachedSearchResult;
 import com.test.salesportal.rest.search.all.cache.SearchKey;
@@ -36,7 +37,6 @@ import com.test.salesportal.rest.search.util.SearchTypesUtil;
 
 final class AllSearchLogic extends BaseSearchLogic<AllSearchItemResult, ItemSearchResult<AllSearchItemResult>> {
 
-	private static final List<TypeInfo> ALL_TYPES = ItemTypes.getAllTypeInfosList();
 	
 	private static final SortedSearchResultFactory SORTED_SEARCH_RESULT_FACTORY = new SortedSearchResultFactory() {
 		
@@ -48,21 +48,35 @@ final class AllSearchLogic extends BaseSearchLogic<AllSearchItemResult, ItemSear
 	
 	private static final SearchResultCache SEARCH_RESULT_CACHE = new SearchResultCache(SORTED_SEARCH_RESULT_FACTORY);
 	
-	private static final OperationDataMarshaller OPERATION_DATA_MARSHALLER = new OperationDataMarshaller();
 	
 	private final IOperationsRetrieval operationsRetrieval;
+	private final OperationDataMarshaller operationDataMarshaller;
 	private final ITestCriticalSectionCallback criticalSectionCallback;
-	
+
+	private final List<TypeInfo> ALL_TYPES;
+
 	private long currentRefreshedModelVersion;
 
-	AllSearchLogic(IOperationsRetrieval operationsRetrieval, ITestCriticalSectionCallback criticalSectionCallback) {
+	AllSearchLogic(IOperationsRetrieval operationsRetrieval, OperationDataMarshaller operationDataMarshaller, ItemTypes itemTypes, ITestCriticalSectionCallback criticalSectionCallback) {
 
+		super(itemTypes);
+		
 		if (operationsRetrieval == null) {
 			throw new IllegalArgumentException("operationsRetrieval == null");
 		}
 		
+		if (operationDataMarshaller == null) {
+			throw new IllegalArgumentException("operationDataMarshaller == null");
+		}
+		
+		if (itemTypes == null) {
+			throw new IllegalArgumentException("itemTypes == null");
+		}
+		
 		this.operationsRetrieval = operationsRetrieval;
+		this.operationDataMarshaller = operationDataMarshaller;
 		this.criticalSectionCallback = criticalSectionCallback;
+		this.ALL_TYPES = itemTypes.getAllTypeInfosList();
 		this.currentRefreshedModelVersion = -1L;
 	}
 
@@ -115,16 +129,18 @@ final class AllSearchLogic extends BaseSearchLogic<AllSearchItemResult, ItemSear
 		// Apply any outstanding model changes to all sort results
 		// Does a database query and meanwhile blocks all other searches
 		
-		final List<Class<? extends Item>> typesList = SearchTypesUtil.computeTypes(types);
+		final ItemTypes itemTypes = getItemTypes();
 		
-		final List<SortAttributeAndOrder> sortAttributes = SearchSortUtil.decodeSortOrders(sortOrder, typesList);
+		final List<Class<? extends Item>> typesList = SearchTypesUtil.computeTypes(types, itemTypes);
+		
+		final List<SortAttributeAndOrder> sortAttributes = SearchSortUtil.decodeSortOrders(sortOrder, typesList, itemTypes);
 
 		final int fieldsLength = (fields != null ? fields.length : 0) + 1;
 		final List<ItemAttribute> responseFieldAttributes = new ArrayList<>(fieldsLength);
 
 		for (Class<? extends Item> type : typesList) {
 
-			final TypeInfo typeInfo = ItemTypes.getTypeInfo(type);
+			final TypeInfo typeInfo = itemTypes.getTypeInfo(type);
 			final ItemAttribute attribute = typeInfo.getAttributes().getByName(Item.MODEL_VERSION);
 
 			if (attribute == null) {
@@ -149,7 +165,7 @@ final class AllSearchLogic extends BaseSearchLogic<AllSearchItemResult, ItemSear
 		
 		final AllSearchResult allSearchResult;
 		
-		final SearchSortOrderAlternative [] possibleSortOrders = SearchSortUtil.computeAndSortPossibleSortOrders(typesList);
+		final SearchSortOrderAlternative [] possibleSortOrders = SearchSortUtil.computeAndSortPossibleSortOrders(typesList, itemTypes);
 		
 		if (cachedSearchResult != null) {
 			
@@ -176,7 +192,7 @@ final class AllSearchLogic extends BaseSearchLogic<AllSearchItemResult, ItemSear
 	
 				for (Class<? extends Item> type : typesList) {
 
-					final TypeInfo typeInfo = ItemTypes.getTypeInfo(type);
+					final TypeInfo typeInfo = itemTypes.getTypeInfo(type);
 
 					for (String field : fields) {
 						
@@ -249,7 +265,7 @@ final class AllSearchLogic extends BaseSearchLogic<AllSearchItemResult, ItemSear
 			
 			if (!operations.isEmpty()) {
 				
-				final Unmarshaller unmarshaller = OPERATION_DATA_MARSHALLER.createUnmarshaller();
+				final Unmarshaller unmarshaller = operationDataMarshaller.createUnmarshaller();
 				
 				// Apply to cache in order
 				for (Operation operation : operations) {
@@ -266,20 +282,20 @@ final class AllSearchLogic extends BaseSearchLogic<AllSearchItemResult, ItemSear
 						}
 					}
 
-					final BaseOperationData operationData = OPERATION_DATA_MARSHALLER.decodeOperationData(unmarshaller, operation);
+					final BaseOperationData operationData = operationDataMarshaller.decodeOperationData(unmarshaller, operation);
 
 					if (operationData instanceof StoreItemOperationData) {
 						
 						final StoreItemOperationData storeItemOperationData = (StoreItemOperationData)operationData;
 						
-						SEARCH_RESULT_CACHE.applyToAnyMatchingCachedSearchResults(storeItemOperationData.getItem(), ALL_TYPES);
+						SEARCH_RESULT_CACHE.applyToAnyMatchingCachedSearchResults((TitlePhotoItem)storeItemOperationData.getItem(), ALL_TYPES, getItemTypes());
 						
 					}
 					else if (operationData instanceof UpdateItemOperationData) {
 
 						final UpdateItemOperationData updateItemOperationData = (UpdateItemOperationData)operationData;
 						
-						SEARCH_RESULT_CACHE.applyToAnyMatchingCachedSearchResults(updateItemOperationData.getItem(), ALL_TYPES);
+						SEARCH_RESULT_CACHE.applyToAnyMatchingCachedSearchResults((TitlePhotoItem)updateItemOperationData.getItem(), ALL_TYPES, getItemTypes());
 						
 					}
 					else if (operationData instanceof DeleteItemOperationData) {

@@ -21,7 +21,15 @@
 
 	  <modules>
 	    <module>common</module>
-	    <module>model</module>
+	    <module>model-items</module>
+	    <module>model-items-base</module>
+	    <module>model-items-cv</module>
+	    <module>model-items-sales</module>
+	    <module>model-operations</module>
+	    <module>model-text</module>
+	    <module>model-user</module>
+	    <module>model-login</module>
+	    <module>model-lock</module>
 	    <module>dao</module>
 	    <module>dao-jpa</module>
 	    <module>dao-xml</module>
@@ -62,6 +70,11 @@
 
 
   <dependencies>
+		<dependency>
+			<groupId>org.eclipse.persistence</groupId>
+			<artifactId>javax.persistence</artifactId>
+			<version>2.1.1</version>
+		</dependency>
 
     <dependency>
       	<groupId>junit</groupId>

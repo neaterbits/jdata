@@ -9,14 +9,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.test.salesportal.common.StringUtil;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttribute;
-import com.test.salesportal.model.SortAttributeAndOrder;
-import com.test.salesportal.model.SortOrder;
-import com.test.salesportal.model.annotations.SortableType;
-import com.test.salesportal.model.attributes.ClassAttributes;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttribute;
+import com.test.salesportal.model.items.SortAttributeAndOrder;
+import com.test.salesportal.model.items.SortOrder;
+import com.test.salesportal.model.items.annotations.SortableType;
+import com.test.salesportal.model.items.attributes.ClassAttributes;
+import com.test.salesportal.model.items.base.ItemTypes;
 import com.test.salesportal.rest.search.model.sorting.SearchSortOrderAlternative;
 
 public class SearchSortUtil {
@@ -24,7 +24,7 @@ public class SearchSortUtil {
 	public static final String ASCENDING = "ascending";
 	public static final String DESCENDING = "descending";
 
-	public static List<SortAttributeAndOrder> decodeSortOrders(String [] sortOrder, List<Class<? extends Item>> typesList) {
+	public static List<SortAttributeAndOrder> decodeSortOrders(String [] sortOrder, List<Class<? extends Item>> typesList, ItemTypes itemTypes) {
 		final List<SortAttributeAndOrder> sortAttributes;
 		if (sortOrder != null) {
 			final Set<Class<? extends Item>> baseTypes = ItemTypes.getBaseTypes(typesList);
@@ -39,7 +39,7 @@ public class SearchSortUtil {
 		}
 		else {
 			// Get sort order from common denominator among types
-			sortAttributes = SearchSortUtil.computeAndSortPossibleSortAttributes(typesList)
+			sortAttributes = SearchSortUtil.computeAndSortPossibleSortAttributes(typesList, itemTypes)
 					.stream().map(a -> new SortAttributeAndOrder(a, SortOrder.ASCENDING))
 					.collect(Collectors.toList());
 		}
@@ -47,9 +47,9 @@ public class SearchSortUtil {
 		return sortAttributes;
 	}
 	
-	public static SearchSortOrderAlternative [] computeAndSortPossibleSortOrders(Collection<Class<? extends Item>> types) {
+	public static SearchSortOrderAlternative [] computeAndSortPossibleSortOrders(Collection<Class<? extends Item>> types, ItemTypes itemTypes) {
 		
-		final List<SortAttribute> attributes = computeAndSortPossibleSortAttributes(types);
+		final List<SortAttribute> attributes = computeAndSortPossibleSortAttributes(types, itemTypes);
 
 		// Convert to sort orders
 		return getSortOrdersFromAttributes(attributes);
@@ -90,7 +90,7 @@ public class SearchSortUtil {
 	// Need to hash on declaring-class for attribute
 	// so that base class attributes are only counted once no matter the subclass (eg 'Title' is in baseclass
 	// for both Car and Snowboard)
-	private static List<SortAttribute> computeAndSortPossibleSortAttributes(Collection<Class<? extends Item>> types) {
+	private static List<SortAttribute> computeAndSortPossibleSortAttributes(Collection<Class<? extends Item>> types, ItemTypes itemTypes) {
 
 		final List<SortAttribute> attributes;
 		
@@ -98,7 +98,7 @@ public class SearchSortUtil {
 			attributes = Collections.emptyList();
 		}
 		else if (types.size() == 1) {
-			 attributes = getSortableAttributesFromType(types.iterator().next()).stream()
+			 attributes = getSortableAttributesFromType(types.iterator().next(), itemTypes).stream()
 					 .map(a -> a.makeSortAttribute())
 					 .collect(Collectors.toList());
 		}
@@ -108,7 +108,7 @@ public class SearchSortUtil {
 			final Set<SortAttribute> commonSortableAttributes = new HashSet<>();
 
 			for (Class<? extends Item> type : types) {
-				final List<SortAttribute> typeAttributes = getSortableAttributesFromType(type).stream()
+				final List<SortAttribute> typeAttributes = getSortableAttributesFromType(type, itemTypes).stream()
 						.map(a -> a.makeSortAttribute())
 						.collect(Collectors.toList());
 				
@@ -130,9 +130,9 @@ public class SearchSortUtil {
 		return attributes;
 	}
 
-	private static List<ItemAttribute> getSortableAttributesFromType(Class<? extends Item> type) {
+	private static List<ItemAttribute> getSortableAttributesFromType(Class<? extends Item> type, ItemTypes itemTypes) {
 		
-		final ClassAttributes attrs = ItemTypes.getTypeInfo(type).getAttributes();
+		final ClassAttributes attrs = itemTypes.getTypeInfo(type).getAttributes();
 
 		final List<ItemAttribute> sortAttributes = new ArrayList<>();
 

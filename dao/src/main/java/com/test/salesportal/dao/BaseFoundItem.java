@@ -2,13 +2,13 @@ package com.test.salesportal.dao;
 
 import java.util.List;
 
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttributeValue;
+import com.test.salesportal.model.items.ItemAttributeValue;
+import com.test.salesportal.model.items.base.TitlePhotoItem;
 
 public abstract class BaseFoundItem implements IFoundItem {
-	private final Item item;
+	private final TitlePhotoItem item;
 	
-	protected BaseFoundItem(Item item) {
+	protected BaseFoundItem(TitlePhotoItem item) {
 		
 		if (item == null) {
 			throw new IllegalArgumentException("item == null");
@@ -24,7 +24,7 @@ public abstract class BaseFoundItem implements IFoundItem {
 	}
 
 	@Override
-	public Item getItem() {
+	public TitlePhotoItem getItem() {
 		return item;
 	}
 

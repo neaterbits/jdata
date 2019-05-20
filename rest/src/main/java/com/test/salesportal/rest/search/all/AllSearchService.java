@@ -5,6 +5,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 import com.test.salesportal.dao.IOperationsDAO;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.operations.dao.OperationDataMarshaller;
 import com.test.salesportal.rest.search.BaseSearchService;
 import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
 import com.test.salesportal.rest.search.paged.ItemSearchResult;
@@ -16,10 +18,10 @@ public final class AllSearchService
 	
 	private final AllSearchLogic searchLogic;
 	
-	public AllSearchService(String localFileDir, IOperationsDAO operationsDAO) {
+	public AllSearchService(String localFileDir, IOperationsDAO operationsDAO, OperationDataMarshaller operationDataMarshaller, ItemTypes itemTypes) {
 		super(localFileDir);
 		
-		this.searchLogic = new AllSearchLogic(operationsDAO, null);
+		this.searchLogic = new AllSearchLogic(operationsDAO, operationDataMarshaller, itemTypes, null);
 	}
 	
 

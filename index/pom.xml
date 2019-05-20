@@ -13,7 +13,7 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>model</artifactId>
+			<artifactId>model-items</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

@@ -6,12 +6,12 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.test.salesportal.common.CollectionUtil;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.attributes.ClassAttributes;
-import com.test.salesportal.model.attributes.facets.FacetedAttributeDecimalRange;
-import com.test.salesportal.model.attributes.facets.FacetedAttributeIntegerRange;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.attributes.ClassAttributes;
+import com.test.salesportal.model.items.attributes.facets.FacetedAttributeDecimalRange;
+import com.test.salesportal.model.items.attributes.facets.FacetedAttributeIntegerRange;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeDecimalRangeResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeIntegerRangeResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeRangeResult;

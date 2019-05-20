@@ -18,6 +18,22 @@
   <name>REST Maven Webapp</name>
   <url>http://maven.apache.org</url>
   <dependencies>
+
+  	<dependency>
+	  	<groupId>${project.groupId}</groupId>
+	  	<artifactId>model-items-cv</artifactId>
+	  	<version>${project.version}</version>
+  	</dependency>
+  	<dependency>
+	  	<groupId>${project.groupId}</groupId>
+	  	<artifactId>model-items-sales</artifactId>
+	  	<version>${project.version}</version>
+  	</dependency>
+  	<dependency>
+	  	<groupId>${project.groupId}</groupId>
+	  	<artifactId>model-operations</artifactId>
+	  	<version>${project.version}</version>
+  	</dependency>
   	<dependency>
 	  	<groupId>${project.groupId}</groupId>
 	  	<artifactId>dao</artifactId>
@@ -76,6 +92,13 @@
   	</dependency>
   	
   	<!-- test -->
+
+  	<dependency>
+	  	<groupId>${project.groupId}</groupId>
+	  	<artifactId>model-items-sales</artifactId>
+	  	<version>${project.version}</version>
+	  	<scope>test</scope>
+  	</dependency>
 
   </dependencies>
 

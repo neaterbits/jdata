@@ -56,17 +56,17 @@ import com.test.salesportal.index.IndexSearchItem;
 import com.test.salesportal.index.ItemIndex;
 import com.test.salesportal.index.ItemIndexException;
 import com.test.salesportal.index.MatchNoneIndexSearchCursor;
-import com.test.salesportal.model.DistinctAttribute;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.ItemAttributeValue;
-import com.test.salesportal.model.SortAttribute;
-import com.test.salesportal.model.SortAttributeAndOrder;
-import com.test.salesportal.model.attributes.AttributeType;
-import com.test.salesportal.model.attributes.facets.FacetedAttributeDecimalRange;
-import com.test.salesportal.model.attributes.facets.FacetedAttributeIntegerRange;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.DistinctAttribute;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.ItemAttributeValue;
+import com.test.salesportal.model.items.SortAttribute;
+import com.test.salesportal.model.items.SortAttributeAndOrder;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.attributes.AttributeType;
+import com.test.salesportal.model.items.attributes.facets.FacetedAttributeDecimalRange;
+import com.test.salesportal.model.items.attributes.facets.FacetedAttributeIntegerRange;
+import com.test.salesportal.model.items.base.ItemTypes;
 import com.test.salesportal.search.FieldValues;
 import com.test.salesportal.search.SearchItem;
 import com.test.salesportal.search.criteria.ComparisonCriterium;
@@ -101,18 +101,25 @@ public class ElasticSearchIndex implements ItemIndex {
 
 	private static final String MISSING_PREFIX = "missing-";
 	
+	private final ItemTypes itemTypes;
+	
 	// Name of field to represent title
 	private final ItemAttribute titleAttribute;
 	
-	private static final ESTypeHandling TYPE_HANDLING = new ESTypeHandlingOneTypePerIndexCustomTypeField();
+	private final ESTypeHandling typeHandling;
 	
-	public ElasticSearchIndex(String endpointUrl, ItemAttribute titleAttribute) throws ItemIndexException {
+	
+	public ElasticSearchIndex(String endpointUrl, ItemTypes itemTypes, ItemAttribute titleAttribute) throws ItemIndexException {
 
+		this.itemTypes = itemTypes;
+		
 		if (titleAttribute == null) {
 			throw new IllegalArgumentException("titleAttribute == null");
 		}
 
 		this.titleAttribute = titleAttribute;
+
+		this.typeHandling = new ESTypeHandlingOneTypePerIndexCustomTypeField(itemTypes);
 
 		this.client = new RestHighLevelClient(RestClient.builder(new HttpHost(endpointUrl)));
 		
@@ -149,7 +156,7 @@ public class ElasticSearchIndex implements ItemIndex {
 
 		sb.append("  ").append('"').append(FIELD_USER_ID).append('"').append(" : ").append('"').append(userId).append('"');
 		
-		final Map<String, Object> customFields = TYPE_HANDLING.indexCustomFields(itemType);
+		final Map<String, Object> customFields = typeHandling.indexCustomFields(itemType);
 		
 		if (customFields != null) {
 			for (Map.Entry<String, Object> entry : customFields.entrySet()) {
@@ -240,11 +247,11 @@ public class ElasticSearchIndex implements ItemIndex {
 		}
 	}
 	
-	private static QueryBuilder createFreetextQuery(Collection<Class<? extends Item>> types, String freeText) {
+	private static QueryBuilder createFreetextQuery(Collection<Class<? extends Item>> types, String freeText, ItemTypes itemTypes) {
 		
 		// Get SortAttribute since this has equals() and hashCode() on base class,
 		// this makes us find distinct attributes
-		final Set<DistinctAttribute> distinctAttributes = ItemTypes.getFreetextAttributes(types);
+		final Set<DistinctAttribute> distinctAttributes = itemTypes.getFreetextAttributes(types);
 		
 		final QueryBuilder query;
 		
@@ -484,25 +491,25 @@ public class ElasticSearchIndex implements ItemIndex {
 			
 			final String trimmedFreetext = ItemIndex.trimAndLowercaseFreetext(freeText);
 			
-			if (TYPE_HANDLING.hasQueryTypeFilter() || trimmedFreetext != null) {
+			if (typeHandling.hasQueryTypeFilter() || trimmedFreetext != null) {
 				// Add to a boolean query also specifying types
 				final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
 				boolQuery.must(criteriaBuilder);
 
 				if (types.size() == 1) {
-					boolQuery.must(TYPE_HANDLING.createQueryTypeFilter(types.get(0)));
+					boolQuery.must(typeHandling.createQueryTypeFilter(types.get(0)));
 				}
 				else {
 					final BoolQueryBuilder typesQuery = QueryBuilders.boolQuery();
 		
 					for (Class<? extends Item> type : types) {
-						typesQuery.should(TYPE_HANDLING.createQueryTypeFilter(type));
+						typesQuery.should(typeHandling.createQueryTypeFilter(type));
 					}
 				}
 
 				if (trimmedFreetext != null) {
-					boolQuery.must(createFreetextQuery(types, trimmedFreetext));
+					boolQuery.must(createFreetextQuery(types, trimmedFreetext, itemTypes));
 				}
 
 				queryBuilder = boolQuery;
@@ -538,7 +545,7 @@ public class ElasticSearchIndex implements ItemIndex {
 			}
 			
 			if (facetAttributes != null && !facetAttributes.isEmpty()) {
-				addAggregations(sourceBuilder, facetAttributes);
+				addAggregations(sourceBuilder, facetAttributes, typeHandling);
 			}
 	
 			if (Boolean.FALSE) {
@@ -688,12 +695,12 @@ public class ElasticSearchIndex implements ItemIndex {
 
 		@Override
 		public ItemsFacets getFacets() {
-			return makeFacets(response.getAggregations());
+			return makeFacets(response.getAggregations(), itemTypes);
 		}
 	}
 	
 	
-	private static ItemsFacets makeFacets(Aggregations aggregations) {
+	private static ItemsFacets makeFacets(Aggregations aggregations, ItemTypes itemTypes) {
 		
 
 		// Issue: not able to differentiate on type here with only one ES type per index
@@ -709,7 +716,7 @@ public class ElasticSearchIndex implements ItemIndex {
 
 			final String typeName = splitAggregationName(typeAggregation.getName());
 			
-			final TypeInfo typeInfo = ItemTypes.getTypeByName(typeName);
+			final TypeInfo typeInfo = itemTypes.getTypeByName(typeName);
 			if (typeInfo == null) {
 				throw new IllegalStateException("No type info for " + typeName);
 			}
@@ -1137,7 +1144,7 @@ public class ElasticSearchIndex implements ItemIndex {
 		return new ESQueryAndOccur(query, occur);
 	}
 
-	private static void addAggregations(SearchSourceBuilder sourceBuilder, Set<ItemAttribute> facets) {
+	private static void addAggregations(SearchSourceBuilder sourceBuilder, Set<ItemAttribute> facets, ESTypeHandling typeHandling) {
 		// Create a bucket aggregation for each attribute and then a count metric-aggregation within each
 		
 		final Set<Class<? extends Item>> distinctTypes = facets.stream()
@@ -1150,8 +1157,8 @@ public class ElasticSearchIndex implements ItemIndex {
 			
 			final Consumer<AggregationBuilder> addAttributeAggregation;
 			final AggregationBuilder typeFilter;
-			if (TYPE_HANDLING.hasAggregationTypeFilter()) {
-				typeFilter = TYPE_HANDLING.createAggregationTypeFilter(type);
+			if (typeHandling.hasAggregationTypeFilter()) {
+				typeFilter = typeHandling.createAggregationTypeFilter(type);
 
 				addAttributeAggregation = a -> typeFilter.subAggregation(a);
 			}
@@ -1164,7 +1171,7 @@ public class ElasticSearchIndex implements ItemIndex {
 			addAggregationForAttributes(type, facets, null, addAttributeAggregation);
 			
 
-			if (TYPE_HANDLING.hasAggregationTypeFilter()) {
+			if (typeHandling.hasAggregationTypeFilter()) {
 				sourceBuilder.aggregation(typeFilter);
 			}
 		}
@@ -1291,7 +1298,7 @@ public class ElasticSearchIndex implements ItemIndex {
 
 		boolean firstType = true;
 
-		for (String typeName : TYPE_HANDLING.getCreateIndexTypes(ItemTypes.getAllTypesSet())) {
+		for (String typeName : typeHandling.getCreateIndexTypes(itemTypes.getAllTypesSet())) {
 			if (firstType) {
 				firstType = false;
 			}
@@ -1299,7 +1306,7 @@ public class ElasticSearchIndex implements ItemIndex {
 				sb.append(", ");
 			}
 
-			TYPE_HANDLING.getCreateIndexAttributes(typeName).forEach(attribute -> {
+			typeHandling.getCreateIndexAttributes(typeName).forEach(attribute -> {
 				final String esFieldType = getESFieldType(attribute.getAttributeType());
 				
 				if (attribute.isFreetext()) {
@@ -1312,7 +1319,7 @@ public class ElasticSearchIndex implements ItemIndex {
 				fieldTypes.put(ItemIndex.fieldName(attribute), esFieldType);
 			});
 			
-			final Map<String, String> custom = TYPE_HANDLING.createIndexCustomFields(typeName);
+			final Map<String, String> custom = typeHandling.createIndexCustomFields(typeName);
 			
 			if (custom != null) {
 				fieldTypes.putAll(custom);
@@ -1458,7 +1465,7 @@ public class ElasticSearchIndex implements ItemIndex {
 		}
 	};
 	
-	private static String getTypeName(Class<? extends Item> type) {
-		return TYPE_HANDLING.getESTypeName(type);
+	private String getTypeName(Class<? extends Item> type) {
+		return typeHandling.getESTypeName(type);
 	}
 }

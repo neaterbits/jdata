@@ -12,7 +12,8 @@ import com.test.salesportal.filesystem.api.IFileSystem;
 import com.test.salesportal.filesystem.local.LocalFileSystem;
 import com.test.salesportal.index.ItemIndex;
 import com.test.salesportal.integrationtest.IntegrationTestHelper;
-import com.test.salesportal.model.cv.Language;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.text.Language;
 import com.test.salesportal.xmlstorage.api.IItemStorage;
 import com.test.salesportal.xmlstorage.filesystem.files.ParameterFileSystemFilesXMLStorage;
 
@@ -90,15 +91,15 @@ public abstract class BaseService {
 		return luceneIndex;
 	}
 
-	protected final IItemRetrieval getItemRetrievalDAO(HttpServletRequest request) {
-		return getItemDAO(request);
+	protected final IItemRetrieval getItemRetrievalDAO(HttpServletRequest request, ItemTypes itemTypes) {
+		return getItemDAO(request, itemTypes);
 	}
 
-	protected final IItemUpdate getItemUpdateDAO(HttpServletRequest request) {
-		return getItemDAO(request);
+	protected final IItemUpdate getItemUpdateDAO(HttpServletRequest request, ItemTypes itemTypes) {
+		return getItemDAO(request, itemTypes);
 	}
 
-	private final IItemDAO getItemDAO(HttpServletRequest request) {
+	private final IItemDAO getItemDAO(HttpServletRequest request, ItemTypes itemTypes) {
 		
 		final IItemDAO ret;
 		
@@ -107,7 +108,7 @@ public abstract class BaseService {
 		switch (storage) {
 		case LOCAL_FILE_LUCENE:
 			
-			ret = new XMLItemDAO(getLocalXMLStorage(), assureIndex());
+			ret = new XMLItemDAO(getLocalXMLStorage(), assureIndex(), itemTypes);
 			break;
 
 		default:

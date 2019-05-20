@@ -28,12 +28,12 @@ import javax.ws.rs.QueryParam;
 import com.test.salesportal.common.IOUtil;
 import com.test.salesportal.common.images.ThumbAndImageUrls;
 import com.test.salesportal.dao.ItemStorageException;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.ItemAttributeValue;
-import com.test.salesportal.model.attributes.ClassAttributes;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.ItemAttributeValue;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.attributes.ClassAttributes;
+import com.test.salesportal.model.items.base.ItemTypes;
 import com.test.salesportal.rest.BaseService;
 import com.test.salesportal.rest.BaseServiceLogic;
 import com.test.salesportal.rest.items.model.ServiceItem;
@@ -42,8 +42,16 @@ import com.test.salesportal.rest.items.model.ServiceItemAttribute;
 @Path("/")
 public class ItemService extends BaseService {
 	
-	public ItemService(String localFileDir) {
+	private final ItemTypes itemTypes;
+	
+	public ItemService(String localFileDir, ItemTypes itemTypes) {
 		super(localFileDir);
+		
+		if (itemTypes == null) {
+			throw new IllegalArgumentException("itemTypes == null");
+		}
+		
+		this.itemTypes = itemTypes;
 	}
 
 	@POST
@@ -52,7 +60,7 @@ public class ItemService extends BaseService {
 	@Produces("application/text")
 	public String storeItem(@QueryParam("userId") String userId, Item item, HttpServletRequest request) throws ItemStorageException {
 		// Received an item as JSon, store it
-		final String itemId = getItemUpdateDAO(request).addItem(userId, item);
+		final String itemId = getItemUpdateDAO(request, itemTypes).addItem(userId, item);
 		
 		return itemId;
 	}
@@ -75,10 +83,10 @@ public class ItemService extends BaseService {
 			throw new IllegalArgumentException("No item type");
 		}
 
-		final Class<? extends Item> type = ItemTypes.getTypeByName(itemType).getType();
+		final Class<? extends Item> type = itemTypes.getTypeByName(itemType).getType();
 
 		// Received an item as JSon, store it
-		getItemUpdateDAO(request).addThumbAndPhotoUrlsForItem(userId, itemId, type, urls);
+		getItemUpdateDAO(request, itemTypes).addThumbAndPhotoUrlsForItem(userId, itemId, type, urls);
 	}
 
 	@POST
@@ -169,8 +177,8 @@ public class ItemService extends BaseService {
 		// Must create a thumbnail from photo
 		// Some JPEGs may have thumbnails already
 		
-		getItemUpdateDAO(request).addPhotoAndThumbnailForItem(
-				userId, itemId, ItemTypes.getTypeByName(itemType).getType(),
+		getItemUpdateDAO(request, itemTypes).addPhotoAndThumbnailForItem(
+				userId, itemId, itemTypes.getTypeByName(itemType).getType(),
 				thumbnailInputStream, thumbnailMimeType, thumbDataLength, thumbWidth, thumbHeight,
 				photoInputStream1, photoMimeType, imageData.length);
 	}
@@ -202,8 +210,8 @@ public class ItemService extends BaseService {
 		final int thumbDataLength = thumbData.length;
 		final InputStream thumbnailInputStream = new ByteArrayInputStream(thumbData);
 		
-		getItemUpdateDAO(request).addPhotoUrlAndThumbnailForItem(
-				userId, itemId, ItemTypes.getTypeByName(itemType).getType(),
+		getItemUpdateDAO(request, itemTypes).addPhotoUrlAndThumbnailForItem(
+				userId, itemId, itemTypes.getTypeByName(itemType).getType(),
 				thumbnailInputStream, thumbnailMimeType, thumbDataLength, thumbWidth, thumbHeight,
 				imageUrl);
 		
@@ -216,18 +224,18 @@ public class ItemService extends BaseService {
 			@PathParam("itemId") String itemId,
 			HttpServletRequest request) throws IOException, ItemStorageException {
 		
-		final Item item = getItemRetrievalDAO(request).getItem(itemId);
+		final Item item = getItemRetrievalDAO(request, itemTypes).getItem(itemId);
 		
 		final int photoCount = getPhotoCount(itemId, request);
 
-		final List<ItemAttributeValue<?>> itemAttributes = ClassAttributes.getValues(item);
+		final List<ItemAttributeValue<?>> itemAttributes = ClassAttributes.getValues(itemTypes, item);
 		
 		final Map<ItemAttribute, ItemAttributeValue<?>> attributesMap = itemAttributes.stream()
 				.collect(Collectors.toMap(ItemAttributeValue::getAttribute, Function.identity()));
 		
 		final Map<String, Object> serviceAttributes = new HashMap<>(itemAttributes.size());
 		
-		final TypeInfo typeInfo = ItemTypes.getTypeInfo(item);
+		final TypeInfo typeInfo = itemTypes.getTypeInfo(item);
 		
 		final List<ItemAttribute> displayAttributes = itemAttributes.stream()
 				.map(ItemAttributeValue::getAttribute)
@@ -273,7 +281,7 @@ public class ItemService extends BaseService {
 			@PathParam("itemId") String itemId,
 			HttpServletRequest request) throws IOException, ItemStorageException {
 		
-		return getItemRetrievalDAO(request).getPhotoCount(itemId);
+		return getItemRetrievalDAO(request, itemTypes).getPhotoCount(itemId);
 	}
 	
 	@GET
@@ -284,7 +292,7 @@ public class ItemService extends BaseService {
 			@QueryParam("thumbNo") int photoNo,
 			HttpServletRequest request) throws IOException, ItemStorageException {
 	
-		final InputStream photoStream = getItemRetrievalDAO(request).getItemThumb(itemId, photoNo);
+		final InputStream photoStream = getItemRetrievalDAO(request, itemTypes).getItemThumb(itemId, photoNo);
 
 		final byte[] data;
 		try {
@@ -306,7 +314,7 @@ public class ItemService extends BaseService {
 			@QueryParam("photoNo") int photoNo,
 			HttpServletRequest request) throws IOException, ItemStorageException {
 	
-		final InputStream photoStream = getItemRetrievalDAO(request).getItemPhoto(itemId, photoNo);
+		final InputStream photoStream = getItemRetrievalDAO(request, itemTypes).getItemPhoto(itemId, photoNo);
 
 		final byte[] data;
 		try {

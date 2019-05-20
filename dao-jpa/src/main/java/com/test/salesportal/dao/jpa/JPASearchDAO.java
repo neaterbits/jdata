@@ -17,11 +17,12 @@ import javax.persistence.metamodel.EntityType;
 
 import com.test.salesportal.dao.ISearchCursor;
 import com.test.salesportal.dao.ISearchDAO;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttributeAndOrder;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttributeAndOrder;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.base.TitlePhotoItem;
 import com.test.salesportal.search.criteria.ComparisonCriterium;
 import com.test.salesportal.search.criteria.Criterium;
 import com.test.salesportal.search.criteria.InCriterium;
@@ -32,12 +33,22 @@ import com.test.salesportal.search.facets.ItemsFacets;
 
 public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 
-	public JPASearchDAO(String persistenceUnitName) {
+	private final ItemTypes itemTypes;
+	
+	public JPASearchDAO(String persistenceUnitName, ItemTypes itemTypes) {
 		super(persistenceUnitName);
+
+		if (itemTypes == null) {
+			throw new IllegalArgumentException("itemTypes == null");
+		}
+		
+		this.itemTypes = itemTypes;
 	}
 	
-	public JPASearchDAO(EntityManagerFactory entityManagerFactory) {
+	public JPASearchDAO(EntityManagerFactory entityManagerFactory, ItemTypes itemTypes) {
 		super(entityManagerFactory);
+		
+		this.itemTypes = itemTypes;
 	}
 
 	// Search for criteria on all attributes on a particular type
@@ -171,27 +182,31 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 		
 		// Now we have queries for all matching items, also returning faceted attributes so we can count them
 		@SuppressWarnings("unchecked")
-		final List<Item> results = (List<Item>)itemQuery.getResultList();
+		final List<TitlePhotoItem> results = (List<TitlePhotoItem>)itemQuery.getResultList();
 
 		final List<JPASearchItem> items = new ArrayList<>(results.size());
 
-		for (Item item : results) {
+		for (TitlePhotoItem item : results) {
 			final JPASearchItem searchItem = new JPASearchItem(item);
 			
 			items.add(searchItem);
 		}
 		
 		// We can share code with Lucene mapping for building facets
-		final ItemsFacets facets = FacetUtils.computeFacets(results, facetedAttributes, new FacetUtils.FacetFunctions<Item, Object>() {
+		final ItemsFacets facets = FacetUtils.computeFacets(
+				results,
+				facetedAttributes,
+				itemTypes,
+				new FacetUtils.FacetFunctions<TitlePhotoItem, Object>() {
 			
 			@Override
-			public boolean isType(Item item, String typeName) {
+			public boolean isType(TitlePhotoItem item, String typeName) {
 				return typeName.equals(ItemTypes.getTypeName(item));
 			}
 
 			@Override
-			public Object getField(Item item, String fieldName) {
-				final TypeInfo typeInfo = ItemTypes.getTypeInfo(item);
+			public Object getField(TitlePhotoItem item, String fieldName) {
+				final TypeInfo typeInfo = itemTypes.getTypeInfo(item);
 				
 				return typeInfo.getAttributes().getByName(fieldName).getObjectValue(item);
 			}

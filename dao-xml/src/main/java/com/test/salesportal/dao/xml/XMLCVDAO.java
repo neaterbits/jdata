@@ -11,10 +11,10 @@ import javax.xml.bind.JAXBException;
 import com.test.salesportal.dao.CVStorageException;
 import com.test.salesportal.dao.ICVDAO;
 import com.test.salesportal.index.ItemIndex;
-import com.test.salesportal.model.attributes.ClassAttributes;
 import com.test.salesportal.model.cv.CV;
-import com.test.salesportal.model.cv.Language;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.attributes.ClassAttributes;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.text.Language;
 import com.test.salesportal.xml.CVType;
 import com.test.salesportal.xmlstorage.api.IItemStorage;
 import com.test.salesportal.xmlstorage.api.StorageException;
@@ -30,9 +30,17 @@ public class XMLCVDAO extends XMLBaseDAO implements ICVDAO {
 			throw new IllegalStateException("Failed to initialize JAXB context", ex);
 		}
 	}
+	
+	private final ItemTypes itemTypes;
 
-	public XMLCVDAO(IItemStorage xmlStorage, ItemIndex index) {
+	public XMLCVDAO(IItemStorage xmlStorage, ItemIndex index, ItemTypes itemTypes) {
 		super(jaxbContext, xmlStorage, index);
+		
+		if (itemTypes == null) {
+			throw new IllegalArgumentException("itemTypes == null");
+		}
+		
+		this.itemTypes = itemTypes;
 	}
 	
 	private static final String CV_ID = "cv";
@@ -89,7 +97,7 @@ public class XMLCVDAO extends XMLBaseDAO implements ICVDAO {
 		final CVType converted = convertCV.apply(cv);
 
 		try {
-			store(userId, CV_ID, converted, ItemTypes.getType(cv), ClassAttributes.getValues(cv));
+			store(userId, CV_ID, converted, ItemTypes.getType(cv), ClassAttributes.getValues(itemTypes, cv));
 		} catch (XMLStorageException ex) {
 			throw new CVStorageException("Failed to store CV", ex);
 		}

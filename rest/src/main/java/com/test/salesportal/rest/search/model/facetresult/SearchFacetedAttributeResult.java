@@ -1,6 +1,6 @@
 package com.test.salesportal.rest.search.model.facetresult;
 
-import com.test.salesportal.model.FacetFiltering;
+import com.test.salesportal.model.items.FacetFiltering;
 
 public abstract class SearchFacetedAttributeResult {
 	

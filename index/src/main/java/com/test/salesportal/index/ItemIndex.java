@@ -8,11 +8,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.test.salesportal.common.ItemId;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.ItemAttributeValue;
-import com.test.salesportal.model.PropertyAttribute;
-import com.test.salesportal.model.SortAttributeAndOrder;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.ItemAttributeValue;
+import com.test.salesportal.model.items.PropertyAttribute;
+import com.test.salesportal.model.items.SortAttributeAndOrder;
 import com.test.salesportal.search.criteria.Criterium;
 
 /**

@@ -2,8 +2,8 @@ package com.test.salesportal.dao;
 
 import java.util.List;
 
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttributeValue;
+import com.test.salesportal.model.items.ItemAttributeValue;
+import com.test.salesportal.model.items.base.TitlePhotoItem;
 import com.test.salesportal.search.SearchItem;
 
 public interface IFoundItem extends SearchItem {
@@ -20,6 +20,6 @@ public interface IFoundItem extends SearchItem {
 	 * 
 	 * @return item POJO
 	 */
-	Item getItem();
+	TitlePhotoItem getItem();
 	
 }

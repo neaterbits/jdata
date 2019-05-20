@@ -18,9 +18,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.salesportal.common.IOUtil;
 import com.test.salesportal.common.images.ThumbAndImageUrls;
 import com.test.salesportal.dao.ItemStorageException;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.Item;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.sales.SalesItemTypes;
 import com.test.salesportal.rest.BaseServiceLogic;
 import com.test.salesportal.rest.items.ItemService;
 import com.test.salesportal.rest.items.model.ServiceItem;
@@ -37,6 +38,7 @@ public class JettyRunServlet {
 		return BaseServiceLogic.isTest();
 	}
 	
+	private static final ItemTypes ITEM_TYPES = SalesItemTypes.INSTANCE;
 
 	public static void main(String [] args) throws Exception {
 		
@@ -168,7 +170,7 @@ public class JettyRunServlet {
 			
 			//throw new UnsupportedOperationException();
 			
-			final PagedSearchService searchService = new PagedSearchService(getLocalFileDir());
+			final PagedSearchService searchService = new PagedSearchService(getLocalFileDir(), ITEM_TYPES);
 			
 			// Get parameters
 			String freeText = req.getParameter("freeText");
@@ -242,7 +244,7 @@ public class JettyRunServlet {
 					throw new IllegalArgumentException("No itemIds");
 				}
 				
-				final PagedSearchService searchService = new PagedSearchService(getLocalFileDir());
+				final PagedSearchService searchService = new PagedSearchService(getLocalFileDir(), ITEM_TYPES);
 
 				final byte [] data = searchService.getThumbnails(itemIds, req);
 				
@@ -262,7 +264,7 @@ public class JettyRunServlet {
 
 			System.out.println("## post to items servlet");
 			
-			final ItemService itemService = new ItemService(getLocalFileDir());
+			final ItemService itemService = new ItemService(getLocalFileDir(), ITEM_TYPES);
 			final String userId = req.getParameter("userId");
 
 			if (req.getPathInfo() != null && req.getPathInfo().contains("thumbAndImageUrls")) {
@@ -317,7 +319,7 @@ public class JettyRunServlet {
 					throw new ServletException("No type information for item");
 				}
 
-				final TypeInfo typeInfo = ItemTypes.getTypeByName(type);
+				final TypeInfo typeInfo = ITEM_TYPES.getTypeByName(type);
 				
 				if (typeInfo == null) {
 					throw new ServletException("Unknown type " + type);
@@ -341,7 +343,7 @@ public class JettyRunServlet {
 
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			final ItemService itemService = new ItemService(getLocalFileDir());
+			final ItemService itemService = new ItemService(getLocalFileDir(), ITEM_TYPES);
 
 			if (isTest()) {
 				resp.setHeader("Access-Control-Allow-Origin", "*");

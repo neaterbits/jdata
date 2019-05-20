@@ -16,8 +16,10 @@ import com.test.salesportal.dao.IFoundItemPhotoThumbnail;
 import com.test.salesportal.dao.IItemDAO;
 import com.test.salesportal.dao.IItemUpdate;
 import com.test.salesportal.dao.ItemStorageException;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemPhoto;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.photo.ItemPhoto;
+import com.test.salesportal.model.items.sales.SalesItemTypes;
 import com.test.salesportal.model.items.sports.Snowboard;
 import com.test.salesportal.model.items.sports.SnowboardProfile;
 
@@ -26,6 +28,8 @@ import junit.framework.TestCase;
 // Inherited by implementation specific test
 public abstract class ItemDAOTest extends TestCase {
 
+	protected static final ItemTypes ITEM_TYPES = SalesItemTypes.INSTANCE;
+	
 	protected abstract IItemDAO getItemDAO();
 
 	private static Snowboard makeSnowboard() {

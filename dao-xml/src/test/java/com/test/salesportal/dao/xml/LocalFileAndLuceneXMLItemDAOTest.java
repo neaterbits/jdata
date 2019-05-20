@@ -25,6 +25,6 @@ public class LocalFileAndLuceneXMLItemDAOTest extends ItemDAOTest {
 	protected IItemDAO getItemDAO() {
 		final IItemStorage localXmlStorage = new ParameterFileSystemFilesXMLStorage(new LocalFileSystem(baseDir));
 
-		return new XMLItemDAO(localXmlStorage, index);
+		return new XMLItemDAO(localXmlStorage, index, ITEM_TYPES);
 	}
 }

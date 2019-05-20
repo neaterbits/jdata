@@ -1,0 +1,32 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>com.test.salesportal</groupId>
+    <version>0.0.1-SNAPSHOT</version>
+    <artifactId>root</artifactId>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>model-items-base</artifactId>
+  <name>Base item model</name>
+  <packaging>jar</packaging>
+  <dependencies>
+
+	<dependency>
+		<groupId>${project.groupId}</groupId>
+		<artifactId>model-items</artifactId>
+		<version>${project.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>${project.groupId}</groupId>
+		<artifactId>model-text</artifactId>
+		<version>${project.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>${project.groupId}</groupId>
+		<artifactId>model-operations</artifactId>
+		<version>${project.version}</version>
+	</dependency>
+
+	<!-- test dependencies --> 
+
+  </dependencies>
+</project>

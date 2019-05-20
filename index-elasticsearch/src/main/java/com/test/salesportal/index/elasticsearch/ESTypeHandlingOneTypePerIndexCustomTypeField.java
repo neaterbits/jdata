@@ -12,10 +12,10 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.base.ItemTypes;
 
 /**
  * Store all types in one index, merge all attributes together.
@@ -37,6 +37,18 @@ public class ESTypeHandlingOneTypePerIndexCustomTypeField extends ESTypeHandling
 		
 		TYPES = Collections.unmodifiableSet(types);
 	}
+	
+	private final ItemTypes itemTypes;
+	
+
+	public ESTypeHandlingOneTypePerIndexCustomTypeField(ItemTypes itemTypes) {
+
+		if (itemTypes == null) {
+			throw new IllegalArgumentException("itemTypes == null");
+		}
+		
+		this.itemTypes = itemTypes;
+	}
 
 	@Override
 	Set<String> getESIndexTypes(Collection<Class<? extends Item>> allTypes) {
@@ -49,8 +61,8 @@ public class ESTypeHandlingOneTypePerIndexCustomTypeField extends ESTypeHandling
 		// Distinct attributes across all types
 		final Set<ItemAttribute> distinctAttributes = new HashSet<>();
 
-		for (String typeName : ItemTypes.getTypeNames()) {
-			final TypeInfo typeInfo = ItemTypes.getTypeByName(typeName);
+		for (String typeName : itemTypes.getTypeNames()) {
+			final TypeInfo typeInfo = itemTypes.getTypeByName(typeName);
 			
 			typeInfo.getAttributes().forEach(a -> distinctAttributes.add(a));
 		}

@@ -2,7 +2,7 @@ package com.test.salesportal.search;
 
 import java.util.Map;
 
-import com.test.salesportal.model.PropertyAttribute;
+import com.test.salesportal.model.items.PropertyAttribute;
 
 public final class AttributeValues<T extends PropertyAttribute> implements FieldValues<T> {
 	private final Map<T, Object> values;

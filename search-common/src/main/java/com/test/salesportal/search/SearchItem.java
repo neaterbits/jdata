@@ -1,7 +1,8 @@
 package com.test.salesportal.search;
 
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttribute;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttribute;
+import com.test.salesportal.model.items.base.ItemTypes;
 
 /**
  * Information for one item returned from search result
@@ -41,7 +42,7 @@ public interface SearchItem {
 	 * Sort attribute values
 	 */
 	
-	Object getSortAttributeValue(SortAttribute attribute);
+	Object getSortAttributeValue(SortAttribute attribute, ItemTypes itemTypes);
 	
 	/**
 	 * Any attribute value

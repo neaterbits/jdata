@@ -5,9 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.Item;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.sales.SalesItemTypes;
 import com.test.salesportal.model.items.sports.Snowboard;
 import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
 import com.test.salesportal.rest.search.model.criteria.SearchCriteriumValue;
@@ -19,21 +20,23 @@ import junit.framework.TestCase;
 
 public class SearchKeyMatchUtilTest extends TestCase {
 
+	private static final ItemTypes ITEM_TYPES = SalesItemTypes.INSTANCE;
+	
 	public void testFreetext() {
 
 		final Snowboard snowboard = new Snowboard();
 		
 		snowboard.setTitle("Fole fint snowboard");
 	
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(makeFreetextSearchKey(Snowboard.class, "Fole"), snowboard)).isTrue();
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(makeFreetextSearchKey(Snowboard.class, "Jaujau"), snowboard)).isFalse();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(makeFreetextSearchKey(Snowboard.class, "Fole"), snowboard, ITEM_TYPES)).isTrue();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(makeFreetextSearchKey(Snowboard.class, "Jaujau"), snowboard, ITEM_TYPES)).isFalse();
 	}
 	
 	public void testSingleValueCriteria() {
 		
 		final Snowboard snowboard = new Snowboard();
 		
-		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		final TypeInfo snowboardType = ITEM_TYPES.getTypeInfo(Snowboard.class);
 		
 		snowboard.setMake("Burton");
 		
@@ -45,7 +48,7 @@ public class SearchKeyMatchUtilTest extends TestCase {
 						new SearchCriteriumValue[] { new SearchCriteriumValue("Burton") },
 						false));
 		
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard)).isTrue();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard, ITEM_TYPES)).isTrue();
 
 		searchKey = makeCriteriaSearchKey(
 				Snowboard.class,
@@ -55,14 +58,14 @@ public class SearchKeyMatchUtilTest extends TestCase {
 						new SearchCriteriumValue[] { new SearchCriteriumValue("Jones") },
 						false));
 		
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard)).isFalse();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard, ITEM_TYPES)).isFalse();
 	}
 
 	public void testOtherSelectedCriteria() {
 		
 		final Snowboard snowboard = new Snowboard();
 		
-		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		final TypeInfo snowboardType = ITEM_TYPES.getTypeInfo(Snowboard.class);
 		
 		snowboard.setMake("Burton");
 		
@@ -74,7 +77,7 @@ public class SearchKeyMatchUtilTest extends TestCase {
 						new SearchCriteriumValue[] { new SearchCriteriumValue("Jones") },
 						false));
 		
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard)).isFalse();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard, ITEM_TYPES)).isFalse();
 
 		searchKey = makeCriteriaSearchKey(
 				Snowboard.class,
@@ -84,14 +87,14 @@ public class SearchKeyMatchUtilTest extends TestCase {
 						new SearchCriteriumValue[] { new SearchCriteriumValue("Jones") },
 						true)); // otherSelected is true here
 		
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard)).isTrue();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard, ITEM_TYPES)).isTrue();
 	}
 
 	public void testSingleValueSubCriteria() {
 		
 		final Snowboard snowboard = new Snowboard();
 		
-		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		final TypeInfo snowboardType = ITEM_TYPES.getTypeInfo(Snowboard.class);
 		
 		snowboard.setMake("Burton");
 		snowboard.setModel("SomeModel");
@@ -114,7 +117,7 @@ public class SearchKeyMatchUtilTest extends TestCase {
 					},
 					false));
 		
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard)).isTrue();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard, ITEM_TYPES)).isTrue();
 
 		// Same as above but with SomeOtherModel as model so that does not match
 		searchKey = makeCriteriaSearchKey(
@@ -135,14 +138,14 @@ public class SearchKeyMatchUtilTest extends TestCase {
 					},
 					false));
 		
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard)).isFalse();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard, ITEM_TYPES)).isFalse();
 	}
 	
 	public void testRangeCriteria() {
 
 		final Snowboard snowboard = new Snowboard();
 		
-		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		final TypeInfo snowboardType = ITEM_TYPES.getTypeInfo(Snowboard.class);
 		
 		snowboard.setWidth(decimal(165));
 
@@ -157,7 +160,7 @@ public class SearchKeyMatchUtilTest extends TestCase {
 							new SearchRange(decimal(170), true, null, false),
 						}));
 				
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard)).isTrue();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard, ITEM_TYPES)).isTrue();
 
 		searchKey = makeCriteriaSearchKey(
 				Snowboard.class,
@@ -168,7 +171,7 @@ public class SearchKeyMatchUtilTest extends TestCase {
 							new SearchRange(decimal(170), true, null, false),
 						}));
 
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard)).isFalse();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard, ITEM_TYPES)).isFalse();
 	}
 	
 	public void testSingleValueAndRangeCriteria() {
@@ -176,7 +179,7 @@ public class SearchKeyMatchUtilTest extends TestCase {
 		// Must match both in order to match search key
 		final Snowboard snowboard = new Snowboard();
 		
-		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		final TypeInfo snowboardType = ITEM_TYPES.getTypeInfo(Snowboard.class);
 		
 		snowboard.setMake("Burton");
 		snowboard.setWidth(BigDecimal.valueOf(165));
@@ -203,7 +206,7 @@ public class SearchKeyMatchUtilTest extends TestCase {
 				null,
 				null);
 
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard)).isTrue();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard, ITEM_TYPES)).isTrue();
 
 		searchKey = new SearchKey(
 				Arrays.asList(Snowboard.class),
@@ -227,7 +230,7 @@ public class SearchKeyMatchUtilTest extends TestCase {
 				null,
 				null);
 		
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard)).isFalse();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard, ITEM_TYPES)).isFalse();
 
 		searchKey = new SearchKey(
 				Arrays.asList(Snowboard.class),
@@ -249,7 +252,7 @@ public class SearchKeyMatchUtilTest extends TestCase {
 				null,
 				null);
 
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard)).isFalse();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard, ITEM_TYPES)).isFalse();
 	}
 
 	public void testFreetextAndCriteria() {
@@ -257,7 +260,7 @@ public class SearchKeyMatchUtilTest extends TestCase {
 		// Must match both in order to match search key
 		final Snowboard snowboard = new Snowboard();
 		
-		final TypeInfo snowboardType = ItemTypes.getTypeInfo(Snowboard.class);
+		final TypeInfo snowboardType = ITEM_TYPES.getTypeInfo(Snowboard.class);
 		
 		snowboard.setTitle("Burton snowboard for sale");
 		snowboard.setMake("Burton");
@@ -276,7 +279,7 @@ public class SearchKeyMatchUtilTest extends TestCase {
 				null,
 				null);
 
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard)).isTrue();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard, ITEM_TYPES)).isTrue();
 
 		searchKey = new SearchKey(
 				Arrays.asList(Snowboard.class),
@@ -291,7 +294,7 @@ public class SearchKeyMatchUtilTest extends TestCase {
 				null,
 				null);
 
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard)).isFalse();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard, ITEM_TYPES)).isFalse();
 		
 		searchKey = new SearchKey(
 				Arrays.asList(Snowboard.class),
@@ -306,7 +309,7 @@ public class SearchKeyMatchUtilTest extends TestCase {
 				null,
 				null);
 
-		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard)).isFalse();
+		assertThat(SearchKeyMatchUtil.matchesSearchKey(searchKey, snowboard, ITEM_TYPES)).isFalse();
 	}
 
 	private static SearchKey makeFreetextSearchKey(Class<? extends Item> type, String freetext) {

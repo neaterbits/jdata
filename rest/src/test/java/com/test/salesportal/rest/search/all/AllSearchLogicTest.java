@@ -15,15 +15,13 @@ import com.test.salesportal.common.UUIDGenerator;
 import com.test.salesportal.dao.IOperationsDAO;
 import com.test.salesportal.dao.ISearchCursor;
 import com.test.salesportal.dao.ISearchDAO;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttributeAndOrder;
-import com.test.salesportal.model.SortOrder;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttributeAndOrder;
+import com.test.salesportal.model.items.SortOrder;
 import com.test.salesportal.model.items.TypeInfo;
-import com.test.salesportal.model.items.sports.Snowboard;
 import com.test.salesportal.model.operations.Operation;
-import com.test.salesportal.model.operations.dao.OperationDataMarshaller;
-import com.test.salesportal.model.operations.dao.StoreItemOperationData;
+import com.test.salesportal.model.items.operations.dao.StoreItemOperationData;
+import com.test.salesportal.model.items.sports.Snowboard;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetedTypeResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchSingleValueFacet;
 import com.test.salesportal.rest.search.model.facetresult.SearchSingleValueFacetedAttributeResult;
@@ -45,7 +43,7 @@ public class AllSearchLogicTest extends BaseAllSearchLogicTest {
 		final IOperationsDAO operationsDAO = Mockito.mock(IOperationsDAO.class);
 		final ISearchDAO searchDAO = Mockito.mock(ISearchDAO.class);
 		
-		final AllSearchLogic searchLogic = new AllSearchLogic(operationsDAO, null);
+		final AllSearchLogic searchLogic = new AllSearchLogic(operationsDAO, OPERATION_DATA_MARSHALLER, ITEM_TYPES, null);
 		
 		final ItemAttribute modelVersionAttribute = snowboardType.getAttributes().getByName("modelVersion");
 		final ItemAttribute makeAttribute = snowboardType.getAttributes().getByName("make");
@@ -117,11 +115,10 @@ public class AllSearchLogicTest extends BaseAllSearchLogicTest {
 		anotherSnowboard.setModel("Some model");
 		
 		// Check once more with update from operations log
-		final OperationDataMarshaller operationDataMarshaller = new OperationDataMarshaller();
 		
 		final String userId = "theUser";
 		
-		final byte [] storeData = operationDataMarshaller.encodeOperationData(new StoreItemOperationData(userId, anotherSnowboard));
+		final byte [] storeData = OPERATION_DATA_MARSHALLER.encodeOperationData(new StoreItemOperationData(userId, anotherSnowboard));
 		
 		final Operation operation = new Operation(new Date(), storeData, userId);
 		
@@ -148,7 +145,7 @@ public class AllSearchLogicTest extends BaseAllSearchLogicTest {
 		assertThat(anotherResult.getSearchResultId()).isEqualTo(result.getSearchResultId());
 		assertThat(anotherResult.getTotalItemMatchCount()).isEqualTo(2);
 		
-		assertThat(anotherResult.getFacets().getTypes().size()).isEqualTo(ItemTypes.getAllTypesSet().size());
+		assertThat(anotherResult.getFacets().getTypes().size()).isEqualTo(ITEM_TYPES.getAllTypesSet().size());
 		
 		final SearchFacetedTypeResult typeResult = CollectionUtil.find(
 				anotherResult.getFacets().getTypes(),

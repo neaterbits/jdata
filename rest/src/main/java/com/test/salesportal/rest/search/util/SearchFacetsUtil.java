@@ -3,11 +3,11 @@ package com.test.salesportal.rest.search.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.test.salesportal.model.FacetFiltering;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.attributes.AttributeType;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.FacetFiltering;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.attributes.AttributeType;
+import com.test.salesportal.model.items.base.ItemTypes;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeDecimalRangeResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeIntegerRangeResult;
 import com.test.salesportal.rest.search.model.facetresult.SearchFacetedAttributeRangeResult;
@@ -27,7 +27,7 @@ import com.test.salesportal.search.facets.TypeFacets;
 
 public class SearchFacetsUtil {
 
-	public static SearchFacetsResult convertFacets(ItemsFacets facets) {
+	public static SearchFacetsResult convertFacets(ItemsFacets facets, ItemTypes itemTypes) {
 		final SearchFacetsResult result = new SearchFacetsResult();
 		
 		final List<SearchFacetedTypeResult> typeFacetsResult = new ArrayList<>(facets.getTypes().size());
@@ -39,7 +39,7 @@ public class SearchFacetsUtil {
 			final List<SearchFacetedAttributeResult> facetAttributesResult = convertAttributeList(typeFacet.getAttributes());
 			
 			typeResult.setType(getTypeId(typeFacet.getType()));
-			typeResult.setDisplayName(getTypeDisplayName(typeFacet.getType()));
+			typeResult.setDisplayName(getTypeDisplayName(typeFacet.getType(), itemTypes));
 			typeResult.setAutoExpandAttributesCount(
 					typeFacet.getAutoExpandAttributesCount() != 0
 						? typeFacet.getAutoExpandAttributesCount()
@@ -167,7 +167,7 @@ public class SearchFacetsUtil {
 		return ItemTypes.getTypeName(type);
 	}
 	
-	private static String getTypeDisplayName(Class<? extends Item> type) {
-		return ItemTypes.getTypeDisplayName(type);
+	private static String getTypeDisplayName(Class<? extends Item> type, ItemTypes itemTypes) {
+		return itemTypes.getTypeDisplayName(type);
 	}
 }

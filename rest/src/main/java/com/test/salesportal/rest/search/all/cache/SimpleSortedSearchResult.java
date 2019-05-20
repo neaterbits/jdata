@@ -5,11 +5,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.PropertyAttribute;
-import com.test.salesportal.model.SortAttribute;
-import com.test.salesportal.model.SortOrder;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.PropertyAttribute;
+import com.test.salesportal.model.items.SortAttribute;
+import com.test.salesportal.model.items.SortOrder;
+import com.test.salesportal.model.items.base.ItemTypes;
+import com.test.salesportal.model.items.base.TitlePhotoItem;
 import com.test.salesportal.rest.search.SearchItemResult;
 import com.test.salesportal.rest.search.all.AllSearchItemResult;
 
@@ -124,13 +126,13 @@ public final class SimpleSortedSearchResult extends SortedSearchResult {
 
 
 	@Override
-	void applyItemToCachedItems(SearchKey searchKey, Item item) {
+	void applyItemToCachedItems(SearchKey searchKey, TitlePhotoItem item, ItemTypes itemTypes) {
 
 		// Figure out whether already cached and apply, or create new item at pos in sort order
 		final String itemId = item.getIdString();
 		
 		// Check if matches search criteria
-		if (SearchKeyMatchUtil.matchesSearchKey(searchKey, item)) {
+		if (SearchKeyMatchUtil.matchesSearchKey(searchKey, item, itemTypes)) {
 
 			// Matches, this might be an existing entry or a new one
 			int itemIndex = -1;
@@ -141,7 +143,7 @@ public final class SimpleSortedSearchResult extends SortedSearchResult {
 			
 			final Comparator<SearchItemResult> comparator = makeSortAttributeComparator();
 			
-			final AllSearchItemResult updatedItemResult = makeSearchItemResult(searchKey, item);
+			final AllSearchItemResult updatedItemResult = makeSearchItemResult(searchKey, item, itemTypes);
 			
 			for (int i = 0; i < toSearch.length; ++ i) {
 				
@@ -185,7 +187,7 @@ public final class SimpleSortedSearchResult extends SortedSearchResult {
 
 	}
 	
-	private static AllSearchItemResult makeSearchItemResult(SearchKey searchKey, Item item) {
+	private static AllSearchItemResult makeSearchItemResult(SearchKey searchKey, TitlePhotoItem item, ItemTypes itemTypes) {
 	
 		return new AllSearchItemResult(
 				item.getModelVersion(),
@@ -193,14 +195,14 @@ public final class SimpleSortedSearchResult extends SortedSearchResult {
 				item.getTitle(),
 				item.getThumbWidth(),
 				item.getThumbHeight(),
-				getSortValues(searchKey.getSortAttributes(), item),
+				getSortValues(searchKey.getSortAttributes(), item, itemTypes),
 				getFieldValues(searchKey.getFieldAttributes(), item));
 		
 			
 	}
 
-	private static Object [] getSortValues(List<SortAttribute> fieldAttributes, Item fieldItem) {
-		return getFieldValues(fieldAttributes, fieldItem, SortAttribute::getObjectValue);
+	private static Object [] getSortValues(List<SortAttribute> fieldAttributes, Item fieldItem, ItemTypes itemTypes) {
+		return getFieldValues(fieldAttributes, fieldItem, (attribute, item) -> attribute.getObjectValue(item, itemTypes));
 	}
 
 	private static Object [] getFieldValues(List<ItemAttribute> fieldAttributes, Item fieldItem) {

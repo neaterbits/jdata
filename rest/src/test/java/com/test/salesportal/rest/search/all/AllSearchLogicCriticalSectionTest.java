@@ -10,9 +10,9 @@ import com.test.salesportal.dao.IOperationsRetrieval;
 import com.test.salesportal.dao.ISearchCursor;
 import com.test.salesportal.dao.ISearchDAO;
 import com.test.salesportal.dao.SearchException;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.items.sports.Snowboard;
+import com.test.salesportal.model.items.ItemAttribute;
 import com.test.salesportal.model.operations.Operation;
+import com.test.salesportal.model.items.sports.Snowboard;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -86,7 +86,7 @@ public class AllSearchLogicCriticalSectionTest extends BaseAllSearchLogicTest {
 		final OperationsRetrievalImpl operationsRetrieval = new OperationsRetrievalImpl();
 		final CriticalSectionCallbackImpl criticalSectionCallback = new CriticalSectionCallbackImpl();
 		
-		final AllSearchLogic logic = new AllSearchLogic(operationsRetrieval, criticalSectionCallback);
+		final AllSearchLogic logic = new AllSearchLogic(operationsRetrieval, OPERATION_DATA_MARSHALLER, ITEM_TYPES, criticalSectionCallback);
 
 		final ItemAttribute modelVersionAttribute = snowboardType.getAttributes().getByName("modelVersion");
 		final ItemAttribute makeAttribute = snowboardType.getAttributes().getByName("make");

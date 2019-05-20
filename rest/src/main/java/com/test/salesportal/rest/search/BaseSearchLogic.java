@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 import com.test.salesportal.dao.ISearchCursor;
 import com.test.salesportal.dao.ISearchDAO;
 import com.test.salesportal.dao.SearchException;
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemAttribute;
-import com.test.salesportal.model.SortAttributeAndOrder;
-import com.test.salesportal.model.items.ItemTypes;
+import com.test.salesportal.model.items.Item;
+import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttributeAndOrder;
+import com.test.salesportal.model.items.base.ItemTypes;
 import com.test.salesportal.rest.BaseServiceLogic;
 import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
 import com.test.salesportal.rest.search.paged.ItemSearchResult;
@@ -41,6 +41,17 @@ public abstract class BaseSearchLogic<
 	protected abstract void setPageFirstItem(RESULT result, int firstItem);
 	protected abstract void setPageItemCount(RESULT result, int count);
 	
+	private final ItemTypes itemTypes;
+	
+	protected BaseSearchLogic(ItemTypes itemTypes) {
+
+		if (itemTypes == null) {
+			throw new IllegalArgumentException("itemTypes == null");
+		}
+		
+		this.itemTypes = itemTypes;
+	}
+	
 	protected final RESULT searchInDB(
 			List<Class<? extends Item>> types,
 			String freeText,
@@ -54,7 +65,7 @@ public abstract class BaseSearchLogic<
 
 		final List<Criterium> daoCriteria; 
 		if (criteria != null) {
-			daoCriteria = SearchCriteriaUtil.convertCriteria(criteria);
+			daoCriteria = SearchCriteriaUtil.convertCriteria(criteria, itemTypes);
 		}
 		else {
 			daoCriteria = null;
@@ -78,7 +89,7 @@ public abstract class BaseSearchLogic<
 						sortAttributes,
 						returnSortAttributeValues,
 						responseFieldSet,
-						ItemTypes.getFacetAttributes(types));
+						itemTypes.getFacetAttributes(types));
 				
 			} catch (SearchException ex) {
 				throw new IllegalStateException("Failed to search", ex);
@@ -127,10 +138,10 @@ public abstract class BaseSearchLogic<
 				
 				sortOrderTypes.retainAll(facetTypes);
 				
-				result.setFacets(SearchFacetsUtil.convertFacets(facets));
+				result.setFacets(SearchFacetsUtil.convertFacets(facets, itemTypes));
 			}
 			
-			result.setSortOrders(SearchSortUtil.computeAndSortPossibleSortOrders(sortOrderTypes));
+			result.setSortOrders(SearchSortUtil.computeAndSortPossibleSortOrders(sortOrderTypes, itemTypes));
 
 			for (int i = 0; i < numFound; ++ i) {
 				final SearchItem foundItem = found.get(i);
@@ -141,7 +152,7 @@ public abstract class BaseSearchLogic<
 					sortValues = new Object[sortAttributes.size()];
 				
 					for (int sortAttributeNo = 0; sortAttributeNo < sortAttributes.size(); ++ sortAttributeNo) {
-						sortValues[sortAttributeNo] = foundItem.getSortAttributeValue(sortAttributes.get(sortAttributeNo).getAttribute());
+						sortValues[sortAttributeNo] = foundItem.getSortAttributeValue(sortAttributes.get(sortAttributeNo).getAttribute(), itemTypes);
 					}
 				}
 				else {
@@ -177,5 +188,9 @@ public abstract class BaseSearchLogic<
 		}
 
 		return result;
+	}
+
+	protected final ItemTypes getItemTypes() {
+		return itemTypes;
 	}
 }

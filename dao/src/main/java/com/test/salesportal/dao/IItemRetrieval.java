@@ -2,8 +2,8 @@ package com.test.salesportal.dao;
 
 import java.io.InputStream;
 
-import com.test.salesportal.model.Item;
-import com.test.salesportal.model.ItemPhoto;
+import com.test.salesportal.model.items.base.TitlePhotoItem;
+import com.test.salesportal.model.items.photo.ItemPhoto;
 
 public interface IItemRetrieval extends AutoCloseable {
 	
@@ -12,7 +12,7 @@ public interface IItemRetrieval extends AutoCloseable {
 	 */
 	IFoundItem getItem(String userId, String itemId) throws ItemStorageException;
 
-	Item getItem(String itemId) throws ItemStorageException;
+	TitlePhotoItem getItem(String itemId) throws ItemStorageException;
 
 	InputStream getItemThumb(String itemId, int thumbNo) throws ItemStorageException;
 
