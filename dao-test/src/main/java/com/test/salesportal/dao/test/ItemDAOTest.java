@@ -302,17 +302,23 @@ public abstract class ItemDAOTest extends TestCase {
 					 
 					 int thumbnailSize = dataInput.readInt();
 					 assertThat(thumbnailSize).isEqualTo("thumbnail1_1".length());
+					 int numItemThumbnails = dataInput.readInt();
+					 assertThat(numItemThumbnails).isEqualTo(2);
 					 assertThat(readAscii(dataInput)).isEqualTo("image/png");
 					 assertThat(readBytes(dataInput, thumbnailSize)).isEqualTo("thumbnail1_1".getBytes());
 					 
 					 // item 2 has no thumbnail so expect empty entry
 					 thumbnailSize = dataInput.readInt();
 					 assertThat(thumbnailSize).isEqualTo(0);
+					 numItemThumbnails = dataInput.readInt();
+					 assertThat(numItemThumbnails).isEqualTo(0);
 					 assertThat(readAscii(dataInput)).isEqualTo("");
 					 assertThat(readBytes(dataInput, thumbnailSize)).isEqualTo(new byte[0]);
 					 
 					 thumbnailSize = dataInput.readInt();
 					 assertThat(thumbnailSize).isEqualTo("thumbnail3_1".length());
+					 numItemThumbnails = dataInput.readInt();
+					 assertThat(numItemThumbnails).isEqualTo(1);
 					 assertThat(readAscii(dataInput)).isEqualTo("image/png");
 					 assertThat(readBytes(dataInput, thumbnailSize)).isEqualTo("thumbnail3_1".getBytes());
 					 

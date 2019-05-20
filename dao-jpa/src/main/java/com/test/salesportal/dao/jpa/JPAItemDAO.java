@@ -491,7 +491,8 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 				+ "  					where ipts.id = item.id  )"
 				+ " and item.id in :itemIds";
 		*/
-		final String query = "select ipt.item.id, ipt.mimeType, ipt.data "
+		final String query = "select ipt.item.id, ipt.mimeType, ipt.data, "
+				+ "  (select count(i.id) from ItemPhotoThumbnail i where ipt.item.id = i.item.id) "
 				+ " from ItemPhotoThumbnail ipt "
 				+ " where ipt.item.id in :itemIds"
 				+ "  and ipt.index = 0";
@@ -513,7 +514,7 @@ public final class JPAItemDAO extends JPABaseDAO implements IItemDAO {
 		}
 		
 		final List<JPAThumbnail> thumbnails = rows.stream()
-			.map(row -> new JPAThumbnail((String)row[1], -1, new ByteArrayInputStream((byte[])row[2]), -1, String.valueOf((Long)row[0])))
+			.map(row -> new JPAThumbnail((String)row[1], -1, new ByteArrayInputStream((byte[])row[2]), (int)row[3], String.valueOf((Long)row[0])))
 			.collect(Collectors.toList());
 		
 		// Sort the thumbnails according to their place
