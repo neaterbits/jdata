@@ -108,6 +108,7 @@ public class LuceneItemIndex implements ItemIndex {
 	private static final int BOOLEAN_NONE = -1;
 	private static final String ENUM_NONE = STRING_NONE; // Enums are stored as strings
 	private static final long DATE_NONE = -1L;
+	private static final String TZDATE_NONE = STRING_NONE;
 
 	private static final String THUMBS_FIELD = "thumbs";
 	private static final String TYPE_FIELD = "type";
@@ -387,6 +388,14 @@ public class LuceneItemIndex implements ItemIndex {
 
 			if (storeValue) {
 				storedField = new StoredField(fieldName, DATE_NONE);
+			}
+			break;
+			
+		case TZDATE:
+			field = new StringField(fieldName, TZDATE_NONE, stored);
+
+			if (storeValue) {
+				storedField = new StoredField(fieldName, TZDATE_NONE);
 			}
 			break;
 			
