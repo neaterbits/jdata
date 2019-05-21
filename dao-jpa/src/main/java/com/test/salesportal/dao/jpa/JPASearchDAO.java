@@ -2,6 +2,7 @@ package com.test.salesportal.dao.jpa;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,9 @@ import com.test.salesportal.dao.ISearchCursor;
 import com.test.salesportal.dao.ISearchDAO;
 import com.test.salesportal.model.items.Item;
 import com.test.salesportal.model.items.ItemAttribute;
+import com.test.salesportal.model.items.SortAttribute;
 import com.test.salesportal.model.items.SortAttributeAndOrder;
+import com.test.salesportal.model.items.SortOrder;
 import com.test.salesportal.model.items.TypeInfo;
 import com.test.salesportal.model.items.base.ItemTypes;
 import com.test.salesportal.model.items.base.TitlePhotoItem;
@@ -73,7 +76,9 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 		}
 		else {
 			// Must dynamically construct criteria from database by mapping to table
-			final LinkedHashMap<EntityType<?>, String> typeToVarName = new LinkedHashMap<>(types.size());
+			final LinkedHashMap<EntityType<?>, String> entityTypeToVarName = new LinkedHashMap<>(types.size());
+			
+			final Map<Class<? extends Item>, String> itemTypeToVarName = new HashMap<>(types.size());
 			
 			for (Class<? extends Item> type : types) {
 				final EntityType<?> entity = entityManager.getMetamodel().entity(type);
@@ -82,17 +87,20 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 					throw new IllegalArgumentException("no entity for type " + type.getName());
 				}
 				
-				if (typeToVarName.containsKey(entity)) {
+				if (entityTypeToVarName.containsKey(entity)) {
 					throw new IllegalArgumentException("Duplicate entity " + entity.getName());
 				}
 	
-				typeToVarName.put(entity, "item" + entity.getName());
+				final String varName = "item" + entity.getName();
+				
+				entityTypeToVarName.put(entity, varName);
+				itemTypeToVarName.put(type, varName);
 			}
 	
 			final StringBuilder fromListBuilder = new StringBuilder();
 			
 			boolean first = true;
-			for (Map.Entry<EntityType<?>, String> entry : typeToVarName.entrySet()) {
+			for (Map.Entry<EntityType<?>, String> entry : entityTypeToVarName.entrySet()) {
 				final EntityType<?> entity = entry.getKey();
 				final String entityName = entity.getName();
 				final String itemVarName = entry.getValue();
@@ -118,7 +126,7 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 				// However some criteria may be for base types as well, but we can just apply those to all types
 				final StringBuilder whereSb = new StringBuilder(" where ");
 				
-				allParams = constructWhereClause(typeToVarName, criteria, whereSb);
+				allParams = constructWhereClause(entityTypeToVarName, criteria, whereSb);
 		
 				whereClause = whereSb.toString();
 			}
@@ -127,18 +135,37 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 				allParams = null;
 			}
 			
-			if (facetAttributes == null || facetAttributes.isEmpty()) {
-				searchCursor = makeSearchCursorForNonFacetedQuery(typeToVarName, fromListBuilder.toString(), whereClause, allParams);
+			final String orderBy;
+			
+			
+			if (sortOrder != null && !sortOrder.isEmpty()) {
+				final StringBuilder orderBySb = new StringBuilder();
+				
+				constructOrderBy(itemTypeToVarName, sortOrder, orderBySb);
+				
+				orderBy = orderBySb.toString();
 			}
 			else {
-				searchCursor = makeSearchCursorForFacetedQuery(typeToVarName, facetAttributes, fromList, whereClause, allParams);
+				orderBy = null;
+			}
+			
+			if (facetAttributes == null || facetAttributes.isEmpty()) {
+				searchCursor = makeSearchCursorForNonFacetedQuery(entityTypeToVarName, fromListBuilder.toString(), whereClause, orderBy, allParams);
+			}
+			else {
+				searchCursor = makeSearchCursorForFacetedQuery(entityTypeToVarName, facetAttributes, fromList, whereClause, orderBy, allParams);
 			}
 		}
 
 		return searchCursor;
 	}
 
-	private ISearchCursor makeSearchCursorForNonFacetedQuery(LinkedHashMap<EntityType<?>, String> typeToVarName, String fromList, String whereClause, List<Object> allParams) {
+	private ISearchCursor makeSearchCursorForNonFacetedQuery(
+			LinkedHashMap<EntityType<?>, String> typeToVarName,
+			String fromList,
+			String whereClause,
+			String orderBy,
+			List<Object> allParams) {
 
 		final StringBuilder countBilder = new StringBuilder();
 		final StringBuilder itemIdBuilder = new StringBuilder();
@@ -163,9 +190,22 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			appendItemColumns(itemBuilder, itemVarName).append(" ");
 		}
 
-		final TypedQuery<Long> countQuery = entityManager.createQuery("select " + countBilder.toString() + " from " + fromList + " " + whereClause, Long.class);
-		final TypedQuery<Long> idQuery   = entityManager.createQuery("select " + itemIdBuilder.toString() + " from " + fromList + " " + whereClause, Long.class);
-		final Query itemQuery = entityManager.createQuery("select " + itemBuilder.toString() +" from " + fromList + " " + whereClause);
+		final TypedQuery<Long> countQuery = entityManager.createQuery(
+				   "select " + countBilder.toString()
+				+ " from " + fromList
+				+ " " + whereClause, Long.class);
+		
+		final TypedQuery<Long> idQuery   = entityManager.createQuery(
+					"select " + itemIdBuilder.toString()
+				+ " from " + fromList
+				+ " " + whereClause
+				+ (orderBy != null && !orderBy.isEmpty() ? " " + orderBy : ""), Long.class);
+		
+		final Query itemQuery = entityManager.createQuery(
+					"select " + itemBuilder.toString()
+				+ " from " + fromList
+				+ " " + whereClause
+				+ (orderBy != null && !orderBy.isEmpty() ? " " + orderBy : ""));
 
 		if (allParams != null) {
 			addParams(countQuery, allParams);
@@ -181,9 +221,10 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			Set<ItemAttribute> facetedAttributes,
 			String fromList,
 			String whereClause,
+			String orderBy,
 			List<Object> allParams) {
 		
-		final Query itemQuery = buildItemQuery(typeToVarName, facetedAttributes, fromList, whereClause);
+		final Query itemQuery = buildItemQuery(typeToVarName, facetedAttributes, fromList, whereClause, orderBy);
 
 		if (allParams != null) {
 			addParams(itemQuery, allParams);
@@ -258,7 +299,8 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 	private Query buildItemQuery(LinkedHashMap<EntityType<?>, String> typeToVarName,
 			Set<ItemAttribute> facetedAttributes,
 			String fromList,
-			String whereClause) {
+			String whereClause,
+			String orderBy) {
 		
 		final StringBuilder fromBuilder = new StringBuilder();
 
@@ -277,7 +319,10 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			fromBuilder.append(entity.getName()).append(' ').append(itemVarName);
 		}
 
-		final Query fromQuery = entityManager.createQuery("from " + fromBuilder.toString() + " " + whereClause);
+		final Query fromQuery = entityManager.createQuery(
+				 "from " + fromBuilder.toString()
+				+ " " + whereClause
+				+ (orderBy != null && !orderBy.isEmpty() ? " " + orderBy : ""));
 
 		return fromQuery;
 	}
@@ -355,7 +400,7 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 
 		return allParams;
 	}
-	
+
 	private static List<Object> addWhereClausesForCriteriaForOneType(EntityType<?> entity, String itemJPQLVarName, List<Criterium> criteria, StringBuilder whereSb, int paramNo) {
 		// Find all criteria that applies to this type
 		final List<Criterium> criteriaForThisType = criteria.stream()
@@ -369,6 +414,44 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 		final List<Object> thisTypeParams = constructWhereClause(criteriaForThisType, whereSb, entity, itemJPQLVarName, paramNo);
 
 		return thisTypeParams;
+	}
+
+	private static void constructOrderBy(
+			Map<Class<? extends Item>, String> itemTypeToVarName,
+			List<SortAttributeAndOrder> sortOrders,
+			StringBuilder orderBySb) {
+		
+		if (!sortOrders.isEmpty()) {
+			orderBySb.append("order by ");
+		}
+		
+		int orderByNo = 0;
+		
+		for (int i = 0; i < sortOrders.size(); ++ i) {
+			
+			final SortAttributeAndOrder sortOrder = sortOrders.get(i);
+			
+			final SortAttribute sortAttribute = sortOrder.getAttribute();
+			
+			for (Map.Entry<Class<? extends Item>, String> entry : itemTypeToVarName.entrySet()) {
+				
+				if (!sortAttribute.getDeclaringClass().isAssignableFrom(entry.getKey())) {
+					continue;
+				}
+				
+				if (orderByNo ++ > 0) {
+					orderBySb.append(", ");
+				}
+
+				final String varName = entry.getValue();
+	
+				orderBySb.append(varName).append('.').append(sortAttribute.getName());
+				
+				if (sortOrder.getSortOrder() == SortOrder.DESCENDING) {
+					orderBySb.append(" desc");
+				}
+			}
+		}
 	}
 
 	private static void addParams(Query query, List<Object> params) {
