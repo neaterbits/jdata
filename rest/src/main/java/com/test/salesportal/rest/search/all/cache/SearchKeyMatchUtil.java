@@ -3,11 +3,9 @@ package com.test.salesportal.rest.search.all.cache;
 import java.util.Arrays;
 import java.util.List;
 
-import com.test.salesportal.common.StringUtil;
 import com.test.salesportal.model.items.Item;
 import com.test.salesportal.model.items.ItemAttribute;
 import com.test.salesportal.model.items.TypeInfo;
-import com.test.salesportal.model.items.attributes.AttributeType;
 import com.test.salesportal.model.items.base.ItemTypes;
 import com.test.salesportal.rest.search.model.criteria.SearchCriterium;
 import com.test.salesportal.rest.search.model.criteria.SearchCriteriumValue;
@@ -21,7 +19,7 @@ class SearchKeyMatchUtil {
 		final TypeInfo itemTypeInfo = itemTypes.getTypeInfo(item);
 		
 		return matchesSearchCriteria(searchKey.getCriteria(), item, itemTypeInfo)
-				&& matchesFreeText(searchKey.getFreeText(), item, itemTypeInfo);
+				&& ItemTypes.matchesFreeText(searchKey.getFreeText(), item, itemTypeInfo);
 				
 		
 	}
@@ -132,45 +130,6 @@ class SearchKeyMatchUtil {
 					searchRange.includeLower(),
 					searchRange.getUpper(),
 					searchRange.includeUpper());
-		}
-		
-		return matches;
-	}
-	
-	private static boolean matchesFreeText(String freeText, Item item, TypeInfo itemTypeInfo) {
-		
-		boolean matches;
-		
-		if (freeText == null) {
-			matches = true;
-		}
-		else {
-			final String trimmed = freeText.trim();
-			
-			if (trimmed.isEmpty()) {
-				matches = true;
-			}
-			else {
-				boolean matchFound = false;
-				
-				for (ItemAttribute itemAttribute : itemTypeInfo.getAttributes().asSet()) {
-					
-					if (itemAttribute.isFreetext()) {
-						if (itemAttribute.getAttributeType() != AttributeType.STRING) {
-							throw new IllegalStateException();
-						}
-						
-						final String attributeText = (String)itemAttribute.getObjectValue(item);
-
-						if (attributeText != null && StringUtil.containsWholeWord(attributeText, trimmed, false)) {
-							matchFound = true;
-							break;
-						}
-					}
-				}
-				
-				matches = matchFound;
-			}
 		}
 		
 		return matches;

@@ -5,10 +5,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.test.salesportal.common.StringUtil;
 import com.test.salesportal.model.items.DistinctAttribute;
 import com.test.salesportal.model.items.Item;
 import com.test.salesportal.model.items.ItemAttribute;
 import com.test.salesportal.model.items.TypeInfo;
+import com.test.salesportal.model.items.attributes.AttributeType;
 
 public interface ItemTypes {
 
@@ -29,6 +31,45 @@ public interface ItemTypes {
 		}
 		
 		return baseTypes;
+	}
+
+	public static boolean matchesFreeText(String freeText, Item item, TypeInfo itemTypeInfo) {
+		
+		boolean matches;
+		
+		if (freeText == null) {
+			matches = true;
+		}
+		else {
+			final String trimmed = freeText.trim();
+			
+			if (trimmed.isEmpty()) {
+				matches = true;
+			}
+			else {
+				boolean matchFound = false;
+				
+				for (ItemAttribute itemAttribute : itemTypeInfo.getAttributes().asSet()) {
+					
+					if (itemAttribute.isFreetext()) {
+						if (itemAttribute.getAttributeType() != AttributeType.STRING) {
+							throw new IllegalStateException();
+						}
+						
+						final String attributeText = (String)itemAttribute.getObjectValue(item);
+
+						if (attributeText != null && StringUtil.containsWholeWord(attributeText, trimmed, false)) {
+							matchFound = true;
+							break;
+						}
+					}
+				}
+				
+				matches = matchFound;
+			}
+		}
+		
+		return matches;
 	}
 
 	public static String getTypeName(Class<? extends Item> type) {

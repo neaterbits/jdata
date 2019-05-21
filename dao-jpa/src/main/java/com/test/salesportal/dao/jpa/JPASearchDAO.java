@@ -15,6 +15,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
+import com.test.salesportal.common.StringUtil;
 import com.test.salesportal.dao.ISearchCursor;
 import com.test.salesportal.dao.ISearchDAO;
 import com.test.salesportal.model.items.Item;
@@ -149,18 +150,27 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 				orderBy = null;
 			}
 			
-			if (facetAttributes == null || facetAttributes.isEmpty()) {
-				searchCursor = makeSearchCursorForNonFacetedQuery(entityTypeToVarName, fromListBuilder.toString(), whereClause, orderBy, allParams);
+			final String trimmedToNullFreetext = StringUtil.trimToNull(freeText);
+			
+			if ((facetAttributes == null || facetAttributes.isEmpty()) && trimmedToNullFreetext == null) {
+				searchCursor = makeSearchCursorForNonFacetedOrFreetextQuery(entityTypeToVarName, fromListBuilder.toString(), whereClause, orderBy, allParams);
 			}
 			else {
-				searchCursor = makeSearchCursorForFacetedQuery(entityTypeToVarName, facetAttributes, fromList, whereClause, orderBy, allParams);
+				searchCursor = makeSearchCursorForFacetedOrFreetextQuery(
+						entityTypeToVarName, 
+						facetAttributes,
+						fromList,
+						whereClause,
+						trimmedToNullFreetext,
+						orderBy,
+						allParams);
 			}
 		}
 
 		return searchCursor;
 	}
 
-	private ISearchCursor makeSearchCursorForNonFacetedQuery(
+	private ISearchCursor makeSearchCursorForNonFacetedOrFreetextQuery(
 			LinkedHashMap<EntityType<?>, String> typeToVarName,
 			String fromList,
 			String whereClause,
@@ -216,11 +226,12 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 		return new JPASearchCursor(countQuery, idQuery, itemQuery);
 	}
 
-	private ISearchCursor makeSearchCursorForFacetedQuery(
+	private ISearchCursor makeSearchCursorForFacetedOrFreetextQuery(
 			LinkedHashMap<EntityType<?>, String> typeToVarName,
 			Set<ItemAttribute> facetedAttributes,
 			String fromList,
 			String whereClause,
+			String freeText,
 			String orderBy,
 			List<Object> allParams) {
 		
@@ -232,8 +243,18 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 		
 		// Now we have queries for all matching items, also returning faceted attributes so we can count them
 		@SuppressWarnings("unchecked")
-		final List<TitlePhotoItem> results = (List<TitlePhotoItem>)itemQuery.getResultList();
+		final List<TitlePhotoItem> withoutFreetextResult = (List<TitlePhotoItem>)itemQuery.getResultList();
 
+		if (freeText != null && freeText.trim().isEmpty()) {
+			throw new IllegalArgumentException();
+		}
+		
+		final List<TitlePhotoItem> results = freeText != null
+				? withoutFreetextResult.stream()
+						.filter(item -> ItemTypes.matchesFreeText(freeText, item, itemTypes.getTypeInfo(item)))
+						.collect(Collectors.toList())
+				: withoutFreetextResult;
+		
 		final List<JPASearchItem> items = new ArrayList<>(results.size());
 
 		for (TitlePhotoItem item : results) {
@@ -243,55 +264,63 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 		}
 		
 		// We can share code with Lucene mapping for building facets
-		final ItemsFacets facets = FacetUtils.computeFacets(
+		final ItemsFacets facets;
+		
+		if (facetedAttributes == null || facetedAttributes.isEmpty()) {
+			facets = ItemsFacets.emptyFacets();
+		}
+		else {
+		
+			facets = FacetUtils.computeFacets(
 				results,
 				facetedAttributes,
 				itemTypes,
 				new FacetUtils.FacetFunctions<TitlePhotoItem, Object>() {
-			
-			@Override
-			public boolean isType(TitlePhotoItem item, String typeName) {
-				return typeName.equals(ItemTypes.getTypeName(item));
-			}
-
-			@Override
-			public Object getField(TitlePhotoItem item, String fieldName) {
-				final TypeInfo typeInfo = itemTypes.getTypeInfo(item);
 				
-				return typeInfo.getAttributes().getByName(fieldName).getObjectValue(item);
-			}
-
-			@Override
-			public Integer getIntegerValue(Object field) {
-				return (Integer)field;
-			}
-
-			@Override
-			public BigDecimal getDecimalValue(Object field) {
-				return (BigDecimal)field;
-			}
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public <T extends Enum<T>> T getEnumValue(Class<T> enumClass, Object field) {
-				return (T)field;
-			}
-
-			@Override
-			public Boolean getBooleanValue(Object field) {
-				return (Boolean)field;
-			}
-
-			@Override
-			public Object getObjectValue(ItemAttribute attribute, Object field) {
-				return field;
-			}
-
-			@Override
-			public boolean isNoValue(ItemAttribute attribute, Object field) {
-				return false;
-			}
-		});
+				@Override
+				public boolean isType(TitlePhotoItem item, String typeName) {
+					return typeName.equals(ItemTypes.getTypeName(item));
+				}
+	
+				@Override
+				public Object getField(TitlePhotoItem item, String fieldName) {
+					final TypeInfo typeInfo = itemTypes.getTypeInfo(item);
+					
+					return typeInfo.getAttributes().getByName(fieldName).getObjectValue(item);
+				}
+	
+				@Override
+				public Integer getIntegerValue(Object field) {
+					return (Integer)field;
+				}
+	
+				@Override
+				public BigDecimal getDecimalValue(Object field) {
+					return (BigDecimal)field;
+				}
+	
+				@SuppressWarnings("unchecked")
+				@Override
+				public <T extends Enum<T>> T getEnumValue(Class<T> enumClass, Object field) {
+					return (T)field;
+				}
+	
+				@Override
+				public Boolean getBooleanValue(Object field) {
+					return (Boolean)field;
+				}
+	
+				@Override
+				public Object getObjectValue(ItemAttribute attribute, Object field) {
+					return field;
+				}
+	
+				@Override
+				public boolean isNoValue(ItemAttribute attribute, Object field) {
+					return false;
+				}
+			});
+		}
 
 		return new JPASearchCursorWithFacets(items, facets);
 	}

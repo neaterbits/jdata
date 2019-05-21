@@ -64,6 +64,22 @@ public class StringUtil {
 		return result;
 	}
 	
+	public static String trimToNull(String text) {
+		
+		final String result;
+		
+		if (text == null) {
+			result = null;
+		}
+		else {
+			final String trimmed = text.trim();
+			
+			result = trimmed.isEmpty() ? null : trimmed;
+		}
+
+		return result;
+	}
+	
 	public static boolean containsWholeWord(String toScan, String toScanFor, boolean caseSensitive) {
 
 		if (toScan == null) {

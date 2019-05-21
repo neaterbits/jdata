@@ -28,7 +28,7 @@ public interface ISearchCursor {
 			
 			@Override
 			public ItemsFacets getFacets() {
-				return new ItemsFacets(Collections.emptyList());
+				return ItemsFacets.emptyFacets();
 			}
 		};
 	}
