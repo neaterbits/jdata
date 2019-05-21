@@ -231,7 +231,34 @@ public abstract class SearchDAOTest extends TestCase {
 		});
 	}
 
+	public void testSnowboardCriteriaEquals() throws Exception {
+		
+		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {
+			final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
+
+			final ItemAttribute widthAttribute = snowboardAttributes.getByName("width");
+			 
+			assertThat(widthAttribute).isNotNull();
+			 
+			final DecimalCriterium widthCriteria = new DecimalCriterium(widthAttribute, new BigDecimal("32.8"), ComparisonOperator.EQUALS);
+			
+			final ISearchCursor search = searchDAO.search(
+					Arrays.asList(Snowboard.class),
+					null,
+					Arrays.asList(widthCriteria),
+					null,
+					false,
+					null,
+					null);
+			final List<String> itemIds = search.getItemIDs(0, Integer.MAX_VALUE);
+			
+			assertThat(itemIds.size()).isEqualTo(1);
+			assertThat(itemIds.contains(itemId2)).isTrue();
+		});
+	}
+
 	public void testSnowboardCriteriaNotEquals() throws Exception {
+		
 		checkSnowboard((userId, itemDAO, searchDAO, itemId1, itemId2) -> {
 			final ClassAttributes snowboardAttributes = ClassAttributes.getFromClass(Snowboard.class);
 
