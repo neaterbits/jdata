@@ -30,6 +30,7 @@ import com.test.salesportal.search.criteria.ComparisonCriterium;
 import com.test.salesportal.search.criteria.Criterium;
 import com.test.salesportal.search.criteria.InCriterium;
 import com.test.salesportal.search.criteria.InCriteriumValue;
+import com.test.salesportal.search.criteria.NoValueCriterium;
 import com.test.salesportal.search.criteria.Range;
 import com.test.salesportal.search.criteria.RangesCriterium;
 import com.test.salesportal.search.facets.FacetUtils;
@@ -557,6 +558,9 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 				}
 				
 				sb.append(" ) ");
+			}
+			else if (c instanceof NoValueCriterium) {
+				sb.append(itemJPQLVarName).append('.').append(attrName).append(" is null ");
 			}
 			else {
 				throw new UnsupportedOperationException("Unknown criteria type " + c.getClass());
