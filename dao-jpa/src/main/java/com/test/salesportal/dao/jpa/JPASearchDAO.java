@@ -27,6 +27,7 @@ import com.test.salesportal.model.items.TypeInfo;
 import com.test.salesportal.model.items.base.ItemTypes;
 import com.test.salesportal.model.items.base.TitlePhotoItem;
 import com.test.salesportal.search.criteria.ComparisonCriterium;
+import com.test.salesportal.search.criteria.ComparisonOperator;
 import com.test.salesportal.search.criteria.Criterium;
 import com.test.salesportal.search.criteria.InCriterium;
 import com.test.salesportal.search.criteria.InCriteriumValue;
@@ -508,7 +509,6 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			if (i > 0) {
 				sb.append(" and ");
 			}
-			
 
 			if (c instanceof ComparisonCriterium<?>) {
 				
@@ -522,11 +522,52 @@ public class JPASearchDAO extends JPABaseDAO implements ISearchDAO {
 			else if (c instanceof InCriterium<?>) {
 				final InCriterium<?> ic = (InCriterium<?>)c;
 				
-				sb.append(itemJPQLVarName).append('.').append(attrName);
+				if (ic.getValues().isEmpty()) {
+					throw new IllegalStateException();
+				}
 				
-				sb.append(" in :param").append(paramNo ++);
+				if (ic.getValues().stream().anyMatch(InCriteriumValue::hasSubCriteria)) {
+					
+					sb.append(" ( ");
+					
+					// Cannot use in-query since nested criteria
+					for (int valueNo = 0; valueNo < ic.getValues().size(); ++ valueNo) {
+						final InCriteriumValue<?> value = ic.getValues().get(valueNo);
 
-				params.add(ic.getValues().stream().map(InCriteriumValue::getValue).collect(Collectors.toList()));
+						if (valueNo > 0) {
+							sb.append(" or ");
+						}
+						
+						if (value.hasSubCriteria()) {
+							sb.append(" ( ");
+							
+							final List<Object> subParams = constructWhereClause(value.getSubCritera(), sb, entity, itemJPQLVarName, paramNo);
+							
+							paramNo += subParams.size();
+							params.addAll(subParams);
+							
+							sb.append(" and ");
+						}
+						
+						sb.append(itemJPQLVarName).append('.').append(attrName);
+						sb.append(' ').append(ComparisonOperator.EQUALS.getMathString()).append(":param").append(paramNo ++);
+						params.add(value.getValue());
+						
+						if (value.hasSubCriteria()) {
+							sb.append(" ) ");
+						}
+					}
+					
+					sb.append(" ) ");
+				}
+				else {
+				
+					sb.append(itemJPQLVarName).append('.').append(attrName);
+					
+					sb.append(" in :param").append(paramNo ++);
+	
+					params.add(ic.getValues().stream().map(InCriteriumValue::getValue).collect(Collectors.toList()));
+				}
 			}
 			else if (c instanceof RangesCriterium<?, ?>) {
 				final RangesCriterium<?, ?> rc = (RangesCriterium<?, ?>)c;

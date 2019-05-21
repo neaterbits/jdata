@@ -24,6 +24,10 @@ public final class InCriteriumValue<T extends Comparable<T>> {
 		return subCritera;
 	}
 
+	public boolean hasSubCriteria() {
+		return subCritera != null && !subCritera.isEmpty();
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

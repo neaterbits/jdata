@@ -6,7 +6,7 @@ import com.test.salesportal.model.items.ItemAttribute;
 
 public abstract class InCriterium<T extends Comparable<T>> extends ValueCriterium<T> {
 
-	private final List<InCriteriumValue<T>>  values;
+	private final List<InCriteriumValue<T>> values;
 	private final boolean includeItemsWithNoValue;
 
 	public InCriterium(ItemAttribute attribute, List<InCriteriumValue<T>> values, boolean includeItemsWithNoValue) {
